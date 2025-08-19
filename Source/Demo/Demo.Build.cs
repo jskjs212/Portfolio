@@ -24,7 +24,8 @@ public class Demo : ModuleRules
                 "CoreUObject",
                 "Engine",
                 "InputCore",
-                "EnhancedInput"
+                "EnhancedInput",
+                "GameplayTags"
             }
         );
 
