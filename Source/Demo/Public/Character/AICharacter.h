@@ -9,7 +9,7 @@
 class UBehaviorTree;
 
 /**
- *
+ * AICharacter class that should be inherited by enemy or NPC character classes.
  */
 UCLASS()
 class DEMO_API AAICharacter : public ABaseCharacter

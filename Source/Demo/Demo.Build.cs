@@ -10,6 +10,7 @@ public class Demo : ModuleRules
 
         PublicIncludePaths.AddRange(
             new string[] {
+                "Demo"
             }
         );
 

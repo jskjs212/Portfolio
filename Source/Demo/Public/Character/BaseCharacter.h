@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "GameplayTagContainer.h"
 #include "BaseCharacter.generated.h"
 
 class UCombatComponent;
@@ -18,7 +19,7 @@ class DEMO_API ABaseCharacter : public ACharacter
     //        Subobjects
     ////////////////////////////////////////////////////////
 protected:
-    UPROPERTY(VisibleAnywhere, Category = "Combat")
+    UPROPERTY(VisibleAnywhere, Category = "Character")
     TObjectPtr<UCombatComponent> CombatComponent;
 
     UPROPERTY(VisibleAnywhere, Category = "Character")
@@ -43,8 +44,20 @@ public:
     ////////////////////////////////////////////////////////
     //        Get & set
     ////////////////////////////////////////////////////////
+    UFUNCTION(BlueprintCallable, Category = "Character")
+    void SetMovementSpeedMode(FGameplayTag NewSpeedMode);
 
     ////////////////////////////////////////////////////////
     //        Variables
     ////////////////////////////////////////////////////////
+protected:
+    /* Movement */
+    UPROPERTY(EditAnywhere, Category = "Movement")
+    float WalkSpeed = 180.f;
+    UPROPERTY(EditAnywhere, Category = "Movement")
+    float JogSpeed = 450.f;
+    UPROPERTY(EditAnywhere, Category = "Movement")
+    float SprintSpeed = 800.f;
+
+    FGameplayTag MovementSpeedMode;
 };

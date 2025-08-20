@@ -5,18 +5,20 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/CombatComponent.h"
 #include "Components/StatsComponent.h"
+#include "DemoTypes/DemoGameplayTags.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 ABaseCharacter::ABaseCharacter()
 {
     PrimaryActorTick.bCanEverTick = true;
+    MovementSpeedMode = DemoGameplayTags::Movement_SpeedMode_Jog;
 
     GetCapsuleComponent()->InitCapsuleSize(42.f, 96.f);
 
     // TODO: temporary values
     GetCharacterMovement()->JumpZVelocity = 700.f;
     GetCharacterMovement()->AirControl = 0.2f;
-    GetCharacterMovement()->MaxWalkSpeed = 800.f;
+    GetCharacterMovement()->MaxWalkSpeed = JogSpeed;
     GetCharacterMovement()->GravityScale = 1.75f;
     GetCharacterMovement()->MaxAcceleration = 1500.f;
 
@@ -33,4 +35,30 @@ void ABaseCharacter::BeginPlay()
 void ABaseCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+}
+
+void ABaseCharacter::SetMovementSpeedMode(FGameplayTag NewSpeedMode)
+{
+    UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
+    if (MovementSpeedMode == NewSpeedMode || !MovementComponent)
+    {
+        return;
+    }
+
+    // TODO: Stop consume stamina if sprinting
+
+    MovementSpeedMode = NewSpeedMode;
+
+    if (MovementSpeedMode == DemoGameplayTags::Movement_SpeedMode_Walk)
+    {
+        MovementComponent->MaxWalkSpeed = WalkSpeed;
+    }
+    else if (MovementSpeedMode == DemoGameplayTags::Movement_SpeedMode_Jog)
+    {
+        MovementComponent->MaxWalkSpeed = JogSpeed;
+    }
+    else if (MovementSpeedMode == DemoGameplayTags::Movement_SpeedMode_Sprint)
+    {
+        MovementComponent->MaxWalkSpeed = SprintSpeed;
+    }
 }

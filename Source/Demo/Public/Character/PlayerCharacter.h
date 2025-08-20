@@ -9,6 +9,7 @@
 struct FInputActionValue;
 class UCameraComponent;
 class UInputAction;
+class UInputMappingContext;
 class USpringArmComponent;
 
 /**
@@ -43,16 +44,46 @@ public:
 
 protected:
     void Look(const FInputActionValue& Value);
-
     void Move(const FInputActionValue& Value);
+
+    void StartWalk();
+    void StopWalk();
+    void StartSprint();
+    void StopSprint();
+
+    UFUNCTION(BlueprintNativeEvent)
+    void Test();
 
     ////////////////////////////////////////////////////////
     //        Input variables
     ////////////////////////////////////////////////////////
 public:
     UPROPERTY(EditAnywhere, Category = "Input")
+    TObjectPtr<UInputMappingContext> DefaultMappingContext;
+
+    UPROPERTY(EditAnywhere, Category = "Input")
     TObjectPtr<UInputAction> LookAction;
 
     UPROPERTY(EditAnywhere, Category = "Input")
     TObjectPtr<UInputAction> MoveAction;
+
+    UPROPERTY(EditAnywhere, Category = "Input")
+    TObjectPtr<UInputAction> JumpAction;
+
+    UPROPERTY(EditAnywhere, Category = "Input")
+    TObjectPtr<UInputAction> WalkAction;
+
+    UPROPERTY(EditAnywhere, Category = "Input")
+    TObjectPtr<UInputAction> SprintAction;
+
+    UPROPERTY(EditAnywhere, Category = "Input")
+    TObjectPtr<UInputAction> TestAction;
+
+    ////////////////////////////////////////////////////////
+    //        Variables
+    ////////////////////////////////////////////////////////
+private:
+    // true: toggle, false: hold
+    bool bIsWalkInputTogglesWalking = true;
+    bool bIsSprintInputTogglesSprinting = false;
 };
