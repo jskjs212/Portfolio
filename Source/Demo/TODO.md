@@ -23,7 +23,7 @@ IGenericTeamAgentInterface를 이용해 TeamID 설정?
 > 계획상 모든 적은 서로 싸우지 않으므로 불필요
 
 ## 옵션 기능
-bIsWalkInputTogglesWalking, bIsSprintInputTogglesSprinting
+bIsWalkInputTogglesWalk, bIsSprintInputTogglesSprint
 
 # Solved?
 

@@ -31,7 +31,7 @@ public:
     TObjectPtr<UCameraComponent> FollowCamera;
 
     ////////////////////////////////////////////////////////
-    //        Fundametals
+    //        Fundamentals
     ////////////////////////////////////////////////////////
 public:
     APlayerCharacter();
@@ -84,6 +84,6 @@ public:
     ////////////////////////////////////////////////////////
 private:
     // true: toggle, false: hold
-    bool bIsWalkInputTogglesWalking = true;
-    bool bIsSprintInputTogglesSprinting = false;
+    bool bIsWalkInputTogglesWalk{true};
+    bool bIsSprintInputTogglesSprint{false};
 };

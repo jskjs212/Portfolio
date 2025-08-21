@@ -17,7 +17,7 @@ class DEMO_API AAICharacter : public ABaseCharacter
     GENERATED_BODY()
 
     ////////////////////////////////////////////////////////
-    //        Fundametals
+    //        Fundamentals
     ////////////////////////////////////////////////////////
 public:
     AAICharacter() {}

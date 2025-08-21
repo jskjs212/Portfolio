@@ -26,7 +26,7 @@ protected:
     TObjectPtr<UStatsComponent> StatsComponent;
 
     ////////////////////////////////////////////////////////
-    //        Fundametals
+    //        Fundamentals
     ////////////////////////////////////////////////////////
 public:
     ABaseCharacter();
@@ -53,11 +53,11 @@ public:
 protected:
     /* Movement */
     UPROPERTY(EditAnywhere, Category = "Movement")
-    float WalkSpeed = 180.f;
+    float WalkSpeed{180.f};
     UPROPERTY(EditAnywhere, Category = "Movement")
-    float JogSpeed = 450.f;
+    float JogSpeed{450.f};
     UPROPERTY(EditAnywhere, Category = "Movement")
-    float SprintSpeed = 800.f;
+    float SprintSpeed{800.f};
 
     FGameplayTag MovementSpeedMode;
 };

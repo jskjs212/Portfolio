@@ -35,9 +35,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
     Super::SetupPlayerInputComponent(PlayerInputComponent);
 
     // Add input mapping context
-    if (APlayerController* PlayerController = GetController<APlayerController>())
+    if (const APlayerController* PlayerController = GetController<APlayerController>())
     {
-        if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem< UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+        if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
         {
             Subsystem->AddMappingContext(DefaultMappingContext, 0);
         }
@@ -80,7 +80,7 @@ void APlayerCharacter::Move(const FInputActionValue& Value)
 
 void APlayerCharacter::StartWalk()
 {
-    if (bIsWalkInputTogglesWalking)
+    if (bIsWalkInputTogglesWalk)
     {
         if (MovementSpeedMode == DemoGameplayTags::Movement_SpeedMode_Walk)
         {
@@ -99,7 +99,7 @@ void APlayerCharacter::StartWalk()
 
 void APlayerCharacter::StopWalk()
 {
-    if (bIsWalkInputTogglesWalking)
+    if (bIsWalkInputTogglesWalk)
     {
         // Do nothing
     }
@@ -114,7 +114,7 @@ void APlayerCharacter::StopWalk()
 
 void APlayerCharacter::StartSprint()
 {
-    if (bIsSprintInputTogglesSprinting)
+    if (bIsSprintInputTogglesSprint)
     {
         if (MovementSpeedMode == DemoGameplayTags::Movement_SpeedMode_Sprint)
         {
@@ -135,7 +135,7 @@ void APlayerCharacter::StartSprint()
 
 void APlayerCharacter::StopSprint()
 {
-    if (bIsSprintInputTogglesSprinting)
+    if (bIsSprintInputTogglesSprint)
     {
         // Do nothing
     }
