@@ -25,16 +25,33 @@ ABaseCharacter::ABaseCharacter()
     CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 
     StatsComponent = CreateDefaultSubobject<UStatsComponent>(TEXT("StatsComponent"));
+
+    // TODO: Use data table or config file
+    StatsComponent->AddResourceStat(UStatsComponent::HealthTag, FResourceStat{100.f, 100.f, true});
 }
 
 void ABaseCharacter::BeginPlay()
 {
     Super::BeginPlay();
+
+    StatsComponent->InitializeResourceStats();
+    StatsComponent->OnCurrentResourceStatChanged.AddDynamic(this, &ThisClass::OnCurrentResourceStatChanged);
 }
 
 void ABaseCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+}
+
+void ABaseCharacter::OnCurrentResourceStatChanged(FGameplayTag StatTag, float OldValue, float NewValue)
+{
+    if (StatTag == UStatsComponent::HealthTag)
+    {
+        if (NewValue <= 0.f)
+        {
+            // TODO: Death logic
+        }
+    }
 }
 
 void ABaseCharacter::SetMovementSpeedMode(FGameplayTag NewSpeedMode)

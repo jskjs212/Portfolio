@@ -31,17 +31,6 @@ void UDemoAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
     Super::NativeUpdateAnimation(DeltaSeconds);
 
-    if (!BaseCharacter) _UNLIKELY
-    {
-        UE_LOG(LogTemp, Error, TEXT("UDemoAnimInstance::NativeUpdateAnimation - BaseCharacter is nullptr."));
-        // check: Is there any cases for new BaseCharacter? Respawn? Repossess? Travel? Spectate?
-        BaseCharacter = Cast<ABaseCharacter>(GetOwningActor());
-        if (!BaseCharacter)
-        {
-            return;
-        }
-    }
-
     UpdateCharacterStateOnGameThread();
 }
 
@@ -53,20 +42,22 @@ void UDemoAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 
     Super::NativeThreadSafeUpdateAnimation(DeltaSeconds);
 
-    check(BaseCharacter);
-
     UpdateSpeed();
 }
 
 void UDemoAnimInstance::UpdateCharacterStateOnGameThread()
 {
     check(IsInGameThread());
-    check(BaseCharacter);
+
+    if (!IsValid(BaseCharacter))
+    {
+        return;
+    }
 
     AnimState.Velocity = BaseCharacter->GetVelocity();
 
     bIsInAir = BaseCharacter->GetCharacterMovement()->IsFalling();
-    bIsAccelerating = BaseCharacter->GetCharacterMovement()->GetCurrentAcceleration().SizeSquared() > KINDA_SMALL_NUMBER;
+    bIsAccelerating = BaseCharacter->GetCharacterMovement()->GetCurrentAcceleration().SizeSquared() > UE_KINDA_SMALL_NUMBER;
 }
 
 void UDemoAnimInstance::UpdateSpeed()

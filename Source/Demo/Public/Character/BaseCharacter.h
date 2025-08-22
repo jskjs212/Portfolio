@@ -40,10 +40,14 @@ public:
     ////////////////////////////////////////////////////////
     //        Character functions
     ////////////////////////////////////////////////////////
+protected:
+    UFUNCTION()
+    void OnCurrentResourceStatChanged(FGameplayTag StatTag, float OldValue, float NewValue);
 
     ////////////////////////////////////////////////////////
     //        Get & set
     ////////////////////////////////////////////////////////
+public:
     UFUNCTION(BlueprintCallable, Category = "Character")
     void SetMovementSpeedMode(FGameplayTag NewSpeedMode);
 

@@ -10,15 +10,13 @@ class ABaseCharacter;
 
 /**
  * An animation state proxy used for thread-safe updates.
- * Data is stored on the game thread and accessed in ThreadSafeUpdate().
+ * Data is stored on the game thread and accessed (read-only) in ThreadSafeUpdate().
  */
 struct FDemoAnimState
 {
-    //bool bIsInAir = false;
-    //float DeltaSeconds = 0.f;
-
     FVector Velocity{FVector::ZeroVector};
-    //FVector Acceleration = FVector::ZeroVector;
+
+    //FRotator AimRotation{FRotator::ZeroRotator};
 };
 
 /**

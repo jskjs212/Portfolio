@@ -2,6 +2,7 @@
 
 #include "Character/PlayerCharacter.h"
 #include "Camera/CameraComponent.h"
+#include "Components/StatsComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -19,6 +20,9 @@ APlayerCharacter::APlayerCharacter()
     GetCharacterMovement()->bUseControllerDesiredRotation = false;
     GetCharacterMovement()->bOrientRotationToMovement = true;
     GetCharacterMovement()->RotationRate = FRotator{0.f, 540.f, 0.f};
+
+    // TODO: Use data table or config file
+    StatsComponent->AddResourceStat(UStatsComponent::StaminaTag, FResourceStat{100.f, 100.f, true});
 
     CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
     CameraBoom->SetupAttachment(GetMesh());
@@ -56,6 +60,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
         EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ThisClass::StartSprint);
         EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ThisClass::StopSprint);
+
+        EnhancedInputComponent->BindAction(TestAction, ETriggerEvent::Started, this, &ThisClass::Test);
     }
 }
 
@@ -151,4 +157,5 @@ void APlayerCharacter::StopSprint()
 void APlayerCharacter::Test_Implementation()
 {
     UE_LOG(LogTemp, Warning, TEXT("APlayerCharacter::Test() called!"));
+    StatsComponent->TakeDamage(30.f);
 }

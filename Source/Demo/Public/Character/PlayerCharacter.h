@@ -23,7 +23,7 @@ class DEMO_API APlayerCharacter : public ABaseCharacter
     ////////////////////////////////////////////////////////
     //        Subobjects
     ////////////////////////////////////////////////////////
-public:
+protected:
     UPROPERTY(VisibleAnywhere, Category = "Character")
     TObjectPtr<USpringArmComponent> CameraBoom;
 
@@ -57,7 +57,7 @@ protected:
     ////////////////////////////////////////////////////////
     //        Input variables
     ////////////////////////////////////////////////////////
-public:
+protected:
     UPROPERTY(EditAnywhere, Category = "Input")
     TObjectPtr<UInputMappingContext> DefaultMappingContext;
 
