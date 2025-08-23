@@ -4,6 +4,7 @@
 #include "Character/BaseCharacter.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/CombatComponent.h"
+#include "Components/EquipmentComponent.h"
 #include "Components/StatsComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -15,7 +16,7 @@ ABaseCharacter::ABaseCharacter()
 
     GetCapsuleComponent()->InitCapsuleSize(42.f, 96.f);
 
-    // TODO: temporary values
+    // check: temporary values
     GetCharacterMovement()->JumpZVelocity = 700.f;
     GetCharacterMovement()->AirControl = 0.2f;
     GetCharacterMovement()->MaxWalkSpeed = JogSpeed;
@@ -24,8 +25,9 @@ ABaseCharacter::ABaseCharacter()
 
     CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 
-    StatsComponent = CreateDefaultSubobject<UStatsComponent>(TEXT("StatsComponent"));
+    EquipmentComponent = CreateDefaultSubobject<UEquipmentComponent>(TEXT("EquipmentComponent"));
 
+    StatsComponent = CreateDefaultSubobject<UStatsComponent>(TEXT("StatsComponent"));
     // TODO: Use data table or config file
     StatsComponent->AddResourceStat(UStatsComponent::HealthTag, FResourceStat{100.f, 100.f, true});
 }

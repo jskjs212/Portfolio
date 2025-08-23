@@ -5,6 +5,7 @@
 ## check
 
 ## misc
+대부분 클래스에 DEMO_API 필요한가?
 
 ## Add
 
@@ -38,8 +39,9 @@ TODO:, check:, misc:, TEST: 등 주석 확인 및 정리하기\
 1. Delegates
 1. Fundamentals (constructor, BeginPlay, Tick, etc.)
 1. Class specific functions
-1. Get & set (set -> get)
+1. Getters
+1. Setters
 1. Variables (simple -> complex)
 > Group1 -> Group2 -> ...\
 > Each group: bool -> int -> float -> enum -> structs -> pointer references\
-(Alignment < Readability)
+> (Strict rule or alignment < readability)

@@ -8,6 +8,7 @@
 #include "BaseCharacter.generated.h"
 
 class UCombatComponent;
+class UEquipmentComponent;
 class UStatsComponent;
 
 UCLASS()
@@ -19,10 +20,13 @@ class DEMO_API ABaseCharacter : public ACharacter
     //        Subobjects
     ////////////////////////////////////////////////////////
 protected:
-    UPROPERTY(VisibleAnywhere, Category = "Character")
+    UPROPERTY(VisibleAnywhere)
     TObjectPtr<UCombatComponent> CombatComponent;
 
-    UPROPERTY(VisibleAnywhere, Category = "Character")
+    UPROPERTY(VisibleAnywhere)
+    TObjectPtr<UEquipmentComponent> EquipmentComponent;
+
+    UPROPERTY(VisibleAnywhere)
     TObjectPtr<UStatsComponent> StatsComponent;
 
     ////////////////////////////////////////////////////////

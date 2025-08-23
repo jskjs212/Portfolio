@@ -11,7 +11,7 @@
  * Stat format for Health, Mana, Stamina, etc.
  */
 USTRUCT()
-struct FResourceStat
+struct DEMO_API FResourceStat
 {
     GENERATED_BODY()
 
@@ -44,7 +44,7 @@ struct FResourceStat
  * Stat format for STR, DEX, INT, etc.
  */
 //USTRUCT(BlueprintType)
-//struct FPrimaryStat
+//struct DEMO_API FPrimaryStat
 //{
 //    GENERATED_BODY()
 //
@@ -59,7 +59,7 @@ struct FResourceStat
  * Stat format for Attack, Defense, Speed, etc.
  */
 //USTRUCT(BlueprintType)
-//struct FDerivedStat
+//struct DEMO_API FDerivedStat
 //{
 //    GENERATED_BODY()
 //
@@ -113,7 +113,7 @@ public:
 
     // Current += Delta
     // @return The actual amount by which the value was modified.
-    float ModifyCurrentStatChecked(FGameplayTag StatTag, float Delta, bool bShouldRegenerate = false, float MinValue = 0.f);
+    float ModifyCurrentResourceStatChecked(FGameplayTag StatTag, float Delta, bool bShouldRegenerate = false, float MinValue = 0.f);
 
     void StartRegenChecked(FGameplayTag StatTag);
 
@@ -125,17 +125,11 @@ public:
     ////////////////////////////////////////////////////////
     //        Get & set
     ////////////////////////////////////////////////////////
-    // Need meta = (Categories = "Stats") for UFUNCTION
 public:
     FORCEINLINE bool HasStatType(FGameplayTag StatTag) const
     {
         return ResourceStats.Contains(StatTag);
     }
-
-    // @return The new value of the stat.
-    float SetCurrentResourceStatChecked(FGameplayTag StatTag, float InValue, float MinValue = 0.f);
-
-    void SetMaxResourceStatChecked(FGameplayTag StatTag, float InValue, float MinValue = 0.f);
 
     FORCEINLINE float GetCurrentResourceStatChecked(FGameplayTag StatTag) const
     {
@@ -146,6 +140,11 @@ public:
     {
         return GetResourceStatChecked(StatTag).MaxValue;
     }
+
+    // @return The new value of the stat.
+    float SetCurrentResourceStatChecked(FGameplayTag StatTag, float InValue, float MinValue = 0.f);
+
+    void SetMaxResourceStatChecked(FGameplayTag StatTag, float InValue, float MinValue = 0.f);
 
 private:
     // Assume that no one uses an invalid tag for the StatTag.
@@ -161,7 +160,7 @@ private:
 
     FORCEINLINE FResourceStat& GetResourceStatChecked(FGameplayTag StatTag)
     {
-        // This is safe because "this" and member variables are non-const.
+        // (Practice) This is safe because "this" and member variables are non-const.
         return const_cast<FResourceStat&>(const_cast<const UStatsComponent*>(this)->GetResourceStatChecked(StatTag));
     }
 

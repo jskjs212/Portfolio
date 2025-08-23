@@ -2,8 +2,8 @@
 
 #include "Components/StatsComponent.h"
 
-const FGameplayTag UStatsComponent::HealthTag = FGameplayTag::RequestGameplayTag(TEXT("Stats.Health"));
-const FGameplayTag UStatsComponent::StaminaTag = FGameplayTag::RequestGameplayTag(TEXT("Stats.Stamina"));
+const FGameplayTag UStatsComponent::HealthTag = FGameplayTag::RequestGameplayTag(TEXT("Stat.Health"));
+const FGameplayTag UStatsComponent::StaminaTag = FGameplayTag::RequestGameplayTag(TEXT("Stat.Stamina"));
 
 UStatsComponent::UStatsComponent()
 {
@@ -38,7 +38,7 @@ void UStatsComponent::AddResourceStat(FGameplayTag StatTag, FResourceStat Resour
     ResourceStats.Add(StatTag, ResourceStat);
 }
 
-float UStatsComponent::ModifyCurrentStatChecked(FGameplayTag StatTag, float Delta, bool bShouldRegenerate, float MinValue)
+float UStatsComponent::ModifyCurrentResourceStatChecked(FGameplayTag StatTag, float Delta, bool bShouldRegenerate, float MinValue)
 {
     if (Delta == 0.f)
     {
@@ -78,7 +78,7 @@ void UStatsComponent::RegenChecked(FGameplayTag StatTag)
     // TODO: Dead
 
     // Regen
-    ModifyCurrentStatChecked(StatTag, ResourceStat.RegenRate * ResourceStat.RegenInterval, false);
+    ModifyCurrentResourceStatChecked(StatTag, ResourceStat.RegenRate * ResourceStat.RegenInterval, false);
 
     // Full
     if (ResourceStat.CurrentValue >= ResourceStat.MaxValue)
@@ -98,7 +98,7 @@ float UStatsComponent::TakeDamage(float InDamage)
     constexpr float MaxDamage = 1e10f; // misc: Set max damage
     Damage = FMath::Clamp(Damage, MinDamage, MaxDamage);
 
-    Damage = ModifyCurrentStatChecked(HealthTag, -Damage, true) * -1.f;
+    Damage = ModifyCurrentResourceStatChecked(HealthTag, -Damage, true) * -1.f;
 
     // TODO: death?
 

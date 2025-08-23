@@ -75,5 +75,6 @@ Plugins/**/Intermediate/*
 DerivedDataCache/*
 
 # Etc.
-*.lnk
+Backups/*
 Content/*
+*.lnk

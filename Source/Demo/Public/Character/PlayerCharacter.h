@@ -10,6 +10,7 @@ struct FInputActionValue;
 class UCameraComponent;
 class UInputAction;
 class UInputMappingContext;
+class UInventoryComponent;
 class USpringArmComponent;
 
 /**
@@ -24,11 +25,14 @@ class DEMO_API APlayerCharacter : public ABaseCharacter
     //        Subobjects
     ////////////////////////////////////////////////////////
 protected:
-    UPROPERTY(VisibleAnywhere, Category = "Character")
+    UPROPERTY(VisibleAnywhere)
     TObjectPtr<USpringArmComponent> CameraBoom;
 
-    UPROPERTY(VisibleAnywhere, Category = "Character")
+    UPROPERTY(VisibleAnywhere)
     TObjectPtr<UCameraComponent> FollowCamera;
+
+    UPROPERTY(VisibleAnywhere)
+    TObjectPtr<UInventoryComponent> InventoryComponent;
 
     ////////////////////////////////////////////////////////
     //        Fundamentals
