@@ -34,6 +34,7 @@ protected:
     ////////////////////////////////////////////////////////
 public:
     // check: What if Quantity > 1?
+    // misc: Return EEquipResult if needed.
     // @return true if successfully equipped
     bool EquipItem(FGameplayTag ItemType, const FItemSlot& ItemSlot);
 

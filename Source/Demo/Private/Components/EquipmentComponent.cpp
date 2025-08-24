@@ -25,6 +25,7 @@ void UEquipmentComponent::BeginPlay()
 
 bool UEquipmentComponent::EquipItem(FGameplayTag ItemType, const FItemSlot& ItemSlot)
 {
+    // TODO: ItemType == ItemSlot's ItemType?
     // Input validation
     if (!ItemSlot.IsValid())
     {
@@ -60,6 +61,7 @@ bool UEquipmentComponent::EquipItem(FGameplayTag ItemType, const FItemSlot& Item
         return false;
     }
 
+    // TODO: SocketName in FItemData?
     // Socket name
     FName* SocketName = EquipDefaultSocketNames.Find(ItemType);
     if (!SocketName)
@@ -138,8 +140,13 @@ AItem* UEquipmentComponent::GetEquippedItem(FGameplayTag ItemType) const
 
 AItem* UEquipmentComponent::SpawnItemToEquip(APawn* OwnerPawn, const FItemSlot& ItemSlot) const
 {
+    if (!OwnerPawn)
+    {
+        return nullptr;
+    }
     if (UWorld* World = GetWorld())
     {
+        // check: What if AItem -> AWeapon, AArmor, etc.?
         FTransform SpawnTransform = FTransform::Identity;
         if (AItem* SpawnedItem = World->SpawnActorDeferred<AItem>(AItem::StaticClass(), SpawnTransform, OwnerPawn, OwnerPawn, ESpawnActorCollisionHandlingMethod::AlwaysSpawn))
         {
@@ -154,8 +161,10 @@ AItem* UEquipmentComponent::SpawnItemToEquip(APawn* OwnerPawn, const FItemSlot& 
 
                 return SpawnedItem;
             }
+            // Destroy without static mesh -> change if there's no-mesh-ItemType
             else if (IsValid(SpawnedItem))
             {
+                UE_LOG(LogTemp, Warning, TEXT("UEquipmentComponent::SpawnItemToEquip() - Spawned item has no static mesh."));
                 SpawnedItem->Destroy();
                 return nullptr;
             }
@@ -173,14 +182,14 @@ bool UEquipmentComponent::AttachActor(AActor* ActorToAttach, FName SocketName) c
     }
 
     USkeletalMeshComponent* OwnerMesh = OwnerCharacter->GetMesh();
-    const USkeletalMeshSocket* Socket = OwnerMesh->GetSocketByName(SocketName);
-    if (!Socket)
+    if (!OwnerMesh->DoesSocketExist(SocketName))
     {
         UE_LOG(LogTemp, Warning, TEXT("UEquipmentComponent::AttachActor() - Socket %s does not exist."), *SocketName.ToString());
         return false;
     }
 
-    if (!Socket->AttachActor(ActorToAttach, OwnerMesh))
+    const auto AttachRules = FAttachmentTransformRules::SnapToTargetNotIncludingScale;
+    if (!ActorToAttach->AttachToComponent(OwnerMesh, AttachRules, SocketName))
     {
         UE_LOG(LogTemp, Warning, TEXT("UEquipmentComponent::AttachActor() - Failed to attach %s to %s."), *ActorToAttach->GetName(), *SocketName.ToString());
         return false;

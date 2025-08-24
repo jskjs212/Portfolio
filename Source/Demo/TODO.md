@@ -1,6 +1,7 @@
 ## Bugs
 
 ## TODO
+AddItem -> Unequip
 
 ## check
 
@@ -18,7 +19,8 @@ bIsWalkInputTogglesWalk, bIsSprintInputTogglesSprint
 
 ### 정리
 TODO:, check:, misc:, TEST: 등 주석 확인 및 정리하기\
-테스트 코드 제거하기
+테스트 코드 제거하기\
+LogTemp -> 중요한 곳은 게임 로직으로 처리하고, 나머지는 LogCategory 구분하여 로그 남기기
 
 ## Conventions
 ### Header Ordering
