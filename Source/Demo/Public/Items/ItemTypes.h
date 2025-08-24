@@ -10,7 +10,7 @@
  *
  */
 USTRUCT(BlueprintType)
-struct DEMO_API FItemSlot
+struct FItemSlot
 {
     GENERATED_BODY()
 
@@ -23,10 +23,17 @@ struct DEMO_API FItemSlot
     // Slot is being equipped or consumed.
     UPROPERTY(VisibleAnywhere)
     bool bIsUsing{false};
+
+    // We need only quantity at the moment.
+    // Scalability example: FWeaponInstanceData (Durability, Enchant, MasteryLevel, Attachment, etc.)
+    //UPROPERTY(VisibleAnywhere)
+    //TObjectPtr<FItemInstanceData> InstanceData;
+
+    bool IsValid() const { return !ItemID.IsNull() && Quantity > 0; }
 };
 
 USTRUCT(BlueprintType)
-struct DEMO_API FItemArray
+struct FItemArray
 {
     GENERATED_BODY()
 

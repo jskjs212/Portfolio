@@ -43,29 +43,29 @@ struct DEMO_API FResourceStat
 /**
  * Stat format for STR, DEX, INT, etc.
  */
-//USTRUCT(BlueprintType)
-//struct DEMO_API FPrimaryStat
-//{
-//    GENERATED_BODY()
-//
-//    UPROPERTY(EditAnywhere, Category = "Stats")
-//    float BaseValue{0.f};
-//
-//    UPROPERTY(EditAnywhere, Category = "Stats")
-//    float AssignedValue{0.f};
-//};
+ //USTRUCT(BlueprintType)
+ //struct DEMO_API FPrimaryStat
+ //{
+ //    GENERATED_BODY()
+ //
+ //    UPROPERTY(EditAnywhere, Category = "Stats")
+ //    float BaseValue{0.f};
+ //
+ //    UPROPERTY(EditAnywhere, Category = "Stats")
+ //    float AssignedValue{0.f};
+ //};
 
-/**
- * Stat format for Attack, Defense, Speed, etc.
- */
-//USTRUCT(BlueprintType)
-//struct DEMO_API FDerivedStat
-//{
-//    GENERATED_BODY()
-//
-//    UPROPERTY(EditAnywhere, Category = "Stats")
-//    float BaseValue{0.f};
-//};
+ /**
+  * Stat format for Attack, Defense, Speed, etc.
+  */
+  //USTRUCT(BlueprintType)
+  //struct DEMO_API FDerivedStat
+  //{
+  //    GENERATED_BODY()
+  //
+  //    UPROPERTY(EditAnywhere, Category = "Stats")
+  //    float BaseValue{0.f};
+  //};
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnCurrentStatChanged, FGameplayTag, StatTag, float, OldValue, float, NewValue);
 

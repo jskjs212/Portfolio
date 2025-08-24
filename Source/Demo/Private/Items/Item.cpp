@@ -17,9 +17,9 @@ void AItem::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (ItemSlot.Quantity < 1)
+    if (!ItemSlot.IsValid())
     {
-        UE_LOG(LogTemp, Error, TEXT("AItem::BeginPlay() - Quantity is not set properly."));
+        UE_LOG(LogTemp, Error, TEXT("AItem::BeginPlay() - ItemSlot is not set properly."));
     }
 }
 
@@ -27,6 +27,7 @@ void AItem::OnConstruction(const FTransform& Transform)
 {
     Super::OnConstruction(Transform);
 
+    // Set static mesh from ItemSlot
     const FItemDataBase* ItemData = ItemSlot.ItemID.GetRow<FItemDataBase>(TEXT("AItem::AItem()"));
     if (ItemData && ItemData->StaticMesh)
     {

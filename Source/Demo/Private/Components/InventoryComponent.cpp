@@ -2,6 +2,7 @@
 
 #include "Components/InventoryComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
+#include "Items/ItemTypes.h"
 
 UInventoryComponent::UInventoryComponent()
 {
@@ -17,6 +18,8 @@ void UInventoryComponent::BeginPlay()
     Super::BeginPlay();
 
     // TEST:
-    UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent::BeginPlay - %d"), OwnedItems.Num());
-    UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent::BeginPlay - %d"), OwnedItems[DemoGameplayTags::Item_Weapon].Items.Num());
+    if (OwnedItems.Num())
+    {
+        int32 Temp = OwnedItems.begin()->Value.Items.Add(FItemSlot{});
+    }
 }

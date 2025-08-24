@@ -2,6 +2,8 @@
 
 #include "Character/PlayerCharacter.h"
 #include "Camera/CameraComponent.h"
+#include "Components/EquipmentComponent.h"
+#include "Components/InventoryComponent.h"
 #include "Components/StatsComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "EnhancedInputComponent.h"
@@ -9,6 +11,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "InputActionValue.h"
+#include "Items/ItemTypes.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -32,6 +35,8 @@ APlayerCharacter::APlayerCharacter()
     FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
     FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
     FollowCamera->bUsePawnControlRotation = false;
+
+    InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -61,7 +66,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
         EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ThisClass::StartSprint);
         EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ThisClass::StopSprint);
 
-        EnhancedInputComponent->BindAction(TestAction, ETriggerEvent::Started, this, &ThisClass::Test);
+        EnhancedInputComponent->BindAction(Test1Action, ETriggerEvent::Started, this, &ThisClass::Test1);
+        EnhancedInputComponent->BindAction(Test2Action, ETriggerEvent::Started, this, &ThisClass::Test2);
     }
 }
 
@@ -154,8 +160,16 @@ void APlayerCharacter::StopSprint()
     }
 }
 
-void APlayerCharacter::Test_Implementation()
+void APlayerCharacter::Test1_Implementation()
 {
-    UE_LOG(LogTemp, Warning, TEXT("APlayerCharacter::Test() called!"));
-    StatsComponent->TakeDamage(30.f);
+    UE_LOG(LogTemp, Warning, TEXT("APlayerCharacter::Test1() called!"));
+    EquipmentComponent->EquipItem(DemoGameplayTags::Item_Weapon, TestWeapon);
+    EquipmentComponent->EquipItem(DemoGameplayTags::Item_Armor_Shield, TestShield);
+}
+
+void APlayerCharacter::Test2_Implementation()
+{
+    UE_LOG(LogTemp, Warning, TEXT("APlayerCharacter::Test2() called!"));
+    EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Weapon);
+    EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Armor_Shield);
 }

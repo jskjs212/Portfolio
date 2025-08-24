@@ -16,7 +16,7 @@ class UTexture2D;
 // bIsQuestItem, ItemSubType, Sound, Particle, Animation
 // Requirements
 USTRUCT(BlueprintType)
-struct DEMO_API FItemDataBase : public FTableRowBase
+struct FItemDataBase : public FTableRowBase
 {
     GENERATED_BODY()
 
@@ -67,7 +67,7 @@ struct DEMO_API FItemDataBase : public FTableRowBase
 // Tag: Item.Weapon
 // Consider adding: AttackSpeed, DamageType, Range, StatBonus
 USTRUCT(BlueprintType)
-struct DEMO_API FWeaponData : public FItemDataBase
+struct FWeaponData : public FItemDataBase
 {
     GENERATED_BODY()
 
@@ -91,7 +91,7 @@ struct DEMO_API FWeaponData : public FItemDataBase
 // Tag: Item.Armor
 // Consider adding: StatBonus (MaxHealth), Resistance,
 USTRUCT(BlueprintType)
-struct DEMO_API FArmorData : public FItemDataBase
+struct FArmorData : public FItemDataBase
 {
     GENERATED_BODY()
     UPROPERTY(EditDefaultsOnly)
@@ -114,7 +114,7 @@ struct DEMO_API FArmorData : public FItemDataBase
 // Tag: Item.Consumable
 // Consider adding: Buff, Debuff, Cooldown, Duration
 USTRUCT(BlueprintType)
-struct DEMO_API FConsumableData : public FItemDataBase
+struct FConsumableData : public FItemDataBase
 {
     GENERATED_BODY()
 

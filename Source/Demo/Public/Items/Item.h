@@ -35,6 +35,14 @@ public:
     virtual void OnConstruction(const FTransform& Transform) override;
 
     ////////////////////////////////////////////////////////
+    //        Get & set
+    ////////////////////////////////////////////////////////
+public:
+    UStaticMeshComponent* GetStaticMesh() const { return StaticMesh; }
+
+    void SetItemSlot(const FItemSlot& InItemSlot) { ItemSlot = InItemSlot; }
+
+    ////////////////////////////////////////////////////////
     //        Variables
     ////////////////////////////////////////////////////////
 private:
