@@ -40,12 +40,6 @@ void UInventoryComponent::BeginPlay()
 
 int32 UInventoryComponent::AddItem(FItemSlot& InSlot, int32 DesignatedIndex)
 {
-    // Validations
-    if (InSlot.bIsUsing)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent::AddItem() - Slot is being used."));
-        return -1;
-    }
     if (!InSlot.IsValid())
     {
         UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent::AddItem() - Slot is not valid."));
@@ -56,7 +50,7 @@ int32 UInventoryComponent::AddItem(FItemSlot& InSlot, int32 DesignatedIndex)
     const FItemDataBase* ItemData = InSlot.ItemID.GetRow<FItemDataBase>(TEXT("UInventoryComponent::AddItem()"));
     if (!ItemData)
     {
-        UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent::AddItem() - ItemData is not found."));
+        UE_LOG(LogTemp, Error, TEXT("UInventoryComponent::AddItem() - ItemData is not found."));
         return -1;
     }
 
@@ -75,7 +69,7 @@ int32 UInventoryComponent::AddItem(FItemSlot& InSlot, int32 DesignatedIndex)
     }
     if (!ItemType.IsValid() || !ItemArray)
     {
-        UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent::AddItem() - ItemType is not valid."));
+        UE_LOG(LogTemp, Error, TEXT("UInventoryComponent::AddItem() - ItemType is not valid."));
         return -1;
     }
 
@@ -90,13 +84,8 @@ int32 UInventoryComponent::AddItem(FItemSlot& InSlot, int32 DesignatedIndex)
         {
             if (!IsInventorySlotEmpty(Slot) && Slot.ItemID == InSlot.ItemID)
             {
-                bSlotExists = true;
-                if (Slot.bIsUsing)
-                {
-                    continue;
-                }
-
                 const int32 ToAdd = FMath::Min(RemainingQuantity, MaxStackSize - Slot.Quantity);
+                bSlotExists = true;
                 Slot.Quantity += ToAdd;
                 RemainingQuantity -= ToAdd;
             }
@@ -119,7 +108,7 @@ int32 UInventoryComponent::AddItem(FItemSlot& InSlot, int32 DesignatedIndex)
             {
                 const int32 ToAdd = FMath::Min(RemainingQuantity, MaxStackSize);
                 bSlotExists = true;
-                ItemArray->Add(FItemSlot{InSlot.ItemID, ToAdd, false});
+                ItemArray->Add(FItemSlot{InSlot.ItemID, ToAdd});
                 RemainingQuantity -= ToAdd;
             }
             // Fill an empty slot
@@ -135,7 +124,7 @@ int32 UInventoryComponent::AddItem(FItemSlot& InSlot, int32 DesignatedIndex)
                 {
                     const int32 ToAdd = FMath::Min(RemainingQuantity, MaxStackSize);
                     bSlotExists = true;
-                    (*ItemArray)[EmptySlotIndex] = FItemSlot{InSlot.ItemID, ToAdd, false};
+                    (*ItemArray)[EmptySlotIndex] = FItemSlot{InSlot.ItemID, ToAdd};
                     RemainingQuantity -= ToAdd;
                 }
                 else // Slots are full
@@ -154,11 +143,6 @@ int32 UInventoryComponent::AddItem(FItemSlot& InSlot, int32 DesignatedIndex)
         {
             return 0;
         }
-        else if (Slot.bIsUsing)
-        {
-            UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent::AddItem() - Slot is being used."));
-            return -1;
-        }
         else  // Empty or same item
         {
             const int32 ToAdd = FMath::Min(RemainingQuantity, MaxStackSize - Slot.Quantity);
@@ -173,8 +157,10 @@ int32 UInventoryComponent::AddItem(FItemSlot& InSlot, int32 DesignatedIndex)
         return -1;
     }
 
-    // Update UI
     const int32 Added = InSlot.Quantity - RemainingQuantity;
+    InSlot.Quantity = RemainingQuantity;
+
+    // Update UI
     if (Added > 0)
     {
         // TODO: UI (broadcast?)

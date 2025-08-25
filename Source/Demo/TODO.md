@@ -2,9 +2,12 @@
 
 ## TODO
 AddItem -> Unequip
+RemoveItem
+UseItem: eating for 3 seconds
+DropItem
 
 ## check
-모든 클래스: 초기값이 필요한 변수 검사하기
+모든 클래스: 초기값 세팅이 필요한 변수 세팅 검사하기
 
 ## misc
 

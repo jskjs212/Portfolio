@@ -13,9 +13,11 @@
  * Map of { ItemType, Array<ItemSlot> }
  * Fixed ItemTypes: Weapon, Armor, Consumable
  * ItemSlot.Quantity == 0 means empty slot, although ItemSlot.ItemID may be valid (not cleared when emptied).
+ *
  * bFixSlotSizeAndExposeEmptySlots is true by default.
  * -> Each ItemType has its own fixed slot size. Empty slots are shown. check: can be added by purchase?
  * -> If false, slots can be added/removed. Empty slots are not allowed.
+ *
  * bAllowMultipleSlots is true by default.
  * -> Same items can take multiple slots.
  */
@@ -38,9 +40,9 @@ protected:
     ////////////////////////////////////////////////////////
 public:
     // Add item to inventory.
-    // For/while loops are used. Numbers should not be absurd.
+    // For/while loops are used. Numbers should not be absurd (Size << 1000).
     // @param DesignatedIndex >=0 -> Top-up and discard overflow if same item exists, otherwise cancel.
-    // @param DesignatedIndex  <0 -> Top-up existing slots (using slots are skipped), then fill empty slots.
+    // @param DesignatedIndex  <0 -> Top-up existing slots, then fill empty slots.
     // @return Actually added quantity (subtract InSlot.Quantity), -1 if failed.
     int32 AddItem(FItemSlot& InSlot, int32 DesignatedIndex = -1);
 
@@ -48,6 +50,12 @@ public:
     // Remove item from inventory.
     // @return Actually removed quantity, -1 if failed.
     // int32 RemoveItem(?);
+
+    // Use item.
+    // void UseItem(?);
+
+    // Drop item.
+    // void DropItem(?);
 
 private:
     // @return true if the slot is empty in inventory's perspective.

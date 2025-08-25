@@ -20,10 +20,6 @@ struct FItemSlot
     UPROPERTY(EditAnywhere, Category = "Item")
     int32 Quantity{0};
 
-    // Slot is being equipped or consumed.
-    UPROPERTY(VisibleAnywhere)
-    bool bIsUsing{false};
-
     // We need only quantity at the moment.
     // Scalability example: FWeaponInstanceData (Durability, Enchant, MasteryLevel, Attachment, etc.)
     //UPROPERTY(VisibleAnywhere)
