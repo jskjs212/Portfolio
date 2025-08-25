@@ -19,7 +19,7 @@ void AItem::BeginPlay()
 
     if (!ItemSlot.IsValid())
     {
-        UE_LOG(LogTemp, Error, TEXT("AItem::BeginPlay() - ItemSlot is not set properly."));
+        UE_LOG(LogTemp, Error, TEXT("AItem::BeginPlay() - ItemSlot is not set properly from %s."), *GetName());
     }
 }
 

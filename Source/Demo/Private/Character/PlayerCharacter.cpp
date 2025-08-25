@@ -2,8 +2,10 @@
 
 #include "Character/PlayerCharacter.h"
 #include "Camera/CameraComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/EquipmentComponent.h"
 #include "Components/InventoryComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Components/StatsComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "EnhancedInputComponent.h"
@@ -20,9 +22,20 @@ APlayerCharacter::APlayerCharacter()
     bUseControllerRotationRoll = false;
     bUseControllerRotationYaw = false;
 
-    GetCharacterMovement()->bUseControllerDesiredRotation = false;
-    GetCharacterMovement()->bOrientRotationToMovement = true;
-    GetCharacterMovement()->RotationRate = FRotator{0.f, 540.f, 0.f};
+    UCapsuleComponent* CapsuleComp = GetCapsuleComponent();
+    check(CapsuleComp);
+    CapsuleComp->InitCapsuleSize(42.f, 96.f);
+
+    // Adjust for Elf_Arden mesh
+    USkeletalMeshComponent* MeshComp = GetMesh();
+    check(MeshComp);
+    MeshComp->SetRelativeLocation(FVector{0.f, 0.f, -96.f});
+    MeshComp->SetRelativeRotation(FRotator{0.f, -90.f, 0.f});
+
+    UCharacterMovementComponent* MovementComp = GetCharacterMovement();
+    MovementComp->bUseControllerDesiredRotation = false;
+    MovementComp->bOrientRotationToMovement = true;
+    MovementComp->RotationRate = FRotator{0.f, 540.f, 0.f};
 
     // TODO: Use data table or config file
     StatsComponent->AddResourceStat(UStatsComponent::StaminaTag, FResourceStat{100.f, 100.f, true});
@@ -163,13 +176,30 @@ void APlayerCharacter::StopSprint()
 void APlayerCharacter::Test1_Implementation()
 {
     UE_LOG(LogTemp, Warning, TEXT("APlayerCharacter::Test1() called!"));
-    EquipmentComponent->EquipItem(DemoGameplayTags::Item_Weapon, TestWeapon);
-    EquipmentComponent->EquipItem(DemoGameplayTags::Item_Armor_Shield, TestShield);
+
+    // Equipment test
+    //EquipmentComponent->EquipItem(DemoGameplayTags::Item_Weapon, TestWeapon);
+    //EquipmentComponent->EquipItem(DemoGameplayTags::Item_Armor_Shield, TestShield);
+
+    // Inventory test
+    // Call Test1 and Test2 randomly to test items are filled in all empty slots.
+    TestWeapon.Quantity = 5;
+    TestShield.Quantity = 20;
+    InventoryComponent->AddItem(TestWeapon, -1);
+    InventoryComponent->AddItem(TestShield, 5);
 }
 
 void APlayerCharacter::Test2_Implementation()
 {
     UE_LOG(LogTemp, Warning, TEXT("APlayerCharacter::Test2() called!"));
-    EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Weapon);
-    EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Armor_Shield);
+
+    // Equipment test
+    //EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Weapon);
+    //EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Armor_Shield);
+
+    // Inventory test
+    TestWeapon.Quantity = 5;
+    TestShield.Quantity = 20;
+    InventoryComponent->AddItem(TestWeapon, 5);
+    InventoryComponent->AddItem(TestShield, -1);
 }

@@ -2,7 +2,6 @@
 
 
 #include "Character/BaseCharacter.h"
-#include "Components/CapsuleComponent.h"
 #include "Components/CombatComponent.h"
 #include "Components/EquipmentComponent.h"
 #include "Components/StatsComponent.h"
@@ -11,17 +10,17 @@
 
 ABaseCharacter::ABaseCharacter()
 {
-    PrimaryActorTick.bCanEverTick = true;
+    PrimaryActorTick.bCanEverTick = false;
     MovementSpeedMode = DemoGameplayTags::Movement_SpeedMode_Jog;
 
-    GetCapsuleComponent()->InitCapsuleSize(42.f, 96.f);
-
     // check: temporary values
-    GetCharacterMovement()->JumpZVelocity = 700.f;
-    GetCharacterMovement()->AirControl = 0.2f;
-    GetCharacterMovement()->MaxWalkSpeed = JogSpeed;
-    GetCharacterMovement()->GravityScale = 1.75f;
-    GetCharacterMovement()->MaxAcceleration = 1500.f;
+    UCharacterMovementComponent* MovementComp = GetCharacterMovement();
+    check(MovementComp);
+    MovementComp->JumpZVelocity = 700.f;
+    MovementComp->AirControl = 0.2f;
+    MovementComp->MaxWalkSpeed = JogSpeed;
+    MovementComp->GravityScale = 1.75f;
+    MovementComp->MaxAcceleration = 1500.f;
 
     CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 
@@ -38,11 +37,6 @@ void ABaseCharacter::BeginPlay()
 
     StatsComponent->InitializeResourceStats();
     StatsComponent->OnCurrentResourceStatChanged.AddDynamic(this, &ThisClass::OnCurrentResourceStatChanged);
-}
-
-void ABaseCharacter::Tick(float DeltaTime)
-{
-    Super::Tick(DeltaTime);
 }
 
 void ABaseCharacter::OnCurrentResourceStatChanged(FGameplayTag StatTag, float OldValue, float NewValue)

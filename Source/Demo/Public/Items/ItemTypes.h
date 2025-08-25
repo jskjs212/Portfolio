@@ -18,7 +18,7 @@ struct FItemSlot
     FDataTableRowHandle ItemID;
 
     UPROPERTY(EditAnywhere, Category = "Item")
-    uint32 Quantity{1};
+    int32 Quantity{0};
 
     // Slot is being equipped or consumed.
     UPROPERTY(VisibleAnywhere)
@@ -29,7 +29,7 @@ struct FItemSlot
     //UPROPERTY(VisibleAnywhere)
     //TObjectPtr<FItemInstanceData> InstanceData;
 
-    bool IsValid() const { return !ItemID.IsNull() && Quantity > 0; }
+    FORCEINLINE bool IsValid() const { return !ItemID.IsNull() && Quantity > 0; }
 };
 
 USTRUCT(BlueprintType)
@@ -38,5 +38,5 @@ struct FItemArray
     GENERATED_BODY()
 
     UPROPERTY(EditAnywhere)
-    TArray<FItemSlot> Items;
+    TArray<FItemSlot> ItemArray;
 };

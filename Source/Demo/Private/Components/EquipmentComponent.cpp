@@ -87,7 +87,7 @@ bool UEquipmentComponent::EquipItem(FGameplayTag ItemType, const FItemSlot& Item
 
     // Register active skills
 
-    UE_LOG(LogTemp, Display, TEXT("Equipped %s."), *ItemSlot.ItemID.RowName.ToString());
+    UE_LOG(LogTemp, Display, TEXT("Equipped - %s."), *ItemSlot.ItemID.RowName.ToString());
     return true;
 }
 
@@ -125,7 +125,7 @@ bool UEquipmentComponent::UnequipItem(FGameplayTag ItemType)
 
     // Unregister active skills
 
-    UE_LOG(LogTemp, Display, TEXT("Unequipped %s."), *ItemType.ToString());
+    UE_LOG(LogTemp, Display, TEXT("Unequipped - %s."), *ItemType.ToString());
     return true;
 }
 

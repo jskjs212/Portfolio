@@ -11,7 +11,8 @@
 class AItem;
 
 /**
- * ItemTypes and SocketNames:
+ * Equipment
+ * Fixed ItemTypes and SocketNames:
  *   Item.Weapon = MeleeHandSocket
  *   Item.Armor.Shield = ShieldHandSocket
  */

@@ -96,7 +96,7 @@ protected:
     //        Variables
     ////////////////////////////////////////////////////////
 private:
-    // true: toggle, false: hold
+    // Options: true = toggle, false = hold
     bool bIsWalkInputTogglesWalk{true};
     bool bIsSprintInputTogglesSprint{false};
 
