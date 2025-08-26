@@ -40,6 +40,8 @@ public:
 public:
     UStaticMeshComponent* GetStaticMesh() const { return StaticMesh; }
 
+    FItemSlot& GetItemSlot() { return ItemSlot; }
+
     void SetItemSlot(const FItemSlot& InItemSlot) { ItemSlot = InItemSlot; }
 
     ////////////////////////////////////////////////////////

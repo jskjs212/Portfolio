@@ -15,17 +15,20 @@ struct FItemSlot
     GENERATED_BODY()
 
     UPROPERTY(EditAnywhere, Category = "Item")
-    FDataTableRowHandle ItemID;
+    FDataTableRowHandle RowHandle;
 
     UPROPERTY(EditAnywhere, Category = "Item")
     int32 Quantity{0};
 
     // We need only quantity at the moment.
-    // Scalability example: FWeaponInstanceData (Durability, Enchant, MasteryLevel, Attachment, etc.)
+    // Scalability example:
+    //     FItemInstanceData (FGuid ItemID, etc.)
+    //     FWeaponInstanceData (Durability, Enchant, MasteryLevel, Attachment, etc.)
+    // Or maybe inherit from FItemSlot itself?
     //UPROPERTY(VisibleAnywhere)
     //TObjectPtr<FItemInstanceData> InstanceData;
 
-    FORCEINLINE bool IsValid() const { return !ItemID.IsNull() && Quantity > 0; }
+    FORCEINLINE bool IsValid() const { return !RowHandle.IsNull() && Quantity > 0; }
 };
 
 USTRUCT(BlueprintType)

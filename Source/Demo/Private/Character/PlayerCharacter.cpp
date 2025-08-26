@@ -178,8 +178,8 @@ void APlayerCharacter::Test1_Implementation()
     UE_LOG(LogTemp, Warning, TEXT("APlayerCharacter::Test1() called!"));
 
     // Equipment test
-    //EquipmentComponent->EquipItem(DemoGameplayTags::Item_Weapon, TestWeapon);
-    //EquipmentComponent->EquipItem(DemoGameplayTags::Item_Armor_Shield, TestShield);
+    EquipmentComponent->EquipItem(DemoGameplayTags::Item_Weapon, TestWeapon);
+    EquipmentComponent->EquipItem(DemoGameplayTags::Item_Armor_Shield, TestShield);
 
     // Inventory test
     // Call Test1 and Test2 randomly to test items are filled in all empty slots.
@@ -194,8 +194,8 @@ void APlayerCharacter::Test2_Implementation()
     UE_LOG(LogTemp, Warning, TEXT("APlayerCharacter::Test2() called!"));
 
     // Equipment test
-    //EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Weapon);
-    //EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Armor_Shield);
+    EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Weapon);
+    EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Armor_Shield);
 
     // Inventory test
     TestWeapon.Quantity = 5;

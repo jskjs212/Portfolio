@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Components/EquipmentComponent.h"
+#include "Components/InventoryComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "GameFramework/Character.h"
@@ -23,13 +24,13 @@ void UEquipmentComponent::BeginPlay()
     Super::BeginPlay();
 }
 
-bool UEquipmentComponent::EquipItem(FGameplayTag ItemType, const FItemSlot& ItemSlot)
+bool UEquipmentComponent::EquipItem(FGameplayTag ItemType, const FItemSlot& InSlot)
 {
-    // TODO: ItemType == ItemSlot's ItemType?
+    // TODO: ItemType == InSlot's ItemType?
     // Input validation
-    if (!ItemSlot.IsValid())
+    if (!InSlot.IsValid())
     {
-        UE_LOG(LogTemp, Warning, TEXT("UEquipmentComponent::EquipItem() - ItemSlot is not valid."));
+        UE_LOG(LogTemp, Warning, TEXT("UEquipmentComponent::EquipItem() - Slot is not valid."));
         return false;
     }
 
@@ -54,7 +55,7 @@ bool UEquipmentComponent::EquipItem(FGameplayTag ItemType, const FItemSlot& Item
 
     // Spawn
     APawn* OwnerPawn = GetOwner<APawn>();
-    AItem* SpawnedItem = SpawnItemToEquip(OwnerPawn, ItemSlot);
+    AItem* SpawnedItem = SpawnItemToEquip(OwnerPawn, InSlot);
     if (!IsValid(SpawnedItem))
     {
         UE_LOG(LogTemp, Warning, TEXT("UEquipmentComponent::EquipItem() - Failed to spawn item."));
@@ -87,37 +88,41 @@ bool UEquipmentComponent::EquipItem(FGameplayTag ItemType, const FItemSlot& Item
 
     // Register active skills
 
-    UE_LOG(LogTemp, Display, TEXT("Equipped - %s."), *ItemSlot.ItemID.RowName.ToString());
+    UE_LOG(LogTemp, Display, TEXT("Equipped - %s."), *InSlot.RowHandle.RowName.ToString());
     return true;
 }
 
 bool UEquipmentComponent::UnequipItem(FGameplayTag ItemType)
 {
-    // Tag validation
-    TObjectPtr<AItem>* EquippedItemPtr = EquippedItems.Find(ItemType);
-    if (!EquippedItemPtr)
-    {
-        UE_LOG(LogTemp, Error, TEXT("UEquipmentComponent::EquipItem() - ItemType is not valid."));
-        return false;
-    }
-
-    AItem* EquippedItem = *EquippedItemPtr;
+    // ItemType is checked, Unequip requests should come from Equip or UI's existing item.
+    AItem* EquippedItem = GetEquippedItem(ItemType);
     if (!EquippedItem)
     {
-        UE_LOG(LogTemp, Warning, TEXT("UEquipmentComponent::UnequipItem() - Equipped item not found."));
+        UE_LOG(LogTemp, Warning, TEXT("UEquipmentComponent::UnequipItem() - Equipped %s not found."), *ItemType.ToString());
         return false;
     }
 
-    // TODO: !!!!! Add item to inventory !!!!!
+    // Add to inventory if possible
+    UInventoryComponent* InventoryComp = GetOwner()->FindComponentByClass<UInventoryComponent>();
+    if (InventoryComp)
+    {
+        if (InventoryComp->AddItem(EquippedItem->GetItemSlot()) <= 0)
+        {
+            // misc: In-game notification?
+            UE_LOG(LogTemp, Warning, TEXT("UEquipmentComponent::UnequipItem() - Failed to add item to inventory."));
+            return false;
+        }
+    }
 
     // Destroy
     if (!EquippedItem->Destroy())
     {
         // TODO: Handle failure, already added to inventory so it should be destroyed
+        UE_LOG(LogTemp, Error, TEXT("UEquipmentComponent::UnequipItem() - Failed to destroy item."));
         return false;
     }
 
-    *EquippedItemPtr = nullptr;
+    EquippedItems[ItemType] = nullptr;
 
     // OnUnequipped
 
@@ -138,7 +143,7 @@ AItem* UEquipmentComponent::GetEquippedItem(FGameplayTag ItemType) const
     return nullptr;
 }
 
-AItem* UEquipmentComponent::SpawnItemToEquip(APawn* OwnerPawn, const FItemSlot& ItemSlot) const
+AItem* UEquipmentComponent::SpawnItemToEquip(APawn* OwnerPawn, const FItemSlot& InSlot) const
 {
     if (!OwnerPawn)
     {
@@ -150,7 +155,7 @@ AItem* UEquipmentComponent::SpawnItemToEquip(APawn* OwnerPawn, const FItemSlot& 
         FTransform SpawnTransform = FTransform::Identity;
         if (AItem* SpawnedItem = World->SpawnActorDeferred<AItem>(AItem::StaticClass(), SpawnTransform, OwnerPawn, OwnerPawn, ESpawnActorCollisionHandlingMethod::AlwaysSpawn))
         {
-            SpawnedItem->SetItemSlot(ItemSlot);
+            SpawnedItem->SetItemSlot(InSlot);
             UGameplayStatics::FinishSpawningActor(SpawnedItem, SpawnTransform);
 
             // After construction

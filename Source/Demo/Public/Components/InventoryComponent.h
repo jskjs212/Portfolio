@@ -12,7 +12,7 @@
  * Inventory
  * Map of { ItemType, Array<ItemSlot> }
  * Fixed ItemTypes: Weapon, Armor, Consumable
- * ItemSlot.Quantity == 0 means empty slot, although ItemSlot.ItemID may be valid (not cleared when emptied).
+ * ItemSlot.Quantity == 0 means empty slot, although ItemSlot.RowHandle may be valid (not cleared when emptied).
  *
  * bFixSlotSizeAndExposeEmptySlots is true by default.
  * -> Each ItemType has its own fixed slot size. Empty slots are shown. check: can be added by purchase?
@@ -59,11 +59,20 @@ public:
 
 private:
     // @return true if the slot is empty in inventory's perspective.
-    static FORCEINLINE bool IsInventorySlotEmpty(const FItemSlot& Slot)
+    FORCEINLINE bool IsInventorySlotEmpty(const FItemSlot& Slot) const
     {
         checkf(Slot.Quantity >= 0, TEXT("Negative quantity implies a broken code."));
+        checkf(bFixSlotSizeAndExposeEmptySlots || Slot.Quantity != 0, TEXT("Empty slots are not allowed if bFixSlotSizeAndExposeEmptySlots is false."));
         return Slot.Quantity == 0;
     }
+
+    // Validate InSlot for inventory, and get related data.
+    // @return true if valid.
+    bool ValidateInInventorySlot(const FItemSlot& InSlot, int32& OutMaxStackSize, FName& OutName, FGameplayTag& OutItemType, TArray<FItemSlot>*& OutItemArray);
+
+    // Internal function for adding item to inventory.
+    // @return false if failed
+    bool AddItem_Internal(FItemSlot& InSlot, int32 DesignatedIndex, int32 MaxStackSize, int32 BaseMaxSlotSize, int32& InOutRemainingQuantity, TArray<FItemSlot>*& ItemArray);
 
     ////////////////////////////////////////////////////////
     //        Variables - Inventory

@@ -1,15 +1,14 @@
 ## Bugs
 
 ## TODO
-AddItem -> Unequip
-RemoveItem
-UseItem: eating for 3 seconds
-DropItem
+### ItemActionRequest, ValidateRequest, RemoveItem
 
 ## check
-모든 클래스: 초기값 세팅이 필요한 변수 세팅 검사하기
+### 모든 클래스: 초기값 세팅이 필요한 변수 세팅 검사하기
 
 ## misc
+### AddItem result
+int32 -> EAddItemResult???
 
 ## Add
 

@@ -37,14 +37,14 @@ public:
     // check: What if Quantity > 1?
     // misc: Return EEquipResult if needed.
     // @return true if successfully equipped
-    bool EquipItem(FGameplayTag ItemType, const FItemSlot& ItemSlot);
+    bool EquipItem(FGameplayTag ItemType, const FItemSlot& InSlot);
 
     // @return true if successfully unequipped
     bool UnequipItem(FGameplayTag ItemType);
 
 private:
     // @return nullptr if failed
-    AItem* SpawnItemToEquip(APawn* OwnerPawn, const FItemSlot& ItemSlot) const;
+    AItem* SpawnItemToEquip(APawn* OwnerPawn, const FItemSlot& InSlot) const;
 
     // @return true if successfully attached
     bool AttachActor(AActor* ActorToAttach, FName SocketName) const;

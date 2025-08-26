@@ -40,60 +40,101 @@ void UInventoryComponent::BeginPlay()
 
 int32 UInventoryComponent::AddItem(FItemSlot& InSlot, int32 DesignatedIndex)
 {
-    if (!InSlot.IsValid())
-    {
-        UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent::AddItem() - Slot is not valid."));
-        return -1;
-    }
+    int32 MaxStackSize;
+    FName ItemName;
+    FGameplayTag ItemType;
+    TArray<FItemSlot>* ItemArray;
 
-    // Get ItemData
-    const FItemDataBase* ItemData = InSlot.ItemID.GetRow<FItemDataBase>(TEXT("UInventoryComponent::AddItem()"));
-    if (!ItemData)
+    // Validate and get data
+    bool bValid = ValidateInInventorySlot(InSlot, MaxStackSize, ItemName, ItemType, ItemArray);
+    if (!bValid)
     {
-        UE_LOG(LogTemp, Error, TEXT("UInventoryComponent::AddItem() - ItemData is not found."));
-        return -1;
-    }
-
-    // Find ItemType & ItemArray
-    FGameplayTag ItemType{};
-    TArray<FItemSlot>* ItemArray{nullptr};
-    for (const TPair<FGameplayTag, FItemArray>& Pair : OwnedItems)
-    {
-        // ex) Find Item.Weapon for Item.Weapon.Melee.OneHanded
-        if (ItemData->ItemType.MatchesTag(Pair.Key))
-        {
-            ItemType = Pair.Key;
-            ItemArray = &OwnedItems[ItemType].ItemArray;
-            break;
-        }
-    }
-    if (!ItemType.IsValid() || !ItemArray)
-    {
-        UE_LOG(LogTemp, Error, TEXT("UInventoryComponent::AddItem() - ItemType is not valid."));
-        return -1;
+        return -1; // Log in ValidateInInventorySlot()
     }
 
     // Add item
-    const int32 MaxStackSize = ItemData->MaxStackSize;
+    const int32 OriginalQuantity = InSlot.Quantity;
     int32 RemainingQuantity = InSlot.Quantity;
+    bool bSuccess = AddItem_Internal(InSlot, DesignatedIndex, MaxStackSize, BaseMaxSlotSizes[ItemType], RemainingQuantity, ItemArray);
+    if (!bSuccess)
+    {
+        return -1; // Log in AddItem_Internal()
+    }
+
+    // Update InSlot
+    const int32 Added = OriginalQuantity - RemainingQuantity;
+    InSlot.Quantity = RemainingQuantity;
+
+    // Update UI
+    if (Added > 0)
+    {
+        // TODO: UI (broadcast?)
+    }
+
+    UE_LOG(LogTemp, Display, TEXT("Add item - %s, %d"), *ItemName.ToString(), Added);
+    return Added;
+}
+
+bool UInventoryComponent::ValidateInInventorySlot(const FItemSlot& InSlot, int32& OutMaxStackSize, FName& OutName, FGameplayTag& OutItemType, TArray<FItemSlot>*& OutItemArray)
+{
+    if (!InSlot.IsValid())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent::ValidateInInventorySlot() - Slot is not valid."));
+        return false;
+    }
+
+    // Get ItemData
+    const FItemDataBase* ItemData = InSlot.RowHandle.GetRow<FItemDataBase>(TEXT("UInventoryComponent::AddItem()"));
+    if (!ItemData)
+    {
+        UE_LOG(LogTemp, Error, TEXT("UInventoryComponent::ValidateInInventorySlot() - ItemData is not found."));
+        return false;
+    }
+
+    // Find ItemType & ItemArray
+    // ex) Find Item.Weapon tag from Item.Weapon.Melee.OneHanded tag
+    OutItemType = FGameplayTag::EmptyTag;
+    OutItemArray = nullptr;
+    for (const TPair<FGameplayTag, FItemArray>& Pair : OwnedItems)
+    {
+        if (ItemData->ItemType.MatchesTag(Pair.Key))
+        {
+            OutItemType = Pair.Key;
+            OutItemArray = &OwnedItems[OutItemType].ItemArray;
+            break;
+        }
+    }
+    if (!OutItemType.IsValid() || !OutItemArray)
+    {
+        UE_LOG(LogTemp, Error, TEXT("UInventoryComponent::ValidateInInventorySlot() - ItemType is not valid."));
+        return false;
+    }
+
+    OutMaxStackSize = ItemData->MaxStackSize;
+    OutName = ItemData->Name;
+    return true;
+}
+
+bool UInventoryComponent::AddItem_Internal(FItemSlot& InSlot, int32 DesignatedIndex, int32 MaxStackSize, int32 BaseMaxSlotSize, int32& InOutRemainingQuantity, TArray<FItemSlot>*& ItemArray)
+{
     if (DesignatedIndex < 0)
     {
         // Top-up existing slots
         bool bSlotExists = false;
         for (FItemSlot& Slot : *ItemArray)
         {
-            if (!IsInventorySlotEmpty(Slot) && Slot.ItemID == InSlot.ItemID)
+            if (!IsInventorySlotEmpty(Slot) && Slot.RowHandle == InSlot.RowHandle)
             {
-                const int32 ToAdd = FMath::Min(RemainingQuantity, MaxStackSize - Slot.Quantity);
+                const int32 ToAdd = FMath::Min(InOutRemainingQuantity, MaxStackSize - Slot.Quantity);
                 bSlotExists = true;
                 Slot.Quantity += ToAdd;
-                RemainingQuantity -= ToAdd;
+                InOutRemainingQuantity -= ToAdd;
             }
         }
 
         // Add into new slots
         int32 EmptySlotIndex = 0;
-        while (RemainingQuantity > 0)
+        while (InOutRemainingQuantity > 0)
         {
             // allow - continue
             // !allow && exists - break
@@ -104,12 +145,12 @@ int32 UInventoryComponent::AddItem(FItemSlot& InSlot, int32 DesignatedIndex)
             }
 
             // Add a new slot
-            if (ItemArray->Num() < BaseMaxSlotSizes[ItemType])
+            if (ItemArray->Num() < BaseMaxSlotSize)
             {
-                const int32 ToAdd = FMath::Min(RemainingQuantity, MaxStackSize);
+                const int32 ToAdd = FMath::Min(InOutRemainingQuantity, MaxStackSize);
                 bSlotExists = true;
-                ItemArray->Add(FItemSlot{InSlot.ItemID, ToAdd});
-                RemainingQuantity -= ToAdd;
+                ItemArray->Add(FItemSlot{InSlot.RowHandle, ToAdd});
+                InOutRemainingQuantity -= ToAdd;
             }
             // Fill an empty slot
             else if (bFixSlotSizeAndExposeEmptySlots)
@@ -122,50 +163,41 @@ int32 UInventoryComponent::AddItem(FItemSlot& InSlot, int32 DesignatedIndex)
 
                 if (EmptySlotIndex < ItemArray->Num())
                 {
-                    const int32 ToAdd = FMath::Min(RemainingQuantity, MaxStackSize);
+                    const int32 ToAdd = FMath::Min(InOutRemainingQuantity, MaxStackSize);
                     bSlotExists = true;
-                    (*ItemArray)[EmptySlotIndex] = FItemSlot{InSlot.ItemID, ToAdd};
-                    RemainingQuantity -= ToAdd;
+                    (*ItemArray)[EmptySlotIndex] = FItemSlot{InSlot.RowHandle, ToAdd};
+                    InOutRemainingQuantity -= ToAdd;
                 }
-                else // Slots are full
+                else // No more empty slots
                 {
                     break;
                 }
             }
-        } // end of while (RemainingQuantity > 0)
+        } // end of while (InOutRemainingQuantity > 0)
     } // end of if (DesignatedIndex < 0)
     else if (DesignatedIndex < ItemArray->Num())
     {
         FItemSlot& Slot = (*ItemArray)[DesignatedIndex];
 
-        // Different item -> cancel
-        if (!IsInventorySlotEmpty(Slot) && Slot.ItemID != InSlot.ItemID)
+        // Empty or same item
+        if (IsInventorySlotEmpty(Slot) || Slot.RowHandle == InSlot.RowHandle)
         {
-            return 0;
-        }
-        else  // Empty or same item
-        {
-            const int32 ToAdd = FMath::Min(RemainingQuantity, MaxStackSize - Slot.Quantity);
-            Slot.ItemID = InSlot.ItemID;
+            const int32 ToAdd = FMath::Min(InOutRemainingQuantity, MaxStackSize - Slot.Quantity);
+            Slot.RowHandle = InSlot.RowHandle;
             Slot.Quantity += ToAdd;
-            RemainingQuantity -= ToAdd;
+            InOutRemainingQuantity -= ToAdd;
+        }
+        else // Different item -> cancel
+        {
+            UE_LOG(LogTemp, Display, TEXT("UInventoryComponent::AddItem() - Different item exists at designated index."));
+            return false;
         }
     }
     else
     {
         UE_LOG(LogTemp, Error, TEXT("UInventoryComponent::AddItem() - DesignatedIndex is out of range."));
-        return -1;
+        return false;
     }
 
-    const int32 Added = InSlot.Quantity - RemainingQuantity;
-    InSlot.Quantity = RemainingQuantity;
-
-    // Update UI
-    if (Added > 0)
-    {
-        // TODO: UI (broadcast?)
-    }
-
-    UE_LOG(LogTemp, Display, TEXT("Add item - %s, %d"), *ItemData->Name.ToString(), Added);
-    return Added;
+    return true;
 }
