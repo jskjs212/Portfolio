@@ -64,7 +64,7 @@ struct FItemDataBase : public FTableRowBase
 #endif // WITH_EDITOR
 };
 
-// Tag: Item.Weapon
+// Category: Item.Weapon
 // Consider adding: AttackSpeed, DamageType, Range, StatBonus
 USTRUCT(BlueprintType)
 struct FWeaponData : public FItemDataBase
@@ -88,7 +88,7 @@ struct FWeaponData : public FItemDataBase
 #endif // WITH_EDITOR
 };
 
-// Tag: Item.Armor
+// Category: Item.Armor
 // Consider adding: StatBonus (MaxHealth), Resistance,
 USTRUCT(BlueprintType)
 struct FArmorData : public FItemDataBase
@@ -111,7 +111,7 @@ struct FArmorData : public FItemDataBase
 #endif // WITH_EDITOR
 };
 
-// Tag: Item.Consumable
+// Category: Item.Consumable
 // Consider adding: Buff, Debuff, Cooldown, Duration
 USTRUCT(BlueprintType)
 struct FConsumableData : public FItemDataBase

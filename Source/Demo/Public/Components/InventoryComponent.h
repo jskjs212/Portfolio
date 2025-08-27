@@ -4,19 +4,39 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "DemoTypes/TableRowBases.h"
 #include "GameplayTagContainer.h"
 #include "Items/ItemTypes.h"
 #include "InventoryComponent.generated.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogInventory, Log, All);
+
+/**
+ * Validated data for internal functions' out parameters.
+ */
+USTRUCT()
+struct FInventoryValidatedData
+{
+    GENERATED_BODY()
+
+    FGameplayTag ItemCategory;
+
+    FItemSlot* ItemSlot{nullptr};
+
+    const FItemDataBase* ItemData{nullptr};
+
+    TArray<FItemSlot>* ItemArray{nullptr};
+};
+
 /**
  * Inventory
- * Map of { ItemType, Array<ItemSlot> }
- * Fixed ItemTypes: Weapon, Armor, Consumable
+ * Map of { ItemCategory, Array<ItemSlot> }
+ * Fixed ItemCategories from DemoItemTypes::ItemCategories.
  * ItemSlot.Quantity == 0 means empty slot, although ItemSlot.RowHandle may be valid (not cleared when emptied).
  *
  * bFixSlotSizeAndExposeEmptySlots is true by default.
- * -> Each ItemType has its own fixed slot size. Empty slots are shown. check: can be added by purchase?
- * -> If false, slots can be added/removed. Empty slots are not allowed.
+ * -> Each ItemCategory has its own ItemArray with fixed number (MaxSlotSize) of slots. Empty slots are shown.
+ * -> If false, slots can be added/removed <= MaxSlotSize. Empty slots are not allowed.
  *
  * bAllowMultipleSlots is true by default.
  * -> Same items can take multiple slots.
@@ -46,10 +66,9 @@ public:
     // @return Actually added quantity (subtract InSlot.Quantity), -1 if failed.
     int32 AddItem(FItemSlot& InSlot, int32 DesignatedIndex = -1);
 
-    // TODO: Parameters: ItemType, Index, Quantity?
     // Remove item from inventory.
     // @return Actually removed quantity, -1 if failed.
-    // int32 RemoveItem(?);
+    int32 RemoveItem(const FItemActionRequest& Request);
 
     // Use item.
     // void UseItem(?);
@@ -58,6 +77,10 @@ public:
     // void DropItem(?);
 
 private:
+    // Set initial max slot sizes, and fill with empty slots if bFixSlotSizeAndExposeEmptySlots == true.
+    void InitMaxSlots();
+
+    //
     // @return true if the slot is empty in inventory's perspective.
     FORCEINLINE bool IsInventorySlotEmpty(const FItemSlot& Slot) const
     {
@@ -67,24 +90,31 @@ private:
     }
 
     // Validate InSlot for inventory, and get related data.
+    // @param OutData is filled only if valid.
     // @return true if valid.
-    bool ValidateInInventorySlot(const FItemSlot& InSlot, int32& OutMaxStackSize, FName& OutName, FGameplayTag& OutItemType, TArray<FItemSlot>*& OutItemArray);
+    bool ValidateInInventorySlot(const FItemSlot& InSlot, FInventoryValidatedData& OutData);
 
     // Internal function for adding item to inventory.
     // @return false if failed
-    bool AddItem_Internal(FItemSlot& InSlot, int32 DesignatedIndex, int32 MaxStackSize, int32 BaseMaxSlotSize, int32& InOutRemainingQuantity, TArray<FItemSlot>*& ItemArray);
+    bool AddItem_Internal(FItemSlot& InSlot, int32 DesignatedIndex, int32 MaxStackSize, int32 MaxSlotSize, int32& InOutRemainingQuantity, TArray<FItemSlot>*& ItemArray);
+
+    // Validate item action request, and get related data.
+    // @param OutData is filled only if valid.
+    // @return true if valid.
+    bool ValidateActionRequest(const FItemActionRequest& Request, FInventoryValidatedData& OutData);
 
     ////////////////////////////////////////////////////////
     //        Variables - Inventory
     ////////////////////////////////////////////////////////
 private:
-    // { ItemType, Array<ItemSlot> }
+    // { ItemCategory, Array<ItemSlot> }
     UPROPERTY(VisibleAnywhere, Category = "Inventory")
     TMap<FGameplayTag, FItemArray> OwnedItems;
 
-    // If changed, this should be applied to OwnedItems if bFixSlotSizeAndExposeEmptySlots is true.
+    // check: can be added by purchase?
+    // If changed, this should be applied to OwnedItems if bFixSlotSizeAndExposeEmptySlots == true.
     UPROPERTY(EditDefaultsOnly, Category = "Inventory")
-    TMap<FGameplayTag, int32> BaseMaxSlotSizes;
+    TMap<FGameplayTag, int32> MaxSlotSizes;
 
     ////////////////////////////////////////////////////////
     //        Variables - General

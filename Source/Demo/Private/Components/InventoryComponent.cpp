@@ -5,48 +5,32 @@
 #include "DemoTypes/TableRowBases.h"
 #include "Items/ItemTypes.h"
 
+DEFINE_LOG_CATEGORY(LogInventory);
+
 UInventoryComponent::UInventoryComponent()
 {
     PrimaryComponentTick.bCanEverTick = false;
 
-    // TODO: Config file or data table?
-    // These elements should not be changed at runtime.
-    OwnedItems.Add(DemoGameplayTags::Item_Weapon, FItemArray{});
-    OwnedItems.Add(DemoGameplayTags::Item_Armor, FItemArray{});
-    OwnedItems.Add(DemoGameplayTags::Item_Consumable, FItemArray{});
-
-    // TODO: Config file or data table?
-    constexpr int32 WeaponMaxSlots = 10;
-    constexpr int32 ArmorMaxSlots = 10;
-    constexpr int32 ConsumableMaxSlots = 20;
-    BaseMaxSlotSizes.Add(DemoGameplayTags::Item_Weapon, WeaponMaxSlots);
-    BaseMaxSlotSizes.Add(DemoGameplayTags::Item_Armor, ArmorMaxSlots);
-    BaseMaxSlotSizes.Add(DemoGameplayTags::Item_Consumable, ConsumableMaxSlots);
+    // Inventory setup for fixed item categories.
+    for (const FGameplayTag& ItemCategory : DemoItemTypes::ItemCategories)
+    {
+        OwnedItems.Add(ItemCategory, FItemArray{});
+        MaxSlotSizes.Add(ItemCategory, 0);
+    }
 }
 
 void UInventoryComponent::BeginPlay()
 {
     Super::BeginPlay();
 
-    // Fill with empty slots
-    if (bFixSlotSizeAndExposeEmptySlots)
-    {
-        for (TPair<FGameplayTag, FItemArray>& Pair : OwnedItems)
-        {
-            Pair.Value.ItemArray.SetNum(BaseMaxSlotSizes[Pair.Key]);
-        }
-    }
+    InitMaxSlots();
 }
 
 int32 UInventoryComponent::AddItem(FItemSlot& InSlot, int32 DesignatedIndex)
 {
-    int32 MaxStackSize;
-    FName ItemName;
-    FGameplayTag ItemType;
-    TArray<FItemSlot>* ItemArray;
-
     // Validate and get data
-    bool bValid = ValidateInInventorySlot(InSlot, MaxStackSize, ItemName, ItemType, ItemArray);
+    FInventoryValidatedData ValidatedData;
+    bool bValid = ValidateInInventorySlot(InSlot, ValidatedData);
     if (!bValid)
     {
         return -1; // Log in ValidateInInventorySlot()
@@ -55,7 +39,7 @@ int32 UInventoryComponent::AddItem(FItemSlot& InSlot, int32 DesignatedIndex)
     // Add item
     const int32 OriginalQuantity = InSlot.Quantity;
     int32 RemainingQuantity = InSlot.Quantity;
-    bool bSuccess = AddItem_Internal(InSlot, DesignatedIndex, MaxStackSize, BaseMaxSlotSizes[ItemType], RemainingQuantity, ItemArray);
+    bool bSuccess = AddItem_Internal(InSlot, DesignatedIndex, ValidatedData.ItemData->MaxStackSize, MaxSlotSizes[ValidatedData.ItemCategory], RemainingQuantity, ValidatedData.ItemArray);
     if (!bSuccess)
     {
         return -1; // Log in AddItem_Internal()
@@ -71,15 +55,74 @@ int32 UInventoryComponent::AddItem(FItemSlot& InSlot, int32 DesignatedIndex)
         // TODO: UI (broadcast?)
     }
 
-    UE_LOG(LogTemp, Display, TEXT("Add item - %s, %d"), *ItemName.ToString(), Added);
+    UE_LOG(LogInventory, Display, TEXT("Add item - %s, %d"), *ValidatedData.ItemData->Name.ToString(), Added);
     return Added;
 }
 
-bool UInventoryComponent::ValidateInInventorySlot(const FItemSlot& InSlot, int32& OutMaxStackSize, FName& OutName, FGameplayTag& OutItemType, TArray<FItemSlot>*& OutItemArray)
+int32 UInventoryComponent::RemoveItem(const FItemActionRequest& Request)
 {
+    // Validate and get data
+    FInventoryValidatedData ValidatedData;
+    bool bValid = ValidateActionRequest(Request, ValidatedData);
+    if (!bValid)
+    {
+        return -1; // Log in ValidateActionRequest()
+    }
+
+    // Remove item
+    const int32 ToRemove = FMath::Min(Request.Quantity, ValidatedData.ItemSlot->Quantity);
+    ValidatedData.ItemSlot->Quantity -= ToRemove;
+
+    // Remove empty slot if needed
+    if (!bFixSlotSizeAndExposeEmptySlots && ValidatedData.ItemSlot->Quantity == 0)
+    {
+        ValidatedData.ItemArray->RemoveAt(Request.InventoryIndex);
+    }
+
+    // Update UI
+    if (ToRemove > 0)
+    {
+        // TODO: UI (broadcast?)
+    }
+
+    UE_LOG(LogInventory, Display, TEXT("Remove item - %s, %d"), *ValidatedData.ItemData->Name.ToString(), ToRemove);
+    return ToRemove;
+}
+
+void UInventoryComponent::InitMaxSlots()
+{
+    // TODO: Config file or data table? Determined by character class or something?
+    // Initial max slot sizes.
+    constexpr int32 WeaponMaxSlots = 10;
+    constexpr int32 ArmorMaxSlots = 10;
+    constexpr int32 ConsumableMaxSlots = 20;
+    MaxSlotSizes[DemoGameplayTags::Item_Weapon] = WeaponMaxSlots;
+    MaxSlotSizes[DemoGameplayTags::Item_Armor] = ArmorMaxSlots;
+    MaxSlotSizes[DemoGameplayTags::Item_Consumable] = ConsumableMaxSlots;
+
+    // Fill with empty slots if needed.
+    if (bFixSlotSizeAndExposeEmptySlots)
+    {
+        for (TPair<FGameplayTag, FItemArray>& Pair : OwnedItems)
+        {
+            Pair.Value.ItemArray.SetNum(MaxSlotSizes[Pair.Key]);
+        }
+    }
+}
+
+bool UInventoryComponent::ValidateInInventorySlot(const FItemSlot& InSlot, FInventoryValidatedData& OutData)
+{
+    OutData = FInventoryValidatedData{};
+
     if (!InSlot.IsValid())
     {
-        UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent::ValidateInInventorySlot() - Slot is not valid."));
+        UE_LOG(LogInventory, Warning, TEXT("ValidateInInventorySlot() - Slot is not valid."));
+        return false;
+    }
+
+    if (InSlot.bIsLocked)
+    {
+        UE_LOG(LogInventory, Warning, TEXT("ValidateInInventorySlot() - Slot is locked."));
         return false;
     }
 
@@ -87,35 +130,31 @@ bool UInventoryComponent::ValidateInInventorySlot(const FItemSlot& InSlot, int32
     const FItemDataBase* ItemData = InSlot.RowHandle.GetRow<FItemDataBase>(TEXT("UInventoryComponent::AddItem()"));
     if (!ItemData)
     {
-        UE_LOG(LogTemp, Error, TEXT("UInventoryComponent::ValidateInInventorySlot() - ItemData is not found."));
+        UE_LOG(LogInventory, Error, TEXT("ValidateInInventorySlot() - ItemData is not found."));
         return false;
     }
 
     // Find ItemType & ItemArray
-    // ex) Find Item.Weapon tag from Item.Weapon.Melee.OneHanded tag
-    OutItemType = FGameplayTag::EmptyTag;
-    OutItemArray = nullptr;
-    for (const TPair<FGameplayTag, FItemArray>& Pair : OwnedItems)
+    // ex) Item.Weapon tag from Item.Weapon.Melee.OneHanded tag
+    FGameplayTag ItemCategory = DemoItemTypes::GetItemCategory(ItemData->ItemType);
+    TArray<FItemSlot>* ItemArray = nullptr;
+    if (ItemCategory.IsValid())
     {
-        if (ItemData->ItemType.MatchesTag(Pair.Key))
-        {
-            OutItemType = Pair.Key;
-            OutItemArray = &OwnedItems[OutItemType].ItemArray;
-            break;
-        }
+        ItemArray = &OwnedItems[ItemCategory].ItemArray;
     }
-    if (!OutItemType.IsValid() || !OutItemArray)
+    if (!ItemArray)
     {
-        UE_LOG(LogTemp, Error, TEXT("UInventoryComponent::ValidateInInventorySlot() - ItemType is not valid."));
+        UE_LOG(LogInventory, Error, TEXT("ValidateInInventorySlot() - ItemType is not valid."));
         return false;
     }
 
-    OutMaxStackSize = ItemData->MaxStackSize;
-    OutName = ItemData->Name;
+    OutData.ItemCategory = ItemCategory;
+    OutData.ItemData = ItemData;
+    OutData.ItemArray = ItemArray;
     return true;
 }
 
-bool UInventoryComponent::AddItem_Internal(FItemSlot& InSlot, int32 DesignatedIndex, int32 MaxStackSize, int32 BaseMaxSlotSize, int32& InOutRemainingQuantity, TArray<FItemSlot>*& ItemArray)
+bool UInventoryComponent::AddItem_Internal(FItemSlot& InSlot, int32 DesignatedIndex, int32 MaxStackSize, int32 MaxSlotSize, int32& InOutRemainingQuantity, TArray<FItemSlot>*& ItemArray)
 {
     if (DesignatedIndex < 0)
     {
@@ -123,6 +162,8 @@ bool UInventoryComponent::AddItem_Internal(FItemSlot& InSlot, int32 DesignatedIn
         bool bSlotExists = false;
         for (FItemSlot& Slot : *ItemArray)
         {
+            check(bAllowMultipleSlots || !bSlotExists); // There should be 0 or 1 existing slot if multiple slots are not allowed.
+
             if (!IsInventorySlotEmpty(Slot) && Slot.RowHandle == InSlot.RowHandle)
             {
                 const int32 ToAdd = FMath::Min(InOutRemainingQuantity, MaxStackSize - Slot.Quantity);
@@ -141,11 +182,12 @@ bool UInventoryComponent::AddItem_Internal(FItemSlot& InSlot, int32 DesignatedIn
             // !allow && !exists - continue
             if (!bAllowMultipleSlots && bSlotExists)
             {
+                UE_LOG(LogInventory, Display, TEXT("AddItem() - Multiple slots are not allowed."));
                 break;
             }
 
             // Add a new slot
-            if (ItemArray->Num() < BaseMaxSlotSize)
+            if (ItemArray->Num() < MaxSlotSize)
             {
                 const int32 ToAdd = FMath::Min(InOutRemainingQuantity, MaxStackSize);
                 bSlotExists = true;
@@ -168,10 +210,21 @@ bool UInventoryComponent::AddItem_Internal(FItemSlot& InSlot, int32 DesignatedIn
                     (*ItemArray)[EmptySlotIndex] = FItemSlot{InSlot.RowHandle, ToAdd};
                     InOutRemainingQuantity -= ToAdd;
                 }
-                else // No more empty slots
+                else // Out of empty slots
                 {
+                    UE_LOG(LogInventory, Display, TEXT("AddItem() - Inventory is full."));
                     break;
                 }
+            }
+            else if (ItemArray->Num() == MaxSlotSize)
+            {
+                UE_LOG(LogInventory, Display, TEXT("AddItem() - Inventory is full."));
+                break;
+            }
+            else
+            {
+                checkNoEntry();
+                break;
             }
         } // end of while (InOutRemainingQuantity > 0)
     } // end of if (DesignatedIndex < 0)
@@ -189,15 +242,62 @@ bool UInventoryComponent::AddItem_Internal(FItemSlot& InSlot, int32 DesignatedIn
         }
         else // Different item -> cancel
         {
-            UE_LOG(LogTemp, Display, TEXT("UInventoryComponent::AddItem() - Different item exists at designated index."));
+            UE_LOG(LogInventory, Display, TEXT("AddItem() - Different item exists at designated index."));
             return false;
         }
     }
     else
     {
-        UE_LOG(LogTemp, Error, TEXT("UInventoryComponent::AddItem() - DesignatedIndex is out of range."));
+        UE_LOG(LogInventory, Error, TEXT("AddItem() - DesignatedIndex is out of range."));
         return false;
     }
 
+    return true;
+}
+
+bool UInventoryComponent::ValidateActionRequest(const FItemActionRequest& Request, FInventoryValidatedData& OutData)
+{
+    OutData = FInventoryValidatedData{};
+
+    if (Request.Quantity <= 0)
+    {
+        UE_LOG(LogInventory, Error, TEXT("ValidateActionRequest() - Quantity is not valid."));
+        return false;
+    }
+
+    const FItemDataBase* ItemData = Request.Slot.RowHandle.GetRow<FItemDataBase>(TEXT("UInventoryComponent::ValidateActionRequest()"));
+    if (!ItemData)
+    {
+        UE_LOG(LogInventory, Error, TEXT("ValidateActionRequest() - ItemData is not valid."));
+        return false;
+    }
+
+    FGameplayTag ItemCategory = DemoItemTypes::GetItemCategory(ItemData->ItemType);
+
+    // Category is validated in data table.
+    TArray<FItemSlot>& ItemArray = OwnedItems[ItemCategory].ItemArray;
+    if (Request.InventoryIndex < 0 || Request.InventoryIndex >= ItemArray.Num())
+    {
+        UE_LOG(LogInventory, Error, TEXT("ValidateActionRequest() - InventoryIndex is out of range."));
+        return false;
+    }
+
+    FItemSlot& Slot = ItemArray[Request.InventoryIndex];
+    if (IsInventorySlotEmpty(Slot) || Slot.RowHandle != Request.Slot.RowHandle)
+    {
+        UE_LOG(LogInventory, Error, TEXT("ValidateActionRequest() - Item at InventoryIndex is different."));
+        return false;
+    }
+
+    if (Slot.bIsLocked)
+    {
+        UE_LOG(LogInventory, Warning, TEXT("ValidateActionRequest() - Slot is locked."));
+        return false;
+    }
+
+    OutData.ItemCategory = ItemCategory;
+    OutData.ItemSlot = &Slot;
+    OutData.ItemData = ItemData;
+    OutData.ItemArray = &ItemArray;
     return true;
 }

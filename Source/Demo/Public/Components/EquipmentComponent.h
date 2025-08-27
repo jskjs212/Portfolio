@@ -8,11 +8,13 @@
 #include "Items/ItemTypes.h"
 #include "EquipmentComponent.generated.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogEquipment, Log, All);
+
 class AItem;
 
 /**
  * Equipment
- * Fixed ItemTypes and SocketNames:
+ * Fixed EquipmentTypes and SocketNames:
  *   Item.Weapon = MeleeHandSocket
  *   Item.Armor.Shield = ShieldHandSocket
  */
@@ -37,10 +39,10 @@ public:
     // check: What if Quantity > 1?
     // misc: Return EEquipResult if needed.
     // @return true if successfully equipped
-    bool EquipItem(FGameplayTag ItemType, const FItemSlot& InSlot);
+    bool EquipItem(const FItemSlot& InSlot);
 
     // @return true if successfully unequipped
-    bool UnequipItem(FGameplayTag ItemType);
+    bool UnequipItem(FGameplayTag EquipmentType);
 
 private:
     // @return nullptr if failed
@@ -54,7 +56,7 @@ private:
     ////////////////////////////////////////////////////////
 public:
     // @return nullptr if not found
-    AItem* GetEquippedItem(FGameplayTag ItemType) const;
+    AItem* GetEquippedItem(FGameplayTag EquipmentType) const;
 
     ////////////////////////////////////////////////////////
     //        Variables

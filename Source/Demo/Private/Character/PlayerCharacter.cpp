@@ -177,29 +177,53 @@ void APlayerCharacter::Test1_Implementation()
 {
     UE_LOG(LogTemp, Warning, TEXT("APlayerCharacter::Test1() called!"));
 
-    // Equipment test
-    EquipmentComponent->EquipItem(DemoGameplayTags::Item_Weapon, TestWeapon);
-    EquipmentComponent->EquipItem(DemoGameplayTags::Item_Armor_Shield, TestShield);
+    // Test - Equipment - EquipItem
+    UE_LOG(LogTemp, Display, TEXT("APlayerCharacter::Test1() - EquipItem"));
+    TestWeapon.Quantity = 1;
+    TestShield.Quantity = 1;
+    EquipmentComponent->EquipItem(TestWeapon);
+    EquipmentComponent->EquipItem(TestShield);
 
-    // Inventory test
+    // Test - Inventory - AddItem
     // Call Test1 and Test2 randomly to test items are filled in all empty slots.
+    UE_LOG(LogTemp, Display, TEXT("APlayerCharacter::Test1() - AddItem"));
     TestWeapon.Quantity = 5;
-    TestShield.Quantity = 20;
+    TestShield.Quantity = 3;
     InventoryComponent->AddItem(TestWeapon, -1);
     InventoryComponent->AddItem(TestShield, 5);
+
+    // Test - Inventory - RemoveItem
+    UE_LOG(LogTemp, Display, TEXT("APlayerCharacter::Test1() - RemoveItem"));
+    FItemActionRequest Request;
+    Request.Slot = TestWeapon;
+    Request.InventoryIndex = 0;
+    Request.Quantity = 1;
+    InventoryComponent->RemoveItem(Request);
 }
 
 void APlayerCharacter::Test2_Implementation()
 {
     UE_LOG(LogTemp, Warning, TEXT("APlayerCharacter::Test2() called!"));
 
-    // Equipment test
+    // Test - Equipment - UnequipItem
+    UE_LOG(LogTemp, Display, TEXT("APlayerCharacter::Test2() - UnequipItem"));
+    TestWeapon.Quantity = 1;
+    TestShield.Quantity = 1;
     EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Weapon);
     EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Armor_Shield);
 
-    // Inventory test
+    // Test - Inventory - AddItem
+    UE_LOG(LogTemp, Display, TEXT("APlayerCharacter::Test2() - AddItem"));
     TestWeapon.Quantity = 5;
-    TestShield.Quantity = 20;
+    TestShield.Quantity = 3;
     InventoryComponent->AddItem(TestWeapon, 5);
     InventoryComponent->AddItem(TestShield, -1);
+
+    // Test - Inventory - RemoveItem
+    UE_LOG(LogTemp, Display, TEXT("APlayerCharacter::Test2() - RemoveItem"));
+    FItemActionRequest Request;
+    Request.Slot = TestShield;
+    Request.InventoryIndex = 1;
+    Request.Quantity = 2;
+    InventoryComponent->RemoveItem(Request);
 }

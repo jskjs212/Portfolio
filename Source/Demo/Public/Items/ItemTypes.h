@@ -3,11 +3,60 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DemoTypes/DemoGameplayTags.h"
 #include "Engine/DataTable.h"
+#include "GameplayTagContainer.h"
 #include "ItemTypes.generated.h"
 
+// Defines item categories for Demo's item & inventory system.
+// ItemCategory: Item.Weapon, Item.Armor, Item.Consumable
+// ItemType: Item.Weapon.Melee.OneHanded, Item.Consumable.Food, etc.
+// EquipmentType: Item.Armor.Shield, etc.
+namespace DemoItemTypes
+{
+const TArray<const FGameplayTag> ItemCategories{
+    DemoGameplayTags::Item_Weapon,
+    DemoGameplayTags::Item_Armor,
+    DemoGameplayTags::Item_Consumable
+};
+
+const TArray<const FGameplayTag> EquipmentTypes{
+    DemoGameplayTags::Item_Weapon,
+    DemoGameplayTags::Item_Armor_Shield
+};
+
+// Find item category from item type.
+// ex) Item.Weapon.Melee.OneHanded -> Item.Weapon
+// @return EmptyTag if not found.
+FORCEINLINE FGameplayTag GetItemCategory(const FGameplayTag ItemType)
+{
+    for (const FGameplayTag& ItemCategory : ItemCategories)
+    {
+        if (ItemType.MatchesTag(ItemCategory))
+        {
+            return ItemCategory;
+        }
+    }
+    return FGameplayTag::EmptyTag;
+}
+
+// Find equipment type from item type.
+// @return EmptyTag if not found.
+FORCEINLINE FGameplayTag GetEquipmentType(const FGameplayTag ItemType)
+{
+    for (const FGameplayTag& EquipmentType : EquipmentTypes)
+    {
+        if (ItemType.MatchesTag(EquipmentType))
+        {
+            return EquipmentType;
+        }
+    }
+    return FGameplayTag::EmptyTag;
+}
+} // namespace DemoItemTypes
+
 /**
- *
+ * Item slot for inventory & UI.
  */
 USTRUCT(BlueprintType)
 struct FItemSlot
@@ -20,17 +69,25 @@ struct FItemSlot
     UPROPERTY(EditAnywhere, Category = "Item")
     int32 Quantity{0};
 
+    UPROPERTY(EditAnywhere, Category = "Item")
+    bool bIsLocked{false};
+
     // We need only quantity at the moment.
     // Scalability example:
-    //     FItemInstanceData (FGuid ItemID, etc.)
+    //     FItemInstanceData (FGuid ItemID, ExpiryDate, etc.)
     //     FWeaponInstanceData (Durability, Enchant, MasteryLevel, Attachment, etc.)
+    // Maybe TArray<TObjectPtr<UItemFragment>> ItemFragments?
     // Or maybe inherit from FItemSlot itself?
     //UPROPERTY(VisibleAnywhere)
     //TObjectPtr<FItemInstanceData> InstanceData;
 
+    // @return true if RowHandle is valid and Quantity > 0.
     FORCEINLINE bool IsValid() const { return !RowHandle.IsNull() && Quantity > 0; }
 };
 
+/**
+ * Item array for each item category.
+ */
 USTRUCT(BlueprintType)
 struct FItemArray
 {
@@ -38,4 +95,19 @@ struct FItemArray
 
     UPROPERTY(EditAnywhere)
     TArray<FItemSlot> ItemArray;
+};
+
+/**
+ * Contains data for inventory operations such as Remove, Use, Drop
+ */
+USTRUCT()
+struct FItemActionRequest
+{
+    GENERATED_BODY()
+
+    FItemSlot Slot;
+
+    int32 InventoryIndex{-1};
+
+    int32 Quantity{0};
 };
