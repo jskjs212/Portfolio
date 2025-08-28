@@ -1,12 +1,18 @@
 ## Bugs
+### bAllowMultipleSlots = false, DesignatedIndex != -1
+이미 있는지 검사 안 하고 넣음
+
+### OwnedItems[]를 더 효율적으로 대체?
+
 ### ItemDataBase -> WeaponData, ArmorData
 상속된 Data를 바탕으로 DataTable은 생성되는데 static_cast가 하나만 정확히 고르지 못함 -> UObject와 연동할 수 있을까?
 
 (Weapon인데 Armor casting도 != nullptr)
 
 ## TODO
-### AddItem
-bAllowMultipleSlots = false이고 이미 있을 때 구체적인 알림
+### Inventory
+AddItem - bAllowMultipleSlots = false이고 이미 있을 때 구체적인 알림
+UseItem, DropItem 구현
 
 ## check
 ### 모든 클래스: 초기값 세팅이 필요한 변수 세팅 검사하기
@@ -34,7 +40,7 @@ Others: Multi-threading, replication not considered.
 TODO:, check:, misc:, TEST: 등 주석 확인 및 정리하기\
 테스트 코드 제거하기
 
-Log -> 중요한 곳은 알림 메시지 등 게임 로직으로 처리하고, 나머지는 LogCategory 구분하여 로그 남기기
+Log -> 중요한 곳은 알림 메시지 등 게임 로직으로 처리하고, 나머지는 LogCategory 구분하여 중요한 로그만 남기기
 
 ## Conventions
 ### Header Ordering

@@ -29,37 +29,20 @@ UEquipmentComponent::UEquipmentComponent()
 void UEquipmentComponent::BeginPlay()
 {
     Super::BeginPlay();
+
+    checkf(EquippedItems.Num() == DemoItemTypes::EquipmentTypes.Num(), TEXT("EquippedItems should have all EquipmentTypes."));
 }
 
 bool UEquipmentComponent::EquipItem(const FItemSlot& InSlot)
 {
-    FItemDataBase* ItemData = InSlot.RowHandle.GetRow<FItemDataBase>(TEXT("UEquipmentComponent::EquipItem"));
-    if (!ItemData)
-    {
-        UE_LOG(LogEquipment, Error, TEXT("EquipItem() - ItemData is not valid."));
-        return false;
-    }
+    FGameplayTag EquipmentType;
+    TObjectPtr<AItem>* EquippedItemPtr;
 
-    FGameplayTag EquipmentType = DemoItemTypes::GetEquipmentType(ItemData->ItemType);
-    if (!EquipmentType.IsValid())
+    // Validate and get data
+    bool bValid = EquipItem_Validate(InSlot, EquipmentType, EquippedItemPtr);
+    if (!bValid)
     {
-        UE_LOG(LogEquipment, Error, TEXT("EquipItem() - Item is not equippable."));
-        return false;
-    }
-
-    // Input validation
-    if (!InSlot.IsValid())
-    {
-        UE_LOG(LogEquipment, Warning, TEXT("EquipItem() - Slot is not valid."));
-        return false;
-    }
-
-    // Tag validation
-    TObjectPtr<AItem>* EquippedItemPtr = EquippedItems.Find(EquipmentType);
-    if (!EquippedItemPtr)
-    {
-        UE_LOG(LogEquipment, Error, TEXT("EquipItem() - EquipmentType is not valid."));
-        return false;
+        return false; // Log in EquipItem_Validate()
     }
 
     // Unequip
@@ -75,7 +58,7 @@ bool UEquipmentComponent::EquipItem(const FItemSlot& InSlot)
 
     // Spawn
     APawn* OwnerPawn = GetOwner<APawn>();
-    AItem* SpawnedItem = SpawnItemToEquip(OwnerPawn, InSlot);
+    AItem* SpawnedItem = EquipItem_SpawnItem(OwnerPawn, InSlot);
     if (!IsValid(SpawnedItem))
     {
         UE_LOG(LogEquipment, Warning, TEXT("EquipItem() - Failed to spawn item."));
@@ -114,11 +97,10 @@ bool UEquipmentComponent::EquipItem(const FItemSlot& InSlot)
 
 bool UEquipmentComponent::UnequipItem(FGameplayTag EquipmentType)
 {
-    // EquipmentType is checked, Unequip requests should come from Equip or UI's existing item.
     AItem* EquippedItem = GetEquippedItem(EquipmentType);
     if (!EquippedItem)
     {
-        UE_LOG(LogEquipment, Warning, TEXT("UnequipItem() - Equipped %s not found."), *EquipmentType.ToString());
+        UE_LOG(LogEquipment, Display, TEXT("UnequipItem() - Not equipped %s."), *EquipmentType.ToString());
         return false;
     }
 
@@ -154,6 +136,39 @@ bool UEquipmentComponent::UnequipItem(FGameplayTag EquipmentType)
     return true;
 }
 
+bool UEquipmentComponent::EquipItem_Validate(const FItemSlot& InSlot, FGameplayTag& OutEquipmentType, TObjectPtr<AItem>*& OutEquippedItemPtr)
+{
+    if (!InSlot.IsValid())
+    {
+        UE_LOG(LogEquipment, Warning, TEXT("EquipItem() - Slot is not valid."));
+        return false;
+    }
+
+    FItemDataBase* ItemData = InSlot.RowHandle.GetRow<FItemDataBase>(TEXT("UEquipmentComponent::EquipItem"));
+    if (!ItemData)
+    {
+        UE_LOG(LogEquipment, Error, TEXT("EquipItem() - ItemData is not valid."));
+        return false;
+    }
+
+    OutEquipmentType = DemoItemTypes::GetEquipmentType(ItemData->ItemType);
+    if (!OutEquipmentType.IsValid())
+    {
+        UE_LOG(LogEquipment, Error, TEXT("EquipItem() - Item is not equippable."));
+        return false;
+    }
+
+    // Tag validation
+    OutEquippedItemPtr = EquippedItems.Find(OutEquipmentType);
+    if (!OutEquippedItemPtr)
+    {
+        UE_LOG(LogEquipment, Error, TEXT("EquipItem() - EquipmentType is not valid."));
+        return false;
+    }
+
+    return true;
+}
+
 AItem* UEquipmentComponent::GetEquippedItem(FGameplayTag EquipmentType) const
 {
     if (const TObjectPtr<AItem>* EquippedItemPtr = EquippedItems.Find(EquipmentType))
@@ -163,38 +178,44 @@ AItem* UEquipmentComponent::GetEquippedItem(FGameplayTag EquipmentType) const
     return nullptr;
 }
 
-AItem* UEquipmentComponent::SpawnItemToEquip(APawn* OwnerPawn, const FItemSlot& InSlot) const
+AItem* UEquipmentComponent::EquipItem_SpawnItem(APawn* OwnerPawn, const FItemSlot& InSlot) const
 {
-    if (!OwnerPawn)
+    UWorld* World = GetWorld();
+    if (!World || !OwnerPawn)
     {
         return nullptr;
     }
-    if (UWorld* World = GetWorld())
+
+    // SpawnDeferred
+    // check: What if AItem is inherited by AWeapon, AArmor, etc.?
+    FTransform SpawnTransform = FTransform::Identity;
+    AItem* SpawnedItem = World->SpawnActorDeferred<AItem>(AItem::StaticClass(), SpawnTransform, OwnerPawn, OwnerPawn, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+    if (!SpawnedItem)
     {
-        // check: What if AItem -> AWeapon, AArmor, etc.?
-        FTransform SpawnTransform = FTransform::Identity;
-        if (AItem* SpawnedItem = World->SpawnActorDeferred<AItem>(AItem::StaticClass(), SpawnTransform, OwnerPawn, OwnerPawn, ESpawnActorCollisionHandlingMethod::AlwaysSpawn))
-        {
-            SpawnedItem->SetItemSlot(InSlot);
-            UGameplayStatics::FinishSpawningActor(SpawnedItem, SpawnTransform);
-
-            // After construction
-            if (UStaticMeshComponent* StaticMesh = SpawnedItem->GetStaticMesh())
-            {
-                StaticMesh->SetSimulatePhysics(false);
-                StaticMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-                return SpawnedItem;
-            }
-            // Destroy without static mesh -> change if there exists no-mesh-ItemType
-            else if (IsValid(SpawnedItem))
-            {
-                UE_LOG(LogEquipment, Warning, TEXT("SpawnItemToEquip() - Spawned item has no static mesh."));
-                SpawnedItem->Destroy();
-                return nullptr;
-            }
-        }
+        UE_LOG(LogEquipment, Warning, TEXT("EquipItem_SpawnItem() - Failed to spawn deferred."));
+        return nullptr;
     }
+
+    // Set properties
+    SpawnedItem->SetItemSlot(InSlot);
+
+    // Construction
+    UGameplayStatics::FinishSpawningActor(SpawnedItem, SpawnTransform);
+    if (UStaticMeshComponent* StaticMesh = SpawnedItem->GetStaticMesh())
+    {
+        StaticMesh->SetSimulatePhysics(false);
+        StaticMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+        return SpawnedItem;
+    }
+    // Destroy without static mesh -> change if there exists no-mesh-ItemType
+    else if (IsValid(SpawnedItem))
+    {
+        UE_LOG(LogEquipment, Warning, TEXT("EquipItem_SpawnItem() - Spawned item has no static mesh."));
+        SpawnedItem->Destroy();
+        return nullptr;
+    }
+
     return nullptr;
 }
 

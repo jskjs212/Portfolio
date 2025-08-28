@@ -14,6 +14,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "InputActionValue.h"
 #include "Items/ItemTypes.h"
+// TEST:
+#include "DemoTypes/TableRowBases.h"
 
 APlayerCharacter::APlayerCharacter()
 {

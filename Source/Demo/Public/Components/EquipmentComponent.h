@@ -45,8 +45,11 @@ public:
     bool UnequipItem(FGameplayTag EquipmentType);
 
 private:
+    // @return true if valid. If false, out data are not valid.
+    bool EquipItem_Validate(const FItemSlot& InSlot, FGameplayTag& OutEquipmentType, TObjectPtr<AItem>*& OutEquippedItemPtr);
+
     // @return nullptr if failed
-    AItem* SpawnItemToEquip(APawn* OwnerPawn, const FItemSlot& InSlot) const;
+    AItem* EquipItem_SpawnItem(APawn* OwnerPawn, const FItemSlot& InSlot) const;
 
     // @return true if successfully attached
     bool AttachActor(AActor* ActorToAttach, FName SocketName) const;

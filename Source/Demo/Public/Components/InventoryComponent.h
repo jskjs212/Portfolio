@@ -90,17 +90,21 @@ private:
     }
 
     // Validate InSlot for inventory, and get related data.
-    // @param OutData is filled only if valid.
-    // @return true if valid.
-    bool ValidateInInventorySlot(const FItemSlot& InSlot, FInventoryValidatedData& OutData);
+    // @return true if valid. If false, OutData is not valid.
+    bool AddItem_Validate(const FItemSlot& InSlot, FInventoryValidatedData& OutData);
 
     // Internal function for adding item to inventory.
     // @return false if failed
     bool AddItem_Internal(FItemSlot& InSlot, int32 DesignatedIndex, int32 MaxStackSize, int32 MaxSlotSize, int32& InOutRemainingQuantity, TArray<FItemSlot>*& ItemArray);
 
+    // DesignatedIndex < 0
+    bool AddItem_AutoPlacement(FItemSlot& InSlot, int32 MaxStackSize, int32 MaxSlotSize, int32& InOutRemainingQuantity, TArray<FItemSlot>*& ItemArray);
+
+    // DesignatedIndex >= 0
+    bool AddItem_ToDesignatedSlot(FItemSlot& InSlot, int32 DesignatedIndex, int32 MaxStackSize, int32& InOutRemainingQuantity, TArray<FItemSlot>*& ItemArray);
+
     // Validate item action request, and get related data.
-    // @param OutData is filled only if valid.
-    // @return true if valid.
+    // @return true if valid. If false, OutData is not valid.
     bool ValidateActionRequest(const FItemActionRequest& Request, FInventoryValidatedData& OutData);
 
     ////////////////////////////////////////////////////////
