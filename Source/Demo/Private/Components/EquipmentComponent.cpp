@@ -57,8 +57,7 @@ bool UEquipmentComponent::EquipItem(const FItemSlot& InSlot)
     }
 
     // Spawn
-    APawn* OwnerPawn = GetOwner<APawn>();
-    AItem* SpawnedItem = EquipItem_SpawnItem(InSlot, OwnerPawn);
+    AItem* SpawnedItem = EquipItem_SpawnItem(InSlot);
     if (!IsValid(SpawnedItem))
     {
         UE_LOG(LogEquipment, Warning, TEXT("EquipItem() - Failed to spawn item."));
@@ -120,15 +119,6 @@ bool UEquipmentComponent::UnequipItem(const FGameplayTag EquipmentType)
     if (!EquippedItem->Destroy())
     {
         // TODO: Handle failure, already added to inventory so it should be destroyed
-        // Temporary solution (invalid index for now)
-        FItemActionRequest Request;
-        Request.Slot = EquippedItem->GetItemSlot();
-        Request.DesignatedIndex = -1;
-        Request.Quantity = 1;
-        if (InventoryComp)
-        {
-            InventoryComp->RemoveItem(Request);
-        }
         UE_LOG(LogEquipment, Error, TEXT("UnequipItem() - Failed to destroy item."));
         return false;
     }
@@ -186,9 +176,10 @@ AItem* UEquipmentComponent::GetEquippedItem(FGameplayTag EquipmentType) const
     return nullptr;
 }
 
-AItem* UEquipmentComponent::EquipItem_SpawnItem(const FItemSlot& InSlot, APawn* OwnerPawn) const
+AItem* UEquipmentComponent::EquipItem_SpawnItem(const FItemSlot& InSlot) const
 {
     UWorld* World = GetWorld();
+    APawn* OwnerPawn = GetOwner<APawn>();
     if (!World || !OwnerPawn)
     {
         return nullptr;
@@ -200,7 +191,7 @@ AItem* UEquipmentComponent::EquipItem_SpawnItem(const FItemSlot& InSlot, APawn* 
     AItem* SpawnedItem = World->SpawnActorDeferred<AItem>(AItem::StaticClass(), SpawnTransform, OwnerPawn, OwnerPawn, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
     if (!SpawnedItem)
     {
-        UE_LOG(LogEquipment, Warning, TEXT("EquipItem_SpawnItem() - Failed to spawn deferred."));
+        UE_LOG(LogEquipment, Warning, TEXT("EquipItem_SpawnItem() - Failed to spawn."));
         return nullptr;
     }
 
@@ -216,7 +207,7 @@ AItem* UEquipmentComponent::EquipItem_SpawnItem(const FItemSlot& InSlot, APawn* 
 
         return SpawnedItem;
     }
-    // Destroy without static mesh -> change if there exists no-mesh-ItemType
+    // Destroy without static mesh -> change if there exists no-mesh-EquipmentType
     else if (IsValid(SpawnedItem))
     {
         UE_LOG(LogEquipment, Warning, TEXT("EquipItem_SpawnItem() - Spawned item has no static mesh."));

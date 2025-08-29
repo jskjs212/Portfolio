@@ -49,7 +49,7 @@ private:
     bool EquipItem_Validate(const FItemSlot& InSlot, FGameplayTag& OutEquipmentType, TObjectPtr<AItem>*& OutEquippedItemPtr);
 
     // @return nullptr if failed
-    AItem* EquipItem_SpawnItem(const FItemSlot& InSlot, APawn* OwnerPawn) const;
+    AItem* EquipItem_SpawnItem(const FItemSlot& InSlot) const;
 
     // @return true if successfully attached
     bool AttachActor(AActor* ActorToAttach, FName SocketName) const;

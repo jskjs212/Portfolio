@@ -1,9 +1,16 @@
 ## Bugs
 
 ## TODO
-### Inventory
-- DropItem 구현
-- ValidateActionRequest: Index가 -1이면 앞에서부터 찾아서 처리하기를 추가할지?
+### PickUp
+IPickUpable to AItem?
+
+### UI
+Button: UButton? CustomButton?
+MainMenu: Stats, Equipment, Inventory, etc.
+Stats: ResourceBar, ResourceText
+Equipment: ItemSlotWidget?
+Inventory: ItemTab, ItemSlotWidget, Drag & Drop, ToolTip
+ContextMenu: Actions
 
 ## check
 ### 모든 클래스: 초기값 세팅이 필요한 변수 세팅 검사하기
@@ -12,9 +19,8 @@
 Function(true) -> Function(ESomeOption::Good)
 > 1개는 괜찮은데, 인자가 많으면 헷갈림
 
-### ItemDataBase -> WeaponData, ArmorData
-상속된 Data를 바탕으로 DataTable은 생성되는데 static_cast가 하나만 정확히 고르지 못함 -> UObject? UDataAsset? (Weapon인데 Armor casting도 != nullptr)
-> WeaponData가 필요한 경우는 Weapon임을 알 때뿐이므로, GetRow<UWeaponData>로 바로 가져오기
+### Inventory
+- ValidateActionRequest: Index가 -1이면 앞에서부터 찾아서 처리하기를 추가할지?
 
 ## misc
 ### Life cycle

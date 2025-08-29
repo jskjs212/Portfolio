@@ -5,7 +5,9 @@
 #include "Components/StatsComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "DemoTypes/TableRowBases.h"
+#include "Items/Item.h"
 #include "Items/ItemTypes.h"
+#include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY(LogInventory);
 
@@ -90,7 +92,8 @@ int32 UInventoryComponent::UseItem(const FItemActionRequest& Request)
         return -1; // Log in ValidateActionRequest()
     }
 
-    int32 Used = UseItem_Internal(*ValidatedData.ItemSlot, ValidatedData.ItemData->ItemType, Request.Quantity);
+    const int32 ToUse = FMath::Min(Request.Quantity, ValidatedData.ItemSlot->Quantity);
+    int32 Used = UseItem_Internal(*ValidatedData.ItemSlot, ValidatedData.ItemData->ItemType, ToUse);
     if (Used < 0)
     {
         return -1; // Log in UseItem_Internal()
@@ -101,6 +104,93 @@ int32 UInventoryComponent::UseItem(const FItemActionRequest& Request)
 
     UE_LOG(LogInventory, Display, TEXT("Use item - %s, %d"), *ValidatedData.ItemData->Name.ToString(), Removed);
     return Removed;
+}
+
+int32 UInventoryComponent::DropItem(const FItemActionRequest& Request)
+{
+    // Validate and get data
+    FInventoryValidatedData ValidatedData;
+    bool bValid = ValidateActionRequest(Request, ValidatedData);
+    if (!bValid)
+    {
+        return -1; // Log in ValidateActionRequest()
+    }
+
+    const int32 ToDrop = FMath::Min(Request.Quantity, ValidatedData.ItemSlot->Quantity);
+    int32 Dropped = DropItem_Internal(*ValidatedData.ItemSlot, ToDrop);
+    if (Dropped < 0)
+    {
+        return -1; // Log in DropItem_Internal()
+    }
+
+    int32 Removed = RemoveItem_Internal(ValidatedData, Request.DesignatedIndex, Dropped);
+    checkf(Dropped == Removed, TEXT("Dropped %d, but removed %d"), Dropped, Removed);
+
+    UE_LOG(LogInventory, Display, TEXT("Drop item - %s, %d"), *ValidatedData.ItemData->Name.ToString(), Removed);
+    return Removed;
+}
+
+bool UInventoryComponent::SwapItem(const FGameplayTag ItemCategory, const int32 FirstIndex, const int32 SecondIndex)
+{
+    if (FirstIndex == SecondIndex)
+    {
+        UE_LOG(LogInventory, Display, TEXT("SwapItem() - Same index."));
+        return false;
+    }
+
+    FItemArray* ItemArrayPtr = OwnedItems.Find(ItemCategory);
+    if (!ItemArrayPtr)
+    {
+        UE_LOG(LogInventory, Error, TEXT("SwapItem() - ItemCategory is not valid."));
+        return false;
+    }
+
+    TArray<FItemSlot>& ItemArray = ItemArrayPtr->ItemArray;
+    if (!ItemArray.IsValidIndex(FirstIndex) || !ItemArray.IsValidIndex(SecondIndex))
+    {
+        UE_LOG(LogInventory, Warning, TEXT("SwapItem() - Out of range."));
+        return false;
+    }
+
+    const FItemSlot& FirstSlot = ItemArray[FirstIndex];
+    const FItemSlot& SecondSlot = ItemArray[SecondIndex];
+    if (FirstSlot.bIsLocked || SecondSlot.bIsLocked)
+    {
+        UE_LOG(LogInventory, Display, TEXT("SwapItem() - Slot is locked."));
+        return false;
+    }
+
+    ItemArray.Swap(FirstIndex, SecondIndex);
+    OnInventoryUpdated.Broadcast();
+    return true;
+}
+
+bool UInventoryComponent::AddMaxSlotSize(FGameplayTag ItemCategory, int32 ToAdd)
+{
+    int32* MaxSlotSizePtr = MaxSlotSizes.Find(ItemCategory);
+    if (!MaxSlotSizePtr)
+    {
+        UE_LOG(LogInventory, Error, TEXT("AddMaxSlotSize() - ItemCategory is not valid."));
+        return false;
+    }
+
+    if (ToAdd <= 0 || *MaxSlotSizePtr + ToAdd > MaxAllowedSlotSize)
+    {
+        UE_LOG(LogInventory, Warning, TEXT("AddMaxSlotSize() - ToAdd is not valid."));
+        return false;
+    }
+
+    *MaxSlotSizePtr += ToAdd;
+
+    if (bFixSlotSizeAndExposeEmptySlots)
+    {
+        TArray<FItemSlot>& ItemArray = OwnedItems[ItemCategory].ItemArray;
+        check(ItemArray.Num() < *MaxSlotSizePtr);
+        ItemArray.SetNum(*MaxSlotSizePtr);
+        OnInventoryUpdated.Broadcast();
+    }
+
+    return true;
 }
 
 void UInventoryComponent::InitMaxSlots()
@@ -393,9 +483,8 @@ int32 UInventoryComponent::UseItem_Internal(const FItemSlot& InSlot, const FGame
         checkf(EquipmentComp, TEXT("UseItem() - Equip action was requested, but EquipmentComponent is not found."));
         return EquipmentComp->EquipItem(InSlot) ? 1 : -1;
     }
-
     // Consumable types
-    if (ItemType.MatchesTag(DemoGameplayTags::Item_Consumable))
+    else if (ItemType.MatchesTag(DemoGameplayTags::Item_Consumable))
     {
         return UseItem_Consume(InSlot, ItemType, Quantity);
     }
@@ -432,11 +521,56 @@ int32 UInventoryComponent::ConsumeFood(const FConsumableData* ConsumableData, co
     checkf(StatsComp, TEXT("ConsumeFood() - StatsComponent is not found."));
 
     // Just heal for now.
-    // If health is 50/100, HealAmount is 30, use 2 to fully heal.
+    // If health is 50/100 and HealAmount is 30, use 2 to fully heal.
     const float CurrentHealth = StatsComp->GetCurrentHealth();
     const float MaxHealth = StatsComp->GetMaxHealth();
     const int32 ToUse = FMath::Min(Quantity, FMath::CeilToInt32((MaxHealth - CurrentHealth) / ConsumableData->HealAmount));
 
     StatsComp->Heal(ToUse * ConsumableData->HealAmount);
     return ToUse;
+}
+
+int32 UInventoryComponent::DropItem_Internal(const FItemSlot& InSlot, const int32 Quantity)
+{
+    UWorld* World = GetWorld();
+    AActor* OwnerActor = GetOwner();
+    if (!World || !OwnerActor)
+    {
+        return -1;
+    }
+
+    // Spawn location
+    // check: random scatter?
+    const FVector LocationOffset = OwnerActor->GetActorForwardVector() * DropDistance + FVector{0.f, 0.f, DropHeight};
+    FTransform SpawnTransform = OwnerActor->GetActorTransform();
+    SpawnTransform.AddToTranslation(LocationOffset);
+
+    // SpawnDeferred
+    // check: What if AItem is inherited by AWeapon, AArmor, etc.?
+    AItem* DroppedItem = World->SpawnActorDeferred<AItem>(AItem::StaticClass(), SpawnTransform, nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+    if (!DroppedItem)
+    {
+        UE_LOG(LogInventory, Error, TEXT("DropItem() - Failed to spawn."));
+        return -1;
+    }
+
+    // Set properties
+    DroppedItem->SetItemSlot(FItemSlot{InSlot.RowHandle, Quantity});
+
+    // Construction
+    UGameplayStatics::FinishSpawningActor(DroppedItem, SpawnTransform);
+    if (IsValid(DroppedItem) && !DroppedItem->GetStaticMesh())
+    {
+        UE_LOG(LogInventory, Error, TEXT("DropItem() - Dropped item has no static mesh."));
+        DroppedItem->Destroy();
+        return -1;
+    }
+
+    // Throw
+    if (UPrimitiveComponent* PrimitiveComp = Cast<UPrimitiveComponent>(DroppedItem->GetRootComponent()))
+    {
+        PrimitiveComp->AddImpulse(OwnerActor->GetActorForwardVector() * DropImpulseStrength, NAME_None, true);
+    }
+
+    return Quantity;
 }

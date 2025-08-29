@@ -184,15 +184,20 @@ void APlayerCharacter::Test1_Implementation()
     EquipmentComponent->EquipItem(TestShield);
 
     UE_LOG(LogTemp, Display, TEXT("APlayerCharacter::Test1() - AddItem"));
-    TestWeapon.Quantity = 1;
-    InventoryComponent->AddItem(TestWeapon, 0);
+    TestFood.Quantity = 3;
+    InventoryComponent->AddItem(TestFood, 5);
+    InventoryComponent->AddItem(TestFood, 6);
 
-    UE_LOG(LogTemp, Display, TEXT("APlayerCharacter::Test1() - UseItem"));
+    UE_LOG(LogTemp, Display, TEXT("APlayerCharacter::Test1() - UseItem - Food"));
     FItemActionRequest Request;
-    Request.Slot = TestWeapon;
-    Request.DesignatedIndex = 0;
-    Request.Quantity = 1;
+    StatsComponent->TakeDamage(30.f);
+    Request.Slot = TestFood;
+    Request.DesignatedIndex = 5;
+    Request.Quantity = 2;
     InventoryComponent->UseItem(Request);
+
+    InventoryComponent->SwapItem(DemoGameplayTags::Item_Consumable, 5, 6);
+    InventoryComponent->AddMaxSlotSize(DemoGameplayTags::Item_Consumable, 1);
 }
 
 void APlayerCharacter::Test2_Implementation()
@@ -207,12 +212,12 @@ void APlayerCharacter::Test2_Implementation()
 
     UE_LOG(LogTemp, Display, TEXT("APlayerCharacter::Test2() - AddItem"));
     TestShield.Quantity = 1;
-    InventoryComponent->AddItem(TestShield, 1);
+    InventoryComponent->AddItem(TestShield, 6);
 
-    UE_LOG(LogTemp, Display, TEXT("APlayerCharacter::Test2() - UseItem"));
+    UE_LOG(LogTemp, Display, TEXT("APlayerCharacter::Test2() - DropItem"));
     FItemActionRequest Request;
     Request.Slot = TestShield;
-    Request.DesignatedIndex = 1;
+    Request.DesignatedIndex = 6;
     Request.Quantity = 1;
-    InventoryComponent->UseItem(Request);
+    InventoryComponent->DropItem(Request);
 }

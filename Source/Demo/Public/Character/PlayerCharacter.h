@@ -105,4 +105,6 @@ private:
     FItemSlot TestWeapon;
     UPROPERTY(EditAnywhere, Category = "Test")
     FItemSlot TestShield;
+    UPROPERTY(EditAnywhere, Category = "Test")
+    FItemSlot TestFood;
 };

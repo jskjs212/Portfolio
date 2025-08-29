@@ -71,9 +71,10 @@ protected:
 public:
     // Add item to inventory.
     // Caller should subtract InSlot.Quantity if needed.
-    // @param DesignatedIndex >=0 -> Top-up and ignore overflow if same item exists, otherwise cancel.
+    // @param DesignatedIndex >=0 -> Empty or same item: Top-up and ignore remainder.
+    // @param DesignatedIndex >=0 -> Different item: Cancel.
     // @param DesignatedIndex  <0 -> Top-up existing slots, then fill empty slots.
-    // @return Actually added quantity (subtract InSlot.Quantity), -1 if failed.
+    // @return Actually added quantity, -1 if failed.
     int32 AddItem(const FItemSlot& InSlot, int32 DesignatedIndex = -1);
 
     // Remove item from inventory.
@@ -84,8 +85,16 @@ public:
     // @return Actually used quantity, -1 if failed.
     int32 UseItem(const FItemActionRequest& Request);
 
-    // Drop item.
-    // void DropItem(?);
+    // Drop item from inventory.
+    // @return Actually dropped quantity, -1 if failed.
+    int32 DropItem(const FItemActionRequest& Request);
+
+    // Swap item between two inventory slots.
+    // @return true if succeeded.
+    bool SwapItem(FGameplayTag ItemCategory, int32 FirstIndex, int32 SecondIndex);
+
+    // @return true if succeeded.
+    bool AddMaxSlotSize(FGameplayTag ItemCategory, int32 ToAdd);
 
     ////////////////////////////////////////////////////////
     //        Inventory helper functions
@@ -154,6 +163,9 @@ private:
     // @return Actually used quantity, -1 if failed.
     int32 ConsumeFood(const FConsumableData* ConsumableData, int32 Quantity);
 
+    // @return Actually dropped quantity, -1 if failed.
+    int32 DropItem_Internal(const FItemSlot& InSlot, int32 Quantity);
+
     ////////////////////////////////////////////////////////
     //        Variables - Inventory
     ////////////////////////////////////////////////////////
@@ -176,4 +188,16 @@ private:
 
     UPROPERTY(EditDefaultsOnly, Category = "Inventory")
     bool bAllowMultipleSlots{true};
+
+    UPROPERTY(EditDefaultsOnly, Category = "Inventory")
+    int32 MaxAllowedSlotSize{1000};
+
+    UPROPERTY(EditDefaultsOnly, Category = "Inventory")
+    float DropDistance{50.f};
+
+    UPROPERTY(EditDefaultsOnly, Category = "Inventory")
+    float DropHeight{50.f};
+
+    UPROPERTY(EditDefaultsOnly, Category = "Inventory")
+    float DropImpulseStrength{250.f};
 };
