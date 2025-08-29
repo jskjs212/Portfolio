@@ -36,7 +36,7 @@ protected:
     //        Equipment functions
     ////////////////////////////////////////////////////////
 public:
-    // check: What if Quantity > 1?
+    // InSlot's quantity is not changed.
     // misc: Return EEquipResult if needed.
     // @return true if successfully equipped
     bool EquipItem(const FItemSlot& InSlot);
@@ -49,7 +49,7 @@ private:
     bool EquipItem_Validate(const FItemSlot& InSlot, FGameplayTag& OutEquipmentType, TObjectPtr<AItem>*& OutEquippedItemPtr);
 
     // @return nullptr if failed
-    AItem* EquipItem_SpawnItem(APawn* OwnerPawn, const FItemSlot& InSlot) const;
+    AItem* EquipItem_SpawnItem(const FItemSlot& InSlot, APawn* OwnerPawn) const;
 
     // @return true if successfully attached
     bool AttachActor(AActor* ActorToAttach, FName SocketName) const;

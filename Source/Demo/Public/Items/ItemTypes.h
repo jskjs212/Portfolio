@@ -14,15 +14,21 @@
 // EquipmentType: Item.Armor.Shield, etc.
 namespace DemoItemTypes
 {
+// Inventory TMap's keys.
+// check: What if I add an InventoryComponent to containers like Chest, Vendor, etc.?
+//   -> Different ItemCategories for different container types???
 const TArray<const FGameplayTag> ItemCategories{
     DemoGameplayTags::Item_Weapon,
     DemoGameplayTags::Item_Armor,
     DemoGameplayTags::Item_Consumable
+    // or Tool, Quest, Material, etc.
 };
 
+// Equipment TMap's keys.
 const TArray<const FGameplayTag> EquipmentTypes{
     DemoGameplayTags::Item_Weapon,
     DemoGameplayTags::Item_Armor_Shield
+    // or Helmet, Boots, etc.
 };
 
 // Find item category from item type.
@@ -107,7 +113,8 @@ struct FItemActionRequest
 
     FItemSlot Slot;
 
-    int32 InventoryIndex{-1};
+    // Index in inventory's item array.
+    int32 DesignatedIndex{-1};
 
     int32 Quantity{0};
 };

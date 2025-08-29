@@ -28,11 +28,14 @@ struct FInventoryValidatedData
     TArray<FItemSlot>* ItemArray{nullptr};
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryUpdated);
+
 /**
  * Inventory
  * Map of { ItemCategory, Array<ItemSlot> }
  * Fixed ItemCategories from DemoItemTypes::ItemCategories.
  * ItemSlot.Quantity == 0 means empty slot, although ItemSlot.RowHandle may be valid (not cleared when emptied).
+ * For/while loops are used in AddItem. Sizes should not be absurd (Size << 1000).
  *
  * bFixSlotSizeAndExposeEmptySlots is true by default.
  * -> Each ItemCategory has its own ItemArray with fixed number (MaxSlotSize) of slots. Empty slots are shown.
@@ -45,6 +48,13 @@ UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class DEMO_API UInventoryComponent : public UActorComponent
 {
     GENERATED_BODY()
+
+    ////////////////////////////////////////////////////////
+    //        Delegates
+    ////////////////////////////////////////////////////////
+public:
+    UPROPERTY(BlueprintAssignable, Category = "Inventory")
+    FOnInventoryUpdated OnInventoryUpdated;
 
     ////////////////////////////////////////////////////////
     //        Fundamentals
@@ -60,27 +70,30 @@ protected:
     ////////////////////////////////////////////////////////
 public:
     // Add item to inventory.
-    // For/while loops are used. Numbers should not be absurd (Size << 1000).
-    // @param DesignatedIndex >=0 -> Top-up and discard overflow if same item exists, otherwise cancel.
+    // Caller should subtract InSlot.Quantity if needed.
+    // @param DesignatedIndex >=0 -> Top-up and ignore overflow if same item exists, otherwise cancel.
     // @param DesignatedIndex  <0 -> Top-up existing slots, then fill empty slots.
     // @return Actually added quantity (subtract InSlot.Quantity), -1 if failed.
-    int32 AddItem(FItemSlot& InSlot, int32 DesignatedIndex = -1);
+    int32 AddItem(const FItemSlot& InSlot, int32 DesignatedIndex = -1);
 
     // Remove item from inventory.
     // @return Actually removed quantity, -1 if failed.
     int32 RemoveItem(const FItemActionRequest& Request);
 
-    // Use item.
-    // void UseItem(?);
+    // Use item from inventory.
+    // @return Actually used quantity, -1 if failed.
+    int32 UseItem(const FItemActionRequest& Request);
 
     // Drop item.
     // void DropItem(?);
 
+    ////////////////////////////////////////////////////////
+    //        Inventory helper functions
+    ////////////////////////////////////////////////////////
 private:
     // Set initial max slot sizes, and fill with empty slots if bFixSlotSizeAndExposeEmptySlots == true.
     void InitMaxSlots();
 
-    //
     // @return true if the slot is empty in inventory's perspective.
     FORCEINLINE bool IsInventorySlotEmpty(const FItemSlot& Slot) const
     {
@@ -95,17 +108,51 @@ private:
 
     // Internal function for adding item to inventory.
     // @return false if failed
-    bool AddItem_Internal(FItemSlot& InSlot, int32 DesignatedIndex, int32 MaxStackSize, int32 MaxSlotSize, int32& InOutRemainingQuantity, TArray<FItemSlot>*& ItemArray);
+    bool AddItem_Internal(
+        const FDataTableRowHandle& InSlotRowHandle,
+        int32 DesignatedIndex,
+        int32 MaxStackSize,
+        int32 MaxSlotSize,
+        int32& InOutRemainingQuantity,
+        TArray<FItemSlot>& ItemArray
+    );
 
     // DesignatedIndex < 0
-    bool AddItem_AutoPlacement(FItemSlot& InSlot, int32 MaxStackSize, int32 MaxSlotSize, int32& InOutRemainingQuantity, TArray<FItemSlot>*& ItemArray);
+    bool AddItem_AutoPlacement(
+        const FDataTableRowHandle& InSlotRowHandle,
+        int32 MaxStackSize,
+        int32 MaxSlotSize,
+        int32& InOutRemainingQuantity,
+        TArray<FItemSlot>& ItemArray
+    );
 
     // DesignatedIndex >= 0
-    bool AddItem_ToDesignatedSlot(FItemSlot& InSlot, int32 DesignatedIndex, int32 MaxStackSize, int32& InOutRemainingQuantity, TArray<FItemSlot>*& ItemArray);
+    bool AddItem_ToDesignatedSlot(
+        const FDataTableRowHandle& InSlotRowHandle,
+        int32 DesignatedIndex,
+        int32 MaxStackSize,
+        int32& InOutRemainingQuantity,
+        TArray<FItemSlot>& ItemArray
+    );
 
     // Validate item action request, and get related data.
+    // Out slot points to inventory's slot.
     // @return true if valid. If false, OutData is not valid.
     bool ValidateActionRequest(const FItemActionRequest& Request, FInventoryValidatedData& OutData);
+
+    // Remove item quantity from the slot.
+    // Remove empty slot or update UI if needed.
+    // @return Actually removed quantity.
+    int32 RemoveItem_Internal(FInventoryValidatedData& ValidatedData, int32 ValidatedIndex, int32 Quantity);
+
+    // @return Actually used quantity, -1 if failed.
+    int32 UseItem_Internal(const FItemSlot& InSlot, FGameplayTag ItemType, int32 Quantity);
+
+    // @return Actually used quantity, -1 if failed.
+    int32 UseItem_Consume(const FItemSlot& InSlot, FGameplayTag ItemType, int32 Quantity);
+
+    // @return Actually used quantity, -1 if failed.
+    int32 ConsumeFood(const FConsumableData* ConsumableData, int32 Quantity);
 
     ////////////////////////////////////////////////////////
     //        Variables - Inventory

@@ -109,15 +109,26 @@ public:
     // Set all current values to max values.
     void InitializeResourceStats();
 
-    void AddResourceStat(FGameplayTag StatTag, FResourceStat ResourceStat);
+    void AddResourceStat(FGameplayTag StatTag, const FResourceStat& ResourceStat);
 
-    // Current += Delta
+    // Current += Delta.
+    // Don't handle with specific cases like Health <= 0.
     // @return The actual amount by which the value was modified.
     float ModifyCurrentResourceStatChecked(FGameplayTag StatTag, float Delta, bool bShouldRegenerate = false, float MinValue = 0.f);
 
     void StartRegenChecked(FGameplayTag StatTag);
 
     void RegenChecked(FGameplayTag StatTag);
+
+    ////////////////////////////////////////////////////////
+    //        Wrapper functions (only health for now)
+    ////////////////////////////////////////////////////////
+public:
+    FORCEINLINE float GetCurrentHealth() const { return GetCurrentResourceStatChecked(HealthTag); }
+
+    FORCEINLINE float GetMaxHealth() const { return GetMaxResourceStatChecked(HealthTag); }
+
+    float Heal(float HealAmount) { return ModifyCurrentResourceStatChecked(HealthTag, HealAmount, false); }
 
     // @return The actual amount by which the damage was taken.
     float TakeDamage(float InDamage);
@@ -141,6 +152,7 @@ public:
         return GetResourceStatChecked(StatTag).MaxValue;
     }
 
+    // Don't handle with specific cases like Health <= 0.
     // @return The new value of the stat.
     float SetCurrentResourceStatChecked(FGameplayTag StatTag, float InValue, float MinValue = 0.f);
 

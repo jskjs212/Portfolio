@@ -28,7 +28,7 @@ void UStatsComponent::InitializeResourceStats()
     }
 }
 
-void UStatsComponent::AddResourceStat(FGameplayTag StatTag, FResourceStat ResourceStat)
+void UStatsComponent::AddResourceStat(const FGameplayTag StatTag, const FResourceStat& ResourceStat)
 {
     if (ResourceStats.Contains(StatTag))
     {
@@ -38,7 +38,7 @@ void UStatsComponent::AddResourceStat(FGameplayTag StatTag, FResourceStat Resour
     ResourceStats.Add(StatTag, ResourceStat);
 }
 
-float UStatsComponent::ModifyCurrentResourceStatChecked(FGameplayTag StatTag, float Delta, bool bShouldRegenerate, float MinValue)
+float UStatsComponent::ModifyCurrentResourceStatChecked(const FGameplayTag StatTag, const float Delta, const bool bShouldRegenerate, const float MinValue)
 {
     if (Delta == 0.f)
     {
@@ -56,7 +56,7 @@ float UStatsComponent::ModifyCurrentResourceStatChecked(FGameplayTag StatTag, fl
     return NewValue - OldValue;
 }
 
-void UStatsComponent::StartRegenChecked(FGameplayTag StatTag)
+void UStatsComponent::StartRegenChecked(const FGameplayTag StatTag)
 {
     FResourceStat& ResourceStat = GetResourceStatChecked(StatTag);
 
@@ -71,7 +71,7 @@ void UStatsComponent::StartRegenChecked(FGameplayTag StatTag)
     }
 }
 
-void UStatsComponent::RegenChecked(FGameplayTag StatTag)
+void UStatsComponent::RegenChecked(const FGameplayTag StatTag)
 {
     FResourceStat& ResourceStat = GetResourceStatChecked(StatTag);
 
@@ -88,7 +88,7 @@ void UStatsComponent::RegenChecked(FGameplayTag StatTag)
     }
 }
 
-float UStatsComponent::TakeDamage(float InDamage)
+float UStatsComponent::TakeDamage(const float InDamage)
 {
     // Damage calculation
     float Damage = InDamage;
@@ -107,7 +107,7 @@ float UStatsComponent::TakeDamage(float InDamage)
     return Damage;
 }
 
-float UStatsComponent::SetCurrentResourceStatChecked(FGameplayTag StatTag, float InValue, float MinValue)
+float UStatsComponent::SetCurrentResourceStatChecked(const FGameplayTag StatTag, const float InValue, const float MinValue)
 {
     FResourceStat& ResourceStat = GetResourceStatChecked(StatTag);
     const float OldValue = ResourceStat.CurrentValue;
@@ -127,7 +127,7 @@ float UStatsComponent::SetCurrentResourceStatChecked(FGameplayTag StatTag, float
     return NewValue;
 }
 
-void UStatsComponent::SetMaxResourceStatChecked(FGameplayTag StatTag, float InValue, float MinValue)
+void UStatsComponent::SetMaxResourceStatChecked(const FGameplayTag StatTag, const float InValue, const float MinValue)
 {
     FResourceStat& ResourceStat = GetResourceStatChecked(StatTag);
     ResourceStat.MaxValue = InValue;

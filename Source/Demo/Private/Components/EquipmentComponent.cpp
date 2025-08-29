@@ -58,7 +58,7 @@ bool UEquipmentComponent::EquipItem(const FItemSlot& InSlot)
 
     // Spawn
     APawn* OwnerPawn = GetOwner<APawn>();
-    AItem* SpawnedItem = EquipItem_SpawnItem(OwnerPawn, InSlot);
+    AItem* SpawnedItem = EquipItem_SpawnItem(InSlot, OwnerPawn);
     if (!IsValid(SpawnedItem))
     {
         UE_LOG(LogEquipment, Warning, TEXT("EquipItem() - Failed to spawn item."));
@@ -95,7 +95,7 @@ bool UEquipmentComponent::EquipItem(const FItemSlot& InSlot)
     return true;
 }
 
-bool UEquipmentComponent::UnequipItem(FGameplayTag EquipmentType)
+bool UEquipmentComponent::UnequipItem(const FGameplayTag EquipmentType)
 {
     AItem* EquippedItem = GetEquippedItem(EquipmentType);
     if (!EquippedItem)
@@ -120,6 +120,15 @@ bool UEquipmentComponent::UnequipItem(FGameplayTag EquipmentType)
     if (!EquippedItem->Destroy())
     {
         // TODO: Handle failure, already added to inventory so it should be destroyed
+        // Temporary solution (invalid index for now)
+        FItemActionRequest Request;
+        Request.Slot = EquippedItem->GetItemSlot();
+        Request.DesignatedIndex = -1;
+        Request.Quantity = 1;
+        if (InventoryComp)
+        {
+            InventoryComp->RemoveItem(Request);
+        }
         UE_LOG(LogEquipment, Error, TEXT("UnequipItem() - Failed to destroy item."));
         return false;
     }
@@ -144,11 +153,10 @@ bool UEquipmentComponent::EquipItem_Validate(const FItemSlot& InSlot, FGameplayT
         return false;
     }
 
-    FItemDataBase* ItemData = InSlot.RowHandle.GetRow<FItemDataBase>(TEXT("UEquipmentComponent::EquipItem"));
+    FItemDataBase* ItemData = InSlot.RowHandle.GetRow<FItemDataBase>(TEXT("UEquipmentComponent::EquipItem_Validate"));
     if (!ItemData)
     {
-        UE_LOG(LogEquipment, Error, TEXT("EquipItem() - ItemData is not valid."));
-        return false;
+        return false; // Log in GetRow()
     }
 
     OutEquipmentType = DemoItemTypes::GetEquipmentType(ItemData->ItemType);
@@ -178,7 +186,7 @@ AItem* UEquipmentComponent::GetEquippedItem(FGameplayTag EquipmentType) const
     return nullptr;
 }
 
-AItem* UEquipmentComponent::EquipItem_SpawnItem(APawn* OwnerPawn, const FItemSlot& InSlot) const
+AItem* UEquipmentComponent::EquipItem_SpawnItem(const FItemSlot& InSlot, APawn* OwnerPawn) const
 {
     UWorld* World = GetWorld();
     if (!World || !OwnerPawn)
@@ -219,7 +227,7 @@ AItem* UEquipmentComponent::EquipItem_SpawnItem(APawn* OwnerPawn, const FItemSlo
     return nullptr;
 }
 
-bool UEquipmentComponent::AttachActor(AActor* ActorToAttach, FName SocketName) const
+bool UEquipmentComponent::AttachActor(AActor* ActorToAttach, const FName SocketName) const
 {
     ACharacter* OwnerCharacter = GetOwner<ACharacter>();
     if (!ActorToAttach || !OwnerCharacter)
