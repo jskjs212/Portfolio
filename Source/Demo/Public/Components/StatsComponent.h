@@ -80,7 +80,7 @@ class DEMO_API UStatsComponent : public UActorComponent
     GENERATED_BODY()
 
     ////////////////////////////////////////////////////////
-    //        Static
+    //        Statics
     ////////////////////////////////////////////////////////
 public:
     static const FGameplayTag HealthTag;

@@ -4,11 +4,9 @@
 #include "Components/InventoryComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "DemoTypes/TableRowBases.h"
-#include "Engine/SkeletalMeshSocket.h"
 #include "GameFramework/Character.h"
 #include "Items/Item.h"
 #include "Items/ItemTypes.h"
-#include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY(LogEquipment);
 
@@ -185,37 +183,23 @@ AItem* UEquipmentComponent::EquipItem_SpawnItem(const FItemSlot& InSlot) const
         return nullptr;
     }
 
-    // SpawnDeferred
-    // check: What if AItem is inherited by AWeapon, AArmor, etc.?
+    // Spawn
     FTransform SpawnTransform = FTransform::Identity;
-    AItem* SpawnedItem = World->SpawnActorDeferred<AItem>(AItem::StaticClass(), SpawnTransform, OwnerPawn, OwnerPawn, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+    AItem* SpawnedItem = AItem::SpawnItem(World, InSlot, SpawnTransform, true, OwnerPawn, OwnerPawn);
     if (!SpawnedItem)
     {
-        UE_LOG(LogEquipment, Warning, TEXT("EquipItem_SpawnItem() - Failed to spawn."));
         return nullptr;
     }
 
-    // Set properties
-    SpawnedItem->SetItemSlot(InSlot);
-
-    // Construction
-    UGameplayStatics::FinishSpawningActor(SpawnedItem, SpawnTransform);
-    if (UStaticMeshComponent* StaticMesh = SpawnedItem->GetStaticMesh())
-    {
-        StaticMesh->SetSimulatePhysics(false);
-        StaticMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-        return SpawnedItem;
-    }
     // Destroy without static mesh -> change if there exists no-mesh-EquipmentType
-    else if (IsValid(SpawnedItem))
+    if (!SpawnedItem->IsStaticMeshValid())
     {
-        UE_LOG(LogEquipment, Warning, TEXT("EquipItem_SpawnItem() - Spawned item has no static mesh."));
+        UE_LOG(LogEquipment, Error, TEXT("EquipItem_SpawnItem() - Spawned item has no static mesh."));
         SpawnedItem->Destroy();
         return nullptr;
     }
 
-    return nullptr;
+    return SpawnedItem;
 }
 
 bool UEquipmentComponent::AttachActor(AActor* ActorToAttach, const FName SocketName) const

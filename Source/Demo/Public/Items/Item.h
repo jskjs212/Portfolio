@@ -23,6 +23,21 @@ protected:
     TObjectPtr<UStaticMeshComponent> StaticMesh;
 
     ////////////////////////////////////////////////////////
+    //        Statics
+    ////////////////////////////////////////////////////////
+public:
+    // check: What if AItem is inherited by AWeapon, AArmor, etc.?
+    static AItem* SpawnItem(
+        UWorld* World,
+        const FItemSlot& InSlot,
+        const FTransform& SpawnTransform,
+        bool bDisableCollision = false,
+        AActor* Owner = nullptr,
+        APawn* Instigator = nullptr,
+        ESpawnActorCollisionHandlingMethod CollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::AlwaysSpawn
+    );
+
+    ////////////////////////////////////////////////////////
     //        Fundamentals
     ////////////////////////////////////////////////////////
 public:
@@ -38,11 +53,13 @@ public:
     //        Get & set
     ////////////////////////////////////////////////////////
 public:
-    UStaticMeshComponent* GetStaticMesh() const { return StaticMesh; }
+    bool IsStaticMeshValid() const;
 
-    FItemSlot& GetItemSlot() { return ItemSlot; }
+    //UStaticMeshComponent* GetStaticMesh() const { return StaticMesh; }
 
-    void SetItemSlot(const FItemSlot& InItemSlot) { ItemSlot = InItemSlot; }
+    FORCEINLINE FItemSlot& GetItemSlot() { return ItemSlot; }
+
+    FORCEINLINE void SetItemSlot(const FItemSlot& InItemSlot) { ItemSlot = InItemSlot; }
 
     ////////////////////////////////////////////////////////
     //        Variables

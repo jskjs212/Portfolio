@@ -2,12 +2,12 @@
 
 #include "Components/InventoryComponent.h"
 #include "Components/EquipmentComponent.h"
+#include "Components/PrimitiveComponent.h"
 #include "Components/StatsComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "DemoTypes/TableRowBases.h"
 #include "Items/Item.h"
 #include "Items/ItemTypes.h"
-#include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY(LogInventory);
 
@@ -540,28 +540,22 @@ int32 UInventoryComponent::DropItem_Internal(const FItemSlot& InSlot, const int3
     }
 
     // Spawn location
-    // check: random scatter?
     const FVector LocationOffset = OwnerActor->GetActorForwardVector() * DropDistance + FVector{0.f, 0.f, DropHeight};
     FTransform SpawnTransform = OwnerActor->GetActorTransform();
     SpawnTransform.AddToTranslation(LocationOffset);
 
-    // SpawnDeferred
-    // check: What if AItem is inherited by AWeapon, AArmor, etc.?
-    AItem* DroppedItem = World->SpawnActorDeferred<AItem>(AItem::StaticClass(), SpawnTransform, nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
-    if (!DroppedItem)
+    // Spawn
+    AItem* DroppedItem = AItem::SpawnItem(World, FItemSlot{InSlot.RowHandle, Quantity}, SpawnTransform);
+    if (!IsValid(DroppedItem))
     {
-        UE_LOG(LogInventory, Error, TEXT("DropItem() - Failed to spawn."));
+        UE_LOG(LogInventory, Error, TEXT("DropItem() - Failed to spawn item."));
         return -1;
     }
 
-    // Set properties
-    DroppedItem->SetItemSlot(FItemSlot{InSlot.RowHandle, Quantity});
-
-    // Construction
-    UGameplayStatics::FinishSpawningActor(DroppedItem, SpawnTransform);
-    if (IsValid(DroppedItem) && !DroppedItem->GetStaticMesh())
+    // Check static mesh to drop
+    if (!DroppedItem->IsStaticMeshValid())
     {
-        UE_LOG(LogInventory, Error, TEXT("DropItem() - Dropped item has no static mesh."));
+        UE_LOG(LogInventory, Error, TEXT("DropItem() - Item has no static mesh."));
         DroppedItem->Destroy();
         return -1;
     }
