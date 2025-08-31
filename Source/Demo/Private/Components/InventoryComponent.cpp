@@ -552,16 +552,16 @@ int32 UInventoryComponent::DropItem_Internal(const FItemSlot& InSlot, const int3
         return -1;
     }
 
-    // Check static mesh to drop
-    if (!DroppedItem->IsStaticMeshValid())
+    // Check mesh to drop
+    if (!DroppedItem->IsMeshAssetValid())
     {
-        UE_LOG(LogInventory, Error, TEXT("DropItem() - Item has no static mesh."));
+        UE_LOG(LogInventory, Error, TEXT("DropItem() - Item has no mesh."));
         DroppedItem->Destroy();
         return -1;
     }
 
     // Throw
-    if (UPrimitiveComponent* PrimitiveComp = Cast<UPrimitiveComponent>(DroppedItem->GetRootComponent()))
+    if (UPrimitiveComponent* PrimitiveComp = Cast<UPrimitiveComponent>(DroppedItem->GetMesh()))
     {
         PrimitiveComp->AddImpulse(OwnerActor->GetActorForwardVector() * DropImpulseStrength, NAME_None, true);
     }

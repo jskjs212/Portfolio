@@ -191,10 +191,10 @@ AItem* UEquipmentComponent::EquipItem_SpawnItem(const FItemSlot& InSlot) const
         return nullptr;
     }
 
-    // Destroy without static mesh -> change if there exists no-mesh-EquipmentType
-    if (!SpawnedItem->IsStaticMeshValid())
+    // Destroy without mesh -> change if there exists no-mesh-EquipmentType
+    if (!SpawnedItem->IsMeshAssetValid())
     {
-        UE_LOG(LogEquipment, Error, TEXT("EquipItem_SpawnItem() - Spawned item has no static mesh."));
+        UE_LOG(LogEquipment, Error, TEXT("EquipItem_SpawnItem() - Spawned item has no mesh."));
         SpawnedItem->Destroy();
         return nullptr;
     }
@@ -211,11 +211,14 @@ bool UEquipmentComponent::AttachActor(AActor* ActorToAttach, const FName SocketN
     }
 
     USkeletalMeshComponent* OwnerMesh = OwnerCharacter->GetMesh();
+
+#if WITH_EDITOR // Debug
     if (!OwnerMesh->DoesSocketExist(SocketName))
     {
         UE_LOG(LogEquipment, Warning, TEXT("AttachActor() - Socket %s does not exist."), *SocketName.ToString());
         return false;
     }
+#endif // WITH_EDITOR
 
     const auto AttachRules = FAttachmentTransformRules::SnapToTargetNotIncludingScale;
     if (!ActorToAttach->AttachToComponent(OwnerMesh, AttachRules, SocketName))

@@ -1,8 +1,11 @@
 ## Bugs
+### AItem
+SetRelative(zero) 말고 다른 방법은?
 
 ## TODO
 ### PickUp
 IPickUpable to AItem?
+> Sphere -> overlap -> 캐릭터의 NearbyItems에 추가 -> Tick에서 조건 맞는 아이템 표시 -> E키 누르면 줍기 -> NearbyItems에서 제거?
 
 ### UI
 Button: UButton? CustomButton?
@@ -31,6 +34,9 @@ Function(true) -> Function(ESomeOption::Good)
 - int32 AddItem() -> EAddItemResult? EItemValidationResult? EInventoryOpResult?
 
 ## Add
+### Item::Tokens
+Money, EXP, souls?
+
 ### 옵션 기능
 bIsWalkInputTogglesWalk, bIsSprintInputTogglesSprint
 

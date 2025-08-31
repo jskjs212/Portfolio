@@ -7,7 +7,19 @@
 #include "Items/ItemTypes.h"
 #include "Item.generated.h"
 
+class UMeshComponent;
+class USceneComponent;
+class USkeletalMeshComponent;
+class USphereComponent;
 class UStaticMeshComponent;
+
+UENUM()
+enum class EItemMeshType : uint8
+{
+    None,
+    StaticMesh,
+    SkeletalMesh
+};
 
 UCLASS()
 class DEMO_API AItem : public AActor
@@ -18,9 +30,17 @@ class DEMO_API AItem : public AActor
     //        Subobjects
     ////////////////////////////////////////////////////////
 protected:
-    // Only static mesh for now.
+    //TObjectPtr<USceneComponent> DefaultSceneRoot;
+
+    // Collision for item pickup.
+    UPROPERTY(VisibleAnywhere, Category = "Item")
+    TObjectPtr<USphereComponent> AreaSphere;
+
     UPROPERTY(VisibleAnywhere, Category = "Item")
     TObjectPtr<UStaticMeshComponent> StaticMesh;
+
+    UPROPERTY(VisibleAnywhere, Category = "Item")
+    TObjectPtr<USkeletalMeshComponent> SkeletalMesh;
 
     ////////////////////////////////////////////////////////
     //        Statics
@@ -47,15 +67,32 @@ protected:
     virtual void BeginPlay() override;
 
 public:
+    // Create mesh component based on the mesh asset type.
+    // Assume that this is called in the editor, or once when spawned in game.
     virtual void OnConstruction(const FTransform& Transform) override;
+
+    ////////////////////////////////////////////////////////
+    //        Item functions
+    ////////////////////////////////////////////////////////
+protected:
+    void SetupMesh();
+
+    void DisableCollision();
 
     ////////////////////////////////////////////////////////
     //        Get & set
     ////////////////////////////////////////////////////////
 public:
-    bool IsStaticMeshValid() const;
+    bool IsMeshAssetValid() const;
 
-    //UStaticMeshComponent* GetStaticMesh() const { return StaticMesh; }
+    FORCEINLINE UMeshComponent* GetMesh() const
+    {
+        if (MeshType == EItemMeshType::StaticMesh)
+        {
+            return StaticMesh;
+        }
+        return SkeletalMesh;
+    }
 
     FORCEINLINE FItemSlot& GetItemSlot() { return ItemSlot; }
 
@@ -64,7 +101,9 @@ public:
     ////////////////////////////////////////////////////////
     //        Variables
     ////////////////////////////////////////////////////////
-private:
+protected:
+    EItemMeshType MeshType{EItemMeshType::None};
+
     UPROPERTY(EditAnywhere, Category = "Item")
     FItemSlot ItemSlot;
 };

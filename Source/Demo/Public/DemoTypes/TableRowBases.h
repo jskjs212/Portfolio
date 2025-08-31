@@ -6,8 +6,10 @@
 #include "DemoTypes/DemoGameplayTags.h"
 #include "Engine/DataTable.h"
 #include "GameplayTagContainer.h"
+#include "Misc/DataValidation.h"
 #include "TableRowBases.generated.h"
 
+class USkeletalMesh;
 class UStaticMesh;
 class UTexture2D;
 
@@ -35,9 +37,11 @@ struct FItemDataBase : public FTableRowBase
     UPROPERTY(EditDefaultsOnly)
     TObjectPtr<UTexture2D> Icon;
 
-    // Only static mesh for now.
     UPROPERTY(EditDefaultsOnly)
     TObjectPtr<UStaticMesh> StaticMesh;
+
+    UPROPERTY(EditDefaultsOnly)
+    TObjectPtr<USkeletalMesh> SkeletalMesh;
 
     //UPROPERTY(EditDefaultsOnly)
     //TMap<FGameplayTag, float> Attributes;
@@ -57,6 +61,12 @@ struct FItemDataBase : public FTableRowBase
     {
         if (Name.IsNone() || MaxStackSize < 1)
         {
+            Context.AddError(FText::FromString(TEXT("Name is None or MaxStackSize < 1.")));
+            return EDataValidationResult::Invalid;
+        }
+        if (!StaticMesh && !SkeletalMesh)
+        {
+            Context.AddError(FText::FromString(TEXT("Mesh is not valid.")));
             return EDataValidationResult::Invalid;
         }
         return EDataValidationResult::Valid;
@@ -81,6 +91,7 @@ struct FWeaponData : public FItemDataBase
 
         if (!ItemType.MatchesTag(DemoGameplayTags::Item_Weapon))
         {
+            Context.AddError(FText::FromString(TEXT("ItemType is not Weapon.")));
             return EDataValidationResult::Invalid;
         }
         return EDataValidationResult::Valid;
@@ -104,6 +115,7 @@ struct FArmorData : public FItemDataBase
 
         if (!ItemType.MatchesTag(DemoGameplayTags::Item_Armor))
         {
+            Context.AddError(FText::FromString(TEXT("ItemType is not Armor.")));
             return EDataValidationResult::Invalid;
         }
         return EDataValidationResult::Valid;
@@ -128,6 +140,7 @@ struct FConsumableData : public FItemDataBase
 
         if (!ItemType.MatchesTag(DemoGameplayTags::Item_Consumable))
         {
+            Context.AddError(FText::FromString(TEXT("ItemType is not Consumable.")));
             return EDataValidationResult::Invalid;
         }
         return EDataValidationResult::Valid;
