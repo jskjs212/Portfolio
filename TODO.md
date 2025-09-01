@@ -1,6 +1,4 @@
 ## Bugs
-### AItem
-SetRelative(zero) 말고 다른 방법은?
 
 ## TODO
 ### PickUp
@@ -32,6 +30,10 @@ Function(true) -> Function(ESomeOption::Good)
 
 ### Inventory
 - int32 AddItem() -> EAddItemResult? EItemValidationResult? EInventoryOpResult?
+
+### DataTable
+- 현재 StaticMesh는 Collision을, SkeletalMesh는 PhysicsAsset을 수동으로 할당해줘야 함.
+> Valid 체크만 할지, 없으면 자동으로 생성해줄지?
 
 ## Add
 ### Item::Tokens

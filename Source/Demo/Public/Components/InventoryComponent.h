@@ -176,7 +176,7 @@ private:
 
     // check: can be added by purchase?
     // If changed, this should be applied to OwnedItems if bFixSlotSizeAndExposeEmptySlots == true.
-    UPROPERTY(EditDefaultsOnly, Category = "Inventory")
+    UPROPERTY(VisibleAnywhere, Category = "Inventory")
     TMap<FGameplayTag, int32> MaxSlotSizes;
 
     ////////////////////////////////////////////////////////

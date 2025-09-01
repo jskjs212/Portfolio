@@ -8,7 +8,6 @@
 #include "Item.generated.h"
 
 class UMeshComponent;
-class USceneComponent;
 class USkeletalMeshComponent;
 class USphereComponent;
 class UStaticMeshComponent;
@@ -16,7 +15,6 @@ class UStaticMeshComponent;
 UENUM()
 enum class EItemMeshType : uint8
 {
-    None,
     StaticMesh,
     SkeletalMesh
 };
@@ -30,17 +28,15 @@ class DEMO_API AItem : public AActor
     //        Subobjects
     ////////////////////////////////////////////////////////
 protected:
-    //TObjectPtr<USceneComponent> DefaultSceneRoot;
-
-    // Collision for item pickup.
-    UPROPERTY(VisibleAnywhere, Category = "Item")
-    TObjectPtr<USphereComponent> AreaSphere;
-
     UPROPERTY(VisibleAnywhere, Category = "Item")
     TObjectPtr<UStaticMeshComponent> StaticMesh;
 
     UPROPERTY(VisibleAnywhere, Category = "Item")
     TObjectPtr<USkeletalMeshComponent> SkeletalMesh;
+
+    // Collision for item pickup.
+    UPROPERTY(VisibleAnywhere, Category = "Item")
+    TObjectPtr<USphereComponent> AreaSphere;
 
     ////////////////////////////////////////////////////////
     //        Statics
@@ -66,10 +62,9 @@ public:
 protected:
     virtual void BeginPlay() override;
 
-public:
-    // Create mesh component based on the mesh asset type.
-    // Assume that this is called in the editor, or once when spawned in game.
-    virtual void OnConstruction(const FTransform& Transform) override;
+#if WITH_EDITOR
+    virtual void PostEditChangeChainProperty(struct FPropertyChangedChainEvent& PropertyChangedEvent) override;
+#endif // WITH_EDITOR
 
     ////////////////////////////////////////////////////////
     //        Item functions
@@ -85,6 +80,7 @@ protected:
 public:
     bool IsMeshAssetValid() const;
 
+    // Returns static or skeletal mesh based on the asset type.
     FORCEINLINE UMeshComponent* GetMesh() const
     {
         if (MeshType == EItemMeshType::StaticMesh)
@@ -102,7 +98,7 @@ public:
     //        Variables
     ////////////////////////////////////////////////////////
 protected:
-    EItemMeshType MeshType{EItemMeshType::None};
+    EItemMeshType MeshType;
 
     UPROPERTY(EditAnywhere, Category = "Item")
     FItemSlot ItemSlot;

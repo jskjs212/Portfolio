@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Items/Item.h"
-#include "Components/SceneComponent.h"
+#include "Components/MeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -48,36 +48,27 @@ AItem* AItem::SpawnItem(
 AItem::AItem()
 {
     PrimaryActorTick.bCanEverTick = false;
-
-    //DefaultSceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
-    //SetRootComponent(DefaultSceneRoot);
-
-    // Multiplayer not considered.
-    AreaSphere = CreateDefaultSubobject<USphereComponent>(TEXT("AreaSphere"));
-    SetRootComponent(AreaSphere);
-    //AreaSphere->SetupAttachment(RootComponent);
-    AreaSphere->SetSimulatePhysics(false);
-    AreaSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-    AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-    // TODO: Response only to PickUp trace by the player character.
+    MeshType = EItemMeshType::StaticMesh;
 
     StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
-    StaticMesh->SetupAttachment(RootComponent);
-    StaticMesh->SetVisibility(false);
+    SetRootComponent(StaticMesh);
 
     SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
     SkeletalMesh->SetupAttachment(RootComponent);
     SkeletalMesh->SetVisibility(false);
+
+    // Multiplayer not considered.
+    AreaSphere = CreateDefaultSubobject<USphereComponent>(TEXT("AreaSphere"));
+    AreaSphere->SetupAttachment(RootComponent);
+    AreaSphere->SetSimulatePhysics(false);
+    AreaSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+    AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+    // TODO: Response only to PickUp trace by the player character.
 }
 
 void AItem::BeginPlay()
 {
     Super::BeginPlay();
-}
-
-void AItem::OnConstruction(const FTransform& Transform)
-{
-    Super::OnConstruction(Transform);
 
     if (ItemSlot.IsValid())
     {
@@ -89,71 +80,84 @@ void AItem::OnConstruction(const FTransform& Transform)
     }
 }
 
+#if WITH_EDITOR
+void AItem::PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChangedEvent)
+{
+    const FName ActiveMemberNodeName = PropertyChangedEvent.PropertyChain.GetActiveMemberNode()->GetValue()->GetFName();
+    if (ActiveMemberNodeName == GET_MEMBER_NAME_CHECKED(AItem, ItemSlot))
+    {
+        if (ItemSlot.IsValid())
+        {
+            SetupMesh();
+        }
+    }
+    Super::PostEditChangeChainProperty(PropertyChangedEvent);
+}
+#endif // WITH_EDITOR
+
 void AItem::SetupMesh()
 {
+    check(StaticMesh && SkeletalMesh && AreaSphere);
+
     const FItemDataBase* ItemData = ItemSlot.RowHandle.GetRow<FItemDataBase>(TEXT("AItem::AItem()"));
     if (!ItemData)
     {
         return;
     }
 
-    const auto AttachRules = FAttachmentTransformRules::KeepRelativeTransform;
+    const auto AttachRules = FAttachmentTransformRules::SnapToTargetIncludingScale;
     const auto DetachRules = FDetachmentTransformRules::KeepWorldTransform;
     UMeshComponent* CurrentMesh = nullptr;
 
     if (ItemData->SkeletalMesh)
     {
-        SkeletalMesh->SetSkeletalMesh(ItemData->SkeletalMesh);
-        CurrentMesh = SkeletalMesh;
-
         if (MeshType != EItemMeshType::SkeletalMesh)
         {
             MeshType = EItemMeshType::SkeletalMesh;
 
-            AreaSphere->DetachFromComponent(DetachRules);
-            StaticMesh->DetachFromComponent(DetachRules);
             SkeletalMesh->DetachFromComponent(DetachRules);
+            AreaSphere->DetachFromComponent(DetachRules);
 
             SetRootComponent(SkeletalMesh);
-            AreaSphere->AttachToComponent(RootComponent, AttachRules);
-            AreaSphere->SetRelativeLocation(FVector::ZeroVector);
-            StaticMesh->AttachToComponent(RootComponent, AttachRules);
-            StaticMesh->SetRelativeTransform(FTransform::Identity);
 
-            SkeletalMesh->SetSimulatePhysics(true);
-            SkeletalMesh->SetCollisionProfileName(TEXT("IgnorePawnAndCamera"));
-            SkeletalMesh->SetVisibility(true);
-
-            StaticMesh->SetVisibility(false);
-            StaticMesh->SetStaticMesh(nullptr);
+            StaticMesh->AttachToComponent(SkeletalMesh, AttachRules);
+            AreaSphere->AttachToComponent(SkeletalMesh, AttachRules);
         }
+
+        SkeletalMesh->SetSkeletalMesh(ItemData->SkeletalMesh);
+        SkeletalMesh->SetSimulatePhysics(true);
+        SkeletalMesh->SetCollisionProfileName(TEXT("IgnorePawnAndCamera"));
+        SkeletalMesh->SetVisibility(true);
+
+        StaticMesh->SetVisibility(false);
+        StaticMesh->SetStaticMesh(nullptr);
+
+        CurrentMesh = SkeletalMesh;
     }
     else if (ItemData->StaticMesh)
     {
-        StaticMesh->SetStaticMesh(ItemData->StaticMesh);
-        CurrentMesh = StaticMesh;
-
         if (MeshType != EItemMeshType::StaticMesh)
         {
             MeshType = EItemMeshType::StaticMesh;
 
-            AreaSphere->DetachFromComponent(DetachRules);
             StaticMesh->DetachFromComponent(DetachRules);
-            SkeletalMesh->DetachFromComponent(DetachRules);
+            AreaSphere->DetachFromComponent(DetachRules);
 
             SetRootComponent(StaticMesh);
-            AreaSphere->AttachToComponent(RootComponent, AttachRules);
-            AreaSphere->SetRelativeLocation(FVector::ZeroVector);
-            SkeletalMesh->AttachToComponent(RootComponent, AttachRules);
-            SkeletalMesh->SetRelativeTransform(FTransform::Identity);
 
-            StaticMesh->SetSimulatePhysics(true);
-            StaticMesh->SetCollisionProfileName(TEXT("IgnorePawnAndCamera"));
-            StaticMesh->SetVisibility(true);
-
-            SkeletalMesh->SetVisibility(false);
-            SkeletalMesh->SetSkeletalMesh(nullptr);
+            SkeletalMesh->AttachToComponent(StaticMesh, AttachRules);
+            AreaSphere->AttachToComponent(StaticMesh, AttachRules);
         }
+
+        StaticMesh->SetStaticMesh(ItemData->StaticMesh);
+        StaticMesh->SetSimulatePhysics(true);
+        StaticMesh->SetCollisionProfileName(TEXT("IgnorePawnAndCamera"));
+        StaticMesh->SetVisibility(true);
+
+        SkeletalMesh->SetVisibility(false);
+        SkeletalMesh->SetSkeletalMesh(nullptr);
+
+        CurrentMesh = StaticMesh;
     }
 
     if (CurrentMesh)
@@ -163,20 +167,16 @@ void AItem::SetupMesh()
         FVector TempVector;
         UKismetSystemLibrary::GetComponentBounds(CurrentMesh, TempVector, TempVector, Radius);
         AreaSphere->SetSphereRadius(Radius * AreaSphereScale);
+        UE_LOG(LogTemp, Warning, TEXT("AItem::SetupMesh() - Set AreaSphere radius to %f."), Radius);
     }
 }
 
 void AItem::DisableCollision()
 {
-    if (MeshType == EItemMeshType::StaticMesh)
+    if (UMeshComponent* CurrentMesh = GetMesh())
     {
-        StaticMesh->SetSimulatePhysics(false);
-        StaticMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-    }
-    else if (MeshType == EItemMeshType::SkeletalMesh)
-    {
-        SkeletalMesh->SetSimulatePhysics(false);
-        SkeletalMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        CurrentMesh->SetSimulatePhysics(false);
+        CurrentMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     }
 }
 

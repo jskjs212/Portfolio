@@ -13,6 +13,11 @@ DEFINE_LOG_CATEGORY(LogEquipment);
 UEquipmentComponent::UEquipmentComponent()
 {
     PrimaryComponentTick.bCanEverTick = false;
+}
+
+void UEquipmentComponent::BeginPlay()
+{
+    Super::BeginPlay();
 
     for (const FGameplayTag& EquipmentType : DemoItemTypes::EquipmentTypes)
     {
@@ -22,11 +27,6 @@ UEquipmentComponent::UEquipmentComponent()
     // TODO: Config file or data table?
     EquipDefaultSocketNames.Add(DemoGameplayTags::Item_Weapon, TEXT("MeleeHandSocket"));
     EquipDefaultSocketNames.Add(DemoGameplayTags::Item_Armor_Shield, TEXT("ShieldHandSocket"));
-}
-
-void UEquipmentComponent::BeginPlay()
-{
-    Super::BeginPlay();
 
     checkf(EquippedItems.Num() == DemoItemTypes::EquipmentTypes.Num(), TEXT("EquippedItems should have all EquipmentTypes."));
 }

@@ -45,6 +45,10 @@ APlayerCharacter::APlayerCharacter()
     CameraBoom->TargetArmLength = 400.0f;
     CameraBoom->bUsePawnControlRotation = true;
 
+    // Camera position
+    CameraBoom->SetRelativeLocation(FVector{0.f, 0.f, 160.f});
+    CameraBoom->SocketOffset = FVector{0.f, 50.f, 0.f};
+
     FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
     FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
     FollowCamera->bUsePawnControlRotation = false;
@@ -211,12 +215,11 @@ void APlayerCharacter::Test2_Implementation()
     EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Armor_Shield);
 
     UE_LOG(LogTemp, Display, TEXT("APlayerCharacter::Test2() - AddItem"));
-    TestShield.Quantity = 1;
-    InventoryComponent->AddItem(TestShield, 6);
+    InventoryComponent->AddItem(TestWeapon, 6);
 
     UE_LOG(LogTemp, Display, TEXT("APlayerCharacter::Test2() - DropItem"));
     FItemActionRequest Request;
-    Request.Slot = TestShield;
+    Request.Slot = TestWeapon;
     Request.DesignatedIndex = 6;
     Request.Quantity = 1;
     InventoryComponent->DropItem(Request);
