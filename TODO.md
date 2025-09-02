@@ -1,10 +1,6 @@
 ## Bugs
 
 ## TODO
-### PickUp
-IPickUpable to AItem?
-> Sphere -> overlap -> 캐릭터의 NearbyItems에 추가 -> Tick에서 조건 맞는 아이템 표시 -> E키 누르면 줍기 -> NearbyItems에서 제거?
-
 ### UI
 Button: UButton? CustomButton?
 MainMenu: Stats, Equipment, Inventory, etc.
@@ -16,12 +12,11 @@ ContextMenu: Actions
 ## check
 ### 모든 클래스: 초기값 세팅이 필요한 변수 세팅 검사하기
 
-### 모호한 함수 인자 명확히 하기
-Function(true) -> Function(ESomeOption::Good)
-> 1개는 괜찮은데, 인자가 많으면 헷갈림
-
 ### Inventory
-- ValidateActionRequest: Index가 -1이면 앞에서부터 찾아서 처리하기를 추가할지?
+ValidateActionRequest: Index가 -1이면 앞에서부터 찾아서 처리하기를 추가할지?
+
+### PickUp
+Box의 중심이 Mesh의 Root로 가서 위치가 안 맞음.
 
 ## misc
 ### Life cycle

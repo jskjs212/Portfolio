@@ -8,6 +8,7 @@
 #include "PlayerCharacter.generated.h"
 
 struct FInputActionValue;
+class IInteractable;
 class UCameraComponent;
 class UInputAction;
 class UInputMappingContext;
@@ -41,6 +42,19 @@ protected:
 public:
     APlayerCharacter();
 
+protected:
+    virtual void BeginPlay() override;
+
+    ////////////////////////////////////////////////////////
+    //        PlayerCharacter functions
+    ////////////////////////////////////////////////////////
+private:
+    // Trace first visible interactable.
+    IInteractable* TraceForInteractables();
+
+    // Find and handle interactable.
+    void HandleInteractable();
+
     ////////////////////////////////////////////////////////
     //        Input functions
     ////////////////////////////////////////////////////////
@@ -55,6 +69,8 @@ protected:
     void StopWalk();
     void StartSprint();
     void StopSprint();
+
+    void Interact();
 
     // TEST:
     UFUNCTION(BlueprintNativeEvent)
@@ -85,6 +101,9 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Input")
     TObjectPtr<UInputAction> SprintAction;
 
+    UPROPERTY(EditAnywhere, Category = "Input")
+    TObjectPtr<UInputAction> InteractAction;
+
     // TEST:
     UPROPERTY(EditAnywhere, Category = "Input")
     TObjectPtr<UInputAction> Test1Action;
@@ -99,6 +118,17 @@ private:
     // Options: true = toggle, false = hold
     bool bIsWalkInputTogglesWalk{true};
     bool bIsSprintInputTogglesSprint{false};
+
+    // Intract trace options
+    UPROPERTY(EditDefaultsOnly, Category = "Trace")
+    float TraceDistance{1500.f};
+
+    FTimerHandle TraceTimerHandle;
+
+    //#if WITH_EDITORONLY_DATA
+    //    UPROPERTY(EditDefaultsOnly, Category = "Trace")
+    //    bool bDrawDebugTrace{true};
+    //#endif // WITH_EDITORONLY_DATA
 
     // TEST:
     UPROPERTY(EditAnywhere, Category = "Test")

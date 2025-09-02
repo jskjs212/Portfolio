@@ -1,9 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Items/Item.h"
+#include "Components/BoxComponent.h"
+#include "Components/InventoryComponent.h"
 #include "Components/MeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "DemoTypes/TableRowBases.h"
 #include "Kismet/GameplayStatics.h"
@@ -58,12 +59,12 @@ AItem::AItem()
     SkeletalMesh->SetVisibility(false);
 
     // Multiplayer not considered.
-    AreaSphere = CreateDefaultSubobject<USphereComponent>(TEXT("AreaSphere"));
-    AreaSphere->SetupAttachment(RootComponent);
-    AreaSphere->SetSimulatePhysics(false);
-    AreaSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-    AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-    // TODO: Response only to PickUp trace by the player character.
+    InteractCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("InteractCollision"));
+    InteractCollision->SetupAttachment(RootComponent);
+    InteractCollision->SetSimulatePhysics(false);
+    InteractCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
+    InteractCollision->SetCollisionResponseToChannel(ECC_Interactable, ECR_Block);
+    InteractCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 }
 
 void AItem::BeginPlay()
@@ -97,7 +98,7 @@ void AItem::PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChan
 
 void AItem::SetupMesh()
 {
-    check(StaticMesh && SkeletalMesh && AreaSphere);
+    check(StaticMesh && SkeletalMesh && InteractCollision);
 
     const FItemDataBase* ItemData = ItemSlot.RowHandle.GetRow<FItemDataBase>(TEXT("AItem::AItem()"));
     if (!ItemData)
@@ -109,6 +110,7 @@ void AItem::SetupMesh()
     const auto DetachRules = FDetachmentTransformRules::KeepWorldTransform;
     UMeshComponent* CurrentMesh = nullptr;
 
+    // Set skeletal mesh.
     if (ItemData->SkeletalMesh)
     {
         if (MeshType != EItemMeshType::SkeletalMesh)
@@ -116,12 +118,12 @@ void AItem::SetupMesh()
             MeshType = EItemMeshType::SkeletalMesh;
 
             SkeletalMesh->DetachFromComponent(DetachRules);
-            AreaSphere->DetachFromComponent(DetachRules);
+            InteractCollision->DetachFromComponent(DetachRules);
 
             SetRootComponent(SkeletalMesh);
 
             StaticMesh->AttachToComponent(SkeletalMesh, AttachRules);
-            AreaSphere->AttachToComponent(SkeletalMesh, AttachRules);
+            InteractCollision->AttachToComponent(SkeletalMesh, AttachRules);
         }
 
         SkeletalMesh->SetSkeletalMesh(ItemData->SkeletalMesh);
@@ -134,6 +136,7 @@ void AItem::SetupMesh()
 
         CurrentMesh = SkeletalMesh;
     }
+    // Set static mesh.
     else if (ItemData->StaticMesh)
     {
         if (MeshType != EItemMeshType::StaticMesh)
@@ -141,12 +144,12 @@ void AItem::SetupMesh()
             MeshType = EItemMeshType::StaticMesh;
 
             StaticMesh->DetachFromComponent(DetachRules);
-            AreaSphere->DetachFromComponent(DetachRules);
+            InteractCollision->DetachFromComponent(DetachRules);
 
             SetRootComponent(StaticMesh);
 
             SkeletalMesh->AttachToComponent(StaticMesh, AttachRules);
-            AreaSphere->AttachToComponent(StaticMesh, AttachRules);
+            InteractCollision->AttachToComponent(StaticMesh, AttachRules);
         }
 
         StaticMesh->SetStaticMesh(ItemData->StaticMesh);
@@ -162,12 +165,12 @@ void AItem::SetupMesh()
 
     if (CurrentMesh)
     {
-        constexpr float AreaSphereScale = 1.1f;
         float Radius;
-        FVector TempVector;
-        UKismetSystemLibrary::GetComponentBounds(CurrentMesh, TempVector, TempVector, Radius);
-        AreaSphere->SetSphereRadius(Radius * AreaSphereScale);
-        UE_LOG(LogTemp, Warning, TEXT("AItem::SetupMesh() - Set AreaSphere radius to %f."), Radius);
+        FVector Origin;
+        FVector BoxExtent;
+        UKismetSystemLibrary::GetComponentBounds(CurrentMesh, Origin, BoxExtent, Radius);
+        InteractCollision->SetBoxExtent(BoxExtent);
+        UE_LOG(LogTemp, Warning, TEXT("AItem::SetupMesh() - BoxExtent: %s, Origin: %s."), *BoxExtent.ToString(), *Origin.ToString());
     }
 }
 
@@ -177,6 +180,22 @@ void AItem::DisableCollision()
     {
         CurrentMesh->SetSimulatePhysics(false);
         CurrentMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    }
+}
+
+void AItem::Interact(APawn* InstigatorPawn)
+{
+    if (InstigatorPawn)
+    {
+        if (UInventoryComponent* InventoryComp = InstigatorPawn->GetComponentByClass<UInventoryComponent>())
+        {
+            ItemSlot.Quantity -= InventoryComp->AddItem(ItemSlot);
+
+            if (ItemSlot.Quantity <= 0)
+            {
+                Destroy();
+            }
+        }
     }
 }
 

@@ -34,5 +34,7 @@ public class Demo : ModuleRules
             new string[] {
             }
         );
+
+        PublicDefinitions.Add("ECC_Interactable = ECC_GameTraceChannel1");
     }
 }

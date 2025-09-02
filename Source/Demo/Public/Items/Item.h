@@ -4,12 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Interfaces/Interactable.h"
 #include "Items/ItemTypes.h"
 #include "Item.generated.h"
 
 class UMeshComponent;
 class USkeletalMeshComponent;
-class USphereComponent;
+class UBoxComponent;
 class UStaticMeshComponent;
 
 UENUM()
@@ -20,7 +21,7 @@ enum class EItemMeshType : uint8
 };
 
 UCLASS()
-class DEMO_API AItem : public AActor
+class DEMO_API AItem : public AActor, public IInteractable
 {
     GENERATED_BODY()
 
@@ -36,7 +37,7 @@ protected:
 
     // Collision for item pickup.
     UPROPERTY(VisibleAnywhere, Category = "Item")
-    TObjectPtr<USphereComponent> AreaSphere;
+    TObjectPtr<UBoxComponent> InteractCollision;
 
     ////////////////////////////////////////////////////////
     //        Statics
@@ -73,6 +74,13 @@ protected:
     void SetupMesh();
 
     void DisableCollision();
+
+    ////////////////////////////////////////////////////////
+    //        Interactable interface
+    ////////////////////////////////////////////////////////
+public:
+    // Add to inventory.
+    virtual void Interact(APawn* InstigatorPawn) override;
 
     ////////////////////////////////////////////////////////
     //        Get & set

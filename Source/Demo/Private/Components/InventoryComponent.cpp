@@ -14,11 +14,6 @@ DEFINE_LOG_CATEGORY(LogInventory);
 UInventoryComponent::UInventoryComponent()
 {
     PrimaryComponentTick.bCanEverTick = false;
-}
-
-void UInventoryComponent::BeginPlay()
-{
-    Super::BeginPlay();
 
     // Inventory setup for fixed item categories.
     for (const FGameplayTag& ItemCategory : DemoItemTypes::ItemCategories)
@@ -26,6 +21,11 @@ void UInventoryComponent::BeginPlay()
         OwnedItems.Add(ItemCategory, FItemArray{});
         MaxSlotSizes.Add(ItemCategory, 0);
     }
+}
+
+void UInventoryComponent::BeginPlay()
+{
+    Super::BeginPlay();
 
     checkf(OwnedItems.Num() == DemoItemTypes::ItemCategories.Num(), TEXT("OwnedItems should have all ItemCategories."));
     checkf(MaxSlotSizes.Num() == DemoItemTypes::ItemCategories.Num(), TEXT("MaxSlotSizes should have all ItemCategories."));

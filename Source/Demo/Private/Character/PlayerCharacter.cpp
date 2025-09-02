@@ -13,10 +13,13 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "InputActionValue.h"
+#include "Items/Item.h"
 #include "Items/ItemTypes.h"
 
 APlayerCharacter::APlayerCharacter()
 {
+    PrimaryActorTick.bCanEverTick = true;
+
     // Disable character rotation by controller
     bUseControllerRotationPitch = false;
     bUseControllerRotationRoll = false;
@@ -56,6 +59,54 @@ APlayerCharacter::APlayerCharacter()
     InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 }
 
+void APlayerCharacter::BeginPlay()
+{
+    Super::BeginPlay();
+
+    // Trace for interactables at intervals.
+    if (UWorld* World = GetWorld())
+    {
+        constexpr float TraceInterval = 0.15f;
+        GetWorld()->GetTimerManager().SetTimer(TraceTimerHandle, this, &ThisClass::HandleInteractable, TraceInterval, true);
+    }
+}
+
+IInteractable* APlayerCharacter::TraceForInteractables()
+{
+    UWorld* World = GetWorld();
+    if (!World)
+    {
+        return nullptr;
+    }
+
+    FHitResult HitResult;
+    const FVector Start = FollowCamera->GetComponentLocation();
+    const FVector End = Start + (FollowCamera->GetForwardVector() * TraceDistance);
+
+    bool bHit = World->LineTraceSingleByChannel(HitResult, Start, End, ECC_Interactable);
+
+    //#if WITH_EDITOR
+    //    if (bDrawDebugTrace)
+    //    {
+    //        const FColor LineColor = bHit ? FColor::Green : FColor::Red;
+    //        DrawDebugLine(World, Start, End, LineColor, false, -1.f, 0, 5.f);
+    //    }
+    //#endif // WITH_EDITOR
+
+    UE_LOG(LogTemp, Warning, TEXT("Trace: %s"), bHit ? *HitResult.GetActor()->GetName() : TEXT("None"));
+    return bHit ? Cast<IInteractable>(HitResult.GetActor()) : nullptr;
+}
+
+void APlayerCharacter::HandleInteractable()
+{
+    IInteractable* Interactable = TraceForInteractables();
+
+    if (AItem* Item = Cast<AItem>(Interactable))
+    {
+        // TODO: Show item tooltip
+    }
+}
+
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -82,6 +133,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
         EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ThisClass::StartSprint);
         EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ThisClass::StopSprint);
+
+        EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ThisClass::Interact);
 
         EnhancedInputComponent->BindAction(Test1Action, ETriggerEvent::Started, this, &ThisClass::Test1);
         EnhancedInputComponent->BindAction(Test2Action, ETriggerEvent::Started, this, &ThisClass::Test2);
@@ -174,6 +227,14 @@ void APlayerCharacter::StopSprint()
         {
             SetMovementSpeedMode(DemoGameplayTags::Movement_SpeedMode_Jog);
         }
+    }
+}
+
+void APlayerCharacter::Interact()
+{
+    if (IInteractable* Interactable = TraceForInteractables())
+    {
+        Interactable->Interact(this);
     }
 }
 
