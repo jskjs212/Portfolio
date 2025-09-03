@@ -15,6 +15,7 @@
 #include "InputActionValue.h"
 #include "Items/Item.h"
 #include "Items/ItemTypes.h"
+#include "UI/UIManagementSubsystem.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -63,6 +64,14 @@ void APlayerCharacter::BeginPlay()
 {
     Super::BeginPlay();
 
+    // Get references
+    if (UWorld* World = GetWorld())
+    {
+        UIManagementSubsystem = UGameInstance::GetSubsystem<UUIManagementSubsystem>(World->GetGameInstance());
+
+        UIManagementSubsystem->Init();
+    }
+
     // Trace for interactables at intervals.
     if (UWorld* World = GetWorld())
     {
@@ -101,10 +110,9 @@ void APlayerCharacter::HandleInteractable()
 {
     IInteractable* Interactable = TraceForInteractables();
 
-    if (AItem* Item = Cast<AItem>(Interactable))
-    {
-        // TODO: Show item tooltip
-    }
+    // Cases: Item, Switch, etc.
+    const AItem* Item = Cast<AItem>(Interactable);
+    UIManagementSubsystem->ShowInteractWidget(Item);
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

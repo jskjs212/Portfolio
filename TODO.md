@@ -1,13 +1,27 @@
 ## Bugs
+안 보이는 사물 줍기 가능
+- Visibility trace 추가?
 
 ## TODO
 ### UI
+PlayerHUDWidget에 Interact 넣고 캔버스 줄이기?
+
+UUIManagementSubsystem: 전역 UI
+- PlayerMenu: 스탯, 장비, 인벤, 퀘스트, 맵, 업적, 설정, etc.
+- MainMenu: 로비, 세션, 크레딧, 옵션, etc.
+- LoadingScreen
+
+PlayerController: 플레이어 UI
+- PlayerHUD: Resource, Crosshair, Interact, QuickSlot, Minimap, etc.
+
+BaseMenu: TabButtons, PageSwitcher, Close\
+  PlayerMenu: StatsPage, EquipmentPage, InventoryPage, etc.\
+  TraderMenu: BuyPage, SellPage\
+StatsPage: ResourceBar, ResourceText\
+EquipmentPage: ItemSlotWidget? EquipmentSlotWidget?\
+InventoryPage: ItemTabSwitcher, ItemSlotWidget, Drag & Drop, ToolTip\
+ContextMenu: Actions\
 Button: UButton? CustomButton?
-MainMenu: Stats, Equipment, Inventory, etc.
-Stats: ResourceBar, ResourceText
-Equipment: ItemSlotWidget?
-Inventory: ItemTab, ItemSlotWidget, Drag & Drop, ToolTip
-ContextMenu: Actions
 
 ## check
 ### 모든 클래스: 초기값 세팅이 필요한 변수 세팅 검사하기
@@ -49,3 +63,10 @@ TODO:, check:, misc:, TEST: 등 주석 확인 및 정리하기\
 테스트 코드 제거하기
 
 Log -> 중요한 곳은 알림 메시지 등 게임 로직으로 처리하고, 나머지는 LogCategory 구분하여 중요한 로그만 남기기
+
+## 시간이 된다면 공부할 부분
+### GAS
+
+### CommonUI
+
+### Optimization

@@ -100,6 +100,8 @@ public:
 
     FORCEINLINE FItemSlot& GetItemSlot() { return ItemSlot; }
 
+    FORCEINLINE const FItemSlot& GetItemSlot() const { return ItemSlot; }
+
     FORCEINLINE void SetItemSlot(const FItemSlot& InItemSlot) { ItemSlot = InItemSlot; }
 
     ////////////////////////////////////////////////////////

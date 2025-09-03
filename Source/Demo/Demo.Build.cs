@@ -26,6 +26,7 @@ public class Demo : ModuleRules
                 "Engine",
                 "InputCore",
                 "EnhancedInput",
+                "UMG",
                 "GameplayTags"
             }
         );

@@ -14,6 +14,7 @@ class UInputAction;
 class UInputMappingContext;
 class UInventoryComponent;
 class USpringArmComponent;
+class UUIManagementSubsystem;
 
 /**
  *
@@ -49,10 +50,10 @@ protected:
     //        PlayerCharacter functions
     ////////////////////////////////////////////////////////
 private:
-    // Trace first visible interactable.
+    // Trace first visible interactable from camera.
     IInteractable* TraceForInteractables();
 
-    // Find and handle interactable.
+    // Find and handle interactable that was traced from camera.
     void HandleInteractable();
 
     ////////////////////////////////////////////////////////
@@ -137,4 +138,9 @@ private:
     FItemSlot TestShield;
     UPROPERTY(EditAnywhere, Category = "Test")
     FItemSlot TestFood;
+
+    /**
+     * References
+     */
+    TObjectPtr<UUIManagementSubsystem> UIManagementSubsystem;
 };
