@@ -27,7 +27,7 @@ public:
 
     void NativeOnInitialized() override;
 
-    void UpdateUI(const FItemSlot& InSlot);
+    void UpdateItemInfo(const FItemSlot& InSlot);
 
     ////////////////////////////////////////////////////////
     //        Widgets

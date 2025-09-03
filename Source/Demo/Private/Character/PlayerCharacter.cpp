@@ -15,6 +15,7 @@
 #include "InputActionValue.h"
 #include "Items/Item.h"
 #include "Items/ItemTypes.h"
+#include "PlayerController/DemoPlayerController.h"
 #include "UI/UIManagementSubsystem.h"
 
 APlayerCharacter::APlayerCharacter()
@@ -64,7 +65,7 @@ void APlayerCharacter::BeginPlay()
 {
     Super::BeginPlay();
 
-    // Get references
+    // Init UI
     if (UWorld* World = GetWorld())
     {
         UIManagementSubsystem = UGameInstance::GetSubsystem<UUIManagementSubsystem>(World->GetGameInstance());
@@ -72,7 +73,13 @@ void APlayerCharacter::BeginPlay()
         UIManagementSubsystem->Init();
     }
 
-    // Trace for interactables at intervals.
+    // Init HUD
+    if (ADemoPlayerController* DemoPlayerController = GetController<ADemoPlayerController>())
+    {
+        DemoPlayerController->InitDemoHUD();
+    }
+
+    // Trace for interactables at intervals rather than every tick.
     if (UWorld* World = GetWorld())
     {
         constexpr float TraceInterval = 0.15f;
@@ -88,21 +95,15 @@ IInteractable* APlayerCharacter::TraceForInteractables()
         return nullptr;
     }
 
+    // Line trace
     FHitResult HitResult;
     const FVector Start = FollowCamera->GetComponentLocation();
     const FVector End = Start + (FollowCamera->GetForwardVector() * TraceDistance);
-
     bool bHit = World->LineTraceSingleByChannel(HitResult, Start, End, ECC_Interactable);
 
-    //#if WITH_EDITOR
-    //    if (bDrawDebugTrace)
-    //    {
-    //        const FColor LineColor = bHit ? FColor::Green : FColor::Red;
-    //        DrawDebugLine(World, Start, End, LineColor, false, -1.f, 0, 5.f);
-    //    }
-    //#endif // WITH_EDITOR
-
+    // TEST: debug
     UE_LOG(LogTemp, Warning, TEXT("Trace: %s"), bHit ? *HitResult.GetActor()->GetName() : TEXT("None"));
+
     return bHit ? Cast<IInteractable>(HitResult.GetActor()) : nullptr;
 }
 
@@ -110,9 +111,12 @@ void APlayerCharacter::HandleInteractable()
 {
     IInteractable* Interactable = TraceForInteractables();
 
-    // Cases: Item, Switch, etc.
-    const AItem* Item = Cast<AItem>(Interactable);
-    UIManagementSubsystem->ShowInteractWidget(Item);
+    if (FocusedInteractable != Interactable)
+    {
+        // Update widget bound to delegate.
+        FocusedInteractable = Interactable;
+        OnInteractableFocused.ExecuteIfBound(FocusedInteractable);
+    }
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -240,7 +244,7 @@ void APlayerCharacter::StopSprint()
 
 void APlayerCharacter::Interact()
 {
-    if (IInteractable* Interactable = TraceForInteractables())
+    if (IInteractable* Interactable = FocusedInteractable)
     {
         Interactable->Interact(this);
     }

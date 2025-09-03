@@ -176,10 +176,12 @@ void AItem::SetupMesh()
 
 void AItem::DisableCollision()
 {
-    if (UMeshComponent* CurrentMesh = GetMesh())
+    UMeshComponent* CurrentMesh = GetMesh();
+    if (CurrentMesh && InteractCollision)
     {
         CurrentMesh->SetSimulatePhysics(false);
         CurrentMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        InteractCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     }
 }
 

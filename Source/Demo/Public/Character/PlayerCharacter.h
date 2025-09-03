@@ -16,6 +16,8 @@ class UInventoryComponent;
 class USpringArmComponent;
 class UUIManagementSubsystem;
 
+DECLARE_DELEGATE_OneParam(FOnInteractableFocused, IInteractable* /* NewFocusedInteractable */);
+
 /**
  *
  */
@@ -36,6 +38,12 @@ protected:
 
     UPROPERTY(VisibleAnywhere)
     TObjectPtr<UInventoryComponent> InventoryComponent;
+
+    ////////////////////////////////////////////////////////
+    //        Delegates
+    ////////////////////////////////////////////////////////
+public:
+    FOnInteractableFocused OnInteractableFocused;
 
     ////////////////////////////////////////////////////////
     //        Fundamentals
@@ -120,16 +128,12 @@ private:
     bool bIsWalkInputTogglesWalk{true};
     bool bIsSprintInputTogglesSprint{false};
 
-    // Intract trace options
+    // Trace interactable
     UPROPERTY(EditDefaultsOnly, Category = "Trace")
-    float TraceDistance{1500.f};
+    float TraceDistance{1000.f};
 
     FTimerHandle TraceTimerHandle;
-
-    //#if WITH_EDITORONLY_DATA
-    //    UPROPERTY(EditDefaultsOnly, Category = "Trace")
-    //    bool bDrawDebugTrace{true};
-    //#endif // WITH_EDITORONLY_DATA
+    IInteractable* FocusedInteractable{nullptr};
 
     // TEST:
     UPROPERTY(EditAnywhere, Category = "Test")

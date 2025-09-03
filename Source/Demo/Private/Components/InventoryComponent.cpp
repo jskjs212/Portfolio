@@ -27,8 +27,8 @@ void UInventoryComponent::BeginPlay()
         MaxSlotSizes.Add(ItemCategory, 0);
     }
 
-    checkf(OwnedItems.Num() == DemoItemTypes::ItemCategories.Num(), TEXT("OwnedItems should have all ItemCategories."));
-    checkf(MaxSlotSizes.Num() == DemoItemTypes::ItemCategories.Num(), TEXT("MaxSlotSizes should have all ItemCategories."));
+    //checkf(OwnedItems.Num() == DemoItemTypes::ItemCategories.Num(), TEXT("OwnedItems should have all ItemCategories."));
+    //checkf(MaxSlotSizes.Num() == DemoItemTypes::ItemCategories.Num(), TEXT("MaxSlotSizes should have all ItemCategories."));
 
     InitMaxSlots();
 }

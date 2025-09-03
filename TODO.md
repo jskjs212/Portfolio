@@ -1,27 +1,17 @@
 ## Bugs
 안 보이는 사물 줍기 가능
 - Visibility trace 추가?
+- 3인칭인데 카메라 기준이면 이상한 점?
+
+Interact를 타이머로 처리 중, Interact 광클 중복 호출 방지
 
 ## TODO
 ### UI
-PlayerHUDWidget에 Interact 넣고 캔버스 줄이기?
+Interact 버튼 표시: ButtonGuide?
+- HUD에 SizeBox로 관리 vs 커스텀 위젯
+- E키 표시 버튼: 여러 군데 공용으로 사용할 수 있는 DemoActionWidget?
 
-UUIManagementSubsystem: 전역 UI
-- PlayerMenu: 스탯, 장비, 인벤, 퀘스트, 맵, 업적, 설정, etc.
-- MainMenu: 로비, 세션, 크레딧, 옵션, etc.
-- LoadingScreen
-
-PlayerController: 플레이어 UI
-- PlayerHUD: Resource, Crosshair, Interact, QuickSlot, Minimap, etc.
-
-BaseMenu: TabButtons, PageSwitcher, Close\
-  PlayerMenu: StatsPage, EquipmentPage, InventoryPage, etc.\
-  TraderMenu: BuyPage, SellPage\
-StatsPage: ResourceBar, ResourceText\
-EquipmentPage: ItemSlotWidget? EquipmentSlotWidget?\
-InventoryPage: ItemTabSwitcher, ItemSlotWidget, Drag & Drop, ToolTip\
-ContextMenu: Actions\
-Button: UButton? CustomButton?
+Update HUD in OnPossess (체력 등)
 
 ## check
 ### 모든 클래스: 초기값 세팅이 필요한 변수 세팅 검사하기
@@ -30,7 +20,7 @@ Button: UButton? CustomButton?
 ValidateActionRequest: Index가 -1이면 앞에서부터 찾아서 처리하기를 추가할지?
 
 ### PickUp
-Box의 중심이 Mesh의 Root로 가서 위치가 안 맞음.
+Box의 중심이 무기의 손잡이 등 Mesh의 Root로 가서 위치가 안 맞음.
 
 ## misc
 ### Life cycle
@@ -59,7 +49,7 @@ AnimInstance: MultiThreadUpdate
 Others: Multi-threading, replication not considered.
 
 ### 정리
-TODO:, check:, misc:, TEST: 등 주석 확인 및 정리하기\
+TODO:, check:, misc:, hardcoded:, TEST: 등 주석 확인 및 정리하기\
 테스트 코드 제거하기
 
 Log -> 중요한 곳은 알림 메시지 등 게임 로직으로 처리하고, 나머지는 LogCategory 구분하여 중요한 로그만 남기기

@@ -35,9 +35,9 @@ void UItemInfoWidget::NativeOnInitialized()
     }
 }
 
-void UItemInfoWidget::UpdateUI(const FItemSlot& InSlot)
+void UItemInfoWidget::UpdateItemInfo(const FItemSlot& InSlot)
 {
-    const FItemDataBase* ItemData = InSlot.RowHandle.GetRow<FItemDataBase>(TEXT("UItemInfoWidget::UpdateUI()"));
+    const FItemDataBase* ItemData = InSlot.RowHandle.GetRow<FItemDataBase>(TEXT("UItemInfoWidget::UpdateItemInfo()"));
     if (!ItemData)
     {
         return;
