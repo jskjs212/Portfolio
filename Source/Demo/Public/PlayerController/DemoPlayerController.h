@@ -25,5 +25,6 @@ public:
 
 private:
     // Show or hide interact widget.
+    // HUD widget will decide what to show based on actual type (open, pickup, etc.).
     void HandleInteractableFocused(IInteractable* NewFocusedInteractable);
 };

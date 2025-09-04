@@ -8,7 +8,7 @@
 UItemInfoWidget::UItemInfoWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
     // GameplayTags are initialized(?) before subsystem's init.
-    for (const FGameplayTag& ItemCategory : DemoItemTypes::ItemCategories)
+    for (const FGameplayTag& ItemCategory : DemoItemTypes::GetItemCategories())
     {
         CategoryImages.Add(ItemCategory, nullptr);
     }
@@ -25,7 +25,11 @@ void UItemInfoWidget::NativeOnInitialized()
         return;
     }
 
-    checkf(CategoryImages.Num() == DemoItemTypes::ItemCategories.Num(), TEXT("CategoryImages should have all ItemCategories."));
+    if (CategoryImages.Num() != DemoItemTypes::GetItemCategories().Num())
+    {
+        UE_LOG(LogTemp, Error, TEXT("UItemInfoWidget - CategoryImages should have all ItemCategories."));
+    }
+
     for (const TPair<FGameplayTag, TObjectPtr<UTexture2D>>& Pair : CategoryImages)
     {
         if (!Pair.Value)

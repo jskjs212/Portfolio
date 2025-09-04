@@ -19,7 +19,7 @@ void UEquipmentComponent::BeginPlay()
 {
     Super::BeginPlay();
 
-    for (const FGameplayTag& EquipmentType : DemoItemTypes::EquipmentTypes)
+    for (const FGameplayTag& EquipmentType : DemoItemTypes::GetEquipmentTypes())
     {
         EquippedItems.Add(EquipmentType, nullptr);
     }
@@ -28,7 +28,7 @@ void UEquipmentComponent::BeginPlay()
     EquipDefaultSocketNames.Add(DemoGameplayTags::Item_Weapon, TEXT("MeleeHandSocket"));
     EquipDefaultSocketNames.Add(DemoGameplayTags::Item_Armor_Shield, TEXT("ShieldHandSocket"));
 
-    //checkf(EquippedItems.Num() == DemoItemTypes::EquipmentTypes.Num(), TEXT("EquippedItems should have all EquipmentTypes."));
+    checkf(EquippedItems.Num() == DemoItemTypes::GetEquipmentTypes().Num(), TEXT("EquippedItems should have all EquipmentTypes."));
 }
 
 bool UEquipmentComponent::EquipItem(const FItemSlot& InSlot)

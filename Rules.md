@@ -13,7 +13,7 @@
 1. Friends
 1. Typedefs
 1. Subobjects (components, etc.)
-1. Static members
+1. Static members (public)
 1. Delegates
 1. Fundamentals (constructor, BeginPlay, Tick, etc.)
 1. Class specific functions

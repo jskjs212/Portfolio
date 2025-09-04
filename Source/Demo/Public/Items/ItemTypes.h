@@ -17,26 +17,34 @@ namespace DemoItemTypes
 // Inventory TMap's keys.
 // check: What if I add an InventoryComponent to containers like Chest, Vendor, etc.?
 //   -> Different ItemCategories for different container types???
-const TArray<const FGameplayTag> ItemCategories{
-    DemoGameplayTags::Item_Weapon,
-    DemoGameplayTags::Item_Armor,
-    DemoGameplayTags::Item_Consumable
-    // or Tool, Quest, Material, etc.
-};
+FORCEINLINE const TArray<const FGameplayTag>& GetItemCategories()
+{
+    static const TArray<const FGameplayTag> ItemCategories{
+        DemoGameplayTags::Item_Weapon,
+        DemoGameplayTags::Item_Armor,
+        DemoGameplayTags::Item_Consumable
+        // or Tool, Quest, Material, etc.
+    };
+    return ItemCategories;
+}
 
 // Equipment TMap's keys.
-const TArray<const FGameplayTag> EquipmentTypes{
-    DemoGameplayTags::Item_Weapon,
-    DemoGameplayTags::Item_Armor_Shield
-    // or Helmet, Boots, etc.
-};
+FORCEINLINE const TArray<const FGameplayTag>& GetEquipmentTypes()
+{
+    static const TArray<const FGameplayTag> EquipmentTypes{
+        DemoGameplayTags::Item_Weapon,
+        DemoGameplayTags::Item_Armor_Shield
+        // or Helmet, Boots, etc.
+    };
+    return EquipmentTypes;
+}
 
 // Find item category from item type.
 // ex) Item.Weapon.Melee.OneHanded -> Item.Weapon
 // @return EmptyTag if not found.
 FORCEINLINE FGameplayTag GetItemCategory(const FGameplayTag ItemType)
 {
-    for (const FGameplayTag& ItemCategory : ItemCategories)
+    for (const FGameplayTag& ItemCategory : GetItemCategories())
     {
         if (ItemType.MatchesTag(ItemCategory))
         {
@@ -50,7 +58,7 @@ FORCEINLINE FGameplayTag GetItemCategory(const FGameplayTag ItemType)
 // @return EmptyTag if not found.
 FORCEINLINE FGameplayTag GetEquipmentType(const FGameplayTag ItemType)
 {
-    for (const FGameplayTag& EquipmentType : EquipmentTypes)
+    for (const FGameplayTag& EquipmentType : GetEquipmentTypes())
     {
         if (ItemType.MatchesTag(EquipmentType))
         {

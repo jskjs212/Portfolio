@@ -49,7 +49,6 @@ AItem* AItem::SpawnItem(
 AItem::AItem()
 {
     PrimaryActorTick.bCanEverTick = false;
-    MeshType = EItemMeshType::StaticMesh;
 
     StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
     SetRootComponent(StaticMesh);
@@ -64,6 +63,7 @@ AItem::AItem()
     InteractCollision->SetSimulatePhysics(false);
     InteractCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
     InteractCollision->SetCollisionResponseToChannel(ECC_Interactable, ECR_Block);
+    InteractCollision->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block); // Block visibility to prevent line trace through objects.
     InteractCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 }
 
@@ -106,8 +106,8 @@ void AItem::SetupMesh()
         return;
     }
 
-    const auto AttachRules = FAttachmentTransformRules::SnapToTargetIncludingScale;
-    const auto DetachRules = FDetachmentTransformRules::KeepWorldTransform;
+    const auto AttachRules = FAttachmentTransformRules::KeepRelativeTransform;
+    const auto DetachRules = FDetachmentTransformRules::KeepRelativeTransform;
     UMeshComponent* CurrentMesh = nullptr;
 
     // Set skeletal mesh.
@@ -117,13 +117,19 @@ void AItem::SetupMesh()
         {
             MeshType = EItemMeshType::SkeletalMesh;
 
+            const FTransform& CurrentTransform = GetActorTransform();
+
             SkeletalMesh->DetachFromComponent(DetachRules);
             InteractCollision->DetachFromComponent(DetachRules);
 
             SetRootComponent(SkeletalMesh);
+            SetActorTransform(CurrentTransform, false, nullptr, ETeleportType::ResetPhysics);
 
             StaticMesh->AttachToComponent(SkeletalMesh, AttachRules);
+            StaticMesh->SetRelativeTransform(FTransform::Identity);
+
             InteractCollision->AttachToComponent(SkeletalMesh, AttachRules);
+            InteractCollision->SetRelativeTransform(FTransform::Identity);
         }
 
         SkeletalMesh->SetSkeletalMesh(ItemData->SkeletalMesh);
@@ -143,13 +149,19 @@ void AItem::SetupMesh()
         {
             MeshType = EItemMeshType::StaticMesh;
 
+            const FTransform& CurrentTransform = GetActorTransform();
+
             StaticMesh->DetachFromComponent(DetachRules);
             InteractCollision->DetachFromComponent(DetachRules);
 
             SetRootComponent(StaticMesh);
+            SetActorTransform(CurrentTransform);
 
             SkeletalMesh->AttachToComponent(StaticMesh, AttachRules);
+            SkeletalMesh->SetRelativeTransform(FTransform::Identity, false, nullptr, ETeleportType::ResetPhysics);
+
             InteractCollision->AttachToComponent(StaticMesh, AttachRules);
+            InteractCollision->SetRelativeTransform(FTransform::Identity);
         }
 
         StaticMesh->SetStaticMesh(ItemData->StaticMesh);

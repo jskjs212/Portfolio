@@ -21,14 +21,14 @@ void UInventoryComponent::BeginPlay()
     Super::BeginPlay();
 
     // Inventory setup for fixed item categories.
-    for (const FGameplayTag& ItemCategory : DemoItemTypes::ItemCategories)
+    for (const FGameplayTag& ItemCategory : DemoItemTypes::GetItemCategories())
     {
         OwnedItems.Add(ItemCategory, FItemArray{});
         MaxSlotSizes.Add(ItemCategory, 0);
     }
 
-    //checkf(OwnedItems.Num() == DemoItemTypes::ItemCategories.Num(), TEXT("OwnedItems should have all ItemCategories."));
-    //checkf(MaxSlotSizes.Num() == DemoItemTypes::ItemCategories.Num(), TEXT("MaxSlotSizes should have all ItemCategories."));
+    checkf(OwnedItems.Num() == DemoItemTypes::GetItemCategories().Num(), TEXT("OwnedItems should have all ItemCategories."));
+    checkf(MaxSlotSizes.Num() == DemoItemTypes::GetItemCategories().Num(), TEXT("MaxSlotSizes should have all ItemCategories."));
 
     InitMaxSlots();
 }

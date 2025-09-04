@@ -1,9 +1,4 @@
 ## Bugs
-안 보이는 사물 줍기 가능
-- Visibility trace 추가?
-- 3인칭인데 카메라 기준이면 이상한 점?
-
-Interact를 타이머로 처리 중, Interact 광클 중복 호출 방지
 
 ## TODO
 ### UI

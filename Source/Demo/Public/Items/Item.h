@@ -16,6 +16,7 @@ class UStaticMeshComponent;
 UENUM()
 enum class EItemMeshType : uint8
 {
+    None,
     StaticMesh,
     SkeletalMesh
 };
@@ -108,7 +109,7 @@ public:
     //        Variables
     ////////////////////////////////////////////////////////
 protected:
-    EItemMeshType MeshType;
+    EItemMeshType MeshType{EItemMeshType::None};
 
     UPROPERTY(EditAnywhere, Category = "Item")
     FItemSlot ItemSlot;

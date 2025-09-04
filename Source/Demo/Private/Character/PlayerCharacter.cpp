@@ -82,7 +82,6 @@ void APlayerCharacter::BeginPlay()
     // Trace for interactables at intervals rather than every tick.
     if (UWorld* World = GetWorld())
     {
-        constexpr float TraceInterval = 0.15f;
         GetWorld()->GetTimerManager().SetTimer(TraceTimerHandle, this, &ThisClass::HandleInteractable, TraceInterval, true);
     }
 }
@@ -95,14 +94,11 @@ IInteractable* APlayerCharacter::TraceForInteractables()
         return nullptr;
     }
 
-    // Line trace
+    const FVector& Start = FollowCamera->GetComponentLocation();
+    const FVector&& End = Start + (FollowCamera->GetForwardVector() * TraceDistance);
     FHitResult HitResult;
-    const FVector Start = FollowCamera->GetComponentLocation();
-    const FVector End = Start + (FollowCamera->GetForwardVector() * TraceDistance);
-    bool bHit = World->LineTraceSingleByChannel(HitResult, Start, End, ECC_Interactable);
 
-    // TEST: debug
-    UE_LOG(LogTemp, Warning, TEXT("Trace: %s"), bHit ? *HitResult.GetActor()->GetName() : TEXT("None"));
+    const bool bHit = World->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility);
 
     return bHit ? Cast<IInteractable>(HitResult.GetActor()) : nullptr;
 }
@@ -247,6 +243,10 @@ void APlayerCharacter::Interact()
     if (IInteractable* Interactable = FocusedInteractable)
     {
         Interactable->Interact(this);
+
+        // Prevent multiple interactions for TraceInterval.
+        FocusedInteractable = nullptr;
+        OnInteractableFocused.ExecuteIfBound(nullptr);
     }
 }
 

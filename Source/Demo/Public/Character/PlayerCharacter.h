@@ -61,7 +61,7 @@ private:
     // Trace first visible interactable from camera.
     IInteractable* TraceForInteractables();
 
-    // Find and handle interactable that was traced from camera.
+    // Trace and broadcast if focused interactable changed.
     void HandleInteractable();
 
     ////////////////////////////////////////////////////////
@@ -130,7 +130,10 @@ private:
 
     // Trace interactable
     UPROPERTY(EditDefaultsOnly, Category = "Trace")
-    float TraceDistance{1000.f};
+    float TraceInterval{0.15f};
+
+    UPROPERTY(EditDefaultsOnly, Category = "Trace")
+    float TraceDistance{600.f};
 
     FTimerHandle TraceTimerHandle;
     IInteractable* FocusedInteractable{nullptr};
