@@ -130,7 +130,7 @@ private:
 
     // Trace interactable
     UPROPERTY(EditDefaultsOnly, Category = "Trace")
-    float TraceInterval{0.15f};
+    float TraceInterval{0.2f};
 
     UPROPERTY(EditDefaultsOnly, Category = "Trace")
     float TraceDistance{600.f};

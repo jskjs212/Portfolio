@@ -5,30 +5,29 @@ AICharacter <- Enemy, NPC로 상속할지, 하나에서 모두 처리할지 고민\
 Enemy <- Boss, Mob?
 
 ## UI
-### UIManagementSubsystem: 전역 UI
-PlayerMenu: 스탯, 장비, 인벤, 퀘스트, 맵, 업적, 설정, etc.\
-MainMenu: 로비, 세션, 크레딧, 옵션, etc.\
-LoadingScreen
+### Manager
+UIManagementSubsystem (전역 UI)
+- MainMenu, LoadingScreen
 
-### PlayerController: 플레이어 UI
-ADemoHUD: DemoHUDWidget only?
+PlayerController (플레이어 UI)
+- ADemoHUD, PlayerMenu
 
-DemoHUDWidget: Resource, Crosshair, Interact, QuickSlot, Minimap, etc.
-
-구조: PlayerCharacter -> PlayerController -> HUD -> HUDWidget -> SubWidgets
-
-이벤트: PlayerCharacter -> Broadcast -> PlayerController -> HUDWidget::Update(~) -> SubWidget::Update(~)
-
+### Flow
+PlayerCharacter -> Broadcast -> PlayerController -> HUDWidget-Update() -> SubWidget-Update()
 
 ### 클래스 구조
-BaseMenu: TabButtons, PageSwitcher, Close\
-  PlayerMenu: StatsPage, EquipmentPage, InventoryPage, etc.\
-  TraderMenu: BuyPage, SellPage\
+BaseMenu: TabButtons, PageSwitcher, Switch, Close
+- PlayerMenu: StatsPage, EquipmentPage, InventoryPage, etc.
+- TraderMenu: BuyPage, SellPage
+
 StatsPage: ResourceBar, ResourceText\
 EquipmentPage: ItemSlotWidget? EquipmentSlotWidget?\
-InventoryPage: ItemTabSwitcher, ItemSlotWidget, Drag & Drop, ToolTip\
+InventoryPage: ItemTabSwitcher, ItemSlotWidget, Drag & Drop, ToolTip
+
 ContextMenu: Actions\
 Button: UButton? CustomButton?
+
+DemoHUDWidget: Resource, Crosshair, Interact, QuickSlot, Minimap, etc.
 
 ## Key bindings
 Mouse: Look\

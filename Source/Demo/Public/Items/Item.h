@@ -83,6 +83,8 @@ public:
     // Add to inventory.
     virtual void Interact(APawn* InstigatorPawn) override;
 
+    virtual void ShowHighlight(bool bValue) override;
+
     ////////////////////////////////////////////////////////
     //        Get & set
     ////////////////////////////////////////////////////////

@@ -52,6 +52,7 @@ AItem::AItem()
 
     StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
     SetRootComponent(StaticMesh);
+    StaticMesh->SetVisibility(false);
 
     SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
     SkeletalMesh->SetupAttachment(RootComponent);
@@ -62,7 +63,6 @@ AItem::AItem()
     InteractCollision->SetupAttachment(RootComponent);
     InteractCollision->SetSimulatePhysics(false);
     InteractCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
-    InteractCollision->SetCollisionResponseToChannel(ECC_Interactable, ECR_Block);
     InteractCollision->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block); // Block visibility to prevent line trace through objects.
     InteractCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 }
@@ -210,6 +210,15 @@ void AItem::Interact(APawn* InstigatorPawn)
                 Destroy();
             }
         }
+    }
+}
+
+void AItem::ShowHighlight(bool bValue)
+{
+    UMeshComponent* CurrentMesh = GetMesh();
+    if (CurrentMesh)
+    {
+        CurrentMesh->SetRenderCustomDepth(bValue);
     }
 }
 

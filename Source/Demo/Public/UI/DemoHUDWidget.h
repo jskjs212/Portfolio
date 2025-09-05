@@ -7,6 +7,7 @@
 #include "DemoHUDWidget.generated.h"
 
 class IInteractable;
+class UInteractPromptWidget;
 class UItemInfoWidget;
 
 /**
@@ -33,4 +34,7 @@ public:
 public:
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UItemInfoWidget> ItemInfoWidget;
+
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UInteractPromptWidget> InteractPromptWidget;
 };

@@ -1,10 +1,7 @@
 ## Bugs
 
 ## TODO
-### UI
-Interact 버튼 표시: ButtonGuide?
-- HUD에 SizeBox로 관리 vs 커스텀 위젯
-- E키 표시 버튼: 여러 군데 공용으로 사용할 수 있는 DemoActionWidget?
+Health bar in HUD.
 
 Update HUD in OnPossess (체력 등)
 
@@ -35,6 +32,9 @@ Money, EXP, souls?
 
 ### 옵션 기능
 bIsWalkInputTogglesWalk, bIsSprintInputTogglesSprint
+
+### Misc
+Interactable: Glowing effect
 
 ## Solved?
 

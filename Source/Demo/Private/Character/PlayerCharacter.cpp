@@ -105,13 +105,23 @@ IInteractable* APlayerCharacter::TraceForInteractables()
 
 void APlayerCharacter::HandleInteractable()
 {
-    IInteractable* Interactable = TraceForInteractables();
+    IInteractable* NewInteractable = TraceForInteractables();
 
-    if (FocusedInteractable != Interactable)
+    if (FocusedInteractable != NewInteractable)
     {
-        // Update widget bound to delegate.
-        FocusedInteractable = Interactable;
+        if (FocusedInteractable)
+        {
+            FocusedInteractable->ShowHighlight(false);
+        }
+
+        // Update widgets bound to delegate.
+        FocusedInteractable = NewInteractable;
         OnInteractableFocused.ExecuteIfBound(FocusedInteractable);
+
+        if (FocusedInteractable)
+        {
+            FocusedInteractable->ShowHighlight(true);
+        }
     }
 }
 
