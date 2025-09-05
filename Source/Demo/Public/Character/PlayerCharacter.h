@@ -14,7 +14,6 @@ class UInputAction;
 class UInputMappingContext;
 class UInventoryComponent;
 class USpringArmComponent;
-class UUIManagementSubsystem;
 
 DECLARE_DELEGATE_OneParam(FOnInteractableFocused, IInteractable* /* NewFocusedInteractable */);
 
@@ -145,9 +144,4 @@ private:
     FItemSlot TestShield;
     UPROPERTY(EditAnywhere, Category = "Test")
     FItemSlot TestFood;
-
-    /**
-     * References
-     */
-    TObjectPtr<UUIManagementSubsystem> UIManagementSubsystem;
 };

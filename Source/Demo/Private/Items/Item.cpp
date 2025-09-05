@@ -84,6 +84,7 @@ void AItem::BeginPlay()
 #if WITH_EDITOR
 void AItem::PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChangedEvent)
 {
+    // Update mesh when ItemSlot is changed in editor.
     const FName ActiveMemberNodeName = PropertyChangedEvent.PropertyChain.GetActiveMemberNode()->GetValue()->GetFName();
     if (ActiveMemberNodeName == GET_MEMBER_NAME_CHECKED(AItem, ItemSlot))
     {
@@ -182,7 +183,8 @@ void AItem::SetupMesh()
         FVector BoxExtent;
         UKismetSystemLibrary::GetComponentBounds(CurrentMesh, Origin, BoxExtent, Radius);
         InteractCollision->SetBoxExtent(BoxExtent);
-        UE_LOG(LogTemp, Warning, TEXT("AItem::SetupMesh() - BoxExtent: %s, Origin: %s."), *BoxExtent.ToString(), *Origin.ToString());
+        // TEST:
+        UE_LOG(LogTemp, Display, TEXT("AItem::SetupMesh() - BoxExtent: %s, Origin: %s."), *BoxExtent.ToString(), *Origin.ToString());
     }
 }
 
@@ -201,7 +203,7 @@ void AItem::Interact(APawn* InstigatorPawn)
 {
     if (InstigatorPawn)
     {
-        if (UInventoryComponent* InventoryComp = InstigatorPawn->GetComponentByClass<UInventoryComponent>())
+        if (UInventoryComponent* InventoryComp = InstigatorPawn->FindComponentByClass<UInventoryComponent>())
         {
             ItemSlot.Quantity -= InventoryComp->AddItem(ItemSlot);
 

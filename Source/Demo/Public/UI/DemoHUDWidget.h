@@ -9,6 +9,7 @@
 class IInteractable;
 class UInteractPromptWidget;
 class UItemInfoWidget;
+class UStatBarWidget;
 
 /**
  * Demo HUD Widget
@@ -23,7 +24,9 @@ class DEMO_API UDemoHUDWidget : public UUserWidget
     //        UI functions
     ////////////////////////////////////////////////////////
 public:
-    void NativeOnInitialized() override;
+    virtual void NativeOnInitialized() override;
+
+    virtual void NativeConstruct() override;
 
     // Update interact widgets.
     void UpdateInteractWidgets(IInteractable* Interactable);
@@ -37,4 +40,10 @@ public:
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UInteractPromptWidget> InteractPromptWidget;
+
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UStatBarWidget> HealthBarWidget;
+
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UStatBarWidget> StaminaBarWidget;
 };

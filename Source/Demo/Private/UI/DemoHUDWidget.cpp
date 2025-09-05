@@ -1,18 +1,21 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UI/DemoHUDWidget.h"
+#include "Components/StatsComponent.h"
+#include "DemoTypes/DemoGameplayTags.h"
 #include "Interfaces/Interactable.h"
 #include "Items/Item.h"
 #include "UI/ActionKeyWidget.h"
 #include "UI/InteractPromptWidget.h"
 #include "UI/ItemInfoWidget.h"
+#include "UI/StatBarWidget.h"
 
 void UDemoHUDWidget::NativeOnInitialized()
 {
     Super::NativeOnInitialized();
 
     // Validation
-    if (!ItemInfoWidget || !InteractPromptWidget)
+    if (!ItemInfoWidget || !InteractPromptWidget || !HealthBarWidget || !StaminaBarWidget)
     {
         UE_LOG(LogTemp, Error, TEXT("UDemoHUDWidget - Failed to bind widgets."));
         return;
@@ -21,6 +24,16 @@ void UDemoHUDWidget::NativeOnInitialized()
     // Hide interact widgets
     ItemInfoWidget->SetVisibility(ESlateVisibility::Hidden);
     InteractPromptWidget->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UDemoHUDWidget::NativeConstruct()
+{
+    Super::NativeConstruct();
+
+    // Init stat bars
+    APawn* OwnerPawn = GetOwningPlayerPawn();
+    HealthBarWidget->InitStatBar(OwnerPawn, UStatsComponent::HealthTag);
+    StaminaBarWidget->InitStatBar(OwnerPawn, UStatsComponent::StaminaTag);
 }
 
 void UDemoHUDWidget::UpdateInteractWidgets(IInteractable* Interactable)

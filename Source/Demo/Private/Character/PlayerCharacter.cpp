@@ -16,7 +16,6 @@
 #include "Items/Item.h"
 #include "Items/ItemTypes.h"
 #include "PlayerController/DemoPlayerController.h"
-#include "UI/UIManagementSubsystem.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -43,7 +42,9 @@ APlayerCharacter::APlayerCharacter()
     MovementComp->RotationRate = FRotator{0.f, 540.f, 0.f};
 
     // TODO: Use data table or config file
-    StatsComponent->AddResourceStat(UStatsComponent::StaminaTag, FResourceStat{100.f, 100.f, true});
+    StatsComponent->RemoveResourceStat(UStatsComponent::HealthTag);
+    StatsComponent->AddResourceStat(UStatsComponent::HealthTag, FResourceStat{100.f, 100.f, true});
+    StatsComponent->AddResourceStat(UStatsComponent::StaminaTag, FResourceStat{100.f, 100.f, true, 10.f});
 
     CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
     CameraBoom->SetupAttachment(GetMesh());
@@ -64,14 +65,6 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
     Super::BeginPlay();
-
-    // Init UI
-    if (UWorld* World = GetWorld())
-    {
-        UIManagementSubsystem = UGameInstance::GetSubsystem<UUIManagementSubsystem>(World->GetGameInstance());
-
-        UIManagementSubsystem->Init();
-    }
 
     // Init HUD
     if (ADemoPlayerController* DemoPlayerController = GetController<ADemoPlayerController>())

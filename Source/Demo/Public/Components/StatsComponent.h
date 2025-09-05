@@ -67,11 +67,12 @@ struct DEMO_API FResourceStat
   //    float BaseValue{0.f};
   //};
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnCurrentStatChanged, FGameplayTag, StatTag, float, OldValue, float, NewValue);
+DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnCurrentStatChanged, FGameplayTag /* StatTag */, float /* OldValue */, float /* NewValue */);
 
 /**
  * Checked functions with invalid StatTags cause a crash!
  * If you want to handle the case of invalid stat type, use HasStatType() first.
+ * i.e. When you don't know if hit actor has Mana stat or not.
  * Current values are not allowed to exceed max values.
  */
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -90,7 +91,6 @@ public:
     //        Delegates
     ////////////////////////////////////////////////////////
 public:
-    UPROPERTY(BlueprintAssignable, Category = "Stats")
     FOnCurrentStatChanged OnCurrentResourceStatChanged;
 
     ////////////////////////////////////////////////////////
@@ -109,7 +109,9 @@ public:
     // Set all current values to max values.
     void InitializeResourceStats();
 
+    // Not considered to be called after BeginPlay.
     void AddResourceStat(FGameplayTag StatTag, const FResourceStat& ResourceStat);
+    void RemoveResourceStat(FGameplayTag StatTag);
 
     // Current += Delta.
     // Don't handle with specific cases like Health <= 0.

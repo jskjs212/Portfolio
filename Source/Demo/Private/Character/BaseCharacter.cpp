@@ -28,7 +28,7 @@ ABaseCharacter::ABaseCharacter()
 
     StatsComponent = CreateDefaultSubobject<UStatsComponent>(TEXT("StatsComponent"));
     // TODO: Use data table or config file
-    StatsComponent->AddResourceStat(UStatsComponent::HealthTag, FResourceStat{100.f, 100.f, true});
+    StatsComponent->AddResourceStat(UStatsComponent::HealthTag, FResourceStat{100.f, 100.f});
 }
 
 void ABaseCharacter::BeginPlay()
@@ -36,7 +36,7 @@ void ABaseCharacter::BeginPlay()
     Super::BeginPlay();
 
     StatsComponent->InitializeResourceStats();
-    StatsComponent->OnCurrentResourceStatChanged.AddDynamic(this, &ThisClass::OnCurrentResourceStatChanged);
+    StatsComponent->OnCurrentResourceStatChanged.AddUObject(this, &ThisClass::OnCurrentResourceStatChanged);
 }
 
 void ABaseCharacter::OnCurrentResourceStatChanged(FGameplayTag StatTag, float OldValue, float NewValue)

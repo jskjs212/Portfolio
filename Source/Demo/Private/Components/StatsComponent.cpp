@@ -1,9 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Components/StatsComponent.h"
+#include "DemoTypes/DemoGameplayTags.h"
 
-const FGameplayTag UStatsComponent::HealthTag = FGameplayTag::RequestGameplayTag(TEXT("Stat.Health"));
-const FGameplayTag UStatsComponent::StaminaTag = FGameplayTag::RequestGameplayTag(TEXT("Stat.Stamina"));
+const FGameplayTag UStatsComponent::HealthTag = FGameplayTag::RequestGameplayTag("Stat.Health");
+const FGameplayTag UStatsComponent::StaminaTag = FGameplayTag::RequestGameplayTag("Stat.Stamina");
 
 UStatsComponent::UStatsComponent()
 {
@@ -35,7 +36,30 @@ void UStatsComponent::AddResourceStat(const FGameplayTag StatTag, const FResourc
         UE_LOG(LogTemp, Warning, TEXT("UStatsComponent::AddResourceStat - Stat %s already exists."), *StatTag.GetTagName().ToString());
         return;
     }
-    ResourceStats.Add(StatTag, ResourceStat);
+
+    FResourceStat& ResourceStatRef = ResourceStats.Add(StatTag, ResourceStat);
+    if (GetWorld())
+    {
+        // Just in case added after BeginPlay
+        ResourceStatRef.TimerDelegate.BindUObject(this, &ThisClass::RegenChecked, /* Payload Data */ StatTag);
+    }
+}
+
+void UStatsComponent::RemoveResourceStat(FGameplayTag StatTag)
+{
+    FResourceStat* ResourceStat = ResourceStats.Find(StatTag);
+    if (!ResourceStat)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("UStatsComponent::RemoveResourceStat - Stat %s doesn't exist."), *StatTag.GetTagName().ToString());
+        return;
+    }
+
+    if (UWorld* World = GetWorld())
+    {
+        World->GetTimerManager().ClearTimer(ResourceStat->TimerHandle);
+    }
+    // Unbind in ~TDelegateBase()
+    ResourceStats.Remove(StatTag);
 }
 
 float UStatsComponent::ModifyCurrentResourceStatChecked(const FGameplayTag StatTag, const float Delta, const bool bShouldRegenerate, const float MinValue)
@@ -58,6 +82,13 @@ float UStatsComponent::ModifyCurrentResourceStatChecked(const FGameplayTag StatT
 
 void UStatsComponent::StartRegenChecked(const FGameplayTag StatTag)
 {
+    UWorld* World = GetWorld();
+    if (!World)
+    {
+        UE_LOG(LogTemp, Error, TEXT("UStatsComponent::StartRegenChecked - No world."));
+        return;
+    }
+
     FResourceStat& ResourceStat = GetResourceStatChecked(StatTag);
 
     if (ResourceStat.bCanRegen && ResourceStat.RegenInterval > 0.f && ResourceStat.RegenDelay > 0.f)
@@ -73,6 +104,13 @@ void UStatsComponent::StartRegenChecked(const FGameplayTag StatTag)
 
 void UStatsComponent::RegenChecked(const FGameplayTag StatTag)
 {
+    UWorld* World = GetWorld();
+    if (!World)
+    {
+        UE_LOG(LogTemp, Error, TEXT("UStatsComponent::RegenChecked - No world."));
+        return;
+    }
+
     FResourceStat& ResourceStat = GetResourceStatChecked(StatTag);
 
     // TODO: Dead
@@ -102,8 +140,8 @@ float UStatsComponent::TakeDamage(const float InDamage)
 
     // TODO: death?
 
-    // TEST:
-    UE_LOG(LogTemp, Warning, TEXT("UStatsComponent::TakeDamage - %.2f"), Damage);
+    // debug:
+    UE_LOG(LogTemp, Display, TEXT("UStatsComponent::TakeDamage - %.2f"), Damage);
     return Damage;
 }
 
@@ -117,9 +155,6 @@ float UStatsComponent::SetCurrentResourceStatChecked(const FGameplayTag StatTag,
     {
         return OldValue;
     }
-
-    // TEST:
-    UE_LOG(LogTemp, Warning, TEXT("UStatsComponent - Set current %s to %.2f"), *StatTag.GetTagName().ToString(), NewValue);
 
     ResourceStat.CurrentValue = NewValue;
     OnCurrentResourceStatChanged.Broadcast(StatTag, OldValue, NewValue);

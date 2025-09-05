@@ -20,7 +20,5 @@ class DEMO_API UUIManagementSubsystem : public UGameInstanceSubsystem
     //        UI setup
     ////////////////////////////////////////////////////////
 public:
-    UUIManagementSubsystem();
-
-    void Init();
+    UUIManagementSubsystem() {}
 };

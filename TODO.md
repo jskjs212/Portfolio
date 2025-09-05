@@ -1,9 +1,10 @@
 ## Bugs
 
 ## TODO
-Health bar in HUD.
+Consume stamina when sprinting
 
-Update HUD in OnPossess (체력 등)
+UI
+- BaseMenu
 
 ## check
 ### 모든 클래스: 초기값 세팅이 필요한 변수 세팅 검사하기
@@ -26,6 +27,9 @@ Box의 중심이 무기의 손잡이 등 Mesh의 Root로 가서 위치가 안 맞음.
 - 현재 StaticMesh는 Collision을, SkeletalMesh는 PhysicsAsset을 수동으로 할당해줘야 함.
 > Valid 체크만 할지, 없으면 자동으로 생성해줄지?
 
+### UX
+- 줍기, 버리기, 장착, 사용 등 피드백이 없으니 아쉬움 -> 알림창?
+
 ## Add
 ### Item::Tokens
 Money, EXP, souls?
@@ -44,10 +48,10 @@ AnimInstance: MultiThreadUpdate
 Others: Multi-threading, replication not considered.
 
 ### 정리
-TODO:, check:, misc:, hardcoded:, TEST: 등 주석 확인 및 정리하기\
+TODO:, check:, misc:, hardcoded:, TEST:, debug: 등 주석 확인 및 정리하기\
 테스트 코드 제거하기
 
-Log -> 중요한 곳은 알림 메시지 등 게임 로직으로 처리하고, 나머지는 LogCategory 구분하여 중요한 로그만 남기기
+debug: -> 중요한 곳은 알림 메시지 등 게임 로직으로 처리하고, 나머지는 LogCategory 구분하여 중요한 로그만 남기기
 
 ## 시간이 된다면 공부할 부분
 ### GAS

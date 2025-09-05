@@ -434,7 +434,7 @@ bool UInventoryComponent::ValidateActionRequest(const FItemActionRequest& Reques
     FItemSlot& Slot = ItemArray[Request.DesignatedIndex];
     if (IsInventorySlotEmpty(Slot) || Slot.RowHandle != Request.Slot.RowHandle)
     {
-        UE_LOG(LogInventory, Error, TEXT("ValidateActionRequest() - Item at DesignatedIndex is different."));
+        UE_LOG(LogInventory, Error, TEXT("ValidateActionRequest() - Item at DesignatedIndex is different. This request is not from user input."));
         return false;
     }
 
