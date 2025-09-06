@@ -58,10 +58,9 @@ void ABaseCharacter::SetMovementSpeedMode(FGameplayTag NewSpeedMode)
         return;
     }
 
-    // TODO: Stop consume stamina if sprinting
-
     MovementSpeedMode = NewSpeedMode;
 
+    // Update speed
     if (MovementSpeedMode == DemoGameplayTags::Movement_SpeedMode_Walk)
     {
         MovementComponent->MaxWalkSpeed = WalkSpeed;

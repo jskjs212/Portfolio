@@ -1,10 +1,13 @@
 ## Bugs
 
 ## TODO
-Consume stamina when sprinting
+- Add sound when picking up items.
 
 UI
 - BaseMenu
+
+State
+- CharacterState, CharacterAction?
 
 ## check
 ### 모든 클래스: 초기값 세팅이 필요한 변수 세팅 검사하기

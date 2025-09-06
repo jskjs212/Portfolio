@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "GameplayTagContainer.h"
+#include "Interfaces/CombatInterface.h"
 #include "BaseCharacter.generated.h"
 
 class UCombatComponent;
@@ -12,7 +13,7 @@ class UEquipmentComponent;
 class UStatsComponent;
 
 UCLASS()
-class DEMO_API ABaseCharacter : public ACharacter
+class DEMO_API ABaseCharacter : public ACharacter, public ICombatInterface
 {
     GENERATED_BODY()
 
@@ -49,8 +50,8 @@ protected:
     //        Get & set
     ////////////////////////////////////////////////////////
 public:
-    UFUNCTION(BlueprintCallable, Category = "Character")
-    void SetMovementSpeedMode(FGameplayTag NewSpeedMode);
+    UFUNCTION(BlueprintCallable, Category = "Movement")
+    virtual void SetMovementSpeedMode(FGameplayTag NewSpeedMode);
 
     ////////////////////////////////////////////////////////
     //        Variables

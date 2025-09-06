@@ -57,6 +57,8 @@ protected:
     //        PlayerCharacter functions
     ////////////////////////////////////////////////////////
 private:
+    void ConsumeSprintStamina();
+
     // Trace first visible interactable from camera.
     IInteractable* TraceForInteractables();
 
@@ -73,6 +75,9 @@ protected:
     void Look(const FInputActionValue& Value);
     void Move(const FInputActionValue& Value);
 
+    virtual void Jump() override;
+    virtual void Landed(const FHitResult& Hit) override;
+
     void StartWalk();
     void StopWalk();
     void StartSprint();
@@ -86,6 +91,20 @@ protected:
 
     UFUNCTION(BlueprintNativeEvent)
     void Test2();
+
+    ////////////////////////////////////////////////////////
+    //        Get & set
+    ////////////////////////////////////////////////////////
+public:
+    // check: Call in AnimInstance?
+    FORCEINLINE float GetGroundSpeed() const
+    {
+        FVector Velocity = GetVelocity();
+        Velocity.Z = 0.f;
+        return Velocity.Size();
+    }
+
+    virtual void SetMovementSpeedMode(FGameplayTag NewSpeedMode) override;
 
     ////////////////////////////////////////////////////////
     //        Input variables
@@ -126,6 +145,18 @@ private:
     // Options: true = toggle, false = hold
     bool bIsWalkInputTogglesWalk{true};
     bool bIsSprintInputTogglesSprint{false};
+
+    UPROPERTY(EditDefaultsOnly, Category = "Movement")
+    float JumpStaminaCost{10.f};
+
+    // Sprint
+    UPROPERTY(EditDefaultsOnly, Category = "Movement")
+    float SprintStaminaCostPerSecond{10.f};
+    UPROPERTY(EditDefaultsOnly, Category = "Movement")
+    float SprintStaminaInterval{0.1f};
+
+    FTimerHandle SprintStaminaTimerHandle;
+    FTimerDelegate SprintStaminaTimerDelegate;
 
     // Trace interactable
     UPROPERTY(EditDefaultsOnly, Category = "Trace")

@@ -17,7 +17,8 @@
 #include "Items/ItemTypes.h"
 #include "PlayerController/DemoPlayerController.h"
 
-APlayerCharacter::APlayerCharacter()
+APlayerCharacter::APlayerCharacter() :
+    SprintStaminaTimerDelegate{FTimerDelegate::CreateUObject(this, &ThisClass::ConsumeSprintStamina)}
 {
     PrimaryActorTick.bCanEverTick = true;
 
@@ -79,6 +80,35 @@ void APlayerCharacter::BeginPlay()
     }
 }
 
+void APlayerCharacter::ConsumeSprintStamina()
+{
+    if (MovementSpeedMode == DemoGameplayTags::Movement_SpeedMode_Sprint)
+    {
+        if (GetGroundSpeed() > JogSpeed)
+        {
+            const float DeltaStamina = SprintStaminaCostPerSecond * SprintStaminaInterval;
+
+            // Not enough stamina
+            if (StatsComponent->GetCurrentResourceStatChecked(UStatsComponent::StaminaTag) < DeltaStamina)
+            {
+                SetMovementSpeedMode(DemoGameplayTags::Movement_SpeedMode_Jog);
+            }
+            else // Consume stamina
+            {
+                // Refresh Regen timer every time
+                StatsComponent->ModifyCurrentResourceStatChecked(UStatsComponent::StaminaTag, -DeltaStamina, true);
+            }
+        }
+    }
+    else // Not sprinting
+    {
+        if (UWorld* World = GetWorld())
+        {
+            World->GetTimerManager().ClearTimer(SprintStaminaTimerHandle);
+        }
+    }
+}
+
 IInteractable* APlayerCharacter::TraceForInteractables()
 {
     UWorld* World = GetWorld();
@@ -137,7 +167,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
         EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ThisClass::Look);
         EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ThisClass::Move);
 
-        EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
+        EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ThisClass::Jump);
 
         EnhancedInputComponent->BindAction(WalkAction, ETriggerEvent::Started, this, &ThisClass::StartWalk);
         EnhancedInputComponent->BindAction(WalkAction, ETriggerEvent::Completed, this, &ThisClass::StopWalk);
@@ -169,6 +199,45 @@ void APlayerCharacter::Move(const FInputActionValue& Value)
     const FVector2D MoveAxisVector = Value.Get<FVector2D>();
     AddMovementInput(ForwardDirection, MoveAxisVector.Y);
     AddMovementInput(RightDirection, MoveAxisVector.X);
+}
+
+void APlayerCharacter::Jump()
+{
+    if (GetCharacterMovement()->IsFalling())
+    {
+        // TODO: state management
+        return;
+    }
+
+    if (StatsComponent->GetCurrentResourceStatChecked(UStatsComponent::StaminaTag) < JumpStaminaCost)
+    {
+        // Not enough stamina
+        return;
+    }
+
+    Super::Jump();
+
+    // Consume stamina
+    StatsComponent->ModifyCurrentResourceStatChecked(UStatsComponent::StaminaTag, -JumpStaminaCost, true);
+
+    // Pause SprintStamina
+    UWorld* World = GetWorld();
+    if (World && MovementSpeedMode == DemoGameplayTags::Movement_SpeedMode_Sprint)
+    {
+        World->GetTimerManager().PauseTimer(SprintStaminaTimerHandle);
+    }
+}
+
+void APlayerCharacter::Landed(const FHitResult& Hit)
+{
+    Super::Landed(Hit);
+
+    // Resume SprintStamina
+    UWorld* World = GetWorld();
+    if (World && MovementSpeedMode == DemoGameplayTags::Movement_SpeedMode_Sprint)
+    {
+        World->GetTimerManager().UnPauseTimer(SprintStaminaTimerHandle);
+    }
 }
 
 void APlayerCharacter::StartWalk()
@@ -250,6 +319,27 @@ void APlayerCharacter::Interact()
         // Prevent multiple interactions for TraceInterval.
         FocusedInteractable = nullptr;
         OnInteractableFocused.ExecuteIfBound(nullptr);
+    }
+}
+
+void APlayerCharacter::SetMovementSpeedMode(FGameplayTag NewSpeedMode)
+{
+    UWorld* World = GetWorld();
+    if (!World || MovementSpeedMode == NewSpeedMode)
+    {
+        return;
+    }
+
+    if (MovementSpeedMode == DemoGameplayTags::Movement_SpeedMode_Sprint)
+    {
+        World->GetTimerManager().ClearTimer(SprintStaminaTimerHandle);
+    }
+
+    Super::SetMovementSpeedMode(NewSpeedMode);
+
+    if (MovementSpeedMode == DemoGameplayTags::Movement_SpeedMode_Sprint)
+    {
+        World->GetTimerManager().SetTimer(SprintStaminaTimerHandle, SprintStaminaTimerDelegate, SprintStaminaInterval, true);
     }
 }
 
