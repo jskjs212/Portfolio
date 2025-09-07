@@ -22,5 +22,5 @@ class DEMO_API IInteractable
 public:
     virtual void Interact(APawn* InstigatorPawn) PURE_VIRTUAL(IInteractable::Interact);
 
-    virtual void ShowHighlight(bool bValue) PURE_VIRTUAL(IInteractable::ShowHighlight);
+    virtual void ShowHighlight(bool bShow) PURE_VIRTUAL(IInteractable::ShowHighlight);
 };

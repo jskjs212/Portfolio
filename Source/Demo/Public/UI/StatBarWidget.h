@@ -22,11 +22,12 @@ class DEMO_API UStatBarWidget : public UUserWidget
     ////////////////////////////////////////////////////////
     //        UI functions
     ////////////////////////////////////////////////////////
-public:
+protected:
     virtual void NativeOnInitialized() override;
 
     virtual void NativePreConstruct() override;
 
+public:
     void InitStatBar(AActor* OwnerActor, FGameplayTag InStatTag);
 
     void UpdateStatBar();
@@ -52,6 +53,8 @@ public:
     //        Variables
     ////////////////////////////////////////////////////////
 private:
+    FGameplayTag StatTag;
+
     UPROPERTY(EditAnywhere, Category = "Appearance|StatBar")
     FLinearColor StatBarFillColor{FLinearColor::White};
 
@@ -60,8 +63,6 @@ private:
 
     UPROPERTY(EditAnywhere, Category = "Appearance|StatBar")
     TObjectPtr<UTexture2D> StatBarBackgroundImage;
-
-    FGameplayTag StatTag;
 
     // Reference to the character's stats component.
     TObjectPtr<UStatsComponent> StatsComponent;

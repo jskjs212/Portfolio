@@ -8,9 +8,9 @@
 #include "Items/ItemTypes.h"
 #include "Item.generated.h"
 
+class UBoxComponent;
 class UMeshComponent;
 class USkeletalMeshComponent;
-class UBoxComponent;
 class UStaticMeshComponent;
 
 UENUM()
@@ -83,7 +83,7 @@ public:
     // Add to inventory.
     virtual void Interact(APawn* InstigatorPawn) override;
 
-    virtual void ShowHighlight(bool bValue) override;
+    virtual void ShowHighlight(bool bShow) override;
 
     ////////////////////////////////////////////////////////
     //        Get & set

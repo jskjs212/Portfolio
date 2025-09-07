@@ -21,4 +21,8 @@ UE_DEFINE_GAMEPLAY_TAG(Item_Armor_Shield, "Item.Armor.Shield");
 // Item.Consumable.*
 UE_DEFINE_GAMEPLAY_TAG(Item_Consumable, "Item.Consumable");
 UE_DEFINE_GAMEPLAY_TAG(Item_Consumable_Food, "Item.Consumable.Food");
+
+// UI.PlayerMenu.*
+UE_DEFINE_GAMEPLAY_TAG(UI_PlayerMenu_Stats, "UI.PlayerMenu.Stats");
+UE_DEFINE_GAMEPLAY_TAG(UI_PlayerMenu_Inventory, "UI.PlayerMenu.Inventory");
 }

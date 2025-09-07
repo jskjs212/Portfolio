@@ -67,10 +67,10 @@ void APlayerCharacter::BeginPlay()
 {
     Super::BeginPlay();
 
-    // Init HUD
+    // Init UI
     if (ADemoPlayerController* DemoPlayerController = GetController<ADemoPlayerController>())
     {
-        DemoPlayerController->InitDemoHUD();
+        DemoPlayerController->InitUI();
     }
 
     // Trace for interactables at intervals rather than every tick.
@@ -176,6 +176,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
         EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ThisClass::StopSprint);
 
         EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ThisClass::Interact);
+
+        EnhancedInputComponent->BindAction(ShowPlayerMenuAction, ETriggerEvent::Started, this, &ThisClass::ShowPlayerMenu);
 
         EnhancedInputComponent->BindAction(Test1Action, ETriggerEvent::Started, this, &ThisClass::Test1);
         EnhancedInputComponent->BindAction(Test2Action, ETriggerEvent::Started, this, &ThisClass::Test2);
@@ -319,6 +321,14 @@ void APlayerCharacter::Interact()
         // Prevent multiple interactions for TraceInterval.
         FocusedInteractable = nullptr;
         OnInteractableFocused.ExecuteIfBound(nullptr);
+    }
+}
+
+void APlayerCharacter::ShowPlayerMenu()
+{
+    if (ADemoPlayerController* DemoPlayerController = GetController<ADemoPlayerController>())
+    {
+        DemoPlayerController->ShowPlayerMenu(true);
     }
 }
 

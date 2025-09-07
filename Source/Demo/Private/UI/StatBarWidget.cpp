@@ -10,11 +10,7 @@ void UStatBarWidget::NativeOnInitialized()
 {
     Super::NativeOnInitialized();
 
-    if (!StatBar)
-    {
-        UE_LOG(LogTemp, Error, TEXT("UStatBarWidget - Failed to bind widgets."));
-        return;
-    }
+    checkf(StatBar, TEXT("Failed to bind widgets."));
 }
 
 void UStatBarWidget::NativePreConstruct()

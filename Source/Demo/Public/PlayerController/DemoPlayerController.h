@@ -7,6 +7,7 @@
 #include "DemoPlayerController.generated.h"
 
 class IInteractable;
+class UPlayerMenuWidget;
 
 /**
  *
@@ -16,15 +17,36 @@ class DEMO_API ADemoPlayerController : public APlayerController
 {
     GENERATED_BODY()
 
+public:
+    ADemoPlayerController();
+
     ////////////////////////////////////////////////////////
     //        UI functions
     ////////////////////////////////////////////////////////
 public:
-    // Initialize DemoHUD
+    void InitUI()
+    {
+        InitDemoHUD();
+        InitPlayerMenu();
+    }
+
+    void ShowPlayerMenu(bool bShow);
+
+private:
     void InitDemoHUD();
+
+    void InitPlayerMenu();
 
 private:
     // Show or hide interact widget.
     // HUD widget will decide what to show based on actual type (open, pickup, etc.).
     void HandleInteractableFocused(IInteractable* NewFocusedInteractable);
+
+    ////////////////////////////////////////////////////////
+    //        Widgets
+    ////////////////////////////////////////////////////////
+public:
+    TSubclassOf<UPlayerMenuWidget> PlayerMenuWidgetClass;
+
+    TObjectPtr<UPlayerMenuWidget> PlayerMenuWidget;
 };

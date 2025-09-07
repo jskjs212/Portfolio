@@ -65,5 +65,6 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Movement")
     float SprintSpeed{800.f};
 
+    // Should not modify directly, use SetMovementSpeedMode instead.
     FGameplayTag MovementSpeedMode;
 };

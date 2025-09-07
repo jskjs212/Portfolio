@@ -24,11 +24,12 @@ public:
 
     void Init();
 
-    void SetHUDVisibility(bool bVisible);
+    //void SetHUDVisibility(bool bVisible);
 
     ////////////////////////////////////////////////////////
     //        Widgets
     ////////////////////////////////////////////////////////
+public:
     TSubclassOf<UDemoHUDWidget> DemoHUDWidgetClass;
 
     TObjectPtr<UDemoHUDWidget> DemoHUDWidget;

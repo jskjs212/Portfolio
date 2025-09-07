@@ -9,6 +9,8 @@
 #include "DemoTypes/TableRowBases.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
+// TEST: sound
+#include "Character/PlayerCharacter.h"
 
 AItem* AItem::SpawnItem(
     UWorld* World,
@@ -205,7 +207,17 @@ void AItem::Interact(APawn* InstigatorPawn)
     {
         if (UInventoryComponent* InventoryComp = InstigatorPawn->FindComponentByClass<UInventoryComponent>())
         {
-            ItemSlot.Quantity -= InventoryComp->AddItem(ItemSlot);
+            const int32 Added = InventoryComp->AddItem(ItemSlot);
+            ItemSlot.Quantity -= Added;
+
+            if (Added > 0)
+            {
+                // TODO: Audio
+                if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(InstigatorPawn))
+                {
+                    UGameplayStatics::PlaySound2D(this, PlayerCharacter->PickupSound);
+                }
+            }
 
             if (ItemSlot.Quantity <= 0)
             {
@@ -215,12 +227,12 @@ void AItem::Interact(APawn* InstigatorPawn)
     }
 }
 
-void AItem::ShowHighlight(bool bValue)
+void AItem::ShowHighlight(bool bShow)
 {
     UMeshComponent* CurrentMesh = GetMesh();
     if (CurrentMesh)
     {
-        CurrentMesh->SetRenderCustomDepth(bValue);
+        CurrentMesh->SetRenderCustomDepth(bShow);
     }
 }
 

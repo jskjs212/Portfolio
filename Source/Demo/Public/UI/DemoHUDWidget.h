@@ -23,11 +23,12 @@ class DEMO_API UDemoHUDWidget : public UUserWidget
     ////////////////////////////////////////////////////////
     //        UI functions
     ////////////////////////////////////////////////////////
-public:
+protected:
     virtual void NativeOnInitialized() override;
 
     virtual void NativeConstruct() override;
 
+public:
     // Update interact widgets.
     void UpdateInteractWidgets(IInteractable* Interactable);
 
@@ -35,12 +36,14 @@ public:
     //        Widgets
     ////////////////////////////////////////////////////////
 public:
+    /* Interaction */
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UItemInfoWidget> ItemInfoWidget;
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UInteractPromptWidget> InteractPromptWidget;
 
+    /* Stat bar */
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UStatBarWidget> HealthBarWidget;
 

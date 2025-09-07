@@ -18,12 +18,7 @@ void UItemInfoWidget::NativeOnInitialized()
 {
     Super::NativeOnInitialized();
 
-    // Validation
-    if (!CategoryImage || !NameText || !DescriptionText)
-    {
-        UE_LOG(LogTemp, Error, TEXT("UItemInfoWidget - Failed to bind widgets."));
-        return;
-    }
+    checkf(CategoryImage && NameText && DescriptionText, TEXT("Failed to bind widgets."));
 
     if (CategoryImages.Num() != DemoItemTypes::GetItemCategories().Num())
     {

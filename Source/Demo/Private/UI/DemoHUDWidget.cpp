@@ -14,12 +14,9 @@ void UDemoHUDWidget::NativeOnInitialized()
 {
     Super::NativeOnInitialized();
 
-    // Validation
-    if (!ItemInfoWidget || !InteractPromptWidget || !HealthBarWidget || !StaminaBarWidget)
-    {
-        UE_LOG(LogTemp, Error, TEXT("UDemoHUDWidget - Failed to bind widgets."));
-        return;
-    }
+    checkf(ItemInfoWidget && InteractPromptWidget &&
+        HealthBarWidget && StaminaBarWidget,
+        TEXT("Failed to bind widgets."));
 
     // Hide interact widgets
     ItemInfoWidget->SetVisibility(ESlateVisibility::Hidden);
@@ -45,7 +42,7 @@ void UDemoHUDWidget::UpdateInteractWidgets(IInteractable* Interactable)
         ItemInfoWidget->UpdateItemInfo(Item->GetItemSlot());
         ItemInfoWidget->SetVisibility(ESlateVisibility::Visible);
 
-        // hardcoded:
+        // hardcoded: Action text and key
         InteractPromptWidget->SetActionText(FText::FromString(TEXT("Pick Up")));
         InteractPromptWidget->ActionKeyWidget->SetKeyText(FText::FromString(TEXT("E")));
         InteractPromptWidget->SetVisibility(ESlateVisibility::Visible);

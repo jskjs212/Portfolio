@@ -14,6 +14,7 @@ class UInputAction;
 class UInputMappingContext;
 class UInventoryComponent;
 class USpringArmComponent;
+class USoundBase;
 
 DECLARE_DELEGATE_OneParam(FOnInteractableFocused, IInteractable* /* NewFocusedInteractable */);
 
@@ -85,6 +86,8 @@ protected:
 
     void Interact();
 
+    void ShowPlayerMenu();
+
     // TEST:
     UFUNCTION(BlueprintNativeEvent)
     void Test1();
@@ -131,6 +134,9 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Input")
     TObjectPtr<UInputAction> InteractAction;
 
+    UPROPERTY(EditAnywhere, Category = "Input")
+    TObjectPtr<UInputAction> ShowPlayerMenuAction;
+
     // TEST:
     UPROPERTY(EditAnywhere, Category = "Input")
     TObjectPtr<UInputAction> Test1Action;
@@ -141,7 +147,13 @@ protected:
     ////////////////////////////////////////////////////////
     //        Variables
     ////////////////////////////////////////////////////////
+public:
+    // TODO: Audio
+    UPROPERTY(EditDefaultsOnly, Category = "Item|Audio")
+    TObjectPtr<USoundBase> PickupSound;
+
 private:
+    /* Movement */
     // Options: true = toggle, false = hold
     bool bIsWalkInputTogglesWalk{true};
     bool bIsSprintInputTogglesSprint{false};

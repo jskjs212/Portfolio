@@ -4,26 +4,23 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "ActionKeyWidget.generated.h"
+#include "StatsPageWidget.generated.h"
 
 class UTextBlock;
 
 /**
- * Display the input key for an action.
+ *
  */
 UCLASS()
-class DEMO_API UActionKeyWidget : public UUserWidget
+class DEMO_API UStatsPageWidget : public UUserWidget
 {
     GENERATED_BODY()
 
 protected:
     virtual void NativeOnInitialized() override;
 
+    // TEST:
 public:
-    // Currently, set only text.
-    // Maybe later, find key bindings and set text by action tag.
-    void SetKeyText(const FText& InText);
-
     UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTextBlock> KeyText;
+    TObjectPtr<UTextBlock> CurrentHealthText;
 };

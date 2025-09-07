@@ -2,6 +2,7 @@
 
 #include "UI/DemoHUD.h"
 #include "UI/DemoHUDWidget.h"
+#include "UI/PlayerMenuWidget.h"
 
 ADemoHUD::ADemoHUD()
 {
@@ -14,26 +15,29 @@ ADemoHUD::ADemoHUD()
     else
     {
         UE_LOG(LogTemp, Error, TEXT("ADemoHUD - DemoHUDWidget BP not found."));
+        DemoHUDWidgetClass = UDemoHUDWidget::StaticClass();
     }
 }
 
 void ADemoHUD::Init()
 {
     APlayerController* PlayerController = GetOwningPlayerController();
-    if (DemoHUDWidgetClass && PlayerController)
+    if (!PlayerController || !DemoHUDWidgetClass)
     {
-        DemoHUDWidget = CreateWidget<UDemoHUDWidget>(PlayerController, DemoHUDWidgetClass);
-        if (DemoHUDWidget)
-        {
-            DemoHUDWidget->AddToViewport();
-        }
+        return;
+    }
+
+    DemoHUDWidget = CreateWidget<UDemoHUDWidget>(PlayerController, DemoHUDWidgetClass);
+    if (DemoHUDWidget)
+    {
+        DemoHUDWidget->AddToViewport(0);
     }
 }
 
-void ADemoHUD::SetHUDVisibility(bool bVisible)
-{
-    if (DemoHUDWidget)
-    {
-        DemoHUDWidget->SetVisibility(bVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
-    }
-}
+//void ADemoHUD::SetHUDVisibility(bool bVisible)
+//{
+//    if (DemoHUDWidget)
+//    {
+//        DemoHUDWidget->SetVisibility(bVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+//    }
+//}

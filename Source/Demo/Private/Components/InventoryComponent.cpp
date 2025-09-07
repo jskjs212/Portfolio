@@ -165,7 +165,7 @@ bool UInventoryComponent::SwapItem(const FGameplayTag ItemCategory, const int32 
     return true;
 }
 
-bool UInventoryComponent::AddMaxSlotSize(FGameplayTag ItemCategory, int32 ToAdd)
+bool UInventoryComponent::AddMaxSlotSize(FGameplayTag ItemCategory, const int32 ToAdd)
 {
     int32* MaxSlotSizePtr = MaxSlotSizes.Find(ItemCategory);
     if (!MaxSlotSizePtr)

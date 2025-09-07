@@ -7,25 +7,35 @@ Enemy <- Boss, Mob?
 ## UI
 ### Manager
 UIManagementSubsystem (전역 UI)
-- MainMenu, LoadingScreen
+- MainMenu
+- LoadingScreen
 
 PlayerController (플레이어 UI)
-- ADemoHUD, PlayerMenu
+- DemoHUDWidget: ADemoHUD에 보관
+- PlayerMenu: 직접 보관
 
 ### Flow
 PlayerCharacter -> Broadcast -> PlayerController -> HUDWidget-Update() -> SubWidget-Update()
 
 ### 클래스 구조
-BaseMenu: TabButtons, PageSwitcher, Switch, Close
-- PlayerMenu: StatsPage, EquipmentPage, InventoryPage, etc.
-- TraderMenu: BuyPage, SellPage
+Term:
+- Menu: The whole panel (container) that owns a set of tabs.
+- Tab: The button that switches between pages.
+- TabEntry: Tab's metadata linking to a page.
+- Page: The content shown when a tab is active.
+- Category: A second-level grouping of tabs inside a page like inventory.
 
-StatsPage: ResourceBar, ResourceText\
+TabMenu: TabEntries (Tag, TabButton, Page), PageSwitcher
+- PlayerMenu: StatsPage, EquipmentPage, InventoryPage (+ Skills, Quests, Map, Options, Achievements, Overall, etc.)
+- TraderMenu: BuyPage, SellPage
+- InventoryPage: CategoryEntries, WrapBoxes of categories which contain ItemSlotWidgets (like Weapon and Armor)
+
+StatsPage: StatBar, StatText\
 EquipmentPage: ItemSlotWidget? EquipmentSlotWidget?\
-InventoryPage: ItemTabSwitcher, ItemSlotWidget, Drag & Drop, ToolTip
+InventoryPage: TabMenu (WrapBoxes, ItemSlotWidget), Drag & Drop, ToolTip
 
 ContextMenu: Actions\
-Button: UButton? CustomButton?
+DemoButton: UButton? CustomButton?
 
 DemoHUDWidget: Resource, Crosshair, Interact, QuickSlot, Minimap, etc.
 
@@ -36,3 +46,8 @@ Shift: Sprint\
 Ctrl: Walk\
 Tab: PlayerMenu\
 E: Interact
+
+### UI
+Global - Tab: Close\
+PlayerMenu - Esc: Close
+Inventory - 1~3: ItemTabs

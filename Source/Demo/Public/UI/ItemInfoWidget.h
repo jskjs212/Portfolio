@@ -25,8 +25,10 @@ class DEMO_API UItemInfoWidget : public UUserWidget
 public:
     UItemInfoWidget(const FObjectInitializer& ObjectInitializer);
 
-    void NativeOnInitialized() override;
+protected:
+    virtual void NativeOnInitialized() override;
 
+public:
     void UpdateItemInfo(const FItemSlot& InSlot);
 
     ////////////////////////////////////////////////////////

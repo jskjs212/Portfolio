@@ -5,20 +5,85 @@
 #include "Items/Item.h"
 #include "UI/DemoHUD.h"
 #include "UI/DemoHUDWidget.h"
+#include "UI/PlayerMenuWidget.h"
+
+ADemoPlayerController::ADemoPlayerController()
+{
+    // hardcoded:
+    static ConstructorHelpers::FClassFinder<UPlayerMenuWidget> PlayerMenuWidgetBPClass(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprints/UI/WBP_PlayerMenu.WBP_PlayerMenu_C'"));
+    if (PlayerMenuWidgetBPClass.Succeeded())
+    {
+        PlayerMenuWidgetClass = PlayerMenuWidgetBPClass.Class;
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("ADemoHUD - PlayerMenuWidget BP not found."));
+        PlayerMenuWidgetClass = UPlayerMenuWidget::StaticClass();
+    }
+}
+
+void ADemoPlayerController::ShowPlayerMenu(bool bShow)
+{
+    if (bShow)
+    {
+        // Input mode: UI only
+        FInputModeUIOnly InputModeData;
+        InputModeData.SetWidgetToFocus(PlayerMenuWidget->TakeWidget());
+        InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+        SetInputMode(InputModeData);
+
+        // Set mouse position to center
+        int32 ViewportX;
+        int32 ViewportY;
+        GetViewportSize(ViewportX, ViewportY);
+        SetMouseLocation(ViewportX / 2, ViewportY / 2);
+
+        SetShowMouseCursor(true);
+
+        PlayerMenuWidget->SetVisibility(ESlateVisibility::Visible);
+
+        // TODO: IsPendingUIUpdate? Update
+    }
+    else // hide
+    {
+        FInputModeGameOnly InputModeData;
+        SetInputMode(InputModeData);
+
+        SetShowMouseCursor(false);
+
+        PlayerMenuWidget->SetVisibility(ESlateVisibility::Hidden);
+
+        // TODO: Cancel drag
+    }
+}
 
 void ADemoPlayerController::InitDemoHUD()
 {
-    // Init HUD
     ADemoHUD* DemoHUD = GetHUD<ADemoHUD>();
     if (DemoHUD)
     {
         DemoHUD->Init();
+
+        // Bind functions that update HUD widgets to character delegates.
+        if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetPawn()))
+        {
+            PlayerCharacter->OnInteractableFocused.BindUObject(this, &ADemoPlayerController::HandleInteractableFocused);
+        }
+    }
+}
+
+void ADemoPlayerController::InitPlayerMenu()
+{
+    if (!PlayerMenuWidgetClass)
+    {
+        return;
     }
 
-    // Bind functions that update HUD widgets to character delegates.
-    if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetPawn()))
+    PlayerMenuWidget = CreateWidget<UPlayerMenuWidget>(this, PlayerMenuWidgetClass);
+    if (PlayerMenuWidget)
     {
-        PlayerCharacter->OnInteractableFocused.BindUObject(this, &ADemoPlayerController::HandleInteractableFocused);
+        PlayerMenuWidget->SetVisibility(ESlateVisibility::Hidden);
+        PlayerMenuWidget->AddToViewport(1);
     }
 }
 

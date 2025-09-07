@@ -1,12 +1,15 @@
 ## Bugs
 
 ## TODO
-- Add sound when picking up items.
+### UI
+- 탭버튼 color가 text에만 적용됨
+> Style 관리하기
 
-UI
-- BaseMenu
+- PlayerMenu 포커스 -> 인벤토리 1~3 안 먹힘
 
-State
+- All UI: Z order
+
+StateComponent?
 - CharacterState, CharacterAction?
 
 ## check
@@ -39,6 +42,9 @@ Money, EXP, souls?
 
 ### 옵션 기능
 bIsWalkInputTogglesWalk, bIsSprintInputTogglesSprint
+
+### Audio
+MusicComponent? MusicSystem in GameInstance? SoundClasses?
 
 ### Misc
 Interactable: Glowing effect

@@ -17,6 +17,9 @@ class DEMO_API UInteractPromptWidget : public UUserWidget
 {
     GENERATED_BODY()
 
+protected:
+    virtual void NativeOnInitialized() override;
+
 public:
     // Currently, set only text.
     // Maybe later, set text by context (open, pickup, talk).
