@@ -7,6 +7,7 @@
 #include "GameplayTagContainer.h"
 #include "TabMenuWidget.generated.h"
 
+class UImage;
 class UTabButton;
 class UWidgetSwitcher;
 
@@ -22,6 +23,8 @@ struct FTabEntry
 
     TObjectPtr<UTabButton> TabButton;
 
+    TObjectPtr<UImage> Image;
+
     TObjectPtr<UWidget> Widget;
 };
 
@@ -30,6 +33,7 @@ struct FTabEntry
  * Base class for menu widgets that have multiple tab (page) widgets.
  * i.e. PlayerMenu, TraderMenu, Inventory, etc.
  * Child class should call InitMenu() in OnInitialized().
+ * bUseTabButtonImages: Three colors will be used for images if true, otherwise (false) for buttons.
  */
 UCLASS()
 class DEMO_API UTabMenuWidget : public UUserWidget
@@ -46,10 +50,8 @@ protected:
     //        UI functions
     ////////////////////////////////////////////////////////
 public:
-    virtual void ShowMenu(bool bShow)
-    {
-        bShow ? AddToViewport() : RemoveFromParent();
-    }
+    // Set visibility and focus to the active tab.
+    void SetVisibilityAndFocus(bool bShow);
 
 protected:
     // Called after setting up TabEntries in child class.
@@ -67,6 +69,11 @@ protected:
 
     void HandleTabButtonUnhovered(FGameplayTag InTag);
 
+private:
+    void SetFocusToWidget(UWidget* InWidget);
+
+    void UpdateTabButtonColor(FTabEntry& InTabEntry, const FLinearColor& InColor);
+
     ////////////////////////////////////////////////////////
     //        Widgets
     ////////////////////////////////////////////////////////
@@ -79,6 +86,8 @@ protected:
     ////////////////////////////////////////////////////////
 protected:
     TArray<FTabEntry> TabEntries;
+
+    bool bUseTabButtonImages{false};
 
     UPROPERTY(EditAnywhere, Category = "Appearance|Tab")
     FLinearColor TabButtonActiveColor;

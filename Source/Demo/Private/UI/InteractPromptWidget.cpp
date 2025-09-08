@@ -12,8 +12,5 @@ void UInteractPromptWidget::NativeOnInitialized()
 
 void UInteractPromptWidget::SetActionText(const FText& InText)
 {
-    if (ActionText)
-    {
-        ActionText->SetText(InText);
-    }
+    ActionText->SetText(InText);
 }

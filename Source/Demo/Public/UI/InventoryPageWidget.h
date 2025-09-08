@@ -6,6 +6,7 @@
 #include "UI/TabMenuWidget.h"
 #include "InventoryPageWidget.generated.h"
 
+class UImage;
 class UTabButton;
 class UWrapBox;
 
@@ -22,9 +23,6 @@ protected:
 
     virtual FReply NativeOnPreviewKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
 
-public:
-    virtual void ShowMenu(bool bShow) override;
-
     ////////////////////////////////////////////////////////
     //        Widgets
     ////////////////////////////////////////////////////////
@@ -34,6 +32,9 @@ public:
     TObjectPtr<UTabButton> WeaponTabButton;
 
     UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UImage> WeaponTabImage;
+
+    UPROPERTY(meta = (BindWidget))
     TObjectPtr<UWrapBox> WeaponWrapBox;
 
     /* Armor */
@@ -41,11 +42,17 @@ public:
     TObjectPtr<UTabButton> ArmorTabButton;
 
     UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UImage> ArmorTabImage;
+
+    UPROPERTY(meta = (BindWidget))
     TObjectPtr<UWrapBox> ArmorWrapBox;
 
     /* Consumable */
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UTabButton> ConsumableTabButton;
+
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UImage> ConsumableTabImage;
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UWrapBox> ConsumableWrapBox;

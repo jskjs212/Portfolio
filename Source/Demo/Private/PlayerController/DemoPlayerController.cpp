@@ -38,22 +38,42 @@ void ADemoPlayerController::ShowPlayerMenu(bool bShow)
         GetViewportSize(ViewportX, ViewportY);
         SetMouseLocation(ViewportX / 2, ViewportY / 2);
 
+        SetIgnoreLookInput(true);
+        SetIgnoreMoveInput(true);
         SetShowMouseCursor(true);
 
-        PlayerMenuWidget->SetVisibility(ESlateVisibility::Visible);
+        PlayerMenuWidget->SetVisibilityAndFocus(true);
 
         // TODO: IsPendingUIUpdate? Update
+
+        if (ADemoHUD* DemoHUD = GetHUD<ADemoHUD>())
+        {
+            if (DemoHUD->DemoHUDWidget)
+            {
+                DemoHUD->DemoHUDWidget->SetVisibility(ESlateVisibility::Hidden);
+            }
+        }
     }
     else // hide
     {
         FInputModeGameOnly InputModeData;
         SetInputMode(InputModeData);
 
+        SetIgnoreLookInput(false);
+        SetIgnoreMoveInput(false);
         SetShowMouseCursor(false);
 
-        PlayerMenuWidget->SetVisibility(ESlateVisibility::Hidden);
+        PlayerMenuWidget->SetVisibilityAndFocus(false);
 
         // TODO: Cancel drag
+
+        if (ADemoHUD* DemoHUD = GetHUD<ADemoHUD>())
+        {
+            if (DemoHUD->DemoHUDWidget)
+            {
+                DemoHUD->DemoHUDWidget->SetVisibility(ESlateVisibility::Visible);
+            }
+        }
     }
 }
 

@@ -2,11 +2,7 @@
 
 ## TODO
 ### UI
-- 탭버튼 color가 text에만 적용됨
-> Style 관리하기
-
-- PlayerMenu 포커스 -> 인벤토리 1~3 안 먹힘
-
+- 탭버튼 image + style? UImage + color?
 - All UI: Z order
 
 StateComponent?

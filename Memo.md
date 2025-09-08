@@ -39,6 +39,9 @@ DemoButton: UButton? CustomButton?
 
 DemoHUDWidget: Resource, Crosshair, Interact, QuickSlot, Minimap, etc.
 
+### Misc
+Color: #F5F5E7
+
 ## Key bindings
 Mouse: Look\
 WASD: Move\
@@ -48,6 +51,7 @@ Tab: PlayerMenu\
 E: Interact
 
 ### UI
-Global - Tab: Close\
-PlayerMenu - Esc: Close
+Global - Esc: Close\
+PlayerMenu - Tab: Close\
+PlayerMenu - Q, E: Switch tabs\
 Inventory - 1~3: ItemTabs

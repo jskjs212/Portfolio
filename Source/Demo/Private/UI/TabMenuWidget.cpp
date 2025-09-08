@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UI/TabMenuWidget.h"
+#include "Components/Image.h"
 #include "Components/WidgetSwitcher.h"
 #include "UI/TabButton.h"
 
@@ -11,6 +12,19 @@ void UTabMenuWidget::NativeOnInitialized()
     SetIsFocusable(true);
 
     checkf(PageSwitcher, TEXT("Failed to bind widgets."));
+}
+
+void UTabMenuWidget::SetVisibilityAndFocus(bool bShow)
+{
+    if (bShow)
+    {
+        SetVisibility(ESlateVisibility::Visible);
+        SetFocusToWidget(TabEntries[PageSwitcher->GetActiveWidgetIndex()].Widget);
+    }
+    else
+    {
+        SetVisibility(ESlateVisibility::Hidden);
+    }
 }
 
 void UTabMenuWidget::InitMenu()
@@ -29,9 +43,6 @@ void UTabMenuWidget::InitMenu()
         TabEntry.TabButton->OnTabButtonUnhovered.BindUObject(this, &UTabMenuWidget::HandleTabButtonUnhovered);
     }
 
-    // TEST:
-    UE_LOG(LogTemp, Warning, TEXT("TEST: ActiveIndex: %d"), PageSwitcher->GetActiveWidgetIndex());
-
     ActiveTabTag = TabEntries[0].Tag;
 
     // SelectTab() should avoid selecting already selected tab.
@@ -39,7 +50,7 @@ void UTabMenuWidget::InitMenu()
     for (int32 Index = 0; FTabEntry& TabEntry : TabEntries)
     {
         const FLinearColor& TabButtonColor = Index == 0 ? TabButtonActiveColor : TabButtonInactiveColor;
-        TabEntry.TabButton->SetColorAndOpacity(TabButtonColor);
+        UpdateTabButtonColor(TabEntry, TabButtonColor);
         Index++;
     }
 }
@@ -64,8 +75,14 @@ void UTabMenuWidget::SelectTab(const int32 InIndex)
     for (int32 Index = 0; FTabEntry& TabEntry : TabEntries)
     {
         // Update tab button colors
-        const FLinearColor& TabButtonColor = Index == InIndex ? TabButtonActiveColor : TabButtonInactiveColor;
-        TabEntry.TabButton->SetColorAndOpacity(TabButtonColor);
+        const bool bIsTargetTab = Index == InIndex;
+        if (bIsTargetTab)
+        {
+            SetFocusToWidget(TabEntry.Widget);
+            //SetDesiredFocusWidget(TabEntry.Widget);
+        }
+        const FLinearColor& TabButtonColor = bIsTargetTab ? TabButtonActiveColor : TabButtonInactiveColor;
+        UpdateTabButtonColor(TabEntry, TabButtonColor);
         Index++;
     }
 }
@@ -79,15 +96,17 @@ void UTabMenuWidget::SelectTab(const FGameplayTag InTag)
 
     for (int32 Index = 0; FTabEntry& TabEntry : TabEntries)
     {
-        const bool bIsTargetPage = TabEntry.Tag == InTag;
-        if (bIsTargetPage)
+        const bool bIsTargetTab = TabEntry.Tag == InTag;
+        if (bIsTargetTab)
         {
             PageSwitcher->SetActiveWidgetIndex(Index);
             ActiveTabTag = InTag;
+            SetFocusToWidget(TabEntry.Widget);
+            //SetDesiredFocusWidget(TabEntry.Widget);
         }
         // Update tab button colors
-        const FLinearColor& TabButtonColor = bIsTargetPage ? TabButtonActiveColor : TabButtonInactiveColor;
-        TabEntry.TabButton->SetColorAndOpacity(TabButtonColor);
+        const FLinearColor& TabButtonColor = bIsTargetTab ? TabButtonActiveColor : TabButtonInactiveColor;
+        UpdateTabButtonColor(TabEntry, TabButtonColor);
         Index++;
     }
 }
@@ -103,7 +122,7 @@ void UTabMenuWidget::HandleTabButtonHovered(const FGameplayTag InTag)
     {
         if (TabEntry.Tag == InTag)
         {
-            TabEntry.TabButton->SetColorAndOpacity(TabButtonHoveredColor);
+            UpdateTabButtonColor(TabEntry, TabButtonHoveredColor);
             break;
         }
     }
@@ -121,8 +140,31 @@ void UTabMenuWidget::HandleTabButtonUnhovered(const FGameplayTag InTag)
         if (TabEntry.Tag == InTag)
         {
             const FLinearColor& TabButtonColor = TabEntry.Tag == ActiveTabTag ? TabButtonActiveColor : TabButtonInactiveColor;
-            TabEntry.TabButton->SetColorAndOpacity(TabButtonColor);
+            UpdateTabButtonColor(TabEntry, TabButtonColor);
             break;
         }
+    }
+}
+
+void UTabMenuWidget::SetFocusToWidget(UWidget* InWidget)
+{
+    if (UUserWidget* TargetWidget = Cast<UUserWidget>(InWidget))
+    {
+        if (TargetWidget->IsFocusable())
+        {
+            TargetWidget->SetFocus();
+        }
+    }
+}
+
+void UTabMenuWidget::UpdateTabButtonColor(FTabEntry& InTabEntry, const FLinearColor& InColor)
+{
+    if (bUseTabButtonImages && InTabEntry.Image)
+    {
+        InTabEntry.Image->SetColorAndOpacity(InColor);
+    }
+    else
+    {
+        InTabEntry.TabButton->SetColorAndOpacity(InColor);
     }
 }

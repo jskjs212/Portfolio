@@ -26,8 +26,8 @@ public:
     void SetActionText(const FText& InText);
 
     UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UActionKeyWidget> ActionKeyWidget;
+    TObjectPtr<UTextBlock> ActionText;
 
     UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTextBlock> ActionText;
+    TObjectPtr<UActionKeyWidget> ActionKeyWidget;
 };

@@ -76,13 +76,19 @@ void APlayerCharacter::BeginPlay()
     // Trace for interactables at intervals rather than every tick.
     if (UWorld* World = GetWorld())
     {
-        GetWorld()->GetTimerManager().SetTimer(TraceTimerHandle, this, &ThisClass::HandleInteractable, TraceInterval, true);
+        FTimerManager& TimerManager = World->GetTimerManager();
+        TimerManager.SetTimer(TraceTimerHandle, this, &ThisClass::HandleInteractable, TraceInterval, true);
+        TimerManager.SetTimer(SprintStaminaTimerHandle, SprintStaminaTimerDelegate, SprintStaminaInterval, true);
+        TimerManager.PauseTimer(SprintStaminaTimerHandle);
     }
 }
 
 void APlayerCharacter::ConsumeSprintStamina()
 {
-    if (MovementSpeedMode == DemoGameplayTags::Movement_SpeedMode_Sprint)
+    const bool bIsSprinting =
+        MovementSpeedMode == DemoGameplayTags::Movement_SpeedMode_Sprint
+        && !GetCharacterMovement()->IsFalling();
+    if (bIsSprinting)
     {
         if (GetGroundSpeed() > JogSpeed)
         {
@@ -99,12 +105,16 @@ void APlayerCharacter::ConsumeSprintStamina()
                 StatsComponent->ModifyCurrentResourceStatChecked(UStatsComponent::StaminaTag, -DeltaStamina, true);
             }
         }
+        else // Not fast enough
+        {
+            // Skip one interval
+        }
     }
     else // Not sprinting
     {
         if (UWorld* World = GetWorld())
         {
-            World->GetTimerManager().ClearTimer(SprintStaminaTimerHandle);
+            World->GetTimerManager().PauseTimer(SprintStaminaTimerHandle);
         }
     }
 }
@@ -223,8 +233,7 @@ void APlayerCharacter::Jump()
     StatsComponent->ModifyCurrentResourceStatChecked(UStatsComponent::StaminaTag, -JumpStaminaCost, true);
 
     // Pause SprintStamina
-    UWorld* World = GetWorld();
-    if (World && MovementSpeedMode == DemoGameplayTags::Movement_SpeedMode_Sprint)
+    if (UWorld* World = GetWorld())
     {
         World->GetTimerManager().PauseTimer(SprintStaminaTimerHandle);
     }
@@ -340,16 +349,18 @@ void APlayerCharacter::SetMovementSpeedMode(FGameplayTag NewSpeedMode)
         return;
     }
 
+    FTimerManager& TimerManager = World->GetTimerManager();
+
     if (MovementSpeedMode == DemoGameplayTags::Movement_SpeedMode_Sprint)
     {
-        World->GetTimerManager().ClearTimer(SprintStaminaTimerHandle);
+        TimerManager.PauseTimer(SprintStaminaTimerHandle);
     }
 
     Super::SetMovementSpeedMode(NewSpeedMode);
 
     if (MovementSpeedMode == DemoGameplayTags::Movement_SpeedMode_Sprint)
     {
-        World->GetTimerManager().SetTimer(SprintStaminaTimerHandle, SprintStaminaTimerDelegate, SprintStaminaInterval, true);
+        TimerManager.UnPauseTimer(SprintStaminaTimerHandle);
     }
 }
 

@@ -2,6 +2,7 @@
 
 #include "UI/PlayerMenuWidget.h"
 #include "Components/Button.h"
+#include "Components/WidgetSwitcher.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "PlayerController/DemoPlayerController.h"
 #include "UI/InventoryPageWidget.h"
@@ -17,8 +18,8 @@ void UPlayerMenuWidget::NativeOnInitialized()
         TEXT("Failed to bind widgets."));
 
     // Setup tab entries
-    TabEntries.Add(FTabEntry{DemoGameplayTags::UI_PlayerMenu_Stats, StatsTabButton, StatsPageWidget});
-    TabEntries.Add(FTabEntry{DemoGameplayTags::UI_PlayerMenu_Inventory, InventoryTabButton, InventoryPageWidget});
+    TabEntries.Add(FTabEntry{DemoGameplayTags::UI_PlayerMenu_Stats, StatsTabButton, nullptr, StatsPageWidget});
+    TabEntries.Add(FTabEntry{DemoGameplayTags::UI_PlayerMenu_Inventory, InventoryTabButton, nullptr, InventoryPageWidget});
 
     InitMenu();
 
@@ -30,7 +31,25 @@ FReply UPlayerMenuWidget::NativeOnPreviewKeyDown(const FGeometry& InGeometry, co
     // Key(Tab) -> close
     if (InKeyEvent.GetKey() == EKeys::Tab)
     {
-        ShowMenu(false);
+        HideMenu();
+        return FReply::Handled();
+    }
+
+    // Key(Q) -> left tab
+    if (InKeyEvent.GetKey() == EKeys::Q)
+    {
+        const int32 CurrentIndex = PageSwitcher->GetActiveWidgetIndex();
+        const int32 NewIndex = CurrentIndex == 0 ? TabEntries.Num() - 1 : CurrentIndex - 1;
+        SelectTab(NewIndex);
+        return FReply::Handled();
+    }
+
+    // Key(E) -> right tab
+    if (InKeyEvent.GetKey() == EKeys::E)
+    {
+        const int32 CurrentIndex = PageSwitcher->GetActiveWidgetIndex();
+        const int32 NewIndex = CurrentIndex == TabEntries.Num() - 1 ? 0 : CurrentIndex + 1;
+        SelectTab(NewIndex);
         return FReply::Handled();
     }
 
@@ -42,17 +61,17 @@ FReply UPlayerMenuWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKe
     // Key(Escape) -> close
     if (InKeyEvent.GetKey() == EKeys::Escape)
     {
-        ShowMenu(false);
+        HideMenu();
         return FReply::Handled();
     }
 
     return Super::NativeOnKeyDown(InGeometry, InKeyEvent);
 }
 
-void UPlayerMenuWidget::ShowMenu(bool bShow)
+void UPlayerMenuWidget::HideMenu()
 {
-    if (ADemoPlayerController* DemoPlayerController = Cast<ADemoPlayerController>(GetOwningPlayer()))
+    if (ADemoPlayerController* DemoPlayerController = GetOwningPlayer<ADemoPlayerController>())
     {
-        DemoPlayerController->ShowPlayerMenu(bShow);
+        DemoPlayerController->ShowPlayerMenu(false);
     }
 }
