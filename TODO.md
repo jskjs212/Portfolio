@@ -1,12 +1,19 @@
 ## Bugs
+Page 하위 위젯 외의 뭔가를 클릭하면 Page 포커스가 사라짐
 
 ## TODO
 ### UI
 - 탭버튼 image + style? UImage + color?
 - All UI: Z order
 
+InventoryPage:
+- ToolTip, Drag & Drop
+
 StateComponent?
 - CharacterState, CharacterAction?
+
+CombatComponent:
+- Attack, Dodge, Block
 
 ## check
 ### 모든 클래스: 초기값 세팅이 필요한 변수 세팅 검사하기

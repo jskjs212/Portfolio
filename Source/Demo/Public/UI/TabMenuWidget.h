@@ -62,17 +62,16 @@ protected:
 
     void SelectTab(FGameplayTag InTag);
 
+    virtual void SetFocusToWidget(UWidget* InWidget);
+
+    void UpdateTabButtonColor(FTabEntry& InTabEntry, const FLinearColor& InColor);
+
     /* Tab button event handlers */
     FORCEINLINE void HandleTabButtonClicked(FGameplayTag InTag) { SelectTab(InTag); }
 
     void HandleTabButtonHovered(FGameplayTag InTag);
 
     void HandleTabButtonUnhovered(FGameplayTag InTag);
-
-private:
-    void SetFocusToWidget(UWidget* InWidget);
-
-    void UpdateTabButtonColor(FTabEntry& InTabEntry, const FLinearColor& InColor);
 
     ////////////////////////////////////////////////////////
     //        Widgets

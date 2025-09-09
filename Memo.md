@@ -32,7 +32,7 @@ TabMenu: TabEntries (Tag, TabButton, Page), PageSwitcher
 
 StatsPage: StatBar, StatText\
 EquipmentPage: ItemSlotWidget? EquipmentSlotWidget?\
-InventoryPage: TabMenu (WrapBoxes, ItemSlotWidget), Drag & Drop, ToolTip
+InventoryPage: TabMenu - WrapBoxes - ItemSlotWidget, Drag & Drop, ToolTip
 
 ContextMenu: Actions\
 DemoButton: UButton? CustomButton?

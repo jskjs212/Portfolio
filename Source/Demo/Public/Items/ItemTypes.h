@@ -15,6 +15,7 @@
 namespace DemoItemTypes
 {
 // Inventory TMap's keys.
+// MUST sync with InventoryPageWidget's tab entries.
 // check: What if I add an InventoryComponent to containers like Chest, Vendor, etc.?
 //   -> Different ItemCategories for different container types???
 FORCEINLINE const TArray<const FGameplayTag>& GetItemCategories()

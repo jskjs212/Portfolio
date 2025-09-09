@@ -28,7 +28,7 @@ struct FInventoryValidatedData
     TArray<FItemSlot>* ItemArray{nullptr};
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryUpdated);
+DECLARE_MULTICAST_DELEGATE(FOnInventoryUpdated);
 
 /**
  * Inventory
@@ -53,7 +53,6 @@ class DEMO_API UInventoryComponent : public UActorComponent
     //        Delegates
     ////////////////////////////////////////////////////////
 public:
-    UPROPERTY(BlueprintAssignable, Category = "Inventory")
     FOnInventoryUpdated OnInventoryUpdated;
 
     ////////////////////////////////////////////////////////
@@ -165,6 +164,12 @@ private:
 
     // @return Actually dropped quantity, -1 if failed.
     int32 DropItem_Internal(const FItemSlot& InSlot, int32 Quantity);
+
+    ////////////////////////////////////////////////////////
+    //        Get & set
+    ////////////////////////////////////////////////////////
+public:
+    const TMap<FGameplayTag, FItemArray>& GetOwnedItems() const { return OwnedItems; }
 
     ////////////////////////////////////////////////////////
     //        Variables - Inventory

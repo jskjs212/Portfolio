@@ -12,9 +12,9 @@ void UPlayerMenuWidget::NativeOnInitialized()
 {
     Super::NativeOnInitialized();
 
-    checkf(StatsTabButton && StatsPageWidget &&
-        InventoryTabButton && InventoryPageWidget &&
-        CloseButton,
+    checkf(StatsTabButton && StatsPageWidget
+        && InventoryTabButton && InventoryPageWidget
+        && CloseButton,
         TEXT("Failed to bind widgets."));
 
     // Setup tab entries
@@ -73,5 +73,15 @@ void UPlayerMenuWidget::HideMenu()
     if (ADemoPlayerController* DemoPlayerController = GetOwningPlayer<ADemoPlayerController>())
     {
         DemoPlayerController->ShowPlayerMenu(false);
+    }
+}
+
+void UPlayerMenuWidget::SetFocusToWidget(UWidget* InWidget)
+{
+    Super::SetFocusToWidget(InWidget);
+
+    if (UInventoryPageWidget* InventoryPage = Cast<UInventoryPageWidget>(InWidget))
+    {
+        InventoryPage->UpdateItemSlots();
     }
 }

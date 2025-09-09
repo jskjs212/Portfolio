@@ -111,6 +111,29 @@ void UTabMenuWidget::SelectTab(const FGameplayTag InTag)
     }
 }
 
+void UTabMenuWidget::SetFocusToWidget(UWidget* InWidget)
+{
+    if (UUserWidget* TargetWidget = Cast<UUserWidget>(InWidget))
+    {
+        if (TargetWidget->IsFocusable())
+        {
+            TargetWidget->SetFocus();
+        }
+    }
+}
+
+void UTabMenuWidget::UpdateTabButtonColor(FTabEntry& InTabEntry, const FLinearColor& InColor)
+{
+    if (bUseTabButtonImages && InTabEntry.Image)
+    {
+        InTabEntry.Image->SetColorAndOpacity(InColor);
+    }
+    else
+    {
+        InTabEntry.TabButton->SetColorAndOpacity(InColor);
+    }
+}
+
 void UTabMenuWidget::HandleTabButtonHovered(const FGameplayTag InTag)
 {
     if (ActiveTabTag == InTag)
@@ -143,28 +166,5 @@ void UTabMenuWidget::HandleTabButtonUnhovered(const FGameplayTag InTag)
             UpdateTabButtonColor(TabEntry, TabButtonColor);
             break;
         }
-    }
-}
-
-void UTabMenuWidget::SetFocusToWidget(UWidget* InWidget)
-{
-    if (UUserWidget* TargetWidget = Cast<UUserWidget>(InWidget))
-    {
-        if (TargetWidget->IsFocusable())
-        {
-            TargetWidget->SetFocus();
-        }
-    }
-}
-
-void UTabMenuWidget::UpdateTabButtonColor(FTabEntry& InTabEntry, const FLinearColor& InColor)
-{
-    if (bUseTabButtonImages && InTabEntry.Image)
-    {
-        InTabEntry.Image->SetColorAndOpacity(InColor);
-    }
-    else
-    {
-        InTabEntry.TabButton->SetColorAndOpacity(InColor);
     }
 }

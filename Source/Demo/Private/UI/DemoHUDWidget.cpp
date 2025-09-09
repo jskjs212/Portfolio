@@ -14,8 +14,8 @@ void UDemoHUDWidget::NativeOnInitialized()
 {
     Super::NativeOnInitialized();
 
-    checkf(ItemInfoWidget && InteractPromptWidget &&
-        HealthBarWidget && StaminaBarWidget,
+    checkf(ItemInfoWidget && InteractPromptWidget
+        && HealthBarWidget && StaminaBarWidget,
         TEXT("Failed to bind widgets."));
 
     // Hide interact widgets

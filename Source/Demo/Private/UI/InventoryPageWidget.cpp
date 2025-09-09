@@ -2,28 +2,43 @@
 
 #include "UI/InventoryPageWidget.h"
 #include "Components/Image.h"
+#include "Components/InventoryComponent.h"
 #include "Components/WrapBox.h"
 #include "DemoTypes/DemoGameplayTags.h"
+#include "GameFramework/Pawn.h"
+#include "GameplayTagContainer.h"
+#include "Items/ItemTypes.h"
+#include "UI/ItemSlotWidget.h"
 #include "UI/TabButton.h"
 
 void UInventoryPageWidget::NativeOnInitialized()
 {
     Super::NativeOnInitialized();
 
-    checkf(WeaponTabButton && WeaponTabImage && WeaponWrapBox &&
-        ArmorTabButton && ArmorTabImage && ArmorWrapBox &&
-        ConsumableTabButton && ConsumableTabImage && ConsumableWrapBox,
+    checkf(WeaponTabButton && WeaponTabImage && WeaponWrapBox
+        && ArmorTabButton && ArmorTabImage && ArmorWrapBox
+        && ConsumableTabButton && ConsumableTabImage && ConsumableWrapBox
+        && ItemSlotWidgetClass,
         TEXT("Failed to bind widgets."));
 
     bUseTabButtonImages = true;
 
     // Setup tab entries
-    // Should sync with DemoGameplayTags::ItemCategories.
+    // MUST sync with DemoGameplayTags::ItemCategories.
     TabEntries.Add(FTabEntry{DemoGameplayTags::Item_Weapon, WeaponTabButton, WeaponTabImage, WeaponWrapBox});
     TabEntries.Add(FTabEntry{DemoGameplayTags::Item_Armor, ArmorTabButton, ArmorTabImage, ArmorWrapBox});
     TabEntries.Add(FTabEntry{DemoGameplayTags::Item_Consumable, ConsumableTabButton, ConsumableTabImage, ConsumableWrapBox});
 
     InitMenu();
+
+    // Bind inventory update event
+    if (APawn* OwningPawn = GetOwningPlayerPawn())
+    {
+        if (UInventoryComponent* InventoryComponent = OwningPawn->FindComponentByClass<UInventoryComponent>())
+        {
+            InventoryComponent->OnInventoryUpdated.AddUObject(this, &UInventoryPageWidget::UpdateItemSlots);
+        }
+    }
 }
 
 FReply UInventoryPageWidget::NativeOnPreviewKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
@@ -52,4 +67,79 @@ FReply UInventoryPageWidget::NativeOnPreviewKeyDown(const FGeometry& InGeometry,
     }
 
     return Super::NativeOnPreviewKeyDown(InGeometry, InKeyEvent);
+}
+
+void UInventoryPageWidget::UpdateItemSlots()
+{
+    if (!IsVisible())
+    {
+        bPendingUpdateItemSlots = true;
+        return;
+    }
+
+    bPendingUpdateItemSlots = false;
+
+    const APawn* OwningPawn = GetOwningPlayerPawn();
+    if (!OwningPawn)
+    {
+        return;
+    }
+
+    const UInventoryComponent* InventoryComponent = OwningPawn->FindComponentByClass<UInventoryComponent>();
+    if (!InventoryComponent)
+    {
+        return;
+    }
+
+    const TMap<FGameplayTag, FItemArray>& OwnedItems = InventoryComponent->GetOwnedItems();
+
+    // For each item category
+    for (FTabEntry& TabEntry : TabEntries)
+    {
+        UWrapBox* WrapBox = Cast<UWrapBox>(TabEntry.Widget);
+        const TArray<FItemSlot>& ItemArray = OwnedItems[TabEntry.Tag].ItemArray;
+
+        checkf(WrapBox, TEXT("Invalid inventory."));
+
+        // No items (empty wrapbox)
+        // ItemArray.Num() == 0 means bFixSlotSizeAndExposeEmptySlots == false.
+        // TODO: Show text? Set color?
+
+        const int32 ItemNum = ItemArray.Num();
+        const int32 ExistingNum = WrapBox->GetAllChildren().Num();
+        const int32 NewSlotNum = FMath::Max(ItemNum, ExistingNum);
+
+        for (int32 Index = 0; Index < NewSlotNum; ++Index)
+        {
+            UItemSlotWidget* SlotWidget = nullptr;
+
+            // Add a new slot if needed
+            if (Index >= ExistingNum && Index < ItemNum)
+            {
+                SlotWidget = CreateWidget<UItemSlotWidget>(this, ItemSlotWidgetClass);
+                WrapBox->AddChildToWrapBox(SlotWidget);
+                // ExistingNum += 1, but don't need to update.
+            }
+            // Or update existing slot
+            else if (Index < ExistingNum)
+            {
+                ;
+                SlotWidget = Cast<UItemSlotWidget>(WrapBox->GetChildAt(Index));
+            }
+
+            checkf(SlotWidget, TEXT("Undefined behavior."));
+
+            // Update slot
+            if (Index < ItemNum)
+            {
+                SlotWidget->UpdateItemSlot(ItemArray[Index], Index);
+                SlotWidget->SetVisibility(ESlateVisibility::Visible);
+            }
+            // Hide unused slots
+            else if (Index < ExistingNum)
+            {
+                SlotWidget->SetVisibility(ESlateVisibility::Collapsed);
+            }
+        }
+    }
 }

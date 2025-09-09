@@ -21,7 +21,7 @@ class DEMO_API UPlayerMenuWidget : public UTabMenuWidget
     GENERATED_BODY()
 
     ////////////////////////////////////////////////////////
-    //        UI functions
+    //        UUserWidget functions
     ////////////////////////////////////////////////////////
 protected:
     virtual void NativeOnInitialized() override;
@@ -32,9 +32,15 @@ protected:
     // Handle after child widgets.
     virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
 
+    ////////////////////////////////////////////////////////
+    //        UI functions
+    ////////////////////////////////////////////////////////
 public:
     UFUNCTION()
     void HideMenu();
+
+protected:
+    virtual void SetFocusToWidget(UWidget* InWidget) override;
 
     ////////////////////////////////////////////////////////
     //        Widgets

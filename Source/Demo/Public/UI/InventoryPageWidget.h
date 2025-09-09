@@ -7,6 +7,7 @@
 #include "InventoryPageWidget.generated.h"
 
 class UImage;
+class UItemSlotWidget;
 class UTabButton;
 class UWrapBox;
 
@@ -18,10 +19,20 @@ class DEMO_API UInventoryPageWidget : public UTabMenuWidget
 {
     GENERATED_BODY()
 
+    ////////////////////////////////////////////////////////
+    //        UUserWidget functions
+    ////////////////////////////////////////////////////////
 protected:
     virtual void NativeOnInitialized() override;
 
     virtual FReply NativeOnPreviewKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
+
+    ////////////////////////////////////////////////////////
+    //        UI functions
+    ////////////////////////////////////////////////////////
+public:
+    // Update item slots UI from owner pawn's InventoryComponent.
+    void UpdateItemSlots();
 
     ////////////////////////////////////////////////////////
     //        Widgets
@@ -56,4 +67,13 @@ public:
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UWrapBox> ConsumableWrapBox;
+
+    ////////////////////////////////////////////////////////
+    //        Variables
+    ////////////////////////////////////////////////////////
+private:
+    bool bPendingUpdateItemSlots{false};
+
+    UPROPERTY(EditDefaultsOnly, Category = "ItemSlot")
+    TSubclassOf<UItemSlotWidget> ItemSlotWidgetClass;
 };

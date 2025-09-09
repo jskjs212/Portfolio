@@ -212,6 +212,8 @@ void UInventoryComponent::InitMaxSlots()
             Pair.Value.ItemArray.SetNum(MaxSlotSizes[Pair.Key]);
         }
     }
+
+    OnInventoryUpdated.Broadcast();
 }
 
 bool UInventoryComponent::AddItem_Validate(const FItemSlot& InSlot, FInventoryValidatedData& OutData)
