@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "Items/Item.h"
 #include "Items/ItemTypes.h"
+#include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY(LogEquipment);
 
@@ -85,6 +86,10 @@ bool UEquipmentComponent::EquipItem(const FItemSlot& InSlot)
     // OnEquipped
 
     // Update UI, stats, etc.
+    if (EquipSound)
+    {
+        UGameplayStatics::PlaySound2D(this, EquipSound);
+    }
 
     // Register active skills
 
@@ -126,6 +131,10 @@ bool UEquipmentComponent::UnequipItem(const FGameplayTag EquipmentType)
     // OnUnequipped
 
     // Update UI, stats, etc.
+    if (EquipSound)
+    {
+        UGameplayStatics::PlaySound2D(this, EquipSound);
+    }
 
     // Unregister active skills
 

@@ -11,6 +11,7 @@
 class UBorder;
 class UImage;
 class USizeBox;
+class USoundBase;
 class UTextBlock;
 class UTexture2D;
 
@@ -27,6 +28,8 @@ class DEMO_API UItemSlotWidget : public UUserWidget
     ////////////////////////////////////////////////////////
 protected:
     virtual void NativeOnInitialized() override;
+
+    virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 
     virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 
@@ -83,17 +86,21 @@ protected:
     //        Variables
     ////////////////////////////////////////////////////////
 protected:
-    UPROPERTY(EditDefaultsOnly, Category = "Appearance|Item")
+    UPROPERTY(EditDefaultsOnly, Category = "Item")
     FLinearColor NormalBorderColor{FLinearColor::White};
 
-    UPROPERTY(EditDefaultsOnly, Category = "Appearance|Item")
+    UPROPERTY(EditDefaultsOnly, Category = "Item")
     FLinearColor HoveredBorderColor{FLinearColor{1.f, 1.f, 1.f, 0.3f}};
 
-    UPROPERTY(EditDefaultsOnly, Category = "Appearance|Item")
+    UPROPERTY(EditDefaultsOnly, Category = "Item")
     TObjectPtr<UTexture2D> NormalBorderImage;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Appearance|Item")
+    UPROPERTY(EditDefaultsOnly, Category = "Item")
     TObjectPtr<UTexture2D> HoveredBorderImage;
+
+    // TODO: Audio
+    UPROPERTY(EditDefaultsOnly, Category = "Item")
+    TObjectPtr<USoundBase> HoveredSound;
 
 private:
     FDataTableRowHandle CurrentRowHandle;

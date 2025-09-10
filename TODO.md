@@ -3,6 +3,7 @@ Page 하위 위젯 외의 뭔가를 클릭하면 Page 포커스가 사라짐
 
 ## TODO
 ### UI
+- ContextMenu: Use, Equip, Drop, Cancel
 - 탭버튼 image + style? UImage + color?
 - All UI: Z order
 
@@ -14,6 +15,13 @@ StateComponent?
 
 CombatComponent:
 - Attack, Dodge, Block
+
+ESC:
+- Name: GameMenu? PauseMenu? SystemMenu?
+- Settings, Exit to MainMenu, Exit to Desktop
+
+BPClass:
+- 클래스마다 흩어져 있는 BPClass 찾기를 하나의 DataAsset?에 모으기?
 
 ## check
 ### 모든 클래스: 초기값 세팅이 필요한 변수 세팅 검사하기

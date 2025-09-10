@@ -5,6 +5,7 @@
 #include "Items/Item.h"
 #include "UI/DemoHUD.h"
 #include "UI/DemoHUDWidget.h"
+#include "UI/InventoryPageWidget.h"
 #include "UI/PlayerMenuWidget.h"
 
 ADemoPlayerController::ADemoPlayerController()
@@ -75,6 +76,11 @@ void ADemoPlayerController::ShowPlayerMenu(bool bShow)
             }
         }
     }
+}
+
+void ADemoPlayerController::ShowInventoryContextMenu(const FItemSlot& InSlot, int32 DesignatedIndex)
+{
+    PlayerMenuWidget->InventoryPageWidget->ShowContextMenu(InSlot, DesignatedIndex);
 }
 
 void ADemoPlayerController::InitDemoHUD()

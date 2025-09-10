@@ -8,6 +8,7 @@
 #include "TabMenuWidget.generated.h"
 
 class UImage;
+class USoundBase;
 class UTabButton;
 class UWidgetSwitcher;
 
@@ -64,7 +65,7 @@ protected:
 
     virtual void SetFocusToWidget(UWidget* InWidget);
 
-    void UpdateTabButtonColor(FTabEntry& InTabEntry, const FLinearColor& InColor);
+    void UpdateTabButtonColor(FTabEntry& InTabEntry, bool bActive, bool bHovered);
 
     /* Tab button event handlers */
     FORCEINLINE void HandleTabButtonClicked(FGameplayTag InTag) { SelectTab(InTag); }
@@ -88,14 +89,21 @@ protected:
 
     bool bUseTabButtonImages{false};
 
-    UPROPERTY(EditAnywhere, Category = "Appearance|Tab")
+    UPROPERTY(EditAnywhere, Category = "Tab")
     FLinearColor TabButtonActiveColor;
 
-    UPROPERTY(EditAnywhere, Category = "Appearance|Tab")
+    UPROPERTY(EditAnywhere, Category = "Tab")
     FLinearColor TabButtonInactiveColor;
 
-    UPROPERTY(EditAnywhere, Category = "Appearance|Tab")
+    UPROPERTY(EditAnywhere, Category = "Tab")
     FLinearColor TabButtonHoveredColor;
+
+    // TODO: Audio
+    UPROPERTY(EditAnywhere, Category = "Tab")
+    TObjectPtr<USoundBase> TabButtonHoveredSound;
+
+    UPROPERTY(EditAnywhere, Category = "Tab")
+    TObjectPtr<USoundBase> TabButtonClickSound;
 
 private:
     FGameplayTag ActiveTabTag;

@@ -7,6 +7,8 @@
 #include "Components/TextBlock.h"
 #include "DemoTypes/TableRowBases.h"
 #include "Items/ItemTypes.h"
+#include "Kismet/GameplayStatics.h"
+#include "PlayerController/DemoPlayerController.h"
 
 void UItemSlotWidget::NativeOnInitialized()
 {
@@ -23,6 +25,24 @@ void UItemSlotWidget::NativeOnInitialized()
 
     HandleUnhovered();
     UpdateVisuals();
+}
+
+FReply UItemSlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+    if (ItemSlot.IsValid())
+    {
+        // RMB -> Show context menu
+        if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))
+        {
+            if (ADemoPlayerController* DemoPlayerController = GetOwningPlayer<ADemoPlayerController>())
+            {
+                DemoPlayerController->ShowInventoryContextMenu(ItemSlot, Index);
+                return FReply::Handled();
+            }
+        }
+    }
+
+    return Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
 }
 
 void UItemSlotWidget::NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
@@ -67,6 +87,11 @@ void UItemSlotWidget::UpdateVisuals()
 
 void UItemSlotWidget::HandleHovered()
 {
+    if (HoveredSound)
+    {
+        UGameplayStatics::PlaySound2D(this, HoveredSound, 0.5f);
+    }
+
     ItemBorder->SetBrushColor(HoveredBorderColor);
     ItemBorder->SetBrushFromTexture(HoveredBorderImage);
     HoveredBorderTriangleImage->SetVisibility(ESlateVisibility::Visible);

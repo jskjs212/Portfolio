@@ -3,6 +3,7 @@
 #include "UI/TabMenuWidget.h"
 #include "Components/Image.h"
 #include "Components/WidgetSwitcher.h"
+#include "Kismet/GameplayStatics.h"
 #include "UI/TabButton.h"
 
 void UTabMenuWidget::NativeOnInitialized()
@@ -49,8 +50,7 @@ void UTabMenuWidget::InitMenu()
     // Initial index is already 0, so update tab button colors manually.
     for (int32 Index = 0; FTabEntry& TabEntry : TabEntries)
     {
-        const FLinearColor& TabButtonColor = Index == 0 ? TabButtonActiveColor : TabButtonInactiveColor;
-        UpdateTabButtonColor(TabEntry, TabButtonColor);
+        UpdateTabButtonColor(TabEntry, Index == 0, false);
         Index++;
     }
 }
@@ -61,6 +61,11 @@ void UTabMenuWidget::SelectTab(const int32 InIndex)
     if (InIndex < 0 || InIndex >= TabEntries.Num())
     {
         return;
+    }
+
+    if (TabButtonClickSound)
+    {
+        UGameplayStatics::PlaySound2D(this, TabButtonClickSound);
     }
 
     // Already selected
@@ -81,14 +86,18 @@ void UTabMenuWidget::SelectTab(const int32 InIndex)
             SetFocusToWidget(TabEntry.Widget);
             //SetDesiredFocusWidget(TabEntry.Widget);
         }
-        const FLinearColor& TabButtonColor = bIsTargetTab ? TabButtonActiveColor : TabButtonInactiveColor;
-        UpdateTabButtonColor(TabEntry, TabButtonColor);
+        UpdateTabButtonColor(TabEntry, bIsTargetTab, false);
         Index++;
     }
 }
 
 void UTabMenuWidget::SelectTab(const FGameplayTag InTag)
 {
+    if (TabButtonClickSound)
+    {
+        UGameplayStatics::PlaySound2D(this, TabButtonClickSound);
+    }
+
     if (ActiveTabTag == InTag)
     {
         return;
@@ -104,9 +113,7 @@ void UTabMenuWidget::SelectTab(const FGameplayTag InTag)
             SetFocusToWidget(TabEntry.Widget);
             //SetDesiredFocusWidget(TabEntry.Widget);
         }
-        // Update tab button colors
-        const FLinearColor& TabButtonColor = bIsTargetTab ? TabButtonActiveColor : TabButtonInactiveColor;
-        UpdateTabButtonColor(TabEntry, TabButtonColor);
+        UpdateTabButtonColor(TabEntry, bIsTargetTab, false);
         Index++;
     }
 }
@@ -122,20 +129,27 @@ void UTabMenuWidget::SetFocusToWidget(UWidget* InWidget)
     }
 }
 
-void UTabMenuWidget::UpdateTabButtonColor(FTabEntry& InTabEntry, const FLinearColor& InColor)
+void UTabMenuWidget::UpdateTabButtonColor(FTabEntry& InTabEntry, bool bActive, bool bHovered)
 {
+    const FLinearColor& NewColor = bHovered ? TabButtonHoveredColor : (bActive ? TabButtonActiveColor : TabButtonInactiveColor);
+
     if (bUseTabButtonImages && InTabEntry.Image)
     {
-        InTabEntry.Image->SetColorAndOpacity(InColor);
+        InTabEntry.Image->SetColorAndOpacity(NewColor);
     }
     else
     {
-        InTabEntry.TabButton->SetColorAndOpacity(InColor);
+        InTabEntry.TabButton->SetColorAndOpacity(NewColor);
     }
 }
 
 void UTabMenuWidget::HandleTabButtonHovered(const FGameplayTag InTag)
 {
+    if (TabButtonHoveredSound)
+    {
+        UGameplayStatics::PlaySound2D(this, TabButtonHoveredSound, 0.6f);
+    }
+
     if (ActiveTabTag == InTag)
     {
         return;
@@ -145,7 +159,7 @@ void UTabMenuWidget::HandleTabButtonHovered(const FGameplayTag InTag)
     {
         if (TabEntry.Tag == InTag)
         {
-            UpdateTabButtonColor(TabEntry, TabButtonHoveredColor);
+            UpdateTabButtonColor(TabEntry, false, true);
             break;
         }
     }
@@ -162,8 +176,7 @@ void UTabMenuWidget::HandleTabButtonUnhovered(const FGameplayTag InTag)
     {
         if (TabEntry.Tag == InTag)
         {
-            const FLinearColor& TabButtonColor = TabEntry.Tag == ActiveTabTag ? TabButtonActiveColor : TabButtonInactiveColor;
-            UpdateTabButtonColor(TabEntry, TabButtonColor);
+            UpdateTabButtonColor(TabEntry, TabEntry.Tag == ActiveTabTag, false);
             break;
         }
     }

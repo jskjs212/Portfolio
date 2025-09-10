@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Items/ItemTypes.h"
 #include "DemoPlayerController.generated.h"
 
 class IInteractable;
@@ -31,6 +32,8 @@ public:
     }
 
     void ShowPlayerMenu(bool bShow);
+
+    void ShowInventoryContextMenu(const FItemSlot& InSlot, int32 DesignatedIndex);
 
 private:
     void InitDemoHUD();

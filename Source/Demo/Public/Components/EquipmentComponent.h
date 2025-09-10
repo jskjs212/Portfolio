@@ -11,6 +11,7 @@
 DECLARE_LOG_CATEGORY_EXTERN(LogEquipment, Log, All);
 
 class AItem;
+class USoundBase;
 
 /**
  * Equipment
@@ -64,6 +65,11 @@ public:
     ////////////////////////////////////////////////////////
     //        Variables
     ////////////////////////////////////////////////////////
+public:
+    // TODO: Audio
+    UPROPERTY(EditDefaultsOnly, Category = "Sound")
+    TObjectPtr<USoundBase> EquipSound;
+
 private:
     // nullptr = not equipped
     UPROPERTY(VisibleAnywhere, Category = "Item", meta = (Categories = "Item"))

@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UI/InventoryPageWidget.h"
+#include "Components/Button.h"
 #include "Components/Image.h"
 #include "Components/InventoryComponent.h"
 #include "Components/WrapBox.h"
@@ -8,6 +9,7 @@
 #include "GameFramework/Pawn.h"
 #include "GameplayTagContainer.h"
 #include "Items/ItemTypes.h"
+#include "UI/ContextMenuWidget.h"
 #include "UI/ItemSlotWidget.h"
 #include "UI/TabButton.h"
 
@@ -18,7 +20,7 @@ void UInventoryPageWidget::NativeOnInitialized()
     checkf(WeaponTabButton && WeaponTabImage && WeaponWrapBox
         && ArmorTabButton && ArmorTabImage && ArmorWrapBox
         && ConsumableTabButton && ConsumableTabImage && ConsumableWrapBox
-        && ItemSlotWidgetClass,
+        && ItemSlotWidgetClass && ContextMenuWidgetClass,
         TEXT("Failed to bind widgets."));
 
     bUseTabButtonImages = true;
@@ -31,12 +33,27 @@ void UInventoryPageWidget::NativeOnInitialized()
 
     InitMenu();
 
+    TArray<FContextAction> Actions;
+    Actions.Add(FContextAction{FText::FromString(TEXT("Use"))});
+    Actions.Add(FContextAction{FText::FromString(TEXT("Drop"))});
+    Actions.Add(FContextAction{FText::FromString(TEXT("Cancel"))});
+
+    // Create context menu
+    ContextMenuWidget = CreateWidget<UContextMenuWidget>(this, ContextMenuWidgetClass);
+    checkf(ContextMenuWidget, TEXT("Failed to create ContextMenuWidget."));
+    ContextMenuWidget->SetupActions(Actions);
+    ContextMenuWidget->SetVisibility(ESlateVisibility::Hidden);
+    ContextMenuWidget->AddToViewport(3);
+
+    TArray<TObjectPtr<UButton>>& Buttons = ContextMenuWidget->GetActionButtons();
+
     // Bind inventory update event
     if (APawn* OwningPawn = GetOwningPlayerPawn())
     {
         if (UInventoryComponent* InventoryComponent = OwningPawn->FindComponentByClass<UInventoryComponent>())
         {
             InventoryComponent->OnInventoryUpdated.AddUObject(this, &UInventoryPageWidget::UpdateItemSlots);
+            UpdateItemSlots();
         }
     }
 }
@@ -142,4 +159,9 @@ void UInventoryPageWidget::UpdateItemSlots()
             }
         }
     }
+}
+
+void UInventoryPageWidget::ShowContextMenu(const FItemSlot& InSlot, int32 InIndex)
+{
+    ContextMenuWidget->ShowContextMenu(InSlot, InIndex);
 }

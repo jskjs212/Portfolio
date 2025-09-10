@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "UI/TabMenuWidget.h"
+#include "Items/ItemTypes.h"
 #include "InventoryPageWidget.generated.h"
 
+class UContextMenuWidget;
 class UImage;
 class UItemSlotWidget;
 class UTabButton;
@@ -31,8 +33,12 @@ protected:
     //        UI functions
     ////////////////////////////////////////////////////////
 public:
-    // Update item slots UI from owner pawn's InventoryComponent.
+    // Update item slots UI from owner pawn's InventoryComponent (when visible)
     void UpdateItemSlots();
+
+    void ShowContextMenu(const FItemSlot& InSlot, int32 InIndex);
+
+    bool IsPendingUpdate() const { return bPendingUpdateItemSlots; }
 
     ////////////////////////////////////////////////////////
     //        Widgets
@@ -76,4 +82,9 @@ private:
 
     UPROPERTY(EditDefaultsOnly, Category = "ItemSlot")
     TSubclassOf<UItemSlotWidget> ItemSlotWidgetClass;
+
+    UPROPERTY(EditDefaultsOnly, Category = "ItemSlot")
+    TSubclassOf<UContextMenuWidget> ContextMenuWidgetClass;
+
+    TObjectPtr<UContextMenuWidget> ContextMenuWidget;
 };

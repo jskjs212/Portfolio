@@ -73,6 +73,7 @@ void APlayerCharacter::BeginPlay()
         DemoPlayerController->InitUI();
     }
 
+    // Set timers for interactable tracing and sprint stamina consumption.
     // Trace for interactables at intervals rather than every tick.
     if (UWorld* World = GetWorld())
     {
@@ -373,22 +374,6 @@ void APlayerCharacter::Test1_Implementation()
     TestShield.Quantity = 1;
     EquipmentComponent->EquipItem(TestWeapon);
     EquipmentComponent->EquipItem(TestShield);
-
-    UE_LOG(LogTemp, Display, TEXT("APlayerCharacter::Test1() - AddItem"));
-    TestFood.Quantity = 3;
-    InventoryComponent->AddItem(TestFood, 5);
-    InventoryComponent->AddItem(TestFood, 6);
-
-    UE_LOG(LogTemp, Display, TEXT("APlayerCharacter::Test1() - UseItem - Food"));
-    FItemActionRequest Request;
-    StatsComponent->TakeDamage(30.f);
-    Request.Slot = TestFood;
-    Request.DesignatedIndex = 5;
-    Request.Quantity = 2;
-    InventoryComponent->UseItem(Request);
-
-    InventoryComponent->SwapItem(DemoGameplayTags::Item_Consumable, 5, 6);
-    InventoryComponent->AddMaxSlotSize(DemoGameplayTags::Item_Consumable, 1);
 }
 
 void APlayerCharacter::Test2_Implementation()
@@ -400,14 +385,4 @@ void APlayerCharacter::Test2_Implementation()
     TestShield.Quantity = 1;
     EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Weapon);
     EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Armor_Shield);
-
-    UE_LOG(LogTemp, Display, TEXT("APlayerCharacter::Test2() - AddItem"));
-    InventoryComponent->AddItem(TestWeapon, 6);
-
-    UE_LOG(LogTemp, Display, TEXT("APlayerCharacter::Test2() - DropItem"));
-    FItemActionRequest Request;
-    Request.Slot = TestWeapon;
-    Request.DesignatedIndex = 6;
-    Request.Quantity = 1;
-    InventoryComponent->DropItem(Request);
 }

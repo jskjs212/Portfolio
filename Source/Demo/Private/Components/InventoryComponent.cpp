@@ -213,6 +213,7 @@ void UInventoryComponent::InitMaxSlots()
         }
     }
 
+    // Inventory page is not initialized yet, but just in case.
     OnInventoryUpdated.Broadcast();
 }
 
