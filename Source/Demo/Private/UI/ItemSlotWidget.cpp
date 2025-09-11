@@ -32,13 +32,10 @@ FReply UItemSlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, con
     if (ItemSlot.IsValid())
     {
         // RMB -> Show context menu
-        if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))
+        if (InMouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
         {
-            if (ADemoPlayerController* DemoPlayerController = GetOwningPlayer<ADemoPlayerController>())
-            {
-                DemoPlayerController->ShowInventoryContextMenu(ItemSlot, Index);
-                return FReply::Handled();
-            }
+            RightClicked.ExecuteIfBound(ItemSlot, Index);
+            return FReply::Handled();
         }
     }
 
@@ -92,6 +89,10 @@ void UItemSlotWidget::HandleHovered()
         UGameplayStatics::PlaySound2D(this, HoveredSound, 0.5f);
     }
 
+    if (ItemSlot.IsValid())
+    {
+        OnHovered.ExecuteIfBound(ItemSlot);
+    }
     ItemBorder->SetBrushColor(HoveredBorderColor);
     ItemBorder->SetBrushFromTexture(HoveredBorderImage);
     HoveredBorderTriangleImage->SetVisibility(ESlateVisibility::Visible);
@@ -99,6 +100,7 @@ void UItemSlotWidget::HandleHovered()
 
 void UItemSlotWidget::HandleUnhovered()
 {
+    OnUnhovered.ExecuteIfBound();
     ItemBorder->SetBrushColor(NormalBorderColor);
     ItemBorder->SetBrushFromTexture(NormalBorderImage);
     HoveredBorderTriangleImage->SetVisibility(ESlateVisibility::Hidden);

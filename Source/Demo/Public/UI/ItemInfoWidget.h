@@ -7,6 +7,7 @@
 #include "Items/ItemTypes.h"
 #include "ItemInfoWidget.generated.h"
 
+struct FItemDataBase;
 class UImage;
 class UTextBlock;
 class UTexture2D;
@@ -29,7 +30,8 @@ protected:
     virtual void NativeOnInitialized() override;
 
 public:
-    void UpdateItemInfo(const FItemSlot& InSlot);
+    // @return ItemData if valid.
+    const FItemDataBase* UpdateItemInfo(const FItemSlot& InSlot);
 
     ////////////////////////////////////////////////////////
     //        Widgets

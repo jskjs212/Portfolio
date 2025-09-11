@@ -39,9 +39,9 @@ void UTabMenuWidget::InitMenu()
     // Bind tab button events
     for (FTabEntry& TabEntry : TabEntries)
     {
-        TabEntry.TabButton->OnTabButtonClicked.BindUObject(this, &UTabMenuWidget::HandleTabButtonClicked);
-        TabEntry.TabButton->OnTabButtonHovered.BindUObject(this, &UTabMenuWidget::HandleTabButtonHovered);
-        TabEntry.TabButton->OnTabButtonUnhovered.BindUObject(this, &UTabMenuWidget::HandleTabButtonUnhovered);
+        TabEntry.TabButton->OnTabButtonClicked.BindUObject(this, &ThisClass::HandleTabButtonClicked);
+        TabEntry.TabButton->OnTabButtonHovered.BindUObject(this, &ThisClass::HandleTabButtonHovered);
+        TabEntry.TabButton->OnTabButtonUnhovered.BindUObject(this, &ThisClass::HandleTabButtonUnhovered);
     }
 
     ActiveTabTag = TabEntries[0].Tag;

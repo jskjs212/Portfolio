@@ -5,7 +5,6 @@
 #include "Items/Item.h"
 #include "UI/DemoHUD.h"
 #include "UI/DemoHUDWidget.h"
-#include "UI/InventoryPageWidget.h"
 #include "UI/PlayerMenuWidget.h"
 
 ADemoPlayerController::ADemoPlayerController()
@@ -21,6 +20,9 @@ ADemoPlayerController::ADemoPlayerController()
         UE_LOG(LogTemp, Error, TEXT("ADemoHUD - PlayerMenuWidget BP not found."));
         PlayerMenuWidgetClass = UPlayerMenuWidget::StaticClass();
     }
+
+    ItemActionDispatcher = CreateDefaultSubobject<UItemActionDispatcher>(TEXT("ItemActionDispatcher"));
+    check(ItemActionDispatcher);
 }
 
 void ADemoPlayerController::ShowPlayerMenu(bool bShow)
@@ -78,11 +80,6 @@ void ADemoPlayerController::ShowPlayerMenu(bool bShow)
     }
 }
 
-void ADemoPlayerController::ShowInventoryContextMenu(const FItemSlot& InSlot, int32 DesignatedIndex)
-{
-    PlayerMenuWidget->InventoryPageWidget->ShowContextMenu(InSlot, DesignatedIndex);
-}
-
 void ADemoPlayerController::InitDemoHUD()
 {
     ADemoHUD* DemoHUD = GetHUD<ADemoHUD>();
@@ -93,7 +90,7 @@ void ADemoPlayerController::InitDemoHUD()
         // Bind functions that update HUD widgets to character delegates.
         if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetPawn()))
         {
-            PlayerCharacter->OnInteractableFocused.BindUObject(this, &ADemoPlayerController::HandleInteractableFocused);
+            PlayerCharacter->OnInteractableFocused.BindUObject(this, &ThisClass::HandleInteractableFocused);
         }
     }
 }

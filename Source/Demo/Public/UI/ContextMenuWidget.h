@@ -4,12 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Items/ItemTypes.h"
-#include "Styling/SlateTypes.h"
+#include "GameplayTagContainer.h"
 #include "ContextMenuWidget.generated.h"
 
-class UButton;
 class UImage;
+class UTabButton;
 class UVerticalBox;
 
 USTRUCT()
@@ -18,6 +17,8 @@ struct FContextAction
     GENERATED_BODY()
 
     FText Label;
+
+    FGameplayTag ActionTag;
 };
 
 /**
@@ -44,50 +45,45 @@ protected:
 public:
     void SetupActions(const TArray<FContextAction>& InActions);
 
-    void ShowContextMenu(const FItemSlot& InSlot, int32 DesignatedIndex);
-
-    void HideContextMenu()
+    FORCEINLINE void ShowContextMenu()
     {
-        ClearActionRequest();
+        SetPositionToCursor();
+        SetVisibility(ESlateVisibility::Visible);
+    }
+
+    FORCEINLINE void HideContextMenu()
+    {
+        UE_LOG(LogTemp, Display, TEXT("UContextMenuWidget::HideContextMenu"));
         SetVisibility(ESlateVisibility::Hidden);
     }
 
 private:
     void SetPositionToCursor();
 
-    void ClearActionRequest() { ActionRequest.Slot = FItemSlot{}; }
+    UFUNCTION()
+    void HandleButtonHovered(FGameplayTag InTag);
 
     UFUNCTION()
-    void HandleButtonHovered();
-
-    UFUNCTION()
-    void HandleButtonUnhovered();
+    void HandleButtonUnhovered(FGameplayTag InTag);
 
     ////////////////////////////////////////////////////////
     //        Get & set
     ////////////////////////////////////////////////////////
 public:
-    FORCEINLINE TArray<TObjectPtr<UButton>>& GetActionButtons() { return ActionButtons; }
-
-    FORCEINLINE void SetActionRequest(const FItemSlot& InSlot, int32 DesignatedIndex)
-    {
-        ActionRequest.Slot = InSlot;
-        ActionRequest.DesignatedIndex = DesignatedIndex;
-        ActionRequest.Quantity = 0;
-    }
+    FORCEINLINE TArray<TObjectPtr<UTabButton>>& GetActionButtons() { return ActionButtons; }
 
     ////////////////////////////////////////////////////////
     //        Widgets
     ////////////////////////////////////////////////////////
 public:
     UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UButton> FirstDesignButton;
+    TObjectPtr<UTabButton> FirstDesignButton;
 
     UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UButton> MiddleDesignButton;
+    TObjectPtr<UTabButton> MiddleDesignButton;
 
     UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UButton> LastDesignButton;
+    TObjectPtr<UTabButton> LastDesignButton;
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UVerticalBox> ContextVerticalBox;
@@ -96,14 +92,10 @@ public:
     //        Variables
     ////////////////////////////////////////////////////////
 protected:
-    TArray<TObjectPtr<UButton>> ActionButtons;
+    TArray<TObjectPtr<UTabButton>> ActionButtons;
 
     TArray<TObjectPtr<UImage>> HoveredImages;
 
-    //FButtonStyle FirstButtonStyle;
-    //FButtonStyle MiddleButtonStyle;
-    //FButtonStyle LastButtonStyle;
-
 private:
-    FItemActionRequest ActionRequest;
+    bool bSetupDone{false};
 };

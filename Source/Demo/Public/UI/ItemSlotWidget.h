@@ -15,6 +15,9 @@ class USoundBase;
 class UTextBlock;
 class UTexture2D;
 
+DECLARE_DELEGATE_TwoParams(FOnItemSlotClicked, const FItemSlot& /* InSlot */, int32 /* InIndex */);
+DECLARE_DELEGATE_OneParam(FOnItemSlotHovered, const FItemSlot& /* InSlot */);
+
 /**
  *
  */
@@ -22,6 +25,16 @@ UCLASS()
 class DEMO_API UItemSlotWidget : public UUserWidget
 {
     GENERATED_BODY()
+
+    ////////////////////////////////////////////////////////
+    //        Delegates
+    ////////////////////////////////////////////////////////
+public:
+    FOnItemSlotClicked RightClicked;
+
+    FOnItemSlotHovered OnHovered;
+
+    FSimpleDelegate OnUnhovered;
 
     ////////////////////////////////////////////////////////
     //        UUserWidget functions

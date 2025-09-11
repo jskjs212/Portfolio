@@ -1,14 +1,20 @@
+- ItemSlot 우클릭을 Delegate로 처리하기
+
 ## Bugs
-Page 하위 위젯 외의 뭔가를 클릭하면 Page 포커스가 사라짐
+- 몇번쓰고나면 ContextMenu 버튼이 안 먹히는데?
+> Use했는데 피 꽉 차서 못 썼을 때 이후?\
+> RequestUseItem에서 IsBound? 하는데도 null 접근 발생함.
+- HideContextMenu 할 때 focus 돌려주기
+- Page 하위 위젯 외의 뭔가를 클릭하면 Page 포커스가 사라짐
+- ContextMenu 버튼 겹쳐서 Hover 위치가 애매함
 
 ## TODO
 ### UI
-- ContextMenu: Use, Equip, Drop, Cancel
 - 탭버튼 image + style? UImage + color?
 - All UI: Z order
 
 InventoryPage:
-- ToolTip, Drag & Drop
+- Drag & Drop
 
 StateComponent?
 - CharacterState, CharacterAction?
@@ -22,6 +28,12 @@ ESC:
 
 BPClass:
 - 클래스마다 흩어져 있는 BPClass 찾기를 하나의 DataAsset?에 모으기?
+
+ContextMenu:
+- PlayerMenu나 Inventory 탭이 바뀌면 닫기
+
+Equipment:
+- Equip 안에서 Unequip할 때 같은 slot에 돌려놓기 (비었으면)
 
 ## check
 ### 모든 클래스: 초기값 세팅이 필요한 변수 세팅 검사하기

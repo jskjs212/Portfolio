@@ -34,12 +34,12 @@ void UItemInfoWidget::NativeOnInitialized()
     }
 }
 
-void UItemInfoWidget::UpdateItemInfo(const FItemSlot& InSlot)
+const FItemDataBase* UItemInfoWidget::UpdateItemInfo(const FItemSlot& InSlot)
 {
     const FItemDataBase* ItemData = InSlot.RowHandle.GetRow<FItemDataBase>(TEXT("UItemInfoWidget::UpdateItemInfo()"));
     if (!ItemData)
     {
-        return;
+        return nullptr;
     }
 
     // Update
@@ -47,4 +47,6 @@ void UItemInfoWidget::UpdateItemInfo(const FItemSlot& InSlot)
     CategoryImage->SetBrushFromTexture(CategoryImages[ItemCategory]);
     NameText->SetText(FText::FromName(ItemData->Name));
     DescriptionText->SetText(ItemData->Description);
+
+    return ItemData;
 }

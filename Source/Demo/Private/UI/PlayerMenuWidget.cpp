@@ -84,7 +84,7 @@ void UPlayerMenuWidget::SetFocusToWidget(UWidget* InWidget)
     {
         if (InventoryPage->IsPendingUpdate())
         {
-            InventoryPage->UpdateItemSlots();
+            InventoryPage->UpdateItemSlotsUI();
         }
     }
 }

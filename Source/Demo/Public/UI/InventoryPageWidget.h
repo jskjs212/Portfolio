@@ -7,8 +7,10 @@
 #include "Items/ItemTypes.h"
 #include "InventoryPageWidget.generated.h"
 
+class UBorder;
 class UContextMenuWidget;
 class UImage;
+class UItemInfoWidget;
 class UItemSlotWidget;
 class UTabButton;
 class UWrapBox;
@@ -34,11 +36,39 @@ protected:
     ////////////////////////////////////////////////////////
 public:
     // Update item slots UI from owner pawn's InventoryComponent (when visible)
-    void UpdateItemSlots();
+    void UpdateItemSlotsUI();
 
     void ShowContextMenu(const FItemSlot& InSlot, int32 InIndex);
 
     bool IsPendingUpdate() const { return bPendingUpdateItemSlots; }
+
+    FORCEINLINE void SetActionRequest(const FItemSlot& InSlot, int32 DesignatedIndex)
+    {
+        ItemActionRequest.Slot = InSlot;
+        ItemActionRequest.DesignatedIndex = DesignatedIndex;
+        ItemActionRequest.Quantity = 0;
+    }
+
+private:
+    void SetupContextMenu();
+
+    void BindToInventoryUpdates();
+
+    // Just enough to invalidate
+    //void ClearActionRequest() { ItemActionRequest.Slot = FItemSlot{}; }
+
+    ////////////////////////////////////////////////////////
+    //        Handlers
+    ////////////////////////////////////////////////////////
+private:
+    UFUNCTION()
+    void HandleContextMenuButtonClicked(FGameplayTag InTag);
+
+    void HandleItemSlotRightClicked(const FItemSlot& InSlot, int32 InIndex);
+
+    void ShowItemInfo(const FItemSlot& InSlot);
+
+    void HideItemInfo();
 
     ////////////////////////////////////////////////////////
     //        Widgets
@@ -74,12 +104,17 @@ public:
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UWrapBox> ConsumableWrapBox;
 
-    ////////////////////////////////////////////////////////
-    //        Variables
-    ////////////////////////////////////////////////////////
-private:
-    bool bPendingUpdateItemSlots{false};
+    /* Else */
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UItemInfoWidget> ItemInfoWidget;
 
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UBorder> ItemPreviewBorder;
+
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UImage> ItemPreviewImage;
+
+private:
     UPROPERTY(EditDefaultsOnly, Category = "ItemSlot")
     TSubclassOf<UItemSlotWidget> ItemSlotWidgetClass;
 
@@ -87,4 +122,11 @@ private:
     TSubclassOf<UContextMenuWidget> ContextMenuWidgetClass;
 
     TObjectPtr<UContextMenuWidget> ContextMenuWidget;
+
+    ////////////////////////////////////////////////////////
+    //        Variables
+    ////////////////////////////////////////////////////////
+    bool bPendingUpdateItemSlots{false};
+
+    FItemActionRequest ItemActionRequest;
 };

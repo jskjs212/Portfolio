@@ -6,8 +6,11 @@
 #include "Components/StatsComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "DemoTypes/TableRowBases.h"
+#include "GameFramework/Pawn.h"
 #include "Items/Item.h"
 #include "Items/ItemTypes.h"
+#include "PlayerController/DemoPlayerController.h"
+#include "UI/ItemActionDispatcher.h"
 
 DEFINE_LOG_CATEGORY(LogInventory);
 
@@ -31,6 +34,7 @@ void UInventoryComponent::BeginPlay()
     checkf(MaxSlotSizes.Num() == DemoItemTypes::GetItemCategories().Num(), TEXT("MaxSlotSizes should have all ItemCategories."));
 
     InitMaxSlots();
+    BindToItemActionDispatcher();
 }
 
 int32 UInventoryComponent::AddItem(const FItemSlot& InSlot, const int32 DesignatedIndex)
@@ -215,6 +219,21 @@ void UInventoryComponent::InitMaxSlots()
 
     // Inventory page is not initialized yet, but just in case.
     OnInventoryUpdated.Broadcast();
+}
+
+void UInventoryComponent::BindToItemActionDispatcher()
+{
+    if (APawn* Pawn = Cast<APawn>(GetOwner()))
+    {
+        if (ADemoPlayerController* DemoPlayerController = Pawn->GetController<ADemoPlayerController>())
+        {
+            if (UItemActionDispatcher* ItemActionDispatcher = DemoPlayerController->GetItemActionDispatcher())
+            {
+                ItemActionDispatcher->OnUseItemRequested.BindUObject(this, &ThisClass::UseItem);
+                ItemActionDispatcher->OnDropItemRequested.BindUObject(this, &ThisClass::DropItem);
+            }
+        }
+    }
 }
 
 bool UInventoryComponent::AddItem_Validate(const FItemSlot& InSlot, FInventoryValidatedData& OutData)

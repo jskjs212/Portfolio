@@ -102,6 +102,9 @@ private:
     // Set initial max slot sizes, and fill with empty slots if bFixSlotSizeAndExposeEmptySlots == true.
     void InitMaxSlots();
 
+    // Bind inventory functions to UI's item action dispatcher.
+    void BindToItemActionDispatcher();
+
     // @return true if the slot is empty in inventory's perspective.
     FORCEINLINE bool IsInventorySlotEmpty(const FItemSlot& Slot) const
     {

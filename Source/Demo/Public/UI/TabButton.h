@@ -20,11 +20,18 @@ class DEMO_API UTabButton : public UButton
 {
     GENERATED_BODY()
 
+    ////////////////////////////////////////////////////////
+    //        Delegates
+    ////////////////////////////////////////////////////////
 public:
     FOnTabButtonClicked OnTabButtonClicked;
     FOnTabButtonHovered OnTabButtonHovered;
     FOnTabButtonUnhovered OnTabButtonUnhovered;
 
+    ////////////////////////////////////////////////////////
+    //        UI functions
+    ////////////////////////////////////////////////////////
+public:
     virtual void SynchronizeProperties() override
     {
         Super::SynchronizeProperties();
@@ -35,14 +42,18 @@ public:
         }
 
         // TEST:
-        PRAGMA_DISABLE_DEPRECATION_WARNINGS;
-        IsFocusable = false;
-        PRAGMA_ENABLE_DEPRECATION_WARNINGS;
+        //PRAGMA_DISABLE_DEPRECATION_WARNINGS;
+        //IsFocusable = false;
+        //PRAGMA_ENABLE_DEPRECATION_WARNINGS;
 
         OnClicked.AddDynamic(this, &ThisClass::HandleOnClicked);
         OnHovered.AddDynamic(this, &ThisClass::HandleOnHovered);
         OnUnhovered.AddDynamic(this, &ThisClass::HandleOnUnhovered);
     }
+
+    FORCEINLINE FGameplayTag GetTabTag() const { return TabTag; }
+
+    FORCEINLINE void SetTabTag(FGameplayTag InTag) { TabTag = InTag; }
 
 private:
     UFUNCTION()
@@ -54,6 +65,9 @@ private:
     UFUNCTION()
     void HandleOnUnhovered() { OnTabButtonUnhovered.ExecuteIfBound(TabTag); }
 
+    ////////////////////////////////////////////////////////
+    //        Variables
+    ////////////////////////////////////////////////////////
 protected:
     UPROPERTY(EditAnywhere, Category = "Tab")
     FGameplayTag TabTag;
