@@ -1,12 +1,6 @@
-- ItemSlot 우클릭을 Delegate로 처리하기
-
 ## Bugs
-- 몇번쓰고나면 ContextMenu 버튼이 안 먹히는데?
-> Use했는데 피 꽉 차서 못 썼을 때 이후?\
-> RequestUseItem에서 IsBound? 하는데도 null 접근 발생함.
-- HideContextMenu 할 때 focus 돌려주기
 - Page 하위 위젯 외의 뭔가를 클릭하면 Page 포커스가 사라짐
-- ContextMenu 버튼 겹쳐서 Hover 위치가 애매함
+- ContextMenu 버튼 겹쳐서 Hover 바뀌는 시점이 애매함
 
 ## TODO
 ### UI
@@ -34,6 +28,8 @@ ContextMenu:
 
 Equipment:
 - Equip 안에서 Unequip할 때 같은 slot에 돌려놓기 (비었으면)
+
+- OnPossess: Bind to UI
 
 ## check
 ### 모든 클래스: 초기값 세팅이 필요한 변수 세팅 검사하기
@@ -72,7 +68,12 @@ MusicComponent? MusicSystem in GameInstance? SoundClasses?
 ### Misc
 Interactable: Glowing effect
 
-## Solved?
+## Debug history
+- Nuget warning: Just update packages...
+- 25-9-12: GC issue
+> 게임 중 Character, Component, UI 등 변경 없이 가만히 있어도 1분 후부터 ContextMenu의 Use, Drop이 안 먹힘. ItemActionDispatcher의 Request()에서 IsBound() == false, null 접근 발생. 생성, 바인드, 호출 등 코드 흐름 모두 이상 없음.\
+> DemoPlayerController의 ItemActionDispatcher에 UPROPERTY()를 붙이는 것으로 해결.\
+> UPROPERTY() 리플렉션이 없어서 CreateDefaultSubobject로 생성 후 Controller 소유 Mark가 되지 않아 GC 대상이 되었던 것.
 
 ## Final tasks
 ### 문서화

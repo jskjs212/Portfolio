@@ -186,7 +186,7 @@ void AItem::SetupMesh()
         UKismetSystemLibrary::GetComponentBounds(CurrentMesh, Origin, BoxExtent, Radius);
         InteractCollision->SetBoxExtent(BoxExtent);
         // TEST:
-        UE_LOG(LogTemp, Display, TEXT("AItem::SetupMesh() - BoxExtent: %s, Origin: %s."), *BoxExtent.ToString(), *Origin.ToString());
+        //UE_LOG(LogTemp, Display, TEXT("AItem::SetupMesh() - BoxExtent: %s, Origin: %s."), *BoxExtent.ToString(), *Origin.ToString());
     }
 }
 

@@ -6,6 +6,7 @@
 #include "Components/Overlay.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
+#include "Framework/Application/SlateApplication.h"
 #include "UI/TabButton.h"
 
 void UContextMenuWidget::NativeOnInitialized()
@@ -66,6 +67,7 @@ void UContextMenuWidget::SetupActions(const TArray<FContextAction>& InActions)
             NewButton->OnTabButtonHovered.BindUObject(this, &ThisClass::HandleButtonHovered);
             NewButton->OnTabButtonUnhovered.BindUObject(this, &ThisClass::HandleButtonUnhovered);
             NewButton->SetVisibility(ESlateVisibility::Visible);
+
             ContextVerticalBox->AddChild(NewButton);
             ActionButtons.Add(NewButton);
 
@@ -102,6 +104,31 @@ void UContextMenuWidget::SetupActions(const TArray<FContextAction>& InActions)
     {
         UE_LOG(LogTemp, Error, TEXT("UContextMenuWidget::SetupActions - ActionButtons.Num() != InActions.Num()"));
     }
+}
+
+void UContextMenuWidget::ShowContextMenu()
+{
+    PreviousFocus = FSlateApplication::Get().GetUserFocusedWidget(0);
+
+    SetPositionToCursor();
+    SetVisibility(ESlateVisibility::Visible);
+}
+
+void UContextMenuWidget::HideContextMenu()
+{
+    if (!IsVisible())
+    {
+        return;
+    }
+
+    // Return focus
+    if (PreviousFocus.IsValid())
+    {
+        FSlateApplication::Get().SetUserFocus(0, PreviousFocus.Pin(), EFocusCause::SetDirectly);
+    }
+    PreviousFocus = nullptr;
+
+    SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UContextMenuWidget::SetPositionToCursor()

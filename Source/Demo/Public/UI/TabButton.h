@@ -41,11 +41,6 @@ public:
             UE_LOG(LogTemp, Error, TEXT("TabTag is not set in %s"), *GetName());
         }
 
-        // TEST:
-        //PRAGMA_DISABLE_DEPRECATION_WARNINGS;
-        //IsFocusable = false;
-        //PRAGMA_ENABLE_DEPRECATION_WARNINGS;
-
         OnClicked.AddDynamic(this, &ThisClass::HandleOnClicked);
         OnHovered.AddDynamic(this, &ThisClass::HandleOnHovered);
         OnUnhovered.AddDynamic(this, &ThisClass::HandleOnUnhovered);

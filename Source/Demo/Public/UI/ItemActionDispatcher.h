@@ -7,9 +7,7 @@
 #include "ItemActionDispatcher.generated.h"
 
 DECLARE_DELEGATE_RetVal_TwoParams(int32, FOnAddItemRequested, const FItemSlot& /* InSlot */, int32 /* DesignatedIndex */);
-DECLARE_DELEGATE_RetVal_OneParam(int32, FOnRemoveItemRequested, const FItemActionRequest& /* Request */);
-DECLARE_DELEGATE_RetVal_OneParam(int32, FOnUseItemRequested, const FItemActionRequest& /* Request */);
-DECLARE_DELEGATE_RetVal_OneParam(int32, FOnDropItemRequested, const FItemActionRequest& /* Request */);
+DECLARE_DELEGATE_RetVal_OneParam(int32, FOnItemActionRequested, const FItemActionRequest& /* Request */);
 DECLARE_DELEGATE_RetVal_ThreeParams(bool, FOnSwapItemRequested, FGameplayTag /* ItemCategory */, int32 /* FirstIndex */, int32 /* SecondIndex */);
 
 /**
@@ -26,11 +24,11 @@ class DEMO_API UItemActionDispatcher : public UObject
 public:
     FOnAddItemRequested OnAddItemRequested;
 
-    FOnRemoveItemRequested OnRemoveItemRequested;
+    FOnItemActionRequested OnRemoveItemRequested;
 
-    FOnUseItemRequested OnUseItemRequested;
+    FOnItemActionRequested OnUseItemRequested;
 
-    FOnDropItemRequested OnDropItemRequested;
+    FOnItemActionRequested OnDropItemRequested;
 
     FOnSwapItemRequested OnSwapItemRequested;
 

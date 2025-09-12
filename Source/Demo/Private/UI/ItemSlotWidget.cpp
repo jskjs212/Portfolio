@@ -8,7 +8,6 @@
 #include "DemoTypes/TableRowBases.h"
 #include "Items/ItemTypes.h"
 #include "Kismet/GameplayStatics.h"
-#include "PlayerController/DemoPlayerController.h"
 
 void UItemSlotWidget::NativeOnInitialized()
 {

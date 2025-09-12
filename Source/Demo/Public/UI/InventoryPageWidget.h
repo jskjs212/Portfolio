@@ -121,6 +121,7 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "ItemSlot")
     TSubclassOf<UContextMenuWidget> ContextMenuWidgetClass;
 
+    UPROPERTY()
     TObjectPtr<UContextMenuWidget> ContextMenuWidget;
 
     ////////////////////////////////////////////////////////

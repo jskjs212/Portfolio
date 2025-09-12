@@ -57,8 +57,10 @@ public:
 public:
     TSubclassOf<UPlayerMenuWidget> PlayerMenuWidgetClass;
 
+    UPROPERTY()
     TObjectPtr<UPlayerMenuWidget> PlayerMenuWidget;
 
 private:
+    UPROPERTY()
     TObjectPtr<UItemActionDispatcher> ItemActionDispatcher;
 };

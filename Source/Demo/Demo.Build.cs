@@ -27,6 +27,7 @@ public class Demo : ModuleRules
                 "InputCore",
                 "EnhancedInput",
                 "UMG",
+                "Slate",
                 "SlateCore",
                 "GameplayTags"
             }

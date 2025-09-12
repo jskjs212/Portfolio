@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "GameplayTagContainer.h"
+#include "Widgets/SWidget.h"
 #include "ContextMenuWidget.generated.h"
 
 class UImage;
@@ -45,17 +46,9 @@ protected:
 public:
     void SetupActions(const TArray<FContextAction>& InActions);
 
-    FORCEINLINE void ShowContextMenu()
-    {
-        SetPositionToCursor();
-        SetVisibility(ESlateVisibility::Visible);
-    }
+    void ShowContextMenu();
 
-    FORCEINLINE void HideContextMenu()
-    {
-        UE_LOG(LogTemp, Display, TEXT("UContextMenuWidget::HideContextMenu"));
-        SetVisibility(ESlateVisibility::Hidden);
-    }
+    void HideContextMenu();
 
 private:
     void SetPositionToCursor();
@@ -92,10 +85,14 @@ public:
     //        Variables
     ////////////////////////////////////////////////////////
 protected:
+    UPROPERTY()
     TArray<TObjectPtr<UTabButton>> ActionButtons;
 
+    UPROPERTY()
     TArray<TObjectPtr<UImage>> HoveredImages;
 
 private:
     bool bSetupDone{false};
+
+    TWeakPtr<SWidget> PreviousFocus;
 };

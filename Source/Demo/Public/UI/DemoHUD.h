@@ -32,5 +32,6 @@ public:
 public:
     TSubclassOf<UDemoHUDWidget> DemoHUDWidgetClass;
 
+    UPROPERTY()
     TObjectPtr<UDemoHUDWidget> DemoHUDWidget;
 };
