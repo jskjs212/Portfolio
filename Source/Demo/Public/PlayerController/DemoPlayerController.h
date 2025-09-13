@@ -20,13 +20,19 @@ class DEMO_API ADemoPlayerController : public APlayerController
 {
     GENERATED_BODY()
 
-public:
-    ADemoPlayerController();
+    ////////////////////////////////////////////////////////
+    //        Subobjects
+    ////////////////////////////////////////////////////////
+private:
+    UPROPERTY()
+    TObjectPtr<UItemActionDispatcher> ItemActionDispatcher;
 
     ////////////////////////////////////////////////////////
     //        UI functions
     ////////////////////////////////////////////////////////
 public:
+    ADemoPlayerController();
+
     void InitUI()
     {
         InitDemoHUD();
@@ -59,8 +65,4 @@ public:
 
     UPROPERTY()
     TObjectPtr<UPlayerMenuWidget> PlayerMenuWidget;
-
-private:
-    UPROPERTY()
-    TObjectPtr<UItemActionDispatcher> ItemActionDispatcher;
 };

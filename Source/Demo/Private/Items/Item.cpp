@@ -207,7 +207,12 @@ void AItem::Interact(APawn* InstigatorPawn)
     {
         if (UInventoryComponent* InventoryComp = InstigatorPawn->FindComponentByClass<UInventoryComponent>())
         {
-            const int32 Added = InventoryComp->AddItem(ItemSlot);
+            // Index = -1
+            FItemActionRequest Request;
+            Request.Slot = ItemSlot;
+            Request.Quantity = ItemSlot.Quantity;
+
+            const int32 Added = InventoryComp->AddItem(Request);
             ItemSlot.Quantity -= Added;
 
             if (Added > 0)

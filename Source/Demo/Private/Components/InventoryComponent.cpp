@@ -37,14 +37,14 @@ void UInventoryComponent::BeginPlay()
     BindToItemActionDispatcher();
 }
 
-int32 UInventoryComponent::AddItem(const FItemSlot& InSlot, const int32 DesignatedIndex)
+int32 UInventoryComponent::AddItem(const FItemActionRequest& Request)
 {
-    const int32 OriginalQuantity = InSlot.Quantity;
-    int32 RemainingQuantity = InSlot.Quantity;
+    const int32 OriginalQuantity = Request.Slot.Quantity;
+    int32 RemainingQuantity = Request.Slot.Quantity;
     FInventoryValidatedData ValidatedData;
 
     // Validate and get data
-    bool bValid = AddItem_Validate(InSlot, ValidatedData);
+    bool bValid = AddItem_Validate(Request.Slot, ValidatedData);
     if (!bValid)
     {
         return -1; // Log in AddItem_Validate()
@@ -53,7 +53,14 @@ int32 UInventoryComponent::AddItem(const FItemSlot& InSlot, const int32 Designat
     // Add item
     int32 MaxStackSize = ValidatedData.ItemData->MaxStackSize;
     int32 MaxSlotSize = MaxSlotSizes[ValidatedData.ItemCategory];
-    bool bSuccess = AddItem_Internal(InSlot.RowHandle, DesignatedIndex, MaxStackSize, MaxSlotSize, RemainingQuantity, *ValidatedData.ItemArray);
+    bool bSuccess = AddItem_Internal(
+        Request.Slot.RowHandle,
+        Request.DesignatedIndex,
+        MaxStackSize,
+        MaxSlotSize,
+        RemainingQuantity,
+        *ValidatedData.ItemArray
+    );
     if (!bSuccess)
     {
         return -1; // Log in AddItem_Internal()
@@ -80,10 +87,10 @@ int32 UInventoryComponent::RemoveItem(const FItemActionRequest& Request)
         return -1; // Log in ValidateActionRequest()
     }
 
-    int32 ToRemove = RemoveItem_Internal(ValidatedData, Request.DesignatedIndex, Request.Quantity);
+    int32 Removed = RemoveItem_Internal(ValidatedData, Request.DesignatedIndex, Request.Quantity);
 
-    UE_LOG(LogInventory, Display, TEXT("Remove item - %s, %d"), *ValidatedData.ItemData->Name.ToString(), ToRemove);
-    return ToRemove;
+    UE_LOG(LogInventory, Display, TEXT("Remove item - %s, %d"), *ValidatedData.ItemData->Name.ToString(), Removed);
+    return Removed;
 }
 
 int32 UInventoryComponent::UseItem(const FItemActionRequest& Request)

@@ -6,7 +6,6 @@
 #include "Items/ItemTypes.h"
 #include "ItemActionDispatcher.generated.h"
 
-DECLARE_DELEGATE_RetVal_TwoParams(int32, FOnAddItemRequested, const FItemSlot& /* InSlot */, int32 /* DesignatedIndex */);
 DECLARE_DELEGATE_RetVal_OneParam(int32, FOnItemActionRequested, const FItemActionRequest& /* Request */);
 DECLARE_DELEGATE_RetVal_ThreeParams(bool, FOnSwapItemRequested, FGameplayTag /* ItemCategory */, int32 /* FirstIndex */, int32 /* SecondIndex */);
 
@@ -22,7 +21,7 @@ class DEMO_API UItemActionDispatcher : public UObject
     //        Delegates
     ////////////////////////////////////////////////////////
 public:
-    FOnAddItemRequested OnAddItemRequested;
+    FOnItemActionRequested OnAddItemRequested;
 
     FOnItemActionRequested OnRemoveItemRequested;
 
@@ -38,9 +37,9 @@ public:
 public:
     // Add item to inventory.
     // @return Actually added quantity, -1 if failed.
-    int32 RequestAddItem(const FItemSlot& InSlot, int32 DesignatedIndex = -1) const
+    int32 RequestAddItem(const FItemActionRequest& Request) const
     {
-        return OnAddItemRequested.IsBound() ? OnAddItemRequested.Execute(InSlot, DesignatedIndex) : -1;
+        return OnAddItemRequested.IsBound() ? OnAddItemRequested.Execute(Request) : -1;
     }
 
     // Remove item from inventory.

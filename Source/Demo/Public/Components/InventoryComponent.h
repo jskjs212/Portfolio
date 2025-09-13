@@ -28,8 +28,6 @@ struct FInventoryValidatedData
     TArray<FItemSlot>* ItemArray{nullptr};
 };
 
-DECLARE_MULTICAST_DELEGATE(FOnInventoryUpdated);
-
 /**
  * Inventory
  * Map of { ItemCategory, Array<ItemSlot> }
@@ -53,7 +51,7 @@ class DEMO_API UInventoryComponent : public UActorComponent
     //        Delegates
     ////////////////////////////////////////////////////////
 public:
-    FOnInventoryUpdated OnInventoryUpdated;
+    FSimpleMulticastDelegate OnInventoryUpdated;
 
     ////////////////////////////////////////////////////////
     //        Fundamentals
@@ -74,7 +72,7 @@ public:
     // @param DesignatedIndex >=0 -> Different item: Cancel.
     // @param DesignatedIndex  <0 -> Top-up existing slots, then fill empty slots.
     // @return Actually added quantity, -1 if failed.
-    int32 AddItem(const FItemSlot& InSlot, int32 DesignatedIndex = -1);
+    int32 AddItem(const FItemActionRequest& Request);
 
     // Remove item from inventory.
     // @return Actually removed quantity, -1 if failed.
@@ -147,7 +145,7 @@ private:
     );
 
     // Validate item action request, and get related data.
-    // Out slot points to inventory's slot.
+    // Out slot points to inventory's slot which matches the request's slot.
     // @return true if valid. If false, OutData is not valid.
     bool ValidateActionRequest(const FItemActionRequest& Request, FInventoryValidatedData& OutData);
 

@@ -7,9 +7,7 @@
 #include "GameplayTagContainer.h"
 #include "TabButton.generated.h"
 
-DECLARE_DELEGATE_OneParam(FOnTabButtonClicked, FGameplayTag /* InTag */);
-DECLARE_DELEGATE_OneParam(FOnTabButtonHovered, FGameplayTag /* InTag */);
-DECLARE_DELEGATE_OneParam(FOnTabButtonUnhovered, FGameplayTag /* InTag */);
+DECLARE_DELEGATE_OneParam(FOnTabButtonEvent, FGameplayTag /* InTag */);
 
 /**
  * Tab button that has a tab type.
@@ -24,9 +22,9 @@ class DEMO_API UTabButton : public UButton
     //        Delegates
     ////////////////////////////////////////////////////////
 public:
-    FOnTabButtonClicked OnTabButtonClicked;
-    FOnTabButtonHovered OnTabButtonHovered;
-    FOnTabButtonUnhovered OnTabButtonUnhovered;
+    FOnTabButtonEvent OnTabButtonClicked;
+    FOnTabButtonEvent OnTabButtonHovered;
+    FOnTabButtonEvent OnTabButtonUnhovered;
 
     ////////////////////////////////////////////////////////
     //        UI functions

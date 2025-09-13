@@ -110,7 +110,11 @@ bool UEquipmentComponent::UnequipItem(const FGameplayTag EquipmentType)
     UInventoryComponent* InventoryComp = GetOwner()->FindComponentByClass<UInventoryComponent>();
     if (InventoryComp)
     {
-        if (InventoryComp->AddItem(EquippedItem->GetItemSlot()) <= 0)
+        FItemActionRequest Request;
+        Request.Slot = EquippedItem->GetItemSlot();
+        Request.Quantity = 1;
+
+        if (InventoryComp->AddItem(Request) <= 0)
         {
             // misc: In-game notification?
             UE_LOG(LogEquipment, Warning, TEXT("UnequipItem() - Failed to add item to inventory."));
