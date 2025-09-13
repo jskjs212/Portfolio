@@ -1,11 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UI/PlayerMenuWidget.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Components/Button.h"
 #include "Components/WidgetSwitcher.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "PlayerController/DemoPlayerController.h"
 #include "UI/InventoryPageWidget.h"
+#include "UI/ItemActionDispatcher.h"
+#include "UI/ItemSlotDragDropOp.h"
 #include "UI/StatsPageWidget.h"
 
 void UPlayerMenuWidget::NativeOnInitialized()
@@ -68,10 +71,48 @@ FReply UPlayerMenuWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKe
     return Super::NativeOnKeyDown(InGeometry, InKeyEvent);
 }
 
+FReply UPlayerMenuWidget::NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+    // Any button -> cancel drag & drop
+    if (UWidgetBlueprintLibrary::IsDragDropping())
+    {
+        UWidgetBlueprintLibrary::CancelDragDrop();
+        return FReply::Handled();
+    }
+
+    return Super::NativeOnPreviewMouseButtonDown(InGeometry, InMouseEvent);
+}
+
+bool UPlayerMenuWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
+{
+    // Item slot dragged & dropped: Only drop item for now
+    // check: Dragged from other page i.e. unequip, buy, move from stash, etc.
+    UItemSlotDragDropOp* DragDropOp = Cast<UItemSlotDragDropOp>(InOperation);
+    if (DragDropOp)
+    {
+        FItemActionRequest Request;
+        Request.Slot = DragDropOp->GetItemSlot();
+        Request.DesignatedIndex = DragDropOp->GetIndex();
+        Request.Quantity = DragDropOp->GetItemSlot().Quantity;
+
+        if (ADemoPlayerController* DemoPlayerController = GetOwningPlayer<ADemoPlayerController>())
+        {
+            if (UItemActionDispatcher* ItemActionDispatcher = DemoPlayerController->GetItemActionDispatcher())
+            {
+                ItemActionDispatcher->RequestDropItem(Request);
+                return true;
+            }
+        }
+    }
+
+    return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
+}
+
 void UPlayerMenuWidget::HideMenu()
 {
     if (ADemoPlayerController* DemoPlayerController = GetOwningPlayer<ADemoPlayerController>())
     {
+        CancelDragDrop();
         DemoPlayerController->ShowPlayerMenu(false);
     }
 }

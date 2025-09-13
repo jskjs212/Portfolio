@@ -236,8 +236,11 @@ void UInventoryComponent::BindToItemActionDispatcher()
         {
             if (UItemActionDispatcher* ItemActionDispatcher = DemoPlayerController->GetItemActionDispatcher())
             {
+                ItemActionDispatcher->OnAddItemRequested.BindUObject(this, &ThisClass::AddItem);
+                ItemActionDispatcher->OnRemoveItemRequested.BindUObject(this, &ThisClass::RemoveItem);
                 ItemActionDispatcher->OnUseItemRequested.BindUObject(this, &ThisClass::UseItem);
                 ItemActionDispatcher->OnDropItemRequested.BindUObject(this, &ThisClass::DropItem);
+                ItemActionDispatcher->OnSwapItemRequested.BindUObject(this, &ThisClass::SwapItem);
             }
         }
     }

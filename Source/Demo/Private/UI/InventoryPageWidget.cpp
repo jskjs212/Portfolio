@@ -2,7 +2,6 @@
 
 #include "UI/InventoryPageWidget.h"
 #include "Components/Border.h"
-#include "Components/Button.h"
 #include "Components/Image.h"
 #include "Components/InventoryComponent.h"
 #include "Components/WrapBox.h"
@@ -126,6 +125,7 @@ void UInventoryPageWidget::UpdateItemSlotsUI()
                 SlotWidget->RightClicked.BindUObject(this, &ThisClass::HandleItemSlotRightClicked);
                 SlotWidget->OnHovered.BindUObject(this, &ThisClass::ShowItemInfo);
                 SlotWidget->OnUnhovered.BindUObject(this, &ThisClass::HideItemInfo);
+                SlotWidget->OnDropped.BindUObject(this, &ThisClass::HandleItemSlotDropped);
                 WrapBox->AddChildToWrapBox(SlotWidget);
                 // ExistingNum += 1, but don't need to update.
             }
@@ -150,12 +150,6 @@ void UInventoryPageWidget::UpdateItemSlotsUI()
             }
         }
     }
-}
-
-void UInventoryPageWidget::ShowContextMenu(const FItemSlot& InSlot, int32 InIndex)
-{
-    SetActionRequest(InSlot, InIndex);
-    ContextMenuWidget->ShowContextMenu();
 }
 
 void UInventoryPageWidget::SetupContextMenu()
@@ -191,16 +185,18 @@ void UInventoryPageWidget::BindToInventoryUpdates()
     }
 }
 
+UItemActionDispatcher* UInventoryPageWidget::GetItemActionDispatcher() const
+{
+    if (const ADemoPlayerController* DemoPlayerController = GetOwningPlayer<ADemoPlayerController>())
+    {
+        return DemoPlayerController->GetItemActionDispatcher();
+    }
+    return nullptr;
+}
+
 void UInventoryPageWidget::HandleContextMenuButtonClicked(FGameplayTag InTag)
 {
-    // Validation
-    ADemoPlayerController* DemoPlayerController = GetOwningPlayer<ADemoPlayerController>();
-    if (!DemoPlayerController)
-    {
-        return;
-    }
-
-    UItemActionDispatcher* ItemActionDispatcher = DemoPlayerController->GetItemActionDispatcher();
+    UItemActionDispatcher* ItemActionDispatcher = GetItemActionDispatcher();
     if (!ItemActionDispatcher)
     {
         return;
@@ -229,7 +225,57 @@ void UInventoryPageWidget::HandleContextMenuButtonClicked(FGameplayTag InTag)
 
 void UInventoryPageWidget::HandleItemSlotRightClicked(const FItemSlot& InSlot, int32 InIndex)
 {
-    ShowContextMenu(InSlot, InIndex);
+    SetActionRequest(InSlot, InIndex);
+    ContextMenuWidget->ShowContextMenu();
+}
+
+void UInventoryPageWidget::HandleItemSlotDropped(const FItemSlot& SrcSlot, const int32 SrcIndex, const FItemSlot& DstSlot, const int32 DstIndex)
+{
+    // Validation
+    if (!SrcSlot.IsValid() || SrcIndex == DstIndex || SrcSlot.bIsLocked || DstSlot.bIsLocked)
+    {
+        return;
+    }
+
+    UItemActionDispatcher* ItemActionDispatcher = GetItemActionDispatcher();
+    if (!ItemActionDispatcher)
+    {
+        return;
+    }
+
+    FItemDataBase* SrcItemData = SrcSlot.RowHandle.GetRow<FItemDataBase>(TEXT("UInventoryPageWidget::HandleItemSlotDropped"));
+    if (!SrcItemData)
+    {
+        return;
+    }
+
+    // debug: 
+    UE_LOG(LogTemp, Display, TEXT("UInventoryPageWidget::HandleItemSlotDropped - SrcIndex: %d, DstIndex: %d"), SrcIndex, DstIndex);
+
+    // Case1: Empty or different item -> Swap
+    if (!DstSlot.IsValid() || SrcSlot.RowHandle != DstSlot.RowHandle)
+    {
+        const FGameplayTag ItemCategory = DemoItemTypes::GetItemCategory(SrcItemData->ItemType);
+
+        ItemActionDispatcher->RequestSwapItem(ItemCategory, SrcIndex, DstIndex);
+    }
+    // Case2: Same item -> Merge
+    else
+    {
+        FItemActionRequest Request;
+        Request.Slot = SrcSlot;
+        Request.DesignatedIndex = DstIndex;
+        Request.Quantity = SrcSlot.Quantity;
+
+        const int32 Added = ItemActionDispatcher->RequestAddItem(Request);
+        if (Added > 0)
+        {
+            Request.Slot = DstSlot;
+            Request.DesignatedIndex = SrcIndex;
+            Request.Quantity = Added;
+            ItemActionDispatcher->RequestRemoveItem(Request);
+        }
+    }
 }
 
 void UInventoryPageWidget::ShowItemInfo(const FItemSlot& InSlot)

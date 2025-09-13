@@ -10,6 +10,7 @@
 class UBorder;
 class UContextMenuWidget;
 class UImage;
+class UItemActionDispatcher;
 class UItemInfoWidget;
 class UItemSlotWidget;
 class UTabButton;
@@ -38,8 +39,6 @@ public:
     // Update item slots UI from owner pawn's InventoryComponent (when visible)
     void UpdateItemSlotsUI();
 
-    void ShowContextMenu(const FItemSlot& InSlot, int32 InIndex);
-
     bool IsPendingUpdate() const { return bPendingUpdateItemSlots; }
 
     FORCEINLINE void SetActionRequest(const FItemSlot& InSlot, int32 DesignatedIndex)
@@ -54,8 +53,7 @@ private:
 
     void BindToInventoryUpdates();
 
-    // Just enough to invalidate
-    //void ClearActionRequest() { ItemActionRequest.Slot = FItemSlot{}; }
+    UItemActionDispatcher* GetItemActionDispatcher() const;
 
     ////////////////////////////////////////////////////////
     //        Handlers
@@ -65,6 +63,8 @@ private:
     void HandleContextMenuButtonClicked(FGameplayTag InTag);
 
     void HandleItemSlotRightClicked(const FItemSlot& InSlot, int32 InIndex);
+
+    void HandleItemSlotDropped(const FItemSlot& SrcSlot, int32 SrcIndex, const FItemSlot& DstSlot, int32 DstIndex);
 
     void ShowItemInfo(const FItemSlot& InSlot);
 

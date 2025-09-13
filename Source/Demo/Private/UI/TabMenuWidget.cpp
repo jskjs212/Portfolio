@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UI/TabMenuWidget.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Components/Image.h"
 #include "Components/WidgetSwitcher.h"
 #include "Kismet/GameplayStatics.h"
@@ -76,6 +77,7 @@ void UTabMenuWidget::SelectTab(const int32 InIndex)
 
     PageSwitcher->SetActiveWidgetIndex(InIndex);
     ActiveTabTag = TabEntries[InIndex].Tag;
+    CancelDragDrop();
 
     for (int32 Index = 0; FTabEntry& TabEntry : TabEntries)
     {
@@ -102,6 +104,8 @@ void UTabMenuWidget::SelectTab(const FGameplayTag InTag)
     {
         return;
     }
+
+    CancelDragDrop();
 
     for (int32 Index = 0; FTabEntry& TabEntry : TabEntries)
     {
@@ -140,6 +144,14 @@ void UTabMenuWidget::UpdateTabButtonColor(FTabEntry& InTabEntry, bool bActive, b
     else
     {
         InTabEntry.TabButton->SetColorAndOpacity(NewColor);
+    }
+}
+
+void UTabMenuWidget::CancelDragDrop()
+{
+    if (UWidgetBlueprintLibrary::IsDragDropping())
+    {
+        UWidgetBlueprintLibrary::CancelDragDrop();
     }
 }
 

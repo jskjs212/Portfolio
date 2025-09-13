@@ -67,6 +67,8 @@ protected:
 
     void UpdateTabButtonColor(FTabEntry& InTabEntry, bool bActive, bool bHovered);
 
+    void CancelDragDrop();
+
     /* Tab button event handlers */
     FORCEINLINE void HandleTabButtonClicked(FGameplayTag InTag) { SelectTab(InTag); }
 

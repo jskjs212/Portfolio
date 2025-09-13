@@ -9,6 +9,7 @@
 #include "ItemSlotWidget.generated.h"
 
 class UBorder;
+class UDraggedItemSlotWidget;
 class UImage;
 class USizeBox;
 class USoundBase;
@@ -17,6 +18,7 @@ class UTexture2D;
 
 DECLARE_DELEGATE_TwoParams(FOnItemSlotClicked, const FItemSlot& /* InSlot */, int32 /* InIndex */);
 DECLARE_DELEGATE_OneParam(FOnItemSlotHovered, const FItemSlot& /* InSlot */);
+DECLARE_DELEGATE_FourParams(FOnItemSlotDropped, const FItemSlot& /* SrcSlot */, int32 /* SrcIndex */, const FItemSlot& /* DstSlot */, int32 /* DstIndex */);
 
 /**
  *
@@ -36,6 +38,8 @@ public:
 
     FSimpleDelegate OnUnhovered;
 
+    FOnItemSlotDropped OnDropped;
+
     ////////////////////////////////////////////////////////
     //        UUserWidget functions
     ////////////////////////////////////////////////////////
@@ -47,6 +51,14 @@ protected:
     virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 
     virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
+
+    virtual FReply NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+
+    virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
+
+    virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+
+    virtual void NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 
     ////////////////////////////////////////////////////////
     //        UI functions
@@ -65,6 +77,8 @@ private:
     void HandleHovered();
 
     void HandleUnhovered();
+
+    FORCEINLINE bool CanDragDrop() const { return ItemSlot.IsValid() && !ItemSlot.bIsLocked; }
 
     ////////////////////////////////////////////////////////
     //        Widgets
@@ -100,6 +114,9 @@ protected:
     ////////////////////////////////////////////////////////
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "Item")
+    TSubclassOf<UDraggedItemSlotWidget> DraggedItemSlotWidgetBPClass;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Item")
     FLinearColor NormalBorderColor{FLinearColor::White};
 
     UPROPERTY(EditDefaultsOnly, Category = "Item")
@@ -116,5 +133,5 @@ protected:
     TObjectPtr<USoundBase> HoveredSound;
 
 private:
-    FDataTableRowHandle CurrentRowHandle;
+    FDataTableRowHandle CurrentItemRowHandle;
 };

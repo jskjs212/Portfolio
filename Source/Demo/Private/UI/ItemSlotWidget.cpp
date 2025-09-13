@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UI/ItemSlotWidget.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Components/Border.h"
 #include "Components/Image.h"
 #include "Components/SizeBox.h"
@@ -8,6 +9,9 @@
 #include "DemoTypes/TableRowBases.h"
 #include "Items/ItemTypes.h"
 #include "Kismet/GameplayStatics.h"
+#include "Styling/SlateBrush.h"
+#include "UI/DraggedItemSlotWidget.h"
+#include "UI/ItemSlotDragDropOp.h"
 
 void UItemSlotWidget::NativeOnInitialized()
 {
@@ -30,6 +34,15 @@ FReply UItemSlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, con
 {
     if (ItemSlot.IsValid())
     {
+        // LMB -> Drag drop
+        if (InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+        {
+            if (CanDragDrop())
+            {
+                return FReply::Unhandled().DetectDrag(TakeWidget(), EKeys::LeftMouseButton);
+            }
+        }
+
         // RMB -> Show context menu
         if (InMouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
         {
@@ -55,6 +68,75 @@ void UItemSlotWidget::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
     HandleUnhovered();
 }
 
+FReply UItemSlotWidget::NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+    // TEST: Bad implementation of drag drop will block LMB double click.
+    UE_LOG(LogTemp, Display, TEXT("UItemSlotWidget::NativeOnMouseButtonDoubleClick"));
+    return Super::NativeOnMouseButtonDoubleClick(InGeometry, InMouseEvent);
+}
+
+void UItemSlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation)
+{
+    Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
+
+    // Create drag visual (widget)
+    UDraggedItemSlotWidget* DraggedItemSlotWidget = CreateWidget<UDraggedItemSlotWidget>(this, DraggedItemSlotWidgetBPClass);
+    if (DraggedItemSlotWidget)
+    {
+        // Create drag drop operation
+        UItemSlotDragDropOp* DragDropOp = Cast<UItemSlotDragDropOp>(UWidgetBlueprintLibrary::CreateDragDropOperation(UItemSlotDragDropOp::StaticClass()));
+        if (DragDropOp)
+        {
+            // Setup OutOperation
+            const float Opacity = 0.7f;
+            const FVector2D DesiredSize = ItemIcon->GetDesiredSize();
+            UTexture2D* ItemIconResource = Cast<UTexture2D>(ItemIcon->GetBrush().GetResourceObject());
+            if (!ItemIconResource)
+            {
+                UE_LOG(LogTemp, Error, TEXT("UItemSlotWidget::NativeOnDragDetected - ItemIconResource is null."));
+            }
+
+            DraggedItemSlotWidget->SetItemIcon(ItemIconResource, Opacity);
+            DraggedItemSlotWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
+            DraggedItemSlotWidget->SetDesiredSizeInViewport(DesiredSize);
+            DragDropOp->DefaultDragVisual = DraggedItemSlotWidget;
+            DragDropOp->Setup(ItemSlot, Index);
+            OutOperation = DragDropOp;
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("UItemSlotWidget::NativeOnDragDetected - Failed to create UItemSlotDragDropOp."));
+            DraggedItemSlotWidget->RemoveFromParent();
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("UItemSlotWidget::NativeOnDragDetected - Failed to create UDraggedItemSlotWidget."));
+    }
+}
+
+bool UItemSlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
+{
+    UItemSlotDragDropOp* DragDropOp = Cast<UItemSlotDragDropOp>(InOperation);
+    if (DragDropOp)
+    {
+        const int32 SrcIndex = DragDropOp->GetIndex();
+        const FItemSlot& SrcSlot = DragDropOp->GetItemSlot();
+
+        OnDropped.ExecuteIfBound(SrcSlot, SrcIndex, ItemSlot, Index);
+
+        return true;
+    }
+
+    return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
+}
+
+void UItemSlotWidget::NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
+{
+    // Don't have to remove (GC)
+    Super::NativeOnDragCancelled(InDragDropEvent, InOperation);
+}
+
 void UItemSlotWidget::UpdateVisuals()
 {
     // No item -> hide -> return
@@ -66,11 +148,11 @@ void UItemSlotWidget::UpdateVisuals()
     }
 
     // Yes item -> update (when changed)
-    if (CurrentRowHandle != ItemSlot.RowHandle)
+    if (CurrentItemRowHandle != ItemSlot.RowHandle)
     {
         if (const FItemDataBase* ItemData = ItemSlot.RowHandle.GetRow<FItemDataBase>(TEXT("UItemSlotWidget::UpdateVisuals")))
         {
-            CurrentRowHandle = ItemSlot.RowHandle;
+            CurrentItemRowHandle = ItemSlot.RowHandle;
             ItemIcon->SetBrushFromTexture(ItemData->Icon);
         }
     }
