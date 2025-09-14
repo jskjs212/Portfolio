@@ -6,6 +6,7 @@
 #include "Components/EquipmentComponent.h"
 #include "Components/InventoryComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/StateManagerComponent.h"
 #include "Components/StatsComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "EnhancedInputComponent.h"
@@ -42,7 +43,7 @@ APlayerCharacter::APlayerCharacter() :
     MovementComp->bOrientRotationToMovement = true;
     MovementComp->RotationRate = FRotator{0.f, 540.f, 0.f};
 
-    // TODO: Use data table or config file
+    // @TODO - Use data table or config file
     StatsComponent->RemoveResourceStat(UStatsComponent::HealthTag);
     StatsComponent->AddResourceStat(UStatsComponent::HealthTag, FResourceStat{100.f, 100.f, true});
     StatsComponent->AddResourceStat(UStatsComponent::StaminaTag, FResourceStat{100.f, 100.f, true, 10.f});
@@ -214,21 +215,31 @@ void APlayerCharacter::Move(const FInputActionValue& Value)
     AddMovementInput(RightDirection, MoveAxisVector.X);
 }
 
-void APlayerCharacter::Jump()
+bool APlayerCharacter::CanPerformJump() const
 {
-    if (GetCharacterMovement()->IsFalling())
+    if (!Super::CanPerformJump())
     {
-        // TODO: state management
-        return;
+        return false;
     }
 
     if (StatsComponent->GetCurrentResourceStatChecked(UStatsComponent::StaminaTag) < JumpStaminaCost)
     {
         // Not enough stamina
+        return false;
+    }
+
+    return true;
+}
+
+void APlayerCharacter::Jump()
+{
+    if (!CanPerformJump())
+    {
         return;
     }
 
-    Super::Jump();
+    StateManager->SetAction(DemoGameplayTags::State_Jump);
+    ACharacter::Jump();
 
     // Consume stamina
     StatsComponent->ModifyCurrentResourceStatChecked(UStatsComponent::StaminaTag, -JumpStaminaCost, true);
@@ -304,7 +315,7 @@ void APlayerCharacter::StartSprint()
         SetMovementSpeedMode(DemoGameplayTags::Movement_SpeedMode_Sprint);
     }
 
-    // TODO: Consume stamina if sprinting
+    // @TODO - Consume stamina if sprinting
 }
 
 void APlayerCharacter::StopSprint()

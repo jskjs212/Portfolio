@@ -22,13 +22,9 @@ class DEMO_API UItemActionDispatcher : public UObject
     ////////////////////////////////////////////////////////
 public:
     FOnItemActionRequested OnAddItemRequested;
-
     FOnItemActionRequested OnRemoveItemRequested;
-
     FOnItemActionRequested OnUseItemRequested;
-
     FOnItemActionRequested OnDropItemRequested;
-
     FOnSwapItemRequested OnSwapItemRequested;
 
     ////////////////////////////////////////////////////////

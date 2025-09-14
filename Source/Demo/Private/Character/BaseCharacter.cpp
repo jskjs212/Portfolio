@@ -4,6 +4,7 @@
 #include "Character/BaseCharacter.h"
 #include "Components/CombatComponent.h"
 #include "Components/EquipmentComponent.h"
+#include "Components/StateManagerComponent.h"
 #include "Components/StatsComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -13,7 +14,7 @@ ABaseCharacter::ABaseCharacter()
     PrimaryActorTick.bCanEverTick = false;
     MovementSpeedMode = DemoGameplayTags::Movement_SpeedMode_Jog;
 
-    // check: temporary values
+    // @check - temporary values
     UCharacterMovementComponent* MovementComp = GetCharacterMovement();
     check(MovementComp);
     MovementComp->JumpZVelocity = 700.f;
@@ -26,8 +27,10 @@ ABaseCharacter::ABaseCharacter()
 
     EquipmentComponent = CreateDefaultSubobject<UEquipmentComponent>(TEXT("EquipmentComponent"));
 
+    StateManager = CreateDefaultSubobject<UStateManagerComponent>(TEXT("StateManager"));
+
     StatsComponent = CreateDefaultSubobject<UStatsComponent>(TEXT("StatsComponent"));
-    // TODO: Use data table or config file
+    // @TODO - Use data table or config file
     StatsComponent->AddResourceStat(UStatsComponent::HealthTag, FResourceStat{100.f, 100.f});
 }
 
@@ -35,8 +38,42 @@ void ABaseCharacter::BeginPlay()
 {
     Super::BeginPlay();
 
+    StateManager->OnStateBegan.AddUObject(this, &ThisClass::HandleStateBegan);
+
     StatsComponent->InitializeResourceStats();
     StatsComponent->OnCurrentResourceStatChanged.AddUObject(this, &ThisClass::OnCurrentResourceStatChanged);
+}
+
+bool ABaseCharacter::CanPerformJump() const
+{
+    if (!CanJump())
+    {
+        return false;
+    }
+
+    if (!StateManager->CanPerformAction(DemoGameplayTags::State_Jump))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+void ABaseCharacter::Jump()
+{
+    if (!CanPerformJump())
+    {
+        return;
+    }
+
+    StateManager->SetAction(DemoGameplayTags::State_Jump);
+    ACharacter::Jump();
+}
+
+void ABaseCharacter::Landed(const FHitResult& Hit)
+{
+    StateManager->SetAction(DemoGameplayTags::State_General);
+    Super::Landed(Hit);
 }
 
 void ABaseCharacter::OnCurrentResourceStatChanged(FGameplayTag StatTag, float OldValue, float NewValue)
@@ -45,8 +82,32 @@ void ABaseCharacter::OnCurrentResourceStatChanged(FGameplayTag StatTag, float Ol
     {
         if (NewValue <= 0.f)
         {
-            // TODO: Death logic
+            // @TODO - Death logic
         }
+    }
+}
+
+void ABaseCharacter::HandleDeath()
+{
+    // @TODO
+    // Stop animations to prevent notifies
+
+    // Stop movement
+
+    // Disable collisions
+
+    // Animation of ragdoll
+
+    // Drop weapon if any
+
+    // Destroy actor after some time
+}
+
+void ABaseCharacter::HandleStateBegan(FGameplayTag NewState)
+{
+    if (NewState == DemoGameplayTags::State_Dead)
+    {
+        HandleDeath();
     }
 }
 

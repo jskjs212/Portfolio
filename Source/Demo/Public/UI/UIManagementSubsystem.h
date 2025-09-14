@@ -9,7 +9,7 @@
 /**
  * UI Management Subsystem.
  * Need to call Init() to initialize (not in constructor).
- * misc: Z order for AddToViewport
+ * @misc - Z order for AddToViewport
  */
 UCLASS()
 class DEMO_API UUIManagementSubsystem : public UGameInstanceSubsystem

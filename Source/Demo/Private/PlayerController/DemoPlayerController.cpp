@@ -9,7 +9,7 @@
 
 ADemoPlayerController::ADemoPlayerController()
 {
-    // hardcoded:
+    // @hardcoded
     static ConstructorHelpers::FClassFinder<UPlayerMenuWidget> PlayerMenuWidgetBPClass(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprints/UI/WBP_PlayerMenu.WBP_PlayerMenu_C'"));
     if (PlayerMenuWidgetBPClass.Succeeded())
     {
@@ -47,7 +47,7 @@ void ADemoPlayerController::ShowPlayerMenu(bool bShow)
 
         PlayerMenuWidget->SetVisibilityAndFocus(true);
 
-        // TODO: IsPendingUIUpdate? Update
+        // @TODO - IsPendingUIUpdate? Update
 
         if (ADemoHUD* DemoHUD = GetHUD<ADemoHUD>())
         {
@@ -68,7 +68,7 @@ void ADemoPlayerController::ShowPlayerMenu(bool bShow)
 
         PlayerMenuWidget->SetVisibilityAndFocus(false);
 
-        // TODO: Cancel drag
+        // @TODO - Cancel drag
 
         if (ADemoHUD* DemoHUD = GetHUD<ADemoHUD>())
         {

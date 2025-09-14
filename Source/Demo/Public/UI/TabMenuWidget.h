@@ -91,20 +91,20 @@ protected:
 
     bool bUseTabButtonImages{false};
 
-    UPROPERTY(EditAnywhere, Category = "Tab")
+    UPROPERTY(EditAnywhere, Category = "Initialization")
     FLinearColor TabButtonActiveColor;
 
-    UPROPERTY(EditAnywhere, Category = "Tab")
+    UPROPERTY(EditAnywhere, Category = "Initialization")
     FLinearColor TabButtonInactiveColor;
 
-    UPROPERTY(EditAnywhere, Category = "Tab")
+    UPROPERTY(EditAnywhere, Category = "Initialization")
     FLinearColor TabButtonHoveredColor;
 
-    // TODO: Audio
-    UPROPERTY(EditAnywhere, Category = "Tab")
+    // @TODO - Audio
+    UPROPERTY(EditAnywhere, Category = "Initialization")
     TObjectPtr<USoundBase> TabButtonHoveredSound;
 
-    UPROPERTY(EditAnywhere, Category = "Tab")
+    UPROPERTY(EditAnywhere, Category = "Initialization")
     TObjectPtr<USoundBase> TabButtonClickSound;
 
 private:

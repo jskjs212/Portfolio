@@ -19,7 +19,7 @@ class DEMO_API UStatsPageWidget : public UUserWidget
 protected:
     virtual void NativeOnInitialized() override;
 
-    // TEST:
+    // @TEST
 public:
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UTextBlock> CurrentHealthText;

@@ -108,7 +108,7 @@ void UInventoryPageWidget::UpdateItemSlotsUI()
 
         // No items (empty wrapbox)
         // ItemArray.Num() == 0 means bFixSlotSizeAndExposeEmptySlots == false.
-        // TODO: Show text? Set color?
+        // @TODO - Show text? Set color?
 
         const int32 ItemNum = ItemArray.Num();
         const int32 ExistingNum = WrapBox->GetAllChildren().Num();
@@ -197,7 +197,7 @@ UItemActionDispatcher* UInventoryPageWidget::GetItemActionDispatcher() const
 
 void UInventoryPageWidget::HandleContextMenuButtonClicked(FGameplayTag InTag)
 {
-    // misc: Potential bug (fast click, user intend != cached request)
+    // @misc - Potential bug (fast click, user intend != cached request)
 
     UItemActionDispatcher* ItemActionDispatcher = GetItemActionDispatcher();
     if (!ItemActionDispatcher)
@@ -208,13 +208,13 @@ void UInventoryPageWidget::HandleContextMenuButtonClicked(FGameplayTag InTag)
     // Execute action
     if (InTag == DemoGameplayTags::UI_Action_Item_Use)
     {
-        // TODO: Get quantity from user input
+        // @TODO - Get quantity from user input
         ContextMenuItemActionRequest.Quantity = 1;
         ItemActionDispatcher->RequestUseItem(ContextMenuItemActionRequest);
     }
     else if (InTag == DemoGameplayTags::UI_Action_Item_Drop)
     {
-        // TODO: Get quantity from user input
+        // @TODO - Get quantity from user input
         ContextMenuItemActionRequest.Quantity = 1;
         ItemActionDispatcher->RequestDropItem(ContextMenuItemActionRequest);
     }
@@ -290,7 +290,7 @@ void UInventoryPageWidget::HandleItemSlotDropped(const FItemSlot& SrcSlot, const
             Request.Slot = DstSlot;
             Request.DesignatedIndex = SrcIndex;
             Request.Quantity = Added;
-            // misc: Potential bug if fails.
+            // @misc - Potential bug if fails.
             ItemActionDispatcher->RequestRemoveItem(Request);
         }
     }

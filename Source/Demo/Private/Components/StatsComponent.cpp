@@ -113,7 +113,7 @@ void UStatsComponent::RegenChecked(const FGameplayTag StatTag)
 
     FResourceStat& ResourceStat = GetResourceStatChecked(StatTag);
 
-    // TODO: Dead
+    // @TODO - Dead
 
     // Regen
     ModifyCurrentResourceStatChecked(StatTag, ResourceStat.RegenRate * ResourceStat.RegenInterval, false);
@@ -133,14 +133,14 @@ float UStatsComponent::TakeDamage(const float InDamage)
     // Damage = Damage * (Damage / (Damage + Armor))
 
     constexpr float MinDamage = 0.f;
-    constexpr float MaxDamage = 1e10f; // misc: Set max damage
+    constexpr float MaxDamage = 1e10f; // @misc - Set max damage
     Damage = FMath::Clamp(Damage, MinDamage, MaxDamage);
 
     Damage = ModifyCurrentResourceStatChecked(HealthTag, -Damage, true) * -1.f;
 
-    // TODO: death?
+    // @TODO - death?
 
-    // debug:
+    // @debug
     UE_LOG(LogTemp, Display, TEXT("UStatsComponent::TakeDamage - %.2f"), Damage);
     return Damage;
 }

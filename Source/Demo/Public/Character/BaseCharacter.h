@@ -10,6 +10,7 @@
 
 class UCombatComponent;
 class UEquipmentComponent;
+class UStateManagerComponent;
 class UStatsComponent;
 
 UCLASS()
@@ -28,6 +29,9 @@ protected:
     TObjectPtr<UEquipmentComponent> EquipmentComponent;
 
     UPROPERTY(VisibleAnywhere)
+    TObjectPtr<UStateManagerComponent> StateManager;
+
+    UPROPERTY(VisibleAnywhere)
     TObjectPtr<UStatsComponent> StatsComponent;
 
     ////////////////////////////////////////////////////////
@@ -43,8 +47,16 @@ protected:
     //        Character functions
     ////////////////////////////////////////////////////////
 protected:
+    virtual bool CanPerformJump() const;
+    virtual void Jump() override;
+    virtual void Landed(const FHitResult& Hit) override;
+
     UFUNCTION()
     void OnCurrentResourceStatChanged(FGameplayTag StatTag, float OldValue, float NewValue);
+
+    void HandleDeath();
+
+    void HandleStateBegan(FGameplayTag NewState);
 
     ////////////////////////////////////////////////////////
     //        Get & set

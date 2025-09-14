@@ -2,16 +2,20 @@
 PCH warning
 
 ## TODO
+### Combat
+StateManager:
+- State transition (Jump, ...)
+- Jump testing
+
+HandleDeath()
+
+CombatComponent:
+- Attack, Dodge, Block
+
 ### UI
 - Bind: OnPossess에서 하기
 - All UI: Z order
 - Page 하위 위젯 외의 뭔가를 클릭하면 Page 포커스가 사라짐
-
-StateComponent?
-- CharacterState, CharacterAction?
-
-CombatComponent:
-- Attack, Dodge, Block
 
 BPClass:
 - 클래스마다 흩어져 있는 BPClass 찾기를 하나의 DataAsset?에 모으기?
@@ -82,10 +86,10 @@ AnimInstance: MultiThreadUpdate
 Others: Multi-threading, replication not considered.
 
 ### 정리
-TODO:, check:, misc:, hardcoded:, TEST:, debug: 등 주석 확인 및 정리하기\
+@TODO, @check, @misc, @hardcoded, @TEST, @debug 등 주석 확인 및 정리하기\
 테스트 코드 제거하기
 
-debug: -> 중요한 곳은 알림 메시지 등 게임 로직으로 처리하고, 나머지는 LogCategory 구분하여 중요한 로그만 남기기
+@debug -> 중요한 곳은 알림 메시지 등 게임 로직으로 처리하고, 나머지는 LogCategory 구분하여 중요한 로그만 남기기
 
 ## 시간이 된다면 공부할 부분
 ### GAS

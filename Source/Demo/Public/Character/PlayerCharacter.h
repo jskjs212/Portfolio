@@ -76,6 +76,7 @@ protected:
     void Look(const FInputActionValue& Value);
     void Move(const FInputActionValue& Value);
 
+    virtual bool CanPerformJump() const;
     virtual void Jump() override;
     virtual void Landed(const FHitResult& Hit) override;
 
@@ -88,7 +89,7 @@ protected:
 
     void ShowPlayerMenu();
 
-    // TEST:
+    // @TEST
     UFUNCTION(BlueprintNativeEvent)
     void Test1();
 
@@ -99,7 +100,7 @@ protected:
     //        Get & set
     ////////////////////////////////////////////////////////
 public:
-    // check: Call in AnimInstance?
+    // @check - Call in AnimInstance?
     FORCEINLINE float GetGroundSpeed() const
     {
         FVector Velocity = GetVelocity();
@@ -137,7 +138,7 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Input")
     TObjectPtr<UInputAction> ShowPlayerMenuAction;
 
-    // TEST:
+    // @TEST
     UPROPERTY(EditAnywhere, Category = "Input")
     TObjectPtr<UInputAction> Test1Action;
 
@@ -148,7 +149,7 @@ protected:
     //        Variables
     ////////////////////////////////////////////////////////
 public:
-    // TODO: Audio
+    // @TODO - Audio
     UPROPERTY(EditDefaultsOnly, Category = "Item|Audio")
     TObjectPtr<USoundBase> PickupSound;
 
@@ -180,7 +181,7 @@ private:
     FTimerHandle TraceTimerHandle;
     IInteractable* FocusedInteractable{nullptr};
 
-    // TEST:
+    // @TEST
     UPROPERTY(EditAnywhere, Category = "Test")
     FItemSlot TestWeapon;
     UPROPERTY(EditAnywhere, Category = "Test")

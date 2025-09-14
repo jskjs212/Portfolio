@@ -206,7 +206,7 @@ bool UInventoryComponent::AddMaxSlotSize(FGameplayTag ItemCategory, const int32 
 
 void UInventoryComponent::InitMaxSlots()
 {
-    // TODO: Config file or data table? Determined by character class or something?
+    // @TODO - Config file or data table? Determined by character class or something?
     // Initial max slot sizes.
     constexpr int32 WeaponMaxSlots = 10;
     constexpr int32 ArmorMaxSlots = 10;

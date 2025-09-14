@@ -55,13 +55,13 @@ public:
 private:
     FGameplayTag StatTag;
 
-    UPROPERTY(EditAnywhere, Category = "Appearance|StatBar")
+    UPROPERTY(EditAnywhere, Category = "Initialization")
     FLinearColor StatBarFillColor{FLinearColor::White};
 
-    UPROPERTY(EditAnywhere, Category = "Appearance|StatBar")
+    UPROPERTY(EditAnywhere, Category = "Initialization")
     TObjectPtr<UTexture2D> StatBarFillImage;
 
-    UPROPERTY(EditAnywhere, Category = "Appearance|StatBar")
+    UPROPERTY(EditAnywhere, Category = "Initialization")
     TObjectPtr<UTexture2D> StatBarBackgroundImage;
 
     // Reference to the character's stats component.

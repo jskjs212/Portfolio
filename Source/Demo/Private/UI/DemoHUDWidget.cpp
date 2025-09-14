@@ -42,7 +42,7 @@ void UDemoHUDWidget::UpdateInteractWidgets(IInteractable* Interactable)
         ItemInfoWidget->UpdateItemInfo(Item->GetItemSlot());
         ItemInfoWidget->SetVisibility(ESlateVisibility::Visible);
 
-        // hardcoded: Action text and key
+        // @hardcoded - Action text and key
         InteractPromptWidget->SetActionText(FText::FromString(TEXT("Pick Up")));
         InteractPromptWidget->ActionKeyWidget->SetKeyText(FText::FromString(TEXT("E")));
         InteractPromptWidget->SetVisibility(ESlateVisibility::Visible);

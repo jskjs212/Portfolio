@@ -25,7 +25,7 @@ void UEquipmentComponent::BeginPlay()
         EquippedItems.Add(EquipmentType, nullptr);
     }
 
-    // TODO: Config file or data table?
+    // @TODO - Config file or data table?
     EquipDefaultSocketNames.Add(DemoGameplayTags::Item_Weapon, TEXT("MeleeHandSocket"));
     EquipDefaultSocketNames.Add(DemoGameplayTags::Item_Armor_Shield, TEXT("ShieldHandSocket"));
 
@@ -63,7 +63,7 @@ bool UEquipmentComponent::EquipItem(const FItemSlot& InSlot)
         return false;
     }
 
-    // TODO: SocketName in FItemData?
+    // @TODO - SocketName in FItemData?
     // Socket name
     FName* SocketName = EquipDefaultSocketNames.Find(EquipmentType);
     if (!SocketName)
@@ -116,7 +116,7 @@ bool UEquipmentComponent::UnequipItem(const FGameplayTag EquipmentType)
 
         if (InventoryComp->AddItem(Request) <= 0)
         {
-            // misc: In-game notification?
+            // @misc - In-game notification?
             UE_LOG(LogEquipment, Warning, TEXT("UnequipItem() - Failed to add item to inventory."));
             return false;
         }
@@ -125,7 +125,7 @@ bool UEquipmentComponent::UnequipItem(const FGameplayTag EquipmentType)
     // Destroy
     if (!EquippedItem->Destroy())
     {
-        // TODO: Handle failure, already added to inventory so it should be destroyed
+        // @TODO - Handle failure, already added to inventory so it should be destroyed
         UE_LOG(LogEquipment, Error, TEXT("UnequipItem() - Failed to destroy item."));
         return false;
     }

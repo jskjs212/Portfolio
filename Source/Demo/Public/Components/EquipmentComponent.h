@@ -38,7 +38,7 @@ protected:
     ////////////////////////////////////////////////////////
 public:
     // InSlot's quantity is not changed.
-    // misc: Return EEquipResult if needed.
+    // @misc - Return EEquipResult if needed.
     // @return true if successfully equipped
     bool EquipItem(const FItemSlot& InSlot);
 
@@ -66,7 +66,7 @@ public:
     //        Variables
     ////////////////////////////////////////////////////////
 public:
-    // TODO: Audio
+    // @TODO - Audio
     UPROPERTY(EditDefaultsOnly, Category = "Sound")
     TObjectPtr<USoundBase> EquipSound;
 

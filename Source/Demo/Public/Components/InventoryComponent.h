@@ -180,7 +180,7 @@ private:
     UPROPERTY(VisibleAnywhere, Category = "Inventory")
     TMap<FGameplayTag, FItemArray> OwnedItems;
 
-    // check: can be added by purchase?
+    // @check - can be added by purchase?
     // If changed, this should be applied to OwnedItems if bFixSlotSizeAndExposeEmptySlots == true.
     UPROPERTY(VisibleAnywhere, Category = "Inventory")
     TMap<FGameplayTag, int32> MaxSlotSizes;

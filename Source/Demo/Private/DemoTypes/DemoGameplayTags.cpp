@@ -4,6 +4,24 @@
 
 namespace DemoGameplayTags
 {
+// Character states: State.[state]
+UE_DEFINE_GAMEPLAY_TAG(State, "State");
+UE_DEFINE_GAMEPLAY_TAG(State_General, "State.General");
+UE_DEFINE_GAMEPLAY_TAG(State_Dead, "State.Dead");
+UE_DEFINE_GAMEPLAY_TAG(State_Disabled, "State.Disabled");
+UE_DEFINE_GAMEPLAY_TAG(State_Jump, "State.Jump");
+UE_DEFINE_GAMEPLAY_TAG(State_ToggleCombat, "State.ToggleCombat");
+UE_DEFINE_GAMEPLAY_TAG(State_Attack, "State.Attack");
+UE_DEFINE_GAMEPLAY_TAG(State_Dodge, "State.Dodge");
+UE_DEFINE_GAMEPLAY_TAG(State_Block, "State.Block");
+
+// Character actions: State.[state].[action]
+UE_DEFINE_GAMEPLAY_TAG(State_ToggleCombat_Enter, "State.ToggleCombat.Enter");
+UE_DEFINE_GAMEPLAY_TAG(State_ToggleCombat_Exit, "State.ToggleCombat.Exit");
+UE_DEFINE_GAMEPLAY_TAG(State_Attack_Light, "State.Attack.Light");
+UE_DEFINE_GAMEPLAY_TAG(State_Attack_Heavy, "State.Attack.Heavy");
+UE_DEFINE_GAMEPLAY_TAG(State_Attack_Charged, "State.Attack.Charged");
+
 // Movement.SpeedMode.*
 UE_DEFINE_GAMEPLAY_TAG(Movement_SpeedMode_Walk, "Movement.SpeedMode.Walk");
 UE_DEFINE_GAMEPLAY_TAG(Movement_SpeedMode_Jog, "Movement.SpeedMode.Jog");

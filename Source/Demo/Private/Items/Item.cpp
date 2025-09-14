@@ -9,7 +9,7 @@
 #include "DemoTypes/TableRowBases.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
-// TEST: sound
+// @TEST - sound
 #include "Character/PlayerCharacter.h"
 
 AItem* AItem::SpawnItem(
@@ -185,7 +185,7 @@ void AItem::SetupMesh()
         FVector BoxExtent;
         UKismetSystemLibrary::GetComponentBounds(CurrentMesh, Origin, BoxExtent, Radius);
         InteractCollision->SetBoxExtent(BoxExtent);
-        // TEST:
+        // @TEST
         //UE_LOG(LogTemp, Display, TEXT("AItem::SetupMesh() - BoxExtent: %s, Origin: %s."), *BoxExtent.ToString(), *Origin.ToString());
     }
 }
@@ -217,7 +217,7 @@ void AItem::Interact(APawn* InstigatorPawn)
 
             if (Added > 0)
             {
-                // TODO: Audio
+                // @TODO - Audio
                 if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(InstigatorPawn))
                 {
                     UGameplayStatics::PlaySound2D(this, PlayerCharacter->PickupSound);

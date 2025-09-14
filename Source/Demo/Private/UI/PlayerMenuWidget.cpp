@@ -86,7 +86,7 @@ FReply UPlayerMenuWidget::NativeOnPreviewMouseButtonDown(const FGeometry& InGeom
 bool UPlayerMenuWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
     // Item slot dragged & dropped: Only drop item for now
-    // check: Dragged from other page i.e. unequip, buy, move from stash, etc.
+    // @check - Dragged from other page i.e. unequip, buy, move from stash, etc.
     UItemSlotDragDropOp* DragDropOp = Cast<UItemSlotDragDropOp>(InOperation);
     if (DragDropOp)
     {

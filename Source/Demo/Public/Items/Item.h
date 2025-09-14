@@ -44,7 +44,7 @@ protected:
     //        Statics
     ////////////////////////////////////////////////////////
 public:
-    // check: What if AItem is inherited by AWeapon, AArmor, etc.?
+    // @check - What if AItem is inherited by AWeapon, AArmor, etc.?
     static AItem* SpawnItem(
         UWorld* World,
         const FItemSlot& InSlot,

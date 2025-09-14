@@ -33,13 +33,9 @@ class DEMO_API UItemSlotWidget : public UUserWidget
     ////////////////////////////////////////////////////////
 public:
     FOnItemSlotClicked OnRightClicked;
-
     FOnItemSlotClicked OnLeftDoubleClicked;
-
     FOnItemSlotHovered OnHovered;
-
     FSimpleDelegate OnUnhovered;
-
     FOnItemSlotDropped OnDropped;
 
     ////////////////////////////////////////////////////////
@@ -66,7 +62,7 @@ protected:
     //        UI functions
     ////////////////////////////////////////////////////////
 public:
-    void UpdateItemSlot(const FItemSlot& InItemSlot, int32 InIndex)
+    FORCEINLINE void UpdateItemSlot(const FItemSlot& InItemSlot, int32 InIndex)
     {
         ItemSlot = InItemSlot;
         Index = InIndex;
@@ -118,10 +114,10 @@ private:
 private:
     FDataTableRowHandle CurrentItemRowHandle;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Item")
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization")
     FLinearColor NormalBorderColor{FLinearColor::White};
 
-    UPROPERTY(EditDefaultsOnly, Category = "Item")
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization")
     FLinearColor HoveredBorderColor{FLinearColor{1.f, 1.f, 1.f, 0.3f}};
 
     UPROPERTY(EditDefaultsOnly, Category = "Initialization")
@@ -133,7 +129,7 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "Initialization")
     TSubclassOf<UDraggedItemSlotWidget> DraggedItemSlotWidgetBPClass;
 
-    // TODO: Audio
+    // @TODO - Audio
     UPROPERTY(EditDefaultsOnly, Category = "Initialization")
     TObjectPtr<USoundBase> HoveredSound;
 };

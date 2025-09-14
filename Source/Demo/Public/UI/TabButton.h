@@ -61,7 +61,7 @@ private:
     ////////////////////////////////////////////////////////
     //        Variables
     ////////////////////////////////////////////////////////
-protected:
-    UPROPERTY(EditAnywhere, Category = "Tab")
+private:
+    UPROPERTY(EditAnywhere, Category = "Initialization")
     FGameplayTag TabTag;
 };

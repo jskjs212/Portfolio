@@ -9,6 +9,27 @@
  */
 namespace DemoGameplayTags
 {
+// Character states: State.[state]
+// These can also be used as action tags.
+// MUST sync with UStateManagerComponent::UStateManagerComponent() - std::call_once - AllStates
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(State);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_General);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Dead);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Disabled);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Jump);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_ToggleCombat);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Attack);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Dodge);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Block);
+
+// Character actions: State.[state].[action]
+// *.[subaction] is not allowed for now.
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_ToggleCombat_Enter);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_ToggleCombat_Exit);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Attack_Light);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Attack_Heavy);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Attack_Charged);
+
 // Movement.SpeedMode.*
 DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Movement_SpeedMode_Walk);
 DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Movement_SpeedMode_Jog);

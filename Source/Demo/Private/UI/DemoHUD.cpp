@@ -6,7 +6,7 @@
 
 ADemoHUD::ADemoHUD()
 {
-    // hardcoded:
+    // @hardcoded
     static ConstructorHelpers::FClassFinder<UDemoHUDWidget> DemoHUDWidgetBPClass(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprints/UI/WBP_DemoHUD.WBP_DemoHUD_C'"));
     if (DemoHUDWidgetBPClass.Succeeded())
     {
