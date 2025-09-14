@@ -17,13 +17,13 @@ void UItemSlotWidget::NativeOnInitialized()
 {
     Super::NativeOnInitialized();
 
-    checkf(ItemBorder && ItemIcon
-        && HoveredBorderTriangleImage && QuantitySizeBox,
+    checkf(ItemBorder && ItemIcon && HoveredBorderTriangleImage
+        && QuantitySizeBox && QuantityText,
         TEXT("Failed to bind widgets."));
 
-    if (!NormalBorderImage || !HoveredBorderImage)
+    if (!NormalBorderImage || !HoveredBorderImage || !DraggedItemSlotWidgetBPClass)
     {
-        UE_LOG(LogTemp, Warning, TEXT("UItemSlotWidget - Border image is not set."));
+        UE_LOG(LogTemp, Warning, TEXT("UItemSlotWidget - Properties are not set."));
     }
 
     HandleUnhovered();
@@ -46,7 +46,7 @@ FReply UItemSlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, con
         // RMB -> Show context menu
         if (InMouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
         {
-            RightClicked.ExecuteIfBound(ItemSlot, Index);
+            OnRightClicked.ExecuteIfBound(ItemSlot, Index);
             return FReply::Handled();
         }
     }
@@ -70,8 +70,16 @@ void UItemSlotWidget::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
 
 FReply UItemSlotWidget::NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
-    // TEST: Bad implementation of drag drop will block LMB double click.
-    UE_LOG(LogTemp, Display, TEXT("UItemSlotWidget::NativeOnMouseButtonDoubleClick"));
+    if (ItemSlot.IsValid())
+    {
+        // LMB -> Use item
+        if (InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+        {
+            OnLeftDoubleClicked.ExecuteIfBound(ItemSlot, Index);
+            return FReply::Handled();
+        }
+    }
+
     return Super::NativeOnMouseButtonDoubleClick(InGeometry, InMouseEvent);
 }
 

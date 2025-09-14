@@ -43,13 +43,13 @@ public:
     UFUNCTION()
     void HideMenu();
 
-protected:
+private:
     virtual void SetFocusToWidget(UWidget* InWidget) override;
 
     ////////////////////////////////////////////////////////
     //        Widgets
     ////////////////////////////////////////////////////////
-public:
+private:
     /* Stats */
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UTabButton> StatsTabButton;

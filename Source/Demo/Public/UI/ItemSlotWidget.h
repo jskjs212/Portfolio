@@ -32,7 +32,9 @@ class DEMO_API UItemSlotWidget : public UUserWidget
     //        Delegates
     ////////////////////////////////////////////////////////
 public:
-    FOnItemSlotClicked RightClicked;
+    FOnItemSlotClicked OnRightClicked;
+
+    FOnItemSlotClicked OnLeftDoubleClicked;
 
     FOnItemSlotHovered OnHovered;
 
@@ -102,7 +104,8 @@ public:
     ////////////////////////////////////////////////////////
     //        Variables - Item
     ////////////////////////////////////////////////////////
-protected:
+private:
+    // Index in the inventory array
     UPROPERTY(VisibleAnywhere, Category = "Item")
     int32 Index{-1};
 
@@ -112,9 +115,8 @@ protected:
     ////////////////////////////////////////////////////////
     //        Variables
     ////////////////////////////////////////////////////////
-protected:
-    UPROPERTY(EditDefaultsOnly, Category = "Item")
-    TSubclassOf<UDraggedItemSlotWidget> DraggedItemSlotWidgetBPClass;
+private:
+    FDataTableRowHandle CurrentItemRowHandle;
 
     UPROPERTY(EditDefaultsOnly, Category = "Item")
     FLinearColor NormalBorderColor{FLinearColor::White};
@@ -122,16 +124,16 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Item")
     FLinearColor HoveredBorderColor{FLinearColor{1.f, 1.f, 1.f, 0.3f}};
 
-    UPROPERTY(EditDefaultsOnly, Category = "Item")
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization")
     TObjectPtr<UTexture2D> NormalBorderImage;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Item")
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization")
     TObjectPtr<UTexture2D> HoveredBorderImage;
 
-    // TODO: Audio
-    UPROPERTY(EditDefaultsOnly, Category = "Item")
-    TObjectPtr<USoundBase> HoveredSound;
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization")
+    TSubclassOf<UDraggedItemSlotWidget> DraggedItemSlotWidgetBPClass;
 
-private:
-    FDataTableRowHandle CurrentItemRowHandle;
+    // TODO: Audio
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization")
+    TObjectPtr<USoundBase> HoveredSound;
 };

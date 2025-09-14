@@ -122,14 +122,15 @@ void UInventoryPageWidget::UpdateItemSlotsUI()
             if (Index >= ExistingNum && Index < ItemNum)
             {
                 SlotWidget = CreateWidget<UItemSlotWidget>(this, ItemSlotWidgetClass);
-                SlotWidget->RightClicked.BindUObject(this, &ThisClass::HandleItemSlotRightClicked);
+                SlotWidget->OnRightClicked.BindUObject(this, &ThisClass::HandleItemSlotRightClicked);
+                SlotWidget->OnLeftDoubleClicked.BindUObject(this, &ThisClass::HandleItemSlotLeftDoubleClicked);
                 SlotWidget->OnHovered.BindUObject(this, &ThisClass::ShowItemInfo);
                 SlotWidget->OnUnhovered.BindUObject(this, &ThisClass::HideItemInfo);
                 SlotWidget->OnDropped.BindUObject(this, &ThisClass::HandleItemSlotDropped);
                 WrapBox->AddChildToWrapBox(SlotWidget);
                 // ExistingNum += 1, but don't need to update.
             }
-            // Or update existing slot
+            // Or get existing slot
             else if (Index < ExistingNum)
             {
                 SlotWidget = Cast<UItemSlotWidget>(WrapBox->GetChildAt(Index));
@@ -196,6 +197,8 @@ UItemActionDispatcher* UInventoryPageWidget::GetItemActionDispatcher() const
 
 void UInventoryPageWidget::HandleContextMenuButtonClicked(FGameplayTag InTag)
 {
+    // misc: Potential bug (fast click, user intend != cached request)
+
     UItemActionDispatcher* ItemActionDispatcher = GetItemActionDispatcher();
     if (!ItemActionDispatcher)
     {
@@ -206,14 +209,14 @@ void UInventoryPageWidget::HandleContextMenuButtonClicked(FGameplayTag InTag)
     if (InTag == DemoGameplayTags::UI_Action_Item_Use)
     {
         // TODO: Get quantity from user input
-        ItemActionRequest.Quantity = 1;
-        ItemActionDispatcher->RequestUseItem(ItemActionRequest);
+        ContextMenuItemActionRequest.Quantity = 1;
+        ItemActionDispatcher->RequestUseItem(ContextMenuItemActionRequest);
     }
     else if (InTag == DemoGameplayTags::UI_Action_Item_Drop)
     {
         // TODO: Get quantity from user input
-        ItemActionRequest.Quantity = 1;
-        ItemActionDispatcher->RequestDropItem(ItemActionRequest);
+        ContextMenuItemActionRequest.Quantity = 1;
+        ItemActionDispatcher->RequestDropItem(ContextMenuItemActionRequest);
     }
     else if (InTag == DemoGameplayTags::UI_Action_Item_Cancel)
     {
@@ -227,6 +230,23 @@ void UInventoryPageWidget::HandleItemSlotRightClicked(const FItemSlot& InSlot, i
 {
     SetActionRequest(InSlot, InIndex);
     ContextMenuWidget->ShowContextMenu();
+}
+
+void UInventoryPageWidget::HandleItemSlotLeftDoubleClicked(const FItemSlot& InSlot, int32 InIndex)
+{
+    UItemActionDispatcher* ItemActionDispatcher = GetItemActionDispatcher();
+    if (!ItemActionDispatcher)
+    {
+        return;
+    }
+
+    // Use item (only one)
+    FItemActionRequest Request;
+    Request.Slot = InSlot;
+    Request.DesignatedIndex = InIndex;
+    Request.Quantity = 1;
+
+    ItemActionDispatcher->RequestUseItem(Request);
 }
 
 void UInventoryPageWidget::HandleItemSlotDropped(const FItemSlot& SrcSlot, const int32 SrcIndex, const FItemSlot& DstSlot, const int32 DstIndex)
@@ -249,9 +269,6 @@ void UInventoryPageWidget::HandleItemSlotDropped(const FItemSlot& SrcSlot, const
         return;
     }
 
-    // debug: 
-    UE_LOG(LogTemp, Display, TEXT("UInventoryPageWidget::HandleItemSlotDropped - SrcIndex: %d, DstIndex: %d"), SrcIndex, DstIndex);
-
     // Case1: Empty or different item -> Swap
     if (!DstSlot.IsValid() || SrcSlot.RowHandle != DstSlot.RowHandle)
     {
@@ -273,6 +290,7 @@ void UInventoryPageWidget::HandleItemSlotDropped(const FItemSlot& SrcSlot, const
             Request.Slot = DstSlot;
             Request.DesignatedIndex = SrcIndex;
             Request.Quantity = Added;
+            // misc: Potential bug if fails.
             ItemActionDispatcher->RequestRemoveItem(Request);
         }
     }

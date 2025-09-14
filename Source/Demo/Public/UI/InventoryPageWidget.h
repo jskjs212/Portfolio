@@ -36,16 +36,16 @@ protected:
     //        UI functions
     ////////////////////////////////////////////////////////
 public:
-    // Update item slots UI from owner pawn's InventoryComponent (when visible)
+    // Update UI of inventory item slots from owner pawn's InventoryComponent (when visible)
     void UpdateItemSlotsUI();
 
     bool IsPendingUpdate() const { return bPendingUpdateItemSlots; }
 
     FORCEINLINE void SetActionRequest(const FItemSlot& InSlot, int32 DesignatedIndex)
     {
-        ItemActionRequest.Slot = InSlot;
-        ItemActionRequest.DesignatedIndex = DesignatedIndex;
-        ItemActionRequest.Quantity = 0;
+        ContextMenuItemActionRequest.Slot = InSlot;
+        ContextMenuItemActionRequest.DesignatedIndex = DesignatedIndex;
+        ContextMenuItemActionRequest.Quantity = 0;
     }
 
 private:
@@ -64,6 +64,8 @@ private:
 
     void HandleItemSlotRightClicked(const FItemSlot& InSlot, int32 InIndex);
 
+    void HandleItemSlotLeftDoubleClicked(const FItemSlot& InSlot, int32 InIndex);
+
     void HandleItemSlotDropped(const FItemSlot& SrcSlot, int32 SrcIndex, const FItemSlot& DstSlot, int32 DstIndex);
 
     void ShowItemInfo(const FItemSlot& InSlot);
@@ -73,7 +75,7 @@ private:
     ////////////////////////////////////////////////////////
     //        Widgets
     ////////////////////////////////////////////////////////
-public:
+private:
     /* Weapon */
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UTabButton> WeaponTabButton;
@@ -114,11 +116,10 @@ public:
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UImage> ItemPreviewImage;
 
-private:
-    UPROPERTY(EditDefaultsOnly, Category = "ItemSlot")
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization")
     TSubclassOf<UItemSlotWidget> ItemSlotWidgetClass;
 
-    UPROPERTY(EditDefaultsOnly, Category = "ItemSlot")
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization")
     TSubclassOf<UContextMenuWidget> ContextMenuWidgetClass;
 
     UPROPERTY()
@@ -129,5 +130,5 @@ private:
     ////////////////////////////////////////////////////////
     bool bPendingUpdateItemSlots{false};
 
-    FItemActionRequest ItemActionRequest;
+    FItemActionRequest ContextMenuItemActionRequest;
 };

@@ -36,8 +36,8 @@ void UContextMenuWidget::SetupActions(const TArray<FContextAction>& InActions)
         UE_LOG(LogTemp, Error, TEXT("UContextMenuWidget::SetupActions - Already setup."));
         return;
     }
-
     bSetupDone = true;
+
     ActionButtons.Empty();
     HoveredImages.Empty();
 

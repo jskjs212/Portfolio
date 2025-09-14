@@ -2,8 +2,6 @@
 PCH warning
 
 ## TODO
-Meaningless protected: -> private:
-
 ### UI
 - Bind: OnPossess에서 하기
 - All UI: Z order
