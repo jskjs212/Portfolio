@@ -150,8 +150,8 @@ void UItemSlotWidget::UpdateVisuals()
     // No item -> hide -> return
     if (!ItemSlot.IsValid())
     {
-        ItemIcon->SetVisibility(ESlateVisibility::Hidden);
-        QuantitySizeBox->SetVisibility(ESlateVisibility::Hidden);
+        ItemIcon->SetVisibility(ESlateVisibility::Collapsed);
+        QuantitySizeBox->SetVisibility(ESlateVisibility::Collapsed);
         return;
     }
 
@@ -166,8 +166,8 @@ void UItemSlotWidget::UpdateVisuals()
     }
 
     // Show (whether changed or not)
-    ItemIcon->SetVisibility(ESlateVisibility::Visible);
-    QuantitySizeBox->SetVisibility(ESlateVisibility::Visible);
+    ItemIcon->SetVisibility(ESlateVisibility::HitTestInvisible);
+    QuantitySizeBox->SetVisibility(ESlateVisibility::HitTestInvisible);
     QuantityText->SetText(FText::AsNumber(ItemSlot.Quantity));
 }
 
@@ -184,7 +184,7 @@ void UItemSlotWidget::HandleHovered()
     }
     ItemBorder->SetBrushColor(HoveredBorderColor);
     ItemBorder->SetBrushFromTexture(HoveredBorderImage);
-    HoveredBorderTriangleImage->SetVisibility(ESlateVisibility::Visible);
+    HoveredBorderTriangleImage->SetVisibility(ESlateVisibility::HitTestInvisible);
 }
 
 void UItemSlotWidget::HandleUnhovered()
@@ -192,5 +192,5 @@ void UItemSlotWidget::HandleUnhovered()
     OnUnhovered.ExecuteIfBound();
     ItemBorder->SetBrushColor(NormalBorderColor);
     ItemBorder->SetBrushFromTexture(NormalBorderImage);
-    HoveredBorderTriangleImage->SetVisibility(ESlateVisibility::Hidden);
+    HoveredBorderTriangleImage->SetVisibility(ESlateVisibility::Collapsed);
 }

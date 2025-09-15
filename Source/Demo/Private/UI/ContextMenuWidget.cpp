@@ -2,7 +2,7 @@
 
 #include "UI/ContextMenuWidget.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
-#include "Components/Image.h"
+#include "Components/Border.h"
 #include "Components/Overlay.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
@@ -13,9 +13,7 @@ void UContextMenuWidget::NativeOnInitialized()
 {
     Super::NativeOnInitialized();
 
-    checkf(FirstDesignButton && MiddleDesignButton && LastDesignButton
-        && ContextVerticalBox,
-        TEXT("Failed to bind widgets."));
+    checkf(FirstDesignButton && MiddleDesignButton && LastDesignButton && ContextVerticalBox, TEXT("Failed to bind widgets."));
 
     FirstDesignButton->SetVisibility(ESlateVisibility::Collapsed);
     MiddleDesignButton->SetVisibility(ESlateVisibility::Collapsed);
@@ -39,21 +37,19 @@ void UContextMenuWidget::SetupActions(const TArray<FContextAction>& InActions)
     bSetupDone = true;
 
     ActionButtons.Empty();
-    HoveredImages.Empty();
+    HoveredBorders.Empty();
 
     for (int32 Index = 0; Index < InActions.Num(); ++Index)
     {
         UTabButton* NewButton = nullptr;
 
-        // Create buttons based on action.
+        // Create buttons based on action
         if (Index == 0) // First
         {
-            //NewButton = DuplicateObject<UTabButton>(FirstDesignButton, this);
             NewButton = FirstDesignButton;
         }
         else if (Index == InActions.Num() - 1) // Last
         {
-            //NewButton = DuplicateObject<UTabButton>(LastDesignButton, this);
             NewButton = LastDesignButton;
         }
         else // Middle
@@ -63,6 +59,20 @@ void UContextMenuWidget::SetupActions(const TArray<FContextAction>& InActions)
 
         if (NewButton)
         {
+            UBorder* HoveredBorder = Cast<UBorder>(NewButton->GetChildAt(0));
+            if (!HoveredBorder)
+            {
+                UE_LOG(LogTemp, Error, TEXT("UContextMenuWidget::SetupActions - HoveredBorder is null for index %d"), Index);
+                continue;
+            }
+
+            UTextBlock* TextBlock = Cast<UTextBlock>(HoveredBorder->GetChildAt(0));
+            if (!TextBlock)
+            {
+                UE_LOG(LogTemp, Error, TEXT("UContextMenuWidget::SetupActions - TextBlock is null for index %d"), Index);
+                continue;
+            }
+
             NewButton->SetTabTag(InActions[Index].ActionTag);
             NewButton->OnTabButtonHovered.BindUObject(this, &ThisClass::HandleButtonHovered);
             NewButton->OnTabButtonUnhovered.BindUObject(this, &ThisClass::HandleButtonUnhovered);
@@ -71,28 +81,12 @@ void UContextMenuWidget::SetupActions(const TArray<FContextAction>& InActions)
             ContextVerticalBox->AddChild(NewButton);
             ActionButtons.Add(NewButton);
 
-            UOverlay* Overlay = Cast<UOverlay>(NewButton->GetChildAt(0));
-            if (!Overlay)
-            {
-                UE_LOG(LogTemp, Error, TEXT("UContextMenuWidget::SetupActions - Overlay is null for index %d"), Index);
-                continue;
-            }
+            HoveredBorder->SetVisibility(ESlateVisibility::HitTestInvisible);
+            HoveredBorder->SetBrushColor(FLinearColor{1.f, 1.f, 1.f, 0.f}); // Hide border
+            HoveredBorders.Add(HoveredBorder);
 
-            TArray<UWidget*> AllChildren = Overlay->GetAllChildren();
-            for (UWidget* Child : AllChildren)
-            {
-                // Set button label
-                if (UTextBlock* TextBlock = Cast<UTextBlock>(Child))
-                {
-                    TextBlock->SetText(InActions[Index].Label);
-                }
-                // Show/hide hover image
-                else if (UImage* HoveredImage = Cast<UImage>(Child))
-                {
-                    HoveredImage->SetVisibility(ESlateVisibility::Hidden);
-                    HoveredImages.Add(HoveredImage);
-                }
-            }
+            TextBlock->SetVisibility(ESlateVisibility::HitTestInvisible);
+            TextBlock->SetText(InActions[Index].Label);
         }
         else
         {
@@ -128,7 +122,7 @@ void UContextMenuWidget::HideContextMenu()
     }
     PreviousFocus = nullptr;
 
-    SetVisibility(ESlateVisibility::Hidden);
+    SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void UContextMenuWidget::SetPositionToCursor()
@@ -146,7 +140,7 @@ void UContextMenuWidget::HandleButtonHovered(FGameplayTag InTag)
     {
         if (ActionButtons[Index]->GetTabTag() == InTag)
         {
-            HoveredImages[Index]->SetVisibility(ESlateVisibility::Visible);
+            HoveredBorders[Index]->SetBrushColor(FLinearColor::White);
             return;
         }
     }
@@ -158,7 +152,7 @@ void UContextMenuWidget::HandleButtonUnhovered(FGameplayTag InTag)
     {
         if (ActionButtons[Index]->GetTabTag() == InTag)
         {
-            HoveredImages[Index]->SetVisibility(ESlateVisibility::Hidden);
+            HoveredBorders[Index]->SetBrushColor(FLinearColor{1.f, 1.f, 1.f, 0.f});
             return;
         }
     }

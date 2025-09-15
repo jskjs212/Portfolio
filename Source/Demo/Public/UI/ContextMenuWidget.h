@@ -8,7 +8,7 @@
 #include "Widgets/SWidget.h"
 #include "ContextMenuWidget.generated.h"
 
-class UImage;
+class UBorder;
 class UTabButton;
 class UVerticalBox;
 
@@ -89,7 +89,7 @@ protected:
     TArray<TObjectPtr<UTabButton>> ActionButtons;
 
     UPROPERTY()
-    TArray<TObjectPtr<UImage>> HoveredImages;
+    TArray<TObjectPtr<UBorder>> HoveredBorders;
 
 private:
     bool bSetupDone{false};

@@ -11,6 +11,7 @@
 class IInteractable;
 class UContextMenuWidget;
 class UPlayerMenuWidget;
+class USoundBase;
 
 /**
  *
@@ -64,4 +65,11 @@ private:
 
     UPROPERTY()
     TObjectPtr<UPlayerMenuWidget> PlayerMenuWidget;
+
+    // @TODO - Audio
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization")
+    TObjectPtr<USoundBase> PlayerMenuOpenSound;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization")
+    TObjectPtr<USoundBase> PlayerMenuCloseSound;
 };

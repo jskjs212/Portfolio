@@ -1,6 +1,3 @@
-Hidden -> Collapsed
-Visible -> HitTestInvisible, SelfHitTestInvisible
-
 ## Bugs
 - PCH warning
 
@@ -15,7 +12,8 @@ CombatComponent:
 ### UI
 - Bind: OnPossess에서 하기
 - All UI: Z order
-- Page 하위 위젯 외의 뭔가를 클릭하면 Page 포커스가 사라짐
+- Focus:
+> Page 밖의 Background 클릭 시 Page 단축키 안 먹힘
 
 BPClass:
 - 클래스마다 흩어져 있는 BPClass 찾기를 하나의 DataAsset?에 모으기?

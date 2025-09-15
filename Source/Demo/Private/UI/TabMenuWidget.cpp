@@ -20,12 +20,12 @@ void UTabMenuWidget::SetVisibilityAndFocus(bool bShow)
 {
     if (bShow)
     {
-        SetVisibility(ESlateVisibility::Visible);
+        SetVisibility(ESlateVisibility::SelfHitTestInvisible);
         SetFocusToWidget(TabEntries[PageSwitcher->GetActiveWidgetIndex()].Widget);
     }
     else
     {
-        SetVisibility(ESlateVisibility::Hidden);
+        SetVisibility(ESlateVisibility::Collapsed);
     }
 }
 

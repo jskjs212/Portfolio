@@ -3,6 +3,7 @@
 #include "PlayerController/DemoPlayerController.h"
 #include "Character/PlayerCharacter.h"
 #include "Items/Item.h"
+#include "Kismet/GameplayStatics.h"
 #include "UI/DemoHUD.h"
 #include "UI/DemoHUDWidget.h"
 #include "UI/PlayerMenuWidget.h"
@@ -47,15 +48,15 @@ void ADemoPlayerController::ShowPlayerMenu(bool bShow)
 
         PlayerMenuWidget->SetVisibilityAndFocus(true);
 
-        // @TODO - IsPendingUIUpdate? Update
-
         if (ADemoHUD* DemoHUD = GetHUD<ADemoHUD>())
         {
             if (DemoHUD->DemoHUDWidget)
             {
-                DemoHUD->DemoHUDWidget->SetVisibility(ESlateVisibility::Hidden);
+                DemoHUD->DemoHUDWidget->SetVisibility(ESlateVisibility::Collapsed);
             }
         }
+
+        UGameplayStatics::PlaySound2D(this, PlayerMenuOpenSound, 0.5f);
     }
     else // hide
     {
@@ -74,9 +75,11 @@ void ADemoPlayerController::ShowPlayerMenu(bool bShow)
         {
             if (DemoHUD->DemoHUDWidget)
             {
-                DemoHUD->DemoHUDWidget->SetVisibility(ESlateVisibility::Visible);
+                DemoHUD->DemoHUDWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
             }
         }
+
+        UGameplayStatics::PlaySound2D(this, PlayerMenuCloseSound, 0.5f);
     }
 }
 
@@ -105,7 +108,7 @@ void ADemoPlayerController::InitPlayerMenu()
     PlayerMenuWidget = CreateWidget<UPlayerMenuWidget>(this, PlayerMenuWidgetClass);
     if (PlayerMenuWidget)
     {
-        PlayerMenuWidget->SetVisibility(ESlateVisibility::Hidden);
+        PlayerMenuWidget->SetVisibility(ESlateVisibility::Collapsed);
         PlayerMenuWidget->AddToViewport(1);
     }
 }

@@ -19,8 +19,8 @@ void UDemoHUDWidget::NativeOnInitialized()
         TEXT("Failed to bind widgets."));
 
     // Hide interact widgets
-    ItemInfoWidget->SetVisibility(ESlateVisibility::Hidden);
-    InteractPromptWidget->SetVisibility(ESlateVisibility::Hidden);
+    ItemInfoWidget->SetVisibility(ESlateVisibility::Collapsed);
+    InteractPromptWidget->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void UDemoHUDWidget::NativeConstruct()
@@ -40,16 +40,16 @@ void UDemoHUDWidget::UpdateInteractWidgets(IInteractable* Interactable)
     if (Item && Item->GetItemSlot().IsValid())
     {
         ItemInfoWidget->UpdateItemInfo(Item->GetItemSlot());
-        ItemInfoWidget->SetVisibility(ESlateVisibility::Visible);
+        ItemInfoWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
 
         // @hardcoded - Action text and key
         InteractPromptWidget->SetActionText(FText::FromString(TEXT("Pick Up")));
         InteractPromptWidget->ActionKeyWidget->SetKeyText(FText::FromString(TEXT("E")));
-        InteractPromptWidget->SetVisibility(ESlateVisibility::Visible);
+        InteractPromptWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
     }
     else
     {
-        ItemInfoWidget->SetVisibility(ESlateVisibility::Hidden);
-        InteractPromptWidget->SetVisibility(ESlateVisibility::Hidden);
+        ItemInfoWidget->SetVisibility(ESlateVisibility::Collapsed);
+        InteractPromptWidget->SetVisibility(ESlateVisibility::Collapsed);
     }
 }

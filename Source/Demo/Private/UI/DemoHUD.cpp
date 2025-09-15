@@ -33,11 +33,3 @@ void ADemoHUD::Init()
         DemoHUDWidget->AddToViewport(0);
     }
 }
-
-//void ADemoHUD::SetHUDVisibility(bool bVisible)
-//{
-//    if (DemoHUDWidget)
-//    {
-//        DemoHUDWidget->SetVisibility(bVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
-//    }
-//}

@@ -164,7 +164,7 @@ void UInventoryPageWidget::SetupContextMenu()
     ContextMenuWidget = CreateWidget<UContextMenuWidget>(this, ContextMenuWidgetClass);
     checkf(ContextMenuWidget, TEXT("Failed to create ContextMenuWidget."));
     ContextMenuWidget->SetupActions(Actions);
-    ContextMenuWidget->SetVisibility(ESlateVisibility::Hidden);
+    ContextMenuWidget->SetVisibility(ESlateVisibility::Collapsed);
     ContextMenuWidget->AddToViewport(3);
 
     // Bind context menu buttons
@@ -301,16 +301,16 @@ void UInventoryPageWidget::ShowItemInfo(const FItemSlot& InSlot)
     const FItemDataBase* ItemData = ItemInfoWidget->UpdateItemInfo(InSlot);
     if (ItemData)
     {
-        ItemInfoWidget->SetVisibility(ESlateVisibility::Visible);
-        ItemPreviewBorder->SetVisibility(ESlateVisibility::Visible);
+        ItemInfoWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
+        ItemPreviewBorder->SetVisibility(ESlateVisibility::HitTestInvisible);
         ItemPreviewImage->SetBrushFromTexture(ItemData->Icon);
-        ItemPreviewImage->SetVisibility(ESlateVisibility::Visible);
+        ItemPreviewImage->SetVisibility(ESlateVisibility::HitTestInvisible);
     }
 }
 
 void UInventoryPageWidget::HideItemInfo()
 {
-    ItemInfoWidget->SetVisibility(ESlateVisibility::Hidden);
-    ItemPreviewBorder->SetVisibility(ESlateVisibility::Hidden);
-    ItemPreviewImage->SetVisibility(ESlateVisibility::Hidden);
+    ItemInfoWidget->SetVisibility(ESlateVisibility::Collapsed);
+    ItemPreviewBorder->SetVisibility(ESlateVisibility::Collapsed);
+    ItemPreviewImage->SetVisibility(ESlateVisibility::Collapsed);
 }
