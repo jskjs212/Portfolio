@@ -122,6 +122,8 @@ public:
 
     void RegenChecked(FGameplayTag StatTag);
 
+    void StopAllRegen();
+
     ////////////////////////////////////////////////////////
     //        Wrapper functions (only health for now)
     ////////////////////////////////////////////////////////
@@ -136,14 +138,17 @@ public:
     float TakeDamage(float InDamage);
 
     ////////////////////////////////////////////////////////
+    //        Get & set (all stat types)
+    ////////////////////////////////////////////////////////
+public:
+    FORCEINLINE bool HasStatType(FGameplayTag StatTag) const { return ResourceStats.Contains(StatTag); }
+
+    bool HasEnough(FGameplayTag StatTag, float Value) const;
+
+    ////////////////////////////////////////////////////////
     //        Get & set
     ////////////////////////////////////////////////////////
 public:
-    FORCEINLINE bool HasStatType(FGameplayTag StatTag) const
-    {
-        return ResourceStats.Contains(StatTag);
-    }
-
     FORCEINLINE float GetCurrentResourceStatChecked(FGameplayTag StatTag) const
     {
         return GetResourceStatChecked(StatTag).CurrentValue;

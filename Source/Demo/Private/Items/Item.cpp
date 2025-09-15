@@ -99,6 +99,16 @@ void AItem::PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChan
 }
 #endif // WITH_EDITOR
 
+void AItem::SimulatePhysics()
+{
+    UMeshComponent* CurrentMesh = GetMesh();
+    if (CurrentMesh)
+    {
+        CurrentMesh->SetSimulatePhysics(true);
+        CurrentMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+    }
+}
+
 void AItem::SetupMesh()
 {
     check(StaticMesh && SkeletalMesh && InteractCollision);

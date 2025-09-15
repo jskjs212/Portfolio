@@ -2,8 +2,11 @@
 
 #include "Components/StateManagerComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 #include <mutex>
+
+DEFINE_LOG_CATEGORY(LogStateManager);
 
 UStateManagerComponent::UStateManagerComponent()
 {
@@ -34,11 +37,38 @@ void UStateManagerComponent::SetAction(const FGameplayTag NewAction)
     }
 
     // @debug
-    //UE_LOG(LogTemp, Display, TEXT("New state: %s, New action: %s"), *NewState.ToString(), *NewAction.ToString());
+    UE_LOG(LogStateManager, Display, TEXT("New action: %s"), *NewAction.ToString());
 
     // Set state and action
     SetState(NewState);
     CurrentAction = NewAction;
+}
+
+void UStateManagerComponent::SetDefaultAction()
+{
+    // Reset to Jump if the actor is falling
+    if (AActor* OwnerActor = GetOwner())
+    {
+        if (UCharacterMovementComponent* MovementComponent = OwnerActor->FindComponentByClass<UCharacterMovementComponent>())
+        {
+            if (MovementComponent->IsFalling())
+            {
+                SetAction(DemoGameplayTags::State_Jump);
+                return;
+            }
+        }
+    }
+    
+    SetAction(DemoGameplayTags::State_General);
+}
+
+void UStateManagerComponent::OnLanded()
+{
+    // If already performing another action, then carry on.
+    if (CurrentState == DemoGameplayTags::State_Jump)
+    {
+        SetAction(DemoGameplayTags::State_General);
+    }
 }
 
 void UStateManagerComponent::SetState(const FGameplayTag NewState)
@@ -98,7 +128,7 @@ void UStateManagerComponent::SetupAllowedTransitionsOnlyOnce()
             //          -> Currently it's meaningless to ToggleCombat_Exit, because there's no advantage to do so.
 
             // @TEST
-            UE_LOG(LogTemp, Warning, TEXT("UStateManagerComponent::SetupAllowedTransitionsOnlyOnce"));
+            UE_LOG(LogStateManager, Warning, TEXT("UStateManagerComponent::SetupAllowedTransitionsOnlyOnce"));
         });
 }
 
@@ -123,7 +153,7 @@ FGameplayTag UStateManagerComponent::GetStateFromAction(const FGameplayTag InAct
     // ParentTag is not 'State' or 'State.[state]' == invalid action input
     else if (!ParentTag.MatchesTagExact(DemoGameplayTags::State))
     {
-        UE_LOG(LogTemp, Error, TEXT("UStateManagerComponent::SetAction: Invalid action tag %s"), *InAction.ToString());
+        UE_LOG(LogStateManager, Error, TEXT("UStateManagerComponent::SetAction: Invalid action tag %s"), *InAction.ToString());
         return FGameplayTag::EmptyTag;
     }
 

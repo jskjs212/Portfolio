@@ -69,13 +69,14 @@ float UStatsComponent::ModifyCurrentResourceStatChecked(const FGameplayTag StatT
         return 0.f;
     }
 
-    const float OldValue = GetCurrentResourceStatChecked(StatTag);
-    const float NewValue = SetCurrentResourceStatChecked(StatTag, OldValue + Delta, MinValue);
-
+    // Set timer before broadcast
     if (bShouldRegenerate)
     {
         StartRegenChecked(StatTag);
     }
+
+    const float OldValue = GetCurrentResourceStatChecked(StatTag);
+    const float NewValue = SetCurrentResourceStatChecked(StatTag, OldValue + Delta, MinValue);
 
     return NewValue - OldValue;
 }
@@ -126,6 +127,20 @@ void UStatsComponent::RegenChecked(const FGameplayTag StatTag)
     }
 }
 
+void UStatsComponent::StopAllRegen()
+{
+    if (UWorld* World = GetWorld())
+    {
+        FTimerManager& TimerManager = World->GetTimerManager();
+        for (TPair<FGameplayTag, FResourceStat>& Pair : ResourceStats)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("UStatsComponent::StopAllRegen - Stopping regen for %s"), *Pair.Key.GetTagName().ToString());
+            FResourceStat& ResourceStat = Pair.Value;
+            TimerManager.ClearTimer(ResourceStat.TimerHandle);
+        }
+    }
+}
+
 float UStatsComponent::TakeDamage(const float InDamage)
 {
     // Damage calculation
@@ -143,6 +158,15 @@ float UStatsComponent::TakeDamage(const float InDamage)
     // @debug
     UE_LOG(LogTemp, Display, TEXT("UStatsComponent::TakeDamage - %.2f"), Damage);
     return Damage;
+}
+
+bool UStatsComponent::HasEnough(FGameplayTag StatTag, float Value) const
+{
+    if (const FResourceStat* ResourceStat = ResourceStats.Find(StatTag))
+    {
+        return ResourceStat->CurrentValue >= Value;
+    }
+    return false;
 }
 
 float UStatsComponent::SetCurrentResourceStatChecked(const FGameplayTag StatTag, const float InValue, const float MinValue)

@@ -1,13 +1,13 @@
+Hidden -> Collapsed
+Visible -> HitTestInvisible, SelfHitTestInvisible
+
 ## Bugs
-PCH warning
+- PCH warning
 
 ## TODO
 ### Combat
 StateManager:
-- State transition (Jump, ...)
-- Jump testing
-
-HandleDeath()
+- Jump testing: 공격 중 낙하, 공격 중 착지
 
 CombatComponent:
 - Attack, Dodge, Block
@@ -27,6 +27,7 @@ ContextMenu:
 
 Inventory:
 - AddItem: Index 지정됐고, 이미 있으면 빈 칸에 넣기 bFlag?
+- DropItem: 벽 너머에 스폰됨
 
 Equipment:
 - Equip 안에서 Unequip할 때 같은 slot에 돌려놓기 (비었으면)
@@ -35,6 +36,7 @@ Equipment:
 Design:
 - ContextMenu HoveredImage 겹쳐서 Hover 바뀌는 지점이 애매함
 - TabButton Style: image + style? UImage + color?
+- Hit damage
 
 ESC:
 - Name: GameMenu? PauseMenu? SystemMenu?

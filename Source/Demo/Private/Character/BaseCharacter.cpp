@@ -2,12 +2,16 @@
 
 
 #include "Character/BaseCharacter.h"
+#include "Animation/AnimInstance.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/CombatComponent.h"
 #include "Components/EquipmentComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Components/StateManagerComponent.h"
 #include "Components/StatsComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Items/Item.h"
 
 ABaseCharacter::ABaseCharacter()
 {
@@ -41,7 +45,7 @@ void ABaseCharacter::BeginPlay()
     StateManager->OnStateBegan.AddUObject(this, &ThisClass::HandleStateBegan);
 
     StatsComponent->InitializeResourceStats();
-    StatsComponent->OnCurrentResourceStatChanged.AddUObject(this, &ThisClass::OnCurrentResourceStatChanged);
+    StatsComponent->OnCurrentResourceStatChanged.AddUObject(this, &ThisClass::HandleCurrentResourceStatChanged);
 }
 
 bool ABaseCharacter::CanPerformJump() const
@@ -52,6 +56,11 @@ bool ABaseCharacter::CanPerformJump() const
     }
 
     if (!StateManager->CanPerformAction(DemoGameplayTags::State_Jump))
+    {
+        return false;
+    }
+
+    if (!StatsComponent->HasEnough(UStatsComponent::StaminaTag, JumpStaminaCost))
     {
         return false;
     }
@@ -72,18 +81,41 @@ void ABaseCharacter::Jump()
 
 void ABaseCharacter::Landed(const FHitResult& Hit)
 {
-    StateManager->SetAction(DemoGameplayTags::State_General);
+    StateManager->OnLanded();
     Super::Landed(Hit);
 }
 
-void ABaseCharacter::OnCurrentResourceStatChanged(FGameplayTag StatTag, float OldValue, float NewValue)
+void ABaseCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode)
 {
-    if (StatTag == UStatsComponent::HealthTag)
+    Super::OnMovementModeChanged(PrevMovementMode, PreviousCustomMode);
+
+    // Set Jump state when falling.
+    // If already performing another action, then carry on.
+    if (GetCharacterMovement()->IsFalling())
     {
-        if (NewValue <= 0.f)
+        if (StateManager->CanPerformAction(DemoGameplayTags::State_Jump))
         {
-            // @TODO - Death logic
+            StateManager->SetAction(DemoGameplayTags::State_Jump);
         }
+    }
+}
+
+void ABaseCharacter::DestroyCharacter()
+{
+    EquipmentComponent->DestroyAllEquippedItems();
+    Destroy();
+}
+
+void ABaseCharacter::EnableRagdoll()
+{
+    if (USkeletalMeshComponent* MeshComp = GetMesh())
+    {
+        MeshComp->SetCollisionProfileName(TEXT("Ragdoll"));
+        MeshComp->SetAllBodiesSimulatePhysics(true);
+        // @TEST
+        //MeshComp->SetSimulatePhysics(true);
+        //MeshComp->WakeAllRigidBodies();
+        //MeshComp->bBlendPhysics = true;
     }
 }
 
@@ -91,16 +123,62 @@ void ABaseCharacter::HandleDeath()
 {
     // @TODO
     // Stop animations to prevent notifies
+    UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+    if (AnimInstance)
+    {
+        constexpr float BlendOutTime = 0.3f;
+        AnimInstance->StopAllMontages(BlendOutTime);
+    }
 
     // Stop movement
+    if (GetCharacterMovement())
+    {
+        GetCharacterMovement()->DisableMovement();
+        //MovementComponent->StopMovementImmediately();
+    }
 
     // Disable collisions
+    if (GetCapsuleComponent())
+    {
+        GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    }
 
     // Animation of ragdoll
+    if (AnimInstance && DeathMontage)
+    {
+        AnimInstance->Montage_Play(DeathMontage);
+    }
+    else
+    {
+        EnableRagdoll();
+    }
 
     // Drop weapon if any
+    AItem* Weapon = EquipmentComponent->GetEquippedItem(DemoGameplayTags::Item_Weapon);
+    if (Weapon)
+    {
+        Weapon->SimulatePhysics();
+    }
+
+    // Stop timers
+    StatsComponent->StopAllRegen();
 
     // Destroy actor after some time
+    constexpr float DestroyDelay = 5.f;
+    FTimerHandle DestroyTimerHandle;
+    FTimerManager& TimerManager = GetWorldTimerManager();
+    TimerManager.SetTimer(DestroyTimerHandle, this, &ThisClass::DestroyCharacter, DestroyDelay);
+}
+
+void ABaseCharacter::HandleCurrentResourceStatChanged(FGameplayTag StatTag, float OldValue, float NewValue)
+{
+    if (StatTag == UStatsComponent::HealthTag)
+    {
+        if (NewValue <= 0.f)
+        {
+            StateManager->SetAction(DemoGameplayTags::State_Dead);
+        }
+    }
 }
 
 void ABaseCharacter::HandleStateBegan(FGameplayTag NewState)

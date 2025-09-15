@@ -8,6 +8,7 @@
 #include "Interfaces/CombatInterface.h"
 #include "BaseCharacter.generated.h"
 
+class UAnimMontage;
 class UCombatComponent;
 class UEquipmentComponent;
 class UStateManagerComponent;
@@ -47,14 +48,22 @@ protected:
     //        Character functions
     ////////////////////////////////////////////////////////
 protected:
-    virtual bool CanPerformJump() const;
+    bool CanPerformJump() const;
+
     virtual void Jump() override;
+
     virtual void Landed(const FHitResult& Hit) override;
 
-    UFUNCTION()
-    void OnCurrentResourceStatChanged(FGameplayTag StatTag, float OldValue, float NewValue);
+    // CharacterMovementComponent's movement mode
+    virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode = 0) override;
+
+    void DestroyCharacter();
+
+    void EnableRagdoll();
 
     void HandleDeath();
+
+    void HandleCurrentResourceStatChanged(FGameplayTag StatTag, float OldValue, float NewValue);
 
     void HandleStateBegan(FGameplayTag NewState);
 
@@ -77,6 +86,13 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Movement")
     float SprintSpeed{800.f};
 
+    UPROPERTY(EditAnywhere, Category = "Movement")
+    float JumpStaminaCost{10.f};
+
     // Should not modify directly, use SetMovementSpeedMode instead.
     FGameplayTag MovementSpeedMode;
+
+    /* Animation */
+    UPROPERTY(EditAnywhere, Category = "Animation")
+    TObjectPtr<UAnimMontage> DeathMontage;
 };

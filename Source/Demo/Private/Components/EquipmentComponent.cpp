@@ -146,6 +146,19 @@ bool UEquipmentComponent::UnequipItem(const FGameplayTag EquipmentType)
     return true;
 }
 
+void UEquipmentComponent::DestroyAllEquippedItems()
+{
+    for (TPair<FGameplayTag, TObjectPtr<AItem>>& Pair : EquippedItems)
+    {
+        TObjectPtr<AItem>& EquippedItem = Pair.Value;
+        if (IsValid(EquippedItem))
+        {
+            EquippedItem->Destroy();
+            EquippedItem = nullptr;
+        }
+    }
+}
+
 bool UEquipmentComponent::EquipItem_Validate(const FItemSlot& InSlot, FGameplayTag& OutEquipmentType, TObjectPtr<AItem>*& OutEquippedItemPtr)
 {
     if (!InSlot.IsValid())

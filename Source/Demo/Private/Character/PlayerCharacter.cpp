@@ -96,14 +96,14 @@ void APlayerCharacter::ConsumeSprintStamina()
         {
             const float DeltaStamina = SprintStaminaCostPerSecond * SprintStaminaInterval;
 
-            // Not enough stamina
-            if (StatsComponent->GetCurrentResourceStatChecked(UStatsComponent::StaminaTag) < DeltaStamina)
+            if (!StatsComponent->HasEnough(UStatsComponent::StaminaTag, DeltaStamina))
             {
+                // Not enough stamina
                 SetMovementSpeedMode(DemoGameplayTags::Movement_SpeedMode_Jog);
             }
-            else // Consume stamina
+            else
             {
-                // Refresh Regen timer every time
+                // Consume stamina. Refresh Regen timer every time.
                 StatsComponent->ModifyCurrentResourceStatChecked(UStatsComponent::StaminaTag, -DeltaStamina, true);
             }
         }
@@ -215,22 +215,6 @@ void APlayerCharacter::Move(const FInputActionValue& Value)
     AddMovementInput(RightDirection, MoveAxisVector.X);
 }
 
-bool APlayerCharacter::CanPerformJump() const
-{
-    if (!Super::CanPerformJump())
-    {
-        return false;
-    }
-
-    if (StatsComponent->GetCurrentResourceStatChecked(UStatsComponent::StaminaTag) < JumpStaminaCost)
-    {
-        // Not enough stamina
-        return false;
-    }
-
-    return true;
-}
-
 void APlayerCharacter::Jump()
 {
     if (!CanPerformJump())
@@ -314,8 +298,6 @@ void APlayerCharacter::StartSprint()
     {
         SetMovementSpeedMode(DemoGameplayTags::Movement_SpeedMode_Sprint);
     }
-
-    // @TODO - Consume stamina if sprinting
 }
 
 void APlayerCharacter::StopSprint()
@@ -394,6 +376,8 @@ void APlayerCharacter::Test2_Implementation()
     UE_LOG(LogTemp, Display, TEXT("APlayerCharacter::Test2() - UnequipItem"));
     TestWeapon.Quantity = 1;
     TestShield.Quantity = 1;
-    EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Weapon);
-    EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Armor_Shield);
+    //EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Weapon);
+    //EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Armor_Shield);
+
+    StatsComponent->TakeDamage(30.f);
 }

@@ -45,6 +45,8 @@ public:
     // @return true if successfully unequipped
     bool UnequipItem(FGameplayTag EquipmentType);
 
+    void DestroyAllEquippedItems();
+
 private:
     // @return true if valid. If false, out data are not valid.
     bool EquipItem_Validate(const FItemSlot& InSlot, FGameplayTag& OutEquipmentType, TObjectPtr<AItem>*& OutEquippedItemPtr);

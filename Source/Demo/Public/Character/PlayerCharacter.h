@@ -76,7 +76,6 @@ protected:
     void Look(const FInputActionValue& Value);
     void Move(const FInputActionValue& Value);
 
-    virtual bool CanPerformJump() const;
     virtual void Jump() override;
     virtual void Landed(const FHitResult& Hit) override;
 
@@ -150,7 +149,7 @@ protected:
     ////////////////////////////////////////////////////////
 public:
     // @TODO - Audio
-    UPROPERTY(EditDefaultsOnly, Category = "Item|Audio")
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization")
     TObjectPtr<USoundBase> PickupSound;
 
 private:
@@ -158,9 +157,6 @@ private:
     // Options: true = toggle, false = hold
     bool bIsWalkInputTogglesWalk{true};
     bool bIsSprintInputTogglesSprint{false};
-
-    UPROPERTY(EditDefaultsOnly, Category = "Movement")
-    float JumpStaminaCost{10.f};
 
     // Sprint
     UPROPERTY(EditDefaultsOnly, Category = "Movement")

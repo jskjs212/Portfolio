@@ -4,6 +4,10 @@ BaseCharacter <- PlayerCharacter, AICharacter\
 AICharacter <- Enemy, NPC로 상속할지, 하나에서 모두 처리할지 고민\
 Enemy <- Boss, Mob?
 
+### States
+- Transition rules are set in:
+> UStateManagerComponent::SetupAllowedTransitionsOnlyOnce()
+
 ## UI
 ### Manager
 UIManagementSubsystem (전역 UI)

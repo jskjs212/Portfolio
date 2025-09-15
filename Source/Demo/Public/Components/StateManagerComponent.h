@@ -7,6 +7,8 @@
 #include "GameplayTagContainer.h"
 #include "StateManagerComponent.generated.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogStateManager, Log, All);
+
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnStateChanged, FGameplayTag /* InState */);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -38,6 +40,12 @@ public:
     // State tag will be set to 'State.[state]'.
     // @param NewAction should be 'State.[state]' or 'State.[state].[action]'
     void SetAction(FGameplayTag NewAction);
+
+    // Reset to General or Jump (if falling).
+    void SetDefaultAction();
+
+    // Reset state when landed.
+    void OnLanded();
 
 private:
     // Set only state tag.
