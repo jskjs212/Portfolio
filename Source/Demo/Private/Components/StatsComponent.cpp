@@ -134,7 +134,6 @@ void UStatsComponent::StopAllRegen()
         FTimerManager& TimerManager = World->GetTimerManager();
         for (TPair<FGameplayTag, FResourceStat>& Pair : ResourceStats)
         {
-            UE_LOG(LogTemp, Warning, TEXT("UStatsComponent::StopAllRegen - Stopping regen for %s"), *Pair.Key.GetTagName().ToString());
             FResourceStat& ResourceStat = Pair.Value;
             TimerManager.ClearTimer(ResourceStat.TimerHandle);
         }

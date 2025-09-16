@@ -2,6 +2,7 @@
 
 
 #include "Character/BaseCharacter.h"
+#include "Animation/ActionInfoSubsystem.h"
 #include "Animation/AnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/CombatComponent.h"
@@ -9,6 +10,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StateManagerComponent.h"
 #include "Components/StatsComponent.h"
+#include "DemoTypes/ActionInfoConfig.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Items/Item.h"
@@ -41,6 +43,13 @@ ABaseCharacter::ABaseCharacter()
 void ABaseCharacter::BeginPlay()
 {
     Super::BeginPlay();
+
+    if (!IdentityTag.IsValid())
+    {
+        UE_LOG(LogTemp, Error, TEXT("IdentityTag is not set for %s."), *GetName());
+    }
+
+    UpdateActionInfo(DemoGameplayTags::Item_Weapon_NoWeapon);
 
     StateManager->OnStateBegan.AddUObject(this, &ThisClass::HandleStateBegan);
 
@@ -186,6 +195,24 @@ void ABaseCharacter::HandleStateBegan(FGameplayTag NewState)
     if (NewState == DemoGameplayTags::State_Dead)
     {
         HandleDeath();
+    }
+}
+
+void ABaseCharacter::UpdateActionInfo(FGameplayTag WeaponTag)
+{
+    UActionInfoSubsystem* ActionInfoSubsystem = UGameInstance::GetSubsystem<UActionInfoSubsystem>(GetGameInstance());
+    if (!ActionInfoSubsystem)
+    {
+        UE_LOG(LogTemp, Error, TEXT("ActionInfoSubsystem not found."));
+        CurrentActionInfo = nullptr;
+        return;
+    }
+
+    CurrentActionInfo = ActionInfoSubsystem->GetActionInfoConfig(IdentityTag, WeaponTag);
+
+    if (CurrentActionInfo == nullptr)
+    {
+        UE_LOG(LogTemp, Error, TEXT("Invalid ActionInfo for (%s, %s)."), *IdentityTag.ToString(), *WeaponTag.ToString());
     }
 }
 

@@ -8,6 +8,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StateManagerComponent.h"
 #include "Components/StatsComponent.h"
+#include "DemoTypes/ActionInfoConfig.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -362,20 +363,20 @@ void APlayerCharacter::Test1_Implementation()
 {
     UE_LOG(LogTemp, Warning, TEXT("APlayerCharacter::Test1() called!"));
 
-    UE_LOG(LogTemp, Display, TEXT("APlayerCharacter::Test1() - EquipItem"));
-    TestWeapon.Quantity = 1;
-    TestShield.Quantity = 1;
-    EquipmentComponent->EquipItem(TestWeapon);
-    EquipmentComponent->EquipItem(TestShield);
+    //UE_LOG(LogTemp, Display, TEXT("APlayerCharacter::Test1() - EquipItem"));
+    //TestWeapon.Quantity = 1;
+    //TestShield.Quantity = 1;
+    //EquipmentComponent->EquipItem(TestWeapon);
+    //EquipmentComponent->EquipItem(TestShield);
 }
 
 void APlayerCharacter::Test2_Implementation()
 {
     UE_LOG(LogTemp, Warning, TEXT("APlayerCharacter::Test2() called!"));
 
-    UE_LOG(LogTemp, Display, TEXT("APlayerCharacter::Test2() - UnequipItem"));
-    TestWeapon.Quantity = 1;
-    TestShield.Quantity = 1;
+    //UE_LOG(LogTemp, Display, TEXT("APlayerCharacter::Test2() - UnequipItem"));
+    //TestWeapon.Quantity = 1;
+    //TestShield.Quantity = 1;
     //EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Weapon);
     //EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Armor_Shield);
 

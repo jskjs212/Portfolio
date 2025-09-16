@@ -8,6 +8,7 @@
 #include "Interfaces/CombatInterface.h"
 #include "BaseCharacter.generated.h"
 
+class UActionInfoConfig;
 class UAnimMontage;
 class UCombatComponent;
 class UEquipmentComponent;
@@ -68,6 +69,12 @@ protected:
     void HandleStateBegan(FGameplayTag NewState);
 
     ////////////////////////////////////////////////////////
+    //        Combat interface
+    ////////////////////////////////////////////////////////
+public:
+    virtual void UpdateActionInfo(FGameplayTag WeaponTag) override;
+
+    ////////////////////////////////////////////////////////
     //        Get & set
     ////////////////////////////////////////////////////////
 public:
@@ -95,4 +102,11 @@ protected:
     /* Animation */
     UPROPERTY(EditAnywhere, Category = "Animation")
     TObjectPtr<UAnimMontage> DeathMontage;
+
+    /* Combat */
+    UPROPERTY(EditAnywhere, Category = "Initialization", meta = (Categories = "Identity"))
+    FGameplayTag IdentityTag;
+
+    UPROPERTY(VisibleAnywhere, Transient, Category = "Combat")
+    TObjectPtr<const UActionInfoConfig> CurrentActionInfo;
 };
