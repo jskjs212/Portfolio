@@ -41,7 +41,7 @@ public:
     // @param NewAction should be 'State.[state]' or 'State.[state].[action]'
     void SetAction(FGameplayTag NewAction);
 
-    // Reset to General or Jump (if falling).
+    // Reset to General (or Jump if falling).
     void SetDefaultAction();
 
     // Reset state when landed.

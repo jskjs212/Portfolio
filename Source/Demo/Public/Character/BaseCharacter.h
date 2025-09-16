@@ -8,6 +8,7 @@
 #include "Interfaces/CombatInterface.h"
 #include "BaseCharacter.generated.h"
 
+struct FActionInfo;
 class UActionInfoConfig;
 class UAnimMontage;
 class UCombatComponent;
@@ -49,6 +50,7 @@ protected:
     //        Character functions
     ////////////////////////////////////////////////////////
 protected:
+    /* Movement */
     bool CanPerformJump() const;
 
     virtual void Jump() override;
@@ -58,12 +60,18 @@ protected:
     // CharacterMovementComponent's movement mode
     virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode = 0) override;
 
+    /* Animation */
+    // Update CurrentActionInfo according to the weapon.
+    void UpdateActionInfo(FGameplayTag WeaponTag);
+
+    /* Death */
     void DestroyCharacter();
 
     void EnableRagdoll();
 
     void HandleDeath();
 
+    /* Event handlers */
     void HandleCurrentResourceStatChanged(FGameplayTag StatTag, float OldValue, float NewValue);
 
     void HandleStateBegan(FGameplayTag NewState);
@@ -72,7 +80,13 @@ protected:
     //        Combat interface
     ////////////////////////////////////////////////////////
 public:
-    virtual void UpdateActionInfo(FGameplayTag WeaponTag) override;
+    // @return Duration of the action's AnimMontage, or 0.f if failed to perform action.
+    virtual float PerformAction(FGameplayTag InAction, int32 MontageIndex, bool bUseRandomIndex = false) override;
+
+private:
+    // Helper function
+    // @return nullptr if can't perform the action.
+    const FActionInfo* CanPerformAction(FGameplayTag InAction, int32 MontageIndex, bool bUseRandomIndex) const;
 
     ////////////////////////////////////////////////////////
     //        Get & set
@@ -100,12 +114,11 @@ protected:
     FGameplayTag MovementSpeedMode;
 
     /* Animation */
-    UPROPERTY(EditAnywhere, Category = "Animation")
-    TObjectPtr<UAnimMontage> DeathMontage;
-
-    /* Combat */
     UPROPERTY(EditAnywhere, Category = "Initialization", meta = (Categories = "Identity"))
     FGameplayTag IdentityTag;
+
+    UPROPERTY(EditAnywhere, Category = "Animation")
+    TObjectPtr<UAnimMontage> DeathMontage;
 
     UPROPERTY(VisibleAnywhere, Transient, Category = "Combat")
     TObjectPtr<const UActionInfoConfig> CurrentActionInfo;

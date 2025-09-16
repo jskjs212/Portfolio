@@ -69,7 +69,7 @@ float UStatsComponent::ModifyCurrentResourceStatChecked(const FGameplayTag StatT
         return 0.f;
     }
 
-    // Set timer before broadcast
+    // Set timer before broadcast so listeners can stop it if needed.
     if (bShouldRegenerate)
     {
         StartRegenChecked(StatTag);
@@ -114,8 +114,6 @@ void UStatsComponent::RegenChecked(const FGameplayTag StatTag)
 
     FResourceStat& ResourceStat = GetResourceStatChecked(StatTag);
 
-    // @TODO - Dead
-
     // Regen
     ModifyCurrentResourceStatChecked(StatTag, ResourceStat.RegenRate * ResourceStat.RegenInterval, false);
 
@@ -152,20 +150,26 @@ float UStatsComponent::TakeDamage(const float InDamage)
 
     Damage = ModifyCurrentResourceStatChecked(HealthTag, -Damage, true) * -1.f;
 
-    // @TODO - death?
-
     // @debug
     UE_LOG(LogTemp, Display, TEXT("UStatsComponent::TakeDamage - %.2f"), Damage);
     return Damage;
 }
 
-bool UStatsComponent::HasEnough(FGameplayTag StatTag, float Value) const
+void UStatsComponent::ConsumeStamina(float StaminaCost)
+{
+    if (HasStatType(StaminaTag))
+    {
+        ModifyCurrentResourceStatChecked(StaminaTag, -StaminaCost, true);
+    }
+}
+
+bool UStatsComponent::HasEnoughOrNoRestriction(FGameplayTag StatTag, float Value) const
 {
     if (const FResourceStat* ResourceStat = ResourceStats.Find(StatTag))
     {
         return ResourceStat->CurrentValue >= Value;
     }
-    return false;
+    return true;
 }
 
 float UStatsComponent::SetCurrentResourceStatChecked(const FGameplayTag StatTag, const float InValue, const float MinValue)

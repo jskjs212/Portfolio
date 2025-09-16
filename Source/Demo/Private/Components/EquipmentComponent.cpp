@@ -34,11 +34,12 @@ void UEquipmentComponent::BeginPlay()
 
 bool UEquipmentComponent::EquipItem(const FItemSlot& InSlot)
 {
+    FGameplayTag ItemType;
     FGameplayTag EquipmentType;
     TObjectPtr<AItem>* EquippedItemPtr;
 
     // Validate and get data
-    bool bValid = EquipItem_Validate(InSlot, EquipmentType, EquippedItemPtr);
+    bool bValid = EquipItem_Validate(InSlot, ItemType, EquipmentType, EquippedItemPtr);
     if (!bValid)
     {
         return false; // Log in EquipItem_Validate()
@@ -84,6 +85,10 @@ bool UEquipmentComponent::EquipItem(const FItemSlot& InSlot)
     *EquippedItemPtr = SpawnedItem;
 
     // OnEquipped
+    if (EquipmentType == DemoGameplayTags::Item_Weapon)
+    {
+        OnWeaponChanged.ExecuteIfBound(ItemType);
+    }
 
     // Update UI, stats, etc.
     if (EquipSound)
@@ -133,6 +138,10 @@ bool UEquipmentComponent::UnequipItem(const FGameplayTag EquipmentType)
     EquippedItems[EquipmentType] = nullptr;
 
     // OnUnequipped
+    if (EquipmentType == DemoGameplayTags::Item_Weapon)
+    {
+        OnWeaponChanged.ExecuteIfBound(DemoGameplayTags::Item_Weapon_NoWeapon);
+    }
 
     // Update UI, stats, etc.
     if (EquipSound)
@@ -159,7 +168,12 @@ void UEquipmentComponent::DestroyAllEquippedItems()
     }
 }
 
-bool UEquipmentComponent::EquipItem_Validate(const FItemSlot& InSlot, FGameplayTag& OutEquipmentType, TObjectPtr<AItem>*& OutEquippedItemPtr)
+bool UEquipmentComponent::EquipItem_Validate(
+    const FItemSlot& InSlot,
+    FGameplayTag& OutItemType,
+    FGameplayTag& OutEquipmentType,
+    TObjectPtr<AItem>*& OutEquippedItemPtr
+)
 {
     if (!InSlot.IsValid())
     {
@@ -173,6 +187,7 @@ bool UEquipmentComponent::EquipItem_Validate(const FItemSlot& InSlot, FGameplayT
         return false; // Log in GetRow()
     }
 
+    OutItemType = ItemData->ItemType;
     OutEquipmentType = DemoItemTypes::GetEquipmentType(ItemData->ItemType);
     if (!OutEquipmentType.IsValid())
     {

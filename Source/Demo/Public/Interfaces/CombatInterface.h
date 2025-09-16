@@ -21,5 +21,6 @@ class DEMO_API ICombatInterface
     GENERATED_BODY()
 
 public:
-    virtual void UpdateActionInfo(FGameplayTag WeaponTag) PURE_VIRTUAL(ICombatInterface::UpdateActionInfo);
+    // @return Duration of the action's AnimMontage, or 0.f if failed to perform action.
+    virtual float PerformAction(FGameplayTag InAction, int32 MontageIndex, bool bUseRandomIndex = false) PURE_VIRTUAL(ICombatInterface::PerformAction, return 0.f;);
 };

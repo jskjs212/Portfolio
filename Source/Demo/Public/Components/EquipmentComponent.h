@@ -13,6 +13,8 @@ DECLARE_LOG_CATEGORY_EXTERN(LogEquipment, Log, All);
 class AItem;
 class USoundBase;
 
+DECLARE_DELEGATE_OneParam(FOnEquipmentChanged, FGameplayTag /* ItemType */);
+
 /**
  * Equipment
  * Fixed EquipmentTypes and SocketNames:
@@ -23,6 +25,13 @@ UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class DEMO_API UEquipmentComponent : public UActorComponent
 {
     GENERATED_BODY()
+
+    ////////////////////////////////////////////////////////
+    //        Delegates
+    ////////////////////////////////////////////////////////
+public:
+    // @param ItemType is the type from ItemData.
+    FOnEquipmentChanged OnWeaponChanged;
 
     ////////////////////////////////////////////////////////
     //        Fundamentals
@@ -49,7 +58,12 @@ public:
 
 private:
     // @return true if valid. If false, out data are not valid.
-    bool EquipItem_Validate(const FItemSlot& InSlot, FGameplayTag& OutEquipmentType, TObjectPtr<AItem>*& OutEquippedItemPtr);
+    bool EquipItem_Validate(
+        const FItemSlot& InSlot,
+        FGameplayTag& OutItemType,
+        FGameplayTag& OutEquipmentType,
+        TObjectPtr<AItem>*& OutEquippedItemPtr
+    );
 
     // @return nullptr if failed
     AItem* EquipItem_SpawnItem(const FItemSlot& InSlot) const;

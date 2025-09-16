@@ -2,12 +2,18 @@
 - PCH warning
 
 ## TODO
-### Combat
-StateManager:
-- Jump testing: 공격 중 낙하, 공격 중 착지
+Organize out parameters
 
+### Jump stamina check?
+- 착지하면 무조건 회복됨
+- 공격 중 낙하
+- 공격 중 착지
+- 점프 시 pause 하는 게 문제라면 다시 SetTimer?
+
+### Combat
 CombatComponent:
 - Attack, Dodge, Block
+- 공격 중 장비 변경
 
 ### UI
 - Bind: OnPossess에서 하기

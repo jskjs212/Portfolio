@@ -97,7 +97,7 @@ void APlayerCharacter::ConsumeSprintStamina()
         {
             const float DeltaStamina = SprintStaminaCostPerSecond * SprintStaminaInterval;
 
-            if (!StatsComponent->HasEnough(UStatsComponent::StaminaTag, DeltaStamina))
+            if (!StatsComponent->HasEnoughOrNoRestriction(UStatsComponent::StaminaTag, DeltaStamina))
             {
                 // Not enough stamina
                 SetMovementSpeedMode(DemoGameplayTags::Movement_SpeedMode_Jog);
@@ -226,8 +226,7 @@ void APlayerCharacter::Jump()
     StateManager->SetAction(DemoGameplayTags::State_Jump);
     ACharacter::Jump();
 
-    // Consume stamina
-    StatsComponent->ModifyCurrentResourceStatChecked(UStatsComponent::StaminaTag, -JumpStaminaCost, true);
+    StatsComponent->ConsumeStamina(JumpStaminaCost);
 
     // Pause SprintStamina
     if (UWorld* World = GetWorld())
@@ -363,22 +362,12 @@ void APlayerCharacter::Test1_Implementation()
 {
     UE_LOG(LogTemp, Warning, TEXT("APlayerCharacter::Test1() called!"));
 
-    //UE_LOG(LogTemp, Display, TEXT("APlayerCharacter::Test1() - EquipItem"));
-    //TestWeapon.Quantity = 1;
-    //TestShield.Quantity = 1;
-    //EquipmentComponent->EquipItem(TestWeapon);
-    //EquipmentComponent->EquipItem(TestShield);
+    PerformAction(DemoGameplayTags::State_Attack_Light, 0);
 }
 
 void APlayerCharacter::Test2_Implementation()
 {
     UE_LOG(LogTemp, Warning, TEXT("APlayerCharacter::Test2() called!"));
-
-    //UE_LOG(LogTemp, Display, TEXT("APlayerCharacter::Test2() - UnequipItem"));
-    //TestWeapon.Quantity = 1;
-    //TestShield.Quantity = 1;
-    //EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Weapon);
-    //EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Armor_Shield);
 
     StatsComponent->TakeDamage(30.f);
 }

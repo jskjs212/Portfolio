@@ -125,17 +125,25 @@ public:
     void StopAllRegen();
 
     ////////////////////////////////////////////////////////
-    //        Wrapper functions (only health for now)
+    //        Wrapper functions
     ////////////////////////////////////////////////////////
 public:
+    // Health tag needed.
     FORCEINLINE float GetCurrentHealth() const { return GetCurrentResourceStatChecked(HealthTag); }
 
+    // Health tag needed.
     FORCEINLINE float GetMaxHealth() const { return GetMaxResourceStatChecked(HealthTag); }
 
-    float Heal(float HealAmount) { return ModifyCurrentResourceStatChecked(HealthTag, HealAmount, false); }
+    // Health tag needed.
+    FORCEINLINE float Heal(float HealAmount) { return ModifyCurrentResourceStatChecked(HealthTag, HealAmount, false); }
 
+    // Health tag needed.
     // @return The actual amount by which the damage was taken.
     float TakeDamage(float InDamage);
+
+    // Consume stamina whether it's enough or not.
+    // Do nothing if there's no Stamina tag.
+    void ConsumeStamina(float StaminaCost);
 
     ////////////////////////////////////////////////////////
     //        Get & set (all stat types)
@@ -143,7 +151,9 @@ public:
 public:
     FORCEINLINE bool HasStatType(FGameplayTag StatTag) const { return ResourceStats.Contains(StatTag); }
 
-    bool HasEnough(FGameplayTag StatTag, float Value) const;
+    // If the actor has no StatTag, return true (no restriction).
+    // Otherwise, return Current >= Value.
+    bool HasEnoughOrNoRestriction(FGameplayTag StatTag, float Value) const;
 
     ////////////////////////////////////////////////////////
     //        Get & set

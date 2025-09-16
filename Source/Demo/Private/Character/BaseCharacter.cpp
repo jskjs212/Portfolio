@@ -51,6 +51,8 @@ void ABaseCharacter::BeginPlay()
 
     UpdateActionInfo(DemoGameplayTags::Item_Weapon_NoWeapon);
 
+    EquipmentComponent->OnWeaponChanged.BindUObject(this, &ThisClass::UpdateActionInfo);
+
     StateManager->OnStateBegan.AddUObject(this, &ThisClass::HandleStateBegan);
 
     StatsComponent->InitializeResourceStats();
@@ -69,7 +71,7 @@ bool ABaseCharacter::CanPerformJump() const
         return false;
     }
 
-    if (!StatsComponent->HasEnough(UStatsComponent::StaminaTag, JumpStaminaCost))
+    if (!StatsComponent->HasEnoughOrNoRestriction(UStatsComponent::StaminaTag, JumpStaminaCost))
     {
         return false;
     }
@@ -85,7 +87,9 @@ void ABaseCharacter::Jump()
     }
 
     StateManager->SetAction(DemoGameplayTags::State_Jump);
-    ACharacter::Jump();
+    Super::Jump();
+
+    StatsComponent->ConsumeStamina(JumpStaminaCost);
 }
 
 void ABaseCharacter::Landed(const FHitResult& Hit)
@@ -117,14 +121,14 @@ void ABaseCharacter::DestroyCharacter()
 
 void ABaseCharacter::EnableRagdoll()
 {
-    if (USkeletalMeshComponent* MeshComp = GetMesh())
+    if (USkeletalMeshComponent* CharacterMesh = GetMesh())
     {
-        MeshComp->SetCollisionProfileName(TEXT("Ragdoll"));
-        MeshComp->SetAllBodiesSimulatePhysics(true);
+        CharacterMesh->SetCollisionProfileName(TEXT("Ragdoll"));
+        CharacterMesh->SetAllBodiesSimulatePhysics(true);
         // @TEST
-        //MeshComp->SetSimulatePhysics(true);
-        //MeshComp->WakeAllRigidBodies();
-        //MeshComp->bBlendPhysics = true;
+        //CharacterMesh->SetSimulatePhysics(true);
+        //CharacterMesh->WakeAllRigidBodies();
+        //CharacterMesh->bBlendPhysics = true;
     }
 }
 
@@ -214,6 +218,97 @@ void ABaseCharacter::UpdateActionInfo(FGameplayTag WeaponTag)
     {
         UE_LOG(LogTemp, Error, TEXT("Invalid ActionInfo for (%s, %s)."), *IdentityTag.ToString(), *WeaponTag.ToString());
     }
+}
+
+float ABaseCharacter::PerformAction(FGameplayTag InAction, int32 MontageIndex, bool bUseRandomIndex)
+{
+    USkeletalMeshComponent* CharacterMesh = GetMesh();
+    if (!CharacterMesh)
+    {
+        return 0.f;
+    }
+
+    UAnimInstance* AnimInstance = CharacterMesh->GetAnimInstance();
+    if (!AnimInstance)
+    {
+        return 0.f;
+    }
+
+    const FActionInfo* ActionInfo = CanPerformAction(InAction, MontageIndex, bUseRandomIndex);
+    if (!ActionInfo)
+    {
+        return 0.f;
+    }
+
+    // Play montage
+    float Duration = AnimInstance->Montage_Play(ActionInfo->AnimMontage, ActionInfo->PlayRate, EMontagePlayReturnType::Duration);
+    if (Duration == 0.f)
+    {
+        UE_LOG(LogTemp, Error, TEXT("Failed to play montage for action %s."), *InAction.ToString());
+        return 0.f;
+    }
+
+    // Jump to section
+    if (ActionInfo->StartSection != NAME_None)
+    {
+        AnimInstance->Montage_JumpToSection(ActionInfo->StartSection, ActionInfo->AnimMontage);
+    }
+
+    StateManager->SetAction(InAction);
+    StatsComponent->ConsumeStamina(ActionInfo->StaminaCost);
+
+    return Duration;
+}
+
+const FActionInfo* ABaseCharacter::CanPerformAction(FGameplayTag InAction, int32 MontageIndex, bool bUseRandomIndex) const
+{
+    if (!CurrentActionInfo)
+    {
+        UE_LOG(LogTemp, Error, TEXT("ABaseCharacter::CanPerformAction - CurrentActionInfo is null."));
+        return nullptr;
+    }
+
+    // Allowed in current state?
+    if (!StateManager->CanPerformAction(InAction))
+    {
+        return nullptr;
+    }
+
+    // Get action info
+    const TArray<FActionInfo>* ActionInfoArray = CurrentActionInfo->GetActionInfoArray(InAction);
+    if (!ActionInfoArray)
+    {
+        UE_LOG(LogTemp, Error, TEXT("ABaseCharacter::CanPerformAction - Invalid ActionInfo for action %s."), *InAction.ToString());
+        return nullptr;
+    }
+
+    // Check montage index
+    if (bUseRandomIndex)
+    {
+        // Random index
+        MontageIndex = FMath::RandRange(0, ActionInfoArray->Num() - 1);
+    }
+    else if (MontageIndex < 0 || MontageIndex >= ActionInfoArray->Num())
+    {
+        UE_LOG(LogTemp, Error, TEXT("ABaseCharacter::CanPerformAction - Invalid index %d for action %s."), MontageIndex, *InAction.ToString());
+        return nullptr;
+    }
+
+    // Check stamina
+    const FActionInfo& ActionInfo = (*ActionInfoArray)[MontageIndex];
+    if (!StatsComponent->HasEnoughOrNoRestriction(UStatsComponent::StaminaTag, ActionInfo.StaminaCost))
+    {
+        return nullptr;
+    }
+
+    // Check montage
+    if (!ActionInfo.AnimMontage)
+    {
+        UE_LOG(LogTemp, Error, TEXT("ABaseCharacter::CanPerformAction - Invalid AnimMontage for action %s."), *InAction.ToString());
+        return nullptr;
+    }
+
+    return &ActionInfo;
 }
 
 void ABaseCharacter::SetMovementSpeedMode(FGameplayTag NewSpeedMode)
