@@ -3,6 +3,7 @@
 #include "Character/PlayerCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/CombatComponent.h"
 #include "Components/EquipmentComponent.h"
 #include "Components/InventoryComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -16,7 +17,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "InputActionValue.h"
 #include "Items/Item.h"
-#include "Items/ItemTypes.h"
+#include "DemoTypes/ItemTypes.h"
 #include "PlayerController/DemoPlayerController.h"
 
 APlayerCharacter::APlayerCharacter() :
@@ -43,11 +44,6 @@ APlayerCharacter::APlayerCharacter() :
     MovementComp->bUseControllerDesiredRotation = false;
     MovementComp->bOrientRotationToMovement = true;
     MovementComp->RotationRate = FRotator{0.f, 540.f, 0.f};
-
-    // @TODO - Use data table or config file
-    StatsComponent->RemoveResourceStat(UStatsComponent::HealthTag);
-    StatsComponent->AddResourceStat(UStatsComponent::HealthTag, FResourceStat{100.f, 100.f, true});
-    StatsComponent->AddResourceStat(UStatsComponent::StaminaTag, FResourceStat{100.f, 100.f, true, 10.f});
 
     CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
     CameraBoom->SetupAttachment(GetMesh());
@@ -192,6 +188,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
         EnhancedInputComponent->BindAction(ShowPlayerMenuAction, ETriggerEvent::Started, this, &ThisClass::ShowPlayerMenu);
 
+        EnhancedInputComponent->BindAction(LightAttackAction, ETriggerEvent::Started, this, &ThisClass::LightAttack);
+        EnhancedInputComponent->BindAction(HeavyAttackAction, ETriggerEvent::Started, this, &ThisClass::HeavyAttack);
+
         EnhancedInputComponent->BindAction(Test1Action, ETriggerEvent::Started, this, &ThisClass::Test1);
         EnhancedInputComponent->BindAction(Test2Action, ETriggerEvent::Started, this, &ThisClass::Test2);
     }
@@ -335,6 +334,16 @@ void APlayerCharacter::ShowPlayerMenu()
     }
 }
 
+void APlayerCharacter::LightAttack()
+{
+    CombatComponent->Attack(DemoGameplayTags::State_Attack_Light);
+}
+
+void APlayerCharacter::HeavyAttack()
+{
+    CombatComponent->Attack(DemoGameplayTags::State_Attack_Heavy);
+}
+
 void APlayerCharacter::SetMovementSpeedMode(FGameplayTag NewSpeedMode)
 {
     UWorld* World = GetWorld();
@@ -361,8 +370,6 @@ void APlayerCharacter::SetMovementSpeedMode(FGameplayTag NewSpeedMode)
 void APlayerCharacter::Test1_Implementation()
 {
     UE_LOG(LogTemp, Warning, TEXT("APlayerCharacter::Test1() called!"));
-
-    PerformAction(DemoGameplayTags::State_Attack_Light, 0);
 }
 
 void APlayerCharacter::Test2_Implementation()

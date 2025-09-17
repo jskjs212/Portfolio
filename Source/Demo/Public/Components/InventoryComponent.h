@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "DemoTypes/TableRowBases.h"
 #include "GameplayTagContainer.h"
-#include "Items/ItemTypes.h"
+#include "DemoTypes/ItemTypes.h"
 #include "InventoryComponent.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogInventory, Log, All);

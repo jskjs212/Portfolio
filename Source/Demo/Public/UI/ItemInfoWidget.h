@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Items/ItemTypes.h"
+#include "DemoTypes/ItemTypes.h"
 #include "ItemInfoWidget.generated.h"
 
 struct FItemDataBase;

@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Interfaces/Interactable.h"
-#include "Items/ItemTypes.h"
+#include "DemoTypes/ItemTypes.h"
 #include "Item.generated.h"
 
 class UBoxComponent;

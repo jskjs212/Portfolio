@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
-#include "Items/ItemTypes.h"
+#include "DemoTypes/ItemTypes.h"
 #include "UI/ItemActionDispatcher.h"
 #include "DemoPlayerController.generated.h"
 

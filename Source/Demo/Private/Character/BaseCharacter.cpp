@@ -36,8 +36,6 @@ ABaseCharacter::ABaseCharacter()
     StateManager = CreateDefaultSubobject<UStateManagerComponent>(TEXT("StateManager"));
 
     StatsComponent = CreateDefaultSubobject<UStatsComponent>(TEXT("StatsComponent"));
-    // @TODO - Use data table or config file
-    StatsComponent->AddResourceStat(UStatsComponent::HealthTag, FResourceStat{100.f, 100.f});
 }
 
 void ABaseCharacter::BeginPlay()
@@ -55,6 +53,10 @@ void ABaseCharacter::BeginPlay()
 
     StateManager->OnStateBegan.AddUObject(this, &ThisClass::HandleStateBegan);
 
+    for (const TPair<FGameplayTag, FResourceStat>& Pair : ResourceStats)
+    {
+        StatsComponent->AddResourceStat(Pair.Key, Pair.Value);
+    }
     StatsComponent->InitializeResourceStats();
     StatsComponent->OnCurrentResourceStatChanged.AddUObject(this, &ThisClass::HandleCurrentResourceStatChanged);
 }
@@ -220,31 +222,37 @@ void ABaseCharacter::UpdateActionInfo(FGameplayTag WeaponTag)
     }
 }
 
-float ABaseCharacter::PerformAction(FGameplayTag InAction, int32 MontageIndex, bool bUseRandomIndex)
+bool ABaseCharacter::IsInAction(FGameplayTag Action) const
 {
-    USkeletalMeshComponent* CharacterMesh = GetMesh();
-    if (!CharacterMesh)
-    {
-        return 0.f;
-    }
+    return StateManager->IsInAction(Action);
+}
 
-    UAnimInstance* AnimInstance = CharacterMesh->GetAnimInstance();
-    if (!AnimInstance)
+int32 ABaseCharacter::GetActionInfoCount(FGameplayTag InAction) const
+{
+    if (CurrentActionInfo)
     {
-        return 0.f;
+        if (const TArray<FActionInfo>* ActionInfoArray = CurrentActionInfo->GetActionInfoArray(InAction))
+        {
+            return ActionInfoArray->Num();
+        }
     }
+    return 0;
+}
 
-    const FActionInfo* ActionInfo = CanPerformAction(InAction, MontageIndex, bUseRandomIndex);
+float ABaseCharacter::PerformAction(FGameplayTag InAction, bool bIgnoreCurrentState, int32 MontageIndex, bool bUseRandomIndex)
+{
+    const FActionInfo* ActionInfo = CanPerformAction(InAction, bIgnoreCurrentState, MontageIndex, bUseRandomIndex);
     if (!ActionInfo)
     {
         return 0.f;
     }
 
     // Play montage
+    UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
     float Duration = AnimInstance->Montage_Play(ActionInfo->AnimMontage, ActionInfo->PlayRate, EMontagePlayReturnType::Duration);
     if (Duration == 0.f)
     {
-        UE_LOG(LogTemp, Error, TEXT("Failed to play montage for action %s."), *InAction.ToString());
+        UE_LOG(LogTemp, Error, TEXT("ABaseCharacter::PerformAction - Failed to play montage for %s."), *InAction.ToString());
         return 0.f;
     }
 
@@ -260,16 +268,21 @@ float ABaseCharacter::PerformAction(FGameplayTag InAction, int32 MontageIndex, b
     return Duration;
 }
 
-const FActionInfo* ABaseCharacter::CanPerformAction(FGameplayTag InAction, int32 MontageIndex, bool bUseRandomIndex) const
+const FActionInfo* ABaseCharacter::CanPerformAction(FGameplayTag InAction, bool bIgnoreCurrentState, int32 MontageIndex, bool bUseRandomIndex) const
 {
+    USkeletalMeshComponent* CharacterMesh = GetMesh();
+    if (!CharacterMesh || !CharacterMesh->GetAnimInstance())
+    {
+        return nullptr;
+    }
+
     if (!CurrentActionInfo)
     {
-        UE_LOG(LogTemp, Error, TEXT("ABaseCharacter::CanPerformAction - CurrentActionInfo is null."));
         return nullptr;
     }
 
     // Allowed in current state?
-    if (!StateManager->CanPerformAction(InAction))
+    if (!bIgnoreCurrentState && !StateManager->CanPerformAction(InAction))
     {
         return nullptr;
     }

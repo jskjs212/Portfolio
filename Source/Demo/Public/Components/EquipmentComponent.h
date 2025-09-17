@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "GameplayTagContainer.h"
-#include "Items/ItemTypes.h"
+#include "DemoTypes/ItemTypes.h"
 #include "EquipmentComponent.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogEquipment, Log, All);

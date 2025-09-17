@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UI/TabMenuWidget.h"
-#include "Items/ItemTypes.h"
+#include "DemoTypes/ItemTypes.h"
 #include "InventoryPageWidget.generated.h"
 
 class UBorder;

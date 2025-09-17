@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Character/BaseCharacter.h"
-#include "Items/ItemTypes.h"
+#include "DemoTypes/ItemTypes.h"
 #include "PlayerCharacter.generated.h"
 
 struct FInputActionValue;
@@ -81,12 +81,17 @@ protected:
 
     void StartWalk();
     void StopWalk();
+
     void StartSprint();
     void StopSprint();
 
     void Interact();
 
     void ShowPlayerMenu();
+
+    /* Combat */
+    void LightAttack();
+    void HeavyAttack();
 
     // @TEST
     UFUNCTION(BlueprintNativeEvent)
@@ -137,6 +142,12 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Input")
     TObjectPtr<UInputAction> ShowPlayerMenuAction;
 
+    UPROPERTY(EditAnywhere, Category = "Input")
+    TObjectPtr<UInputAction> LightAttackAction;
+
+    UPROPERTY(EditAnywhere, Category = "Input")
+    TObjectPtr<UInputAction> HeavyAttackAction;
+
     // @TEST
     UPROPERTY(EditAnywhere, Category = "Input")
     TObjectPtr<UInputAction> Test1Action;
@@ -169,7 +180,7 @@ private:
 
     // Trace interactable
     UPROPERTY(EditDefaultsOnly, Category = "Trace")
-    float TraceInterval{0.2f};
+    float TraceInterval{0.1f};
 
     UPROPERTY(EditDefaultsOnly, Category = "Trace")
     float TraceDistance{600.f};

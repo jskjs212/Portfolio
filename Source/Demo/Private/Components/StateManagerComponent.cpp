@@ -37,7 +37,7 @@ void UStateManagerComponent::SetAction(const FGameplayTag NewAction)
     }
 
     // @debug
-    UE_LOG(LogStateManager, Display, TEXT("New action: %s"), *NewAction.ToString());
+    UE_LOG(LogStateManager, Display, TEXT("SetAction: %s"), *NewAction.ToString());
 
     // Set state and action
     SetState(NewState);
@@ -58,7 +58,7 @@ void UStateManagerComponent::SetDefaultAction()
             }
         }
     }
-    
+
     SetAction(DemoGameplayTags::State_General);
 }
 

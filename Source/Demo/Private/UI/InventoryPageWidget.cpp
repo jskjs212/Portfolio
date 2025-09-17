@@ -9,7 +9,7 @@
 #include "DemoTypes/TableRowBases.h"
 #include "GameFramework/Pawn.h"
 #include "GameplayTagContainer.h"
-#include "Items/ItemTypes.h"
+#include "DemoTypes/ItemTypes.h"
 #include "PlayerController/DemoPlayerController.h"
 #include "UI/ContextMenuWidget.h"
 #include "UI/ItemActionDispatcher.h"

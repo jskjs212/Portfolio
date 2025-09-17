@@ -22,5 +22,9 @@ class DEMO_API ICombatInterface
 
 public:
     // @return Duration of the action's AnimMontage, or 0.f if failed to perform action.
-    virtual float PerformAction(FGameplayTag InAction, int32 MontageIndex, bool bUseRandomIndex = false) PURE_VIRTUAL(ICombatInterface::PerformAction, return 0.f;);
+    virtual float PerformAction(FGameplayTag InAction, bool bIgnoreCurrentState, int32 MontageIndex, bool bUseRandomIndex = false) PURE_VIRTUAL(ICombatInterface::PerformAction, return 0.f;);
+
+    virtual bool IsInAction(FGameplayTag InAction) const PURE_VIRTUAL(ICombatInterface::IsInAction, return false;);
+
+    virtual int32 GetActionInfoCount(FGameplayTag InAction) const PURE_VIRTUAL(ICombatInterface::GetActionInfoCount, return 0;);
 };

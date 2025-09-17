@@ -4,18 +4,13 @@
 ## TODO
 Organize out parameters
 
-### Jump stamina check?
-- 착지하면 무조건 회복됨
-- 공격 중 낙하
-- 공격 중 착지
-- 점프 시 pause 하는 게 문제라면 다시 SetTimer?
-
 ### Combat
 CombatComponent:
-- Attack, Dodge, Block
-- 공격 중 장비 변경
+- IsCombatEnabled
+- Dodge, Block
+- 공격 중 장비 변경 금지
 
-### UI
+UI:
 - Bind: OnPossess에서 하기
 - All UI: Z order
 - Focus:
@@ -23,6 +18,9 @@ CombatComponent:
 
 BPClass:
 - 클래스마다 흩어져 있는 BPClass 찾기를 하나의 DataAsset?에 모으기?
+
+PlayerCharacter:
+- Actions, bindinds in generic way.
 
 ContextMenu:
 - Lock 버튼, LockedImage

@@ -6,7 +6,7 @@
 #include "DemoTypes/TableRowBases.h"
 #include "GameFramework/Character.h"
 #include "Items/Item.h"
-#include "Items/ItemTypes.h"
+#include "DemoTypes/ItemTypes.h"
 #include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY(LogEquipment);

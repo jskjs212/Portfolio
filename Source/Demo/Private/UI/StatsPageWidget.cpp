@@ -12,15 +12,4 @@ void UStatsPageWidget::NativeOnInitialized()
     {
         return;
     }
-
-    APawn* OwnerPawn = GetOwningPlayerPawn();
-    if (OwnerPawn)
-    {
-        UStatsComponent* StatsComp = OwnerPawn->FindComponentByClass<UStatsComponent>();
-        if (StatsComp)
-        {
-            const float CurrentHealth = StatsComp->GetCurrentHealth();
-            CurrentHealthText->SetText(FText::AsNumber(CurrentHealth));
-        }
-    }
 }

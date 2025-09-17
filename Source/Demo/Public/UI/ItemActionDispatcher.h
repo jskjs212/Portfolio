@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Items/ItemTypes.h"
+#include "DemoTypes/ItemTypes.h"
 #include "ItemActionDispatcher.generated.h"
 
 DECLARE_DELEGATE_RetVal_OneParam(int32, FOnItemActionRequested, const FItemActionRequest& /* Request */);

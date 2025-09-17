@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "DemoTypes/StatsTypes.h"
 #include "GameplayTagContainer.h"
 #include "Interfaces/CombatInterface.h"
 #include "BaseCharacter.generated.h"
@@ -80,13 +81,18 @@ protected:
     //        Combat interface
     ////////////////////////////////////////////////////////
 public:
+    // @param bIgnoreState: If true, ignore current state.
     // @return Duration of the action's AnimMontage, or 0.f if failed to perform action.
-    virtual float PerformAction(FGameplayTag InAction, int32 MontageIndex, bool bUseRandomIndex = false) override;
+    virtual float PerformAction(FGameplayTag InAction, bool bIgnoreCurrentState, int32 MontageIndex, bool bUseRandomIndex = false) override;
+
+    virtual bool IsInAction(FGameplayTag InAction) const override;
+
+    virtual int32 GetActionInfoCount(FGameplayTag InAction) const override;
 
 private:
-    // Helper function
+    // Helper function that validates all conditions for PerformAction.
     // @return nullptr if can't perform the action.
-    const FActionInfo* CanPerformAction(FGameplayTag InAction, int32 MontageIndex, bool bUseRandomIndex) const;
+    const FActionInfo* CanPerformAction(FGameplayTag InAction, bool bIgnoreCurrentState, int32 MontageIndex, bool bUseRandomIndex) const;
 
     ////////////////////////////////////////////////////////
     //        Get & set
@@ -99,6 +105,11 @@ public:
     //        Variables
     ////////////////////////////////////////////////////////
 protected:
+    /* Stats */
+    // @TODO - Use data table or config file
+    UPROPERTY(EditAnywhere, Category = "Initialization", meta = (Categories = "Stat"))
+    TMap<FGameplayTag, FResourceStat> ResourceStats;
+
     /* Movement */
     UPROPERTY(EditAnywhere, Category = "Movement")
     float WalkSpeed{180.f};

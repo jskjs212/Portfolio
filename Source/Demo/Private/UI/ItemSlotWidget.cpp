@@ -7,7 +7,7 @@
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
 #include "DemoTypes/TableRowBases.h"
-#include "Items/ItemTypes.h"
+#include "DemoTypes/ItemTypes.h"
 #include "Kismet/GameplayStatics.h"
 #include "Styling/SlateBrush.h"
 #include "UI/DraggedItemSlotWidget.h"
