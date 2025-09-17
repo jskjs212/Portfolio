@@ -64,6 +64,7 @@ public:
 protected:
     virtual void BeginPlay() override;
 
+public:
 #if WITH_EDITOR
     virtual void PostEditChangeChainProperty(struct FPropertyChangedChainEvent& PropertyChangedEvent) override;
 #endif // WITH_EDITOR

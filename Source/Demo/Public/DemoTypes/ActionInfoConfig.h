@@ -15,19 +15,28 @@ struct FActionInfo
     GENERATED_BODY()
 
     UPROPERTY(EditAnywhere)
-    float DamageMultiplier{0.0f};
+    float DamageMultiplier{0.f};
 
     UPROPERTY(EditAnywhere)
-    float StaminaCost{0.0f};
+    float StaminaCost{0.f};
 
     UPROPERTY(EditAnywhere)
-    float PlayRate{1.0f};
+    float PlayRate{1.f};
 
     UPROPERTY(EditAnywhere)
     FName StartSection;
 
     UPROPERTY(EditAnywhere)
     TObjectPtr<UAnimMontage> AnimMontage;
+
+    bool IsValid() const
+    {
+        if (DamageMultiplier < 0.f || StaminaCost < 0.f || PlayRate <= 0.f || !AnimMontage)
+        {
+            return false;
+        }
+        return true;
+    }
 };
 
 USTRUCT()
@@ -48,6 +57,26 @@ class DEMO_API UActionInfoConfig : public UDataAsset
     GENERATED_BODY()
 
 public:
+    bool IsValid() const
+    {
+        for (const auto& [ActionTag, ActionInfos] : ActionInfoMap)
+        {
+            if (!ActionTag.IsValid() || ActionInfos.Array.Num() == 0)
+            {
+                return false;
+            }
+
+            for (const FActionInfo& ActionInfo : ActionInfos.Array)
+            {
+                if (!ActionInfo.IsValid())
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     const TArray<FActionInfo>* GetActionInfoArray(FGameplayTag InAction) const
     {
         if (const FActionInfos* ActionInfos = ActionInfoMap.Find(InAction))
@@ -58,7 +87,6 @@ public:
     }
 
 private:
-    // @TODO - Validation: Every array should have at least one element.
     // Map of { ActionTag, Array of ActionInfo }
     UPROPERTY(EditAnywhere, meta = (Categories = "State"))
     TMap<FGameplayTag, FActionInfos> ActionInfoMap;

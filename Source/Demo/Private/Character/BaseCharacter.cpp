@@ -53,9 +53,9 @@ void ABaseCharacter::BeginPlay()
 
     StateManager->OnStateBegan.AddUObject(this, &ThisClass::HandleStateBegan);
 
-    for (const TPair<FGameplayTag, FResourceStat>& Pair : ResourceStats)
+    for (const auto& [StatTag, ResourceStat] : ResourceStats)
     {
-        StatsComponent->AddResourceStat(Pair.Key, Pair.Value);
+        StatsComponent->AddResourceStat(StatTag, ResourceStat);
     }
     StatsComponent->InitializeResourceStats();
     StatsComponent->OnCurrentResourceStatChanged.AddUObject(this, &ThisClass::HandleCurrentResourceStatChanged);

@@ -18,6 +18,17 @@ void UActionInfoSubsystem::Initialize(FSubsystemCollectionBase& Collection)
         }
     }
 
+#if WITH_EDITOR
+    // Validate all ActionInfoConfigs
+    for (const auto& [ActionInfoKey, ActionInfoConfig] : ActionInfoMap)
+    {
+        if (!ActionInfoKey.IdentityTag.IsValid() || !ActionInfoKey.WeaponTag.IsValid() || !ActionInfoConfig->IsValid())
+        {
+            UE_LOG(LogTemp, Error, TEXT("UActionInfoSubsystem::Initialize: Invalid ActionInfoConfig (%s, %s)."), *ActionInfoKey.IdentityTag.ToString(), *ActionInfoKey.WeaponTag.ToString());
+        }
+    }
+#endif // WITH_EDITOR
+
     // @TEST
     UE_LOG(LogTemp, Warning, TEXT("UActionInfoSubsystem::Initialize - %s"), *GetName());
 }

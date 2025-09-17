@@ -25,11 +25,11 @@ void UItemInfoWidget::NativeOnInitialized()
         UE_LOG(LogTemp, Error, TEXT("UItemInfoWidget - CategoryImages should have all ItemCategories."));
     }
 
-    for (const TPair<FGameplayTag, TObjectPtr<UTexture2D>>& Pair : CategoryImages)
+    for (const auto& [ItemCategory, CategoryImageRef] : CategoryImages)
     {
-        if (!Pair.Value)
+        if (!CategoryImageRef)
         {
-            UE_LOG(LogTemp, Error, TEXT("UItemInfoWidget - CategoryImages has no image for %s."), *Pair.Key.ToString());
+            UE_LOG(LogTemp, Error, TEXT("UItemInfoWidget - CategoryImages has no image for %s."), *ItemCategory.ToString());
         }
     }
 }
