@@ -3,10 +3,10 @@
 #include "Components/EquipmentComponent.h"
 #include "Components/InventoryComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
+#include "DemoTypes/ItemTypes.h"
 #include "DemoTypes/TableRowBases.h"
 #include "GameFramework/Character.h"
 #include "Items/Item.h"
-#include "DemoTypes/ItemTypes.h"
 #include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY(LogEquipment);

@@ -6,6 +6,8 @@
 
 void UAnimNotify_ContinueAttack::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
+    Super::Notify(MeshComp, Animation, EventReference);
+
     if (const AActor* OwnerActor = MeshComp->GetOwner())
     {
         if (UCombatComponent* CombatComponent = OwnerActor->FindComponentByClass<UCombatComponent>())

@@ -239,6 +239,19 @@ int32 ABaseCharacter::GetActionInfoCount(FGameplayTag InAction) const
     return 0;
 }
 
+FRotator ABaseCharacter::GetDesiredControlRotation() const
+{
+    FRotator Result = FRotator::ZeroRotator;
+    Result.Yaw = GetControlRotation().Yaw;
+    return Result;
+}
+
+FRotator ABaseCharacter::GetDesiredInputRotation() const
+{
+    // @check - Some enemies may want to do sidestep or backstep.
+    return GetActorRotation();
+}
+
 float ABaseCharacter::PerformAction(FGameplayTag InAction, bool bIgnoreCurrentState, int32 MontageIndex, bool bUseRandomIndex)
 {
     const FActionInfo* ActionInfo = CanPerformAction(InAction, bIgnoreCurrentState, MontageIndex, bUseRandomIndex);

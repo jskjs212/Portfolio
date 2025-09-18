@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Interfaces/Interactable.h"
 #include "DemoTypes/ItemTypes.h"
+#include "Interfaces/Interactable.h"
 #include "Item.generated.h"
 
 class UBoxComponent;

@@ -89,6 +89,10 @@ public:
 
     virtual int32 GetActionInfoCount(FGameplayTag InAction) const override;
 
+    virtual FRotator GetDesiredControlRotation() const override;
+
+    virtual FRotator GetDesiredInputRotation() const override;
+
 private:
     // Helper function that validates all conditions for PerformAction.
     // @return nullptr if can't perform the action.

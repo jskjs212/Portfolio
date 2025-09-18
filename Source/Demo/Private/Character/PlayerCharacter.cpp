@@ -11,13 +11,14 @@
 #include "Components/StatsComponent.h"
 #include "DemoTypes/ActionInfoConfig.h"
 #include "DemoTypes/DemoGameplayTags.h"
+#include "DemoTypes/ItemTypes.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "InputActionValue.h"
 #include "Items/Item.h"
-#include "DemoTypes/ItemTypes.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "PlayerController/DemoPlayerController.h"
 
 APlayerCharacter::APlayerCharacter() :
@@ -155,6 +156,11 @@ void APlayerCharacter::HandleInteractable()
             FocusedInteractable->ShowHighlight(true);
         }
     }
+}
+
+FRotator APlayerCharacter::GetDesiredInputRotation() const
+{
+    return UKismetMathLibrary::MakeRotFromX(GetLastMovementInputVector());
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

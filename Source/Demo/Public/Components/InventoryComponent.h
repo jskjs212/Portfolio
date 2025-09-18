@@ -4,9 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "DemoTypes/ItemTypes.h"
 #include "DemoTypes/TableRowBases.h"
 #include "GameplayTagContainer.h"
-#include "DemoTypes/ItemTypes.h"
 #include "InventoryComponent.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogInventory, Log, All);

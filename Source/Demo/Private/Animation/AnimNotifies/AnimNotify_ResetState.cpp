@@ -6,6 +6,8 @@
 
 void UAnimNotify_ResetState::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
+    Super::Notify(MeshComp, Animation, EventReference);
+
     if (const AActor* OwnerActor = MeshComp->GetOwner())
     {
         if (UStateManagerComponent* StateManager = OwnerActor->FindComponentByClass<UStateManagerComponent>())

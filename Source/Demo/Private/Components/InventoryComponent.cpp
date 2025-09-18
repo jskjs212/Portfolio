@@ -5,10 +5,10 @@
 #include "Components/PrimitiveComponent.h"
 #include "Components/StatsComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
+#include "DemoTypes/ItemTypes.h"
 #include "DemoTypes/TableRowBases.h"
 #include "GameFramework/Pawn.h"
 #include "Items/Item.h"
-#include "DemoTypes/ItemTypes.h"
 #include "PlayerController/DemoPlayerController.h"
 #include "UI/ItemActionDispatcher.h"
 

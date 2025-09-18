@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Character/BaseCharacter.h"
-#include "DemoTypes/ItemTypes.h"
 #include "PlayerCharacter.generated.h"
 
 struct FInputActionValue;
@@ -65,6 +64,12 @@ private:
 
     // Trace and broadcast if focused interactable changed.
     void HandleInteractable();
+
+    ////////////////////////////////////////////////////////
+    //        Combat interface
+    ////////////////////////////////////////////////////////
+public:
+    virtual FRotator GetDesiredInputRotation() const override;
 
     ////////////////////////////////////////////////////////
     //        Input functions
@@ -187,12 +192,4 @@ private:
 
     FTimerHandle TraceTimerHandle;
     IInteractable* FocusedInteractable{nullptr};
-
-    // @TEST
-    UPROPERTY(EditAnywhere, Category = "Test")
-    FItemSlot TestWeapon;
-    UPROPERTY(EditAnywhere, Category = "Test")
-    FItemSlot TestShield;
-    UPROPERTY(EditAnywhere, Category = "Test")
-    FItemSlot TestFood;
 };

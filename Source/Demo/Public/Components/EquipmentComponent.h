@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "GameplayTagContainer.h"
 #include "DemoTypes/ItemTypes.h"
+#include "GameplayTagContainer.h"
 #include "EquipmentComponent.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogEquipment, Log, All);
