@@ -12,12 +12,14 @@
 DECLARE_LOG_CATEGORY_EXTERN(LogInventory, Log, All);
 
 /**
- * Validated data for internal functions' out parameters.
+ * Used to return validated data from internal functions.
  */
 USTRUCT()
-struct FInventoryValidatedData
+struct FInventoryValidationResult
 {
     GENERATED_BODY()
+
+    bool bIsValid{false};
 
     FGameplayTag ItemCategory;
 
@@ -112,8 +114,8 @@ private:
     }
 
     // Validate InSlot for inventory, and get related data.
-    // @return true if valid. If false, OutData is not valid.
-    bool AddItem_Validate(const FItemSlot& InSlot, FInventoryValidatedData& OutData);
+    // @return .bIsValid is true if valid. If false, data is not valid.
+    FInventoryValidationResult AddItem_Validate(const FItemSlot& InSlot);
 
     // Internal function for adding item to inventory.
     // @return false if failed
@@ -145,14 +147,14 @@ private:
     );
 
     // Validate item action request, and get related data.
-    // Out slot points to inventory's slot which matches the request's slot.
-    // @return true if valid. If false, OutData is not valid.
-    bool ValidateActionRequest(const FItemActionRequest& Request, FInventoryValidatedData& OutData);
+    // .ItemSlot points to inventory's slot which matches the request's slot.
+    // @return .bIsValid is true if valid. If false, data is not valid.
+    FInventoryValidationResult ValidateActionRequest(const FItemActionRequest& Request);
 
     // Remove item quantity from the slot.
     // Remove empty slot or update UI if needed.
     // @return Actually removed quantity.
-    int32 RemoveItem_Internal(FInventoryValidatedData& ValidatedData, int32 ValidatedIndex, int32 Quantity);
+    int32 RemoveItem_Internal(FInventoryValidationResult& InOutValidationResult, int32 ValidatedIndex, int32 Quantity);
 
     // @return Actually used quantity, -1 if failed.
     int32 UseItem_Internal(const FItemSlot& InSlot, FGameplayTag ItemType, int32 Quantity);

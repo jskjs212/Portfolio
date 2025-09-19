@@ -4,6 +4,9 @@
 ## TODO
 Organize out parameters
 
+### Animation
+- Assets needed: Idle, Walk, Run, Sprint, Jump, Attack, Dodge, Hit, Death, Draw/Sheath
+
 ### Combat
 CombatComponent:
 - IsCombatEnabled

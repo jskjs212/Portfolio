@@ -13,6 +13,23 @@ DECLARE_LOG_CATEGORY_EXTERN(LogEquipment, Log, All);
 class AItem;
 class USoundBase;
 
+/**
+ * Used to return validated data from internal functions.
+ */
+USTRUCT()
+struct FEquipmentValidationData
+{
+    GENERATED_BODY()
+
+    bool bIsValid{false};
+
+    FGameplayTag ItemType;
+
+    FGameplayTag EquipmentType;
+
+    TObjectPtr<AItem>* EquippedItemPtr{nullptr};
+};
+
 DECLARE_DELEGATE_OneParam(FOnEquipmentChanged, FGameplayTag /* ItemType */);
 
 /**
@@ -57,13 +74,8 @@ public:
     void DestroyAllEquippedItems();
 
 private:
-    // @return true if valid. If false, out data are not valid.
-    bool EquipItem_Validate(
-        const FItemSlot& InSlot,
-        FGameplayTag& OutItemType,
-        FGameplayTag& OutEquipmentType,
-        TObjectPtr<AItem>*& OutEquippedItemPtr
-    );
+    // @return .bIsValid is true if valid. If false, data is not valid.
+    FEquipmentValidationData EquipItem_Validate(const FItemSlot& InSlot);
 
     // @return nullptr if failed
     AItem* EquipItem_SpawnItem(const FItemSlot& InSlot) const;

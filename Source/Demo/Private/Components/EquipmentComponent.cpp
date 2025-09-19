@@ -34,22 +34,18 @@ void UEquipmentComponent::BeginPlay()
 
 bool UEquipmentComponent::EquipItem(const FItemSlot& InSlot)
 {
-    FGameplayTag ItemType;
-    FGameplayTag EquipmentType;
-    TObjectPtr<AItem>* EquippedItemPtr;
-
     // Validate and get data
-    bool bValid = EquipItem_Validate(InSlot, ItemType, EquipmentType, EquippedItemPtr);
-    if (!bValid)
+    FEquipmentValidationData ValidationResult = EquipItem_Validate(InSlot);
+    if (!ValidationResult.bIsValid)
     {
         return false; // Log in EquipItem_Validate()
     }
 
     // Unequip
-    AItem* EquippedItem = *EquippedItemPtr;
+    AItem* EquippedItem = *(ValidationResult.EquippedItemPtr);
     if (EquippedItem)
     {
-        if (!UnequipItem(EquipmentType))
+        if (!UnequipItem(ValidationResult.EquipmentType))
         {
             UE_LOG(LogEquipment, Warning, TEXT("EquipItem() - Failed to unequip."));
             return false;
@@ -66,10 +62,10 @@ bool UEquipmentComponent::EquipItem(const FItemSlot& InSlot)
 
     // @TODO - SocketName in FItemData?
     // Socket name
-    FName* SocketName = EquipDefaultSocketNames.Find(EquipmentType);
+    FName* SocketName = EquipDefaultSocketNames.Find(ValidationResult.EquipmentType);
     if (!SocketName)
     {
-        UE_LOG(LogEquipment, Error, TEXT("EquipItem() - No default socket name for %s."), *EquipmentType.ToString());
+        UE_LOG(LogEquipment, Error, TEXT("EquipItem() - No default socket name for %s."), *ValidationResult.EquipmentType.ToString());
         SpawnedItem->Destroy();
         return false;
     }
@@ -82,12 +78,12 @@ bool UEquipmentComponent::EquipItem(const FItemSlot& InSlot)
         return false;
     }
 
-    *EquippedItemPtr = SpawnedItem;
+    *(ValidationResult.EquippedItemPtr) = SpawnedItem;
 
     // OnEquipped
-    if (EquipmentType == DemoGameplayTags::Item_Weapon)
+    if (ValidationResult.EquipmentType == DemoGameplayTags::Item_Weapon)
     {
-        OnWeaponChanged.ExecuteIfBound(ItemType);
+        OnWeaponChanged.ExecuteIfBound(ValidationResult.ItemType);
     }
 
     // Update UI, stats, etc.
@@ -168,42 +164,43 @@ void UEquipmentComponent::DestroyAllEquippedItems()
     }
 }
 
-bool UEquipmentComponent::EquipItem_Validate(
-    const FItemSlot& InSlot,
-    FGameplayTag& OutItemType,
-    FGameplayTag& OutEquipmentType,
-    TObjectPtr<AItem>*& OutEquippedItemPtr
-)
+FEquipmentValidationData UEquipmentComponent::EquipItem_Validate(const FItemSlot& InSlot)
 {
     if (!InSlot.IsValid())
     {
         UE_LOG(LogEquipment, Warning, TEXT("EquipItem() - Slot is not valid."));
-        return false;
+        return {};
     }
 
     FItemDataBase* ItemData = InSlot.RowHandle.GetRow<FItemDataBase>(TEXT("UEquipmentComponent::EquipItem_Validate"));
     if (!ItemData)
     {
-        return false; // Log in GetRow()
+        return {}; // Log in GetRow()
     }
 
-    OutItemType = ItemData->ItemType;
-    OutEquipmentType = DemoItemTypes::GetEquipmentType(ItemData->ItemType);
-    if (!OutEquipmentType.IsValid())
+    FGameplayTag ItemType = ItemData->ItemType;
+    FGameplayTag EquipmentType = DemoItemTypes::GetEquipmentType(ItemData->ItemType);
+    if (!EquipmentType.IsValid())
     {
         UE_LOG(LogEquipment, Error, TEXT("EquipItem() - Item is not equippable."));
-        return false;
+        return {};
     }
 
     // Tag validation
-    OutEquippedItemPtr = EquippedItems.Find(OutEquipmentType);
-    if (!OutEquippedItemPtr)
+    TObjectPtr<AItem>* EquippedItemPtr = EquippedItems.Find(EquipmentType);
+    if (!EquippedItemPtr)
     {
         UE_LOG(LogEquipment, Error, TEXT("EquipItem() - EquipmentType is not valid."));
-        return false;
+        return {};
     }
 
-    return true;
+    FEquipmentValidationData Result;
+    Result.bIsValid = true;
+    Result.ItemType = ItemType;
+    Result.EquipmentType = EquipmentType;
+    Result.EquippedItemPtr = EquippedItemPtr;
+
+    return Result;
 }
 
 AItem* UEquipmentComponent::GetEquippedItem(FGameplayTag EquipmentType) const

@@ -41,25 +41,24 @@ int32 UInventoryComponent::AddItem(const FItemActionRequest& Request)
 {
     const int32 OriginalQuantity = Request.Slot.Quantity;
     int32 RemainingQuantity = Request.Slot.Quantity;
-    FInventoryValidatedData ValidatedData;
 
     // Validate and get data
-    bool bValid = AddItem_Validate(Request.Slot, ValidatedData);
-    if (!bValid)
+    FInventoryValidationResult ValidationResult = AddItem_Validate(Request.Slot);
+    if (!ValidationResult.bIsValid)
     {
         return -1; // Log in AddItem_Validate()
     }
 
     // Add item
-    int32 MaxStackSize = ValidatedData.ItemData->MaxStackSize;
-    int32 MaxSlotSize = MaxSlotSizes[ValidatedData.ItemCategory];
+    int32 MaxStackSize = ValidationResult.ItemData->MaxStackSize;
+    int32 MaxSlotSize = MaxSlotSizes[ValidationResult.ItemCategory];
     bool bSuccess = AddItem_Internal(
         Request.Slot.RowHandle,
         Request.DesignatedIndex,
         MaxStackSize,
         MaxSlotSize,
         RemainingQuantity,
-        *ValidatedData.ItemArray
+        *ValidationResult.ItemArray
     );
     if (!bSuccess)
     {
@@ -73,71 +72,68 @@ int32 UInventoryComponent::AddItem(const FItemActionRequest& Request)
         OnInventoryUpdated.Broadcast();
     }
 
-    UE_LOG(LogInventory, Display, TEXT("Add item - %s, %d"), *ValidatedData.ItemData->Name.ToString(), Added);
+    UE_LOG(LogInventory, Display, TEXT("Add item - %s, %d"), *ValidationResult.ItemData->Name.ToString(), Added);
     return Added;
 }
 
 int32 UInventoryComponent::RemoveItem(const FItemActionRequest& Request)
 {
     // Validate and get data
-    FInventoryValidatedData ValidatedData;
-    bool bValid = ValidateActionRequest(Request, ValidatedData);
-    if (!bValid)
+    FInventoryValidationResult ValidationResult = ValidateActionRequest(Request);
+    if (!ValidationResult.bIsValid)
     {
         return -1; // Log in ValidateActionRequest()
     }
 
-    int32 Removed = RemoveItem_Internal(ValidatedData, Request.DesignatedIndex, Request.Quantity);
+    int32 Removed = RemoveItem_Internal(ValidationResult, Request.DesignatedIndex, Request.Quantity);
 
-    UE_LOG(LogInventory, Display, TEXT("Remove item - %s, %d"), *ValidatedData.ItemData->Name.ToString(), Removed);
+    UE_LOG(LogInventory, Display, TEXT("Remove item - %s, %d"), *ValidationResult.ItemData->Name.ToString(), Removed);
     return Removed;
 }
 
 int32 UInventoryComponent::UseItem(const FItemActionRequest& Request)
 {
     // Validate and get data
-    FInventoryValidatedData ValidatedData;
-    bool bValid = ValidateActionRequest(Request, ValidatedData);
-    if (!bValid)
+    FInventoryValidationResult ValidationResult = ValidateActionRequest(Request);
+    if (!ValidationResult.bIsValid)
     {
         return -1; // Log in ValidateActionRequest()
     }
 
-    const int32 ToUse = FMath::Min(Request.Quantity, ValidatedData.ItemSlot->Quantity);
-    int32 Used = UseItem_Internal(*ValidatedData.ItemSlot, ValidatedData.ItemData->ItemType, ToUse);
+    const int32 ToUse = FMath::Min(Request.Quantity, ValidationResult.ItemSlot->Quantity);
+    int32 Used = UseItem_Internal(*ValidationResult.ItemSlot, ValidationResult.ItemData->ItemType, ToUse);
     if (Used < 0)
     {
         return -1; // Log in UseItem_Internal()
     }
 
-    int32 Removed = RemoveItem_Internal(ValidatedData, Request.DesignatedIndex, Used);
+    int32 Removed = RemoveItem_Internal(ValidationResult, Request.DesignatedIndex, Used);
     checkf(Used == Removed, TEXT("Used %d, but removed %d"), Used, Removed);
 
-    UE_LOG(LogInventory, Display, TEXT("Use item - %s, %d"), *ValidatedData.ItemData->Name.ToString(), Removed);
+    UE_LOG(LogInventory, Display, TEXT("Use item - %s, %d"), *ValidationResult.ItemData->Name.ToString(), Removed);
     return Removed;
 }
 
 int32 UInventoryComponent::DropItem(const FItemActionRequest& Request)
 {
     // Validate and get data
-    FInventoryValidatedData ValidatedData;
-    bool bValid = ValidateActionRequest(Request, ValidatedData);
-    if (!bValid)
+    FInventoryValidationResult ValidationResult = ValidateActionRequest(Request);
+    if (!ValidationResult.bIsValid)
     {
         return -1; // Log in ValidateActionRequest()
     }
 
-    const int32 ToDrop = FMath::Min(Request.Quantity, ValidatedData.ItemSlot->Quantity);
-    int32 Dropped = DropItem_Internal(*ValidatedData.ItemSlot, ToDrop);
+    const int32 ToDrop = FMath::Min(Request.Quantity, ValidationResult.ItemSlot->Quantity);
+    int32 Dropped = DropItem_Internal(*ValidationResult.ItemSlot, ToDrop);
     if (Dropped < 0)
     {
         return -1; // Log in DropItem_Internal()
     }
 
-    int32 Removed = RemoveItem_Internal(ValidatedData, Request.DesignatedIndex, Dropped);
+    int32 Removed = RemoveItem_Internal(ValidationResult, Request.DesignatedIndex, Dropped);
     checkf(Dropped == Removed, TEXT("Dropped %d, but removed %d"), Dropped, Removed);
 
-    UE_LOG(LogInventory, Display, TEXT("Drop item - %s, %d"), *ValidatedData.ItemData->Name.ToString(), Removed);
+    UE_LOG(LogInventory, Display, TEXT("Drop item - %s, %d"), *ValidationResult.ItemData->Name.ToString(), Removed);
     return Removed;
 }
 
@@ -246,27 +242,25 @@ void UInventoryComponent::BindToItemActionDispatcher()
     }
 }
 
-bool UInventoryComponent::AddItem_Validate(const FItemSlot& InSlot, FInventoryValidatedData& OutData)
+FInventoryValidationResult UInventoryComponent::AddItem_Validate(const FItemSlot& InSlot)
 {
-    OutData = FInventoryValidatedData{};
-
     if (!InSlot.IsValid())
     {
         UE_LOG(LogInventory, Warning, TEXT("AddItem() - Slot is not valid."));
-        return false;
+        return {};
     }
 
     if (InSlot.bIsLocked)
     {
         UE_LOG(LogInventory, Warning, TEXT("AddItem() - Slot is locked."));
-        return false;
+        return {};
     }
 
     // Get ItemData
     const FItemDataBase* ItemData = InSlot.RowHandle.GetRow<FItemDataBase>(TEXT("UInventoryComponent::AddItem_Validate()"));
     if (!ItemData)
     {
-        return false; // Log in GetRow()
+        return {}; // Log in GetRow()
     }
 
     // Find ItemType & ItemArray
@@ -280,13 +274,16 @@ bool UInventoryComponent::AddItem_Validate(const FItemSlot& InSlot, FInventoryVa
     if (!ItemArray)
     {
         UE_LOG(LogInventory, Error, TEXT("AddItem() - ItemType is not valid."));
-        return false;
+        return {};
     }
 
-    OutData.ItemCategory = ItemCategory;
-    OutData.ItemData = ItemData;
-    OutData.ItemArray = ItemArray;
-    return true;
+    FInventoryValidationResult Result;
+    Result.bIsValid = true;
+    Result.ItemCategory = ItemCategory;
+    Result.ItemData = ItemData;
+    Result.ItemArray = ItemArray;
+
+    return Result;
 }
 
 bool UInventoryComponent::AddItem_Internal(
@@ -437,20 +434,18 @@ bool UInventoryComponent::AddItem_ToDesignatedSlot(
     return true;
 }
 
-bool UInventoryComponent::ValidateActionRequest(const FItemActionRequest& Request, FInventoryValidatedData& OutData)
+FInventoryValidationResult UInventoryComponent::ValidateActionRequest(const FItemActionRequest& Request)
 {
-    OutData = FInventoryValidatedData{};
-
     if (Request.Quantity <= 0)
     {
         UE_LOG(LogInventory, Error, TEXT("ValidateActionRequest() - Quantity is not valid."));
-        return false;
+        return {};
     }
 
     const FItemDataBase* ItemData = Request.Slot.RowHandle.GetRow<FItemDataBase>(TEXT("UInventoryComponent::ValidateActionRequest()"));
     if (!ItemData)
     {
-        return false; // Log in GetRow()
+        return {}; // Log in GetRow()
     }
 
     FGameplayTag ItemCategory = DemoItemTypes::GetItemCategory(ItemData->ItemType);
@@ -460,39 +455,42 @@ bool UInventoryComponent::ValidateActionRequest(const FItemActionRequest& Reques
     if (Request.DesignatedIndex < 0 || Request.DesignatedIndex >= ItemArray.Num())
     {
         UE_LOG(LogInventory, Error, TEXT("ValidateActionRequest() - DesignatedIndex is out of range."));
-        return false;
+        return {};
     }
 
     FItemSlot& Slot = ItemArray[Request.DesignatedIndex];
     if (IsInventorySlotEmpty(Slot) || Slot.RowHandle != Request.Slot.RowHandle)
     {
         UE_LOG(LogInventory, Error, TEXT("ValidateActionRequest() - Item at DesignatedIndex is different. This request is not from user input."));
-        return false;
+        return {};
     }
 
     if (Slot.bIsLocked)
     {
         UE_LOG(LogInventory, Warning, TEXT("ValidateActionRequest() - Slot is locked."));
-        return false;
+        return {};
     }
 
-    OutData.ItemCategory = ItemCategory;
-    OutData.ItemSlot = &Slot;
-    OutData.ItemData = ItemData;
-    OutData.ItemArray = &ItemArray;
-    return true;
+    FInventoryValidationResult Result;
+    Result.bIsValid = true;
+    Result.ItemCategory = ItemCategory;
+    Result.ItemSlot = &Slot;
+    Result.ItemData = ItemData;
+    Result.ItemArray = &ItemArray;
+
+    return Result;
 }
 
-int32 UInventoryComponent::RemoveItem_Internal(FInventoryValidatedData& ValidatedData, const int32 ValidatedIndex, const int32 Quantity)
+int32 UInventoryComponent::RemoveItem_Internal(FInventoryValidationResult& InOutValidationResult, const int32 ValidatedIndex, const int32 Quantity)
 {
     // Remove item
-    const int32 Removed = FMath::Min(Quantity, ValidatedData.ItemSlot->Quantity);
-    ValidatedData.ItemSlot->Quantity -= Removed;
+    const int32 Removed = FMath::Min(Quantity, InOutValidationResult.ItemSlot->Quantity);
+    InOutValidationResult.ItemSlot->Quantity -= Removed;
 
     // Remove empty slot if needed
-    if (!bFixSlotSizeAndExposeEmptySlots && ValidatedData.ItemSlot->Quantity == 0)
+    if (!bFixSlotSizeAndExposeEmptySlots && InOutValidationResult.ItemSlot->Quantity == 0)
     {
-        ValidatedData.ItemArray->RemoveAt(ValidatedIndex);
+        InOutValidationResult.ItemArray->RemoveAt(ValidatedIndex);
     }
 
     // Broadcast if removed
