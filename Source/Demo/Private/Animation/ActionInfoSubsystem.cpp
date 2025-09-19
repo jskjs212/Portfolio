@@ -1,19 +1,33 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Animation/ActionInfoSubsystem.h"
-#include "DemoTypes/ActionInfoConfig.h"
+#include "Settings/DemoProjectSettings.h"
 
 void UActionInfoSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
     Super::Initialize(Collection);
 
-    // Populate the map from the array
-    for (const FActionInfoEntry& Entry : ActionInfoEntries)
+    const UDemoProjectSettings* DemoProjectSettings = GetDefault<UDemoProjectSettings>();
+    if (!DemoProjectSettings)
     {
-        // @TODO - Async?
+        UE_LOG(LogTemp, Error, TEXT("UActionInfoSubsystem::Initialize - Failed to get UDemoProjectSettings."));
+        return;
+    }
+
+    // Populate the map from the array
+    for (const FActionInfoEntry& Entry : DemoProjectSettings->DefaultActionInfoEntries)
+    {
+        // @check - Async? Optimize?
         UActionInfoConfig* LoadedActionInfo = Entry.ActionInfo.LoadSynchronous();
         if (LoadedActionInfo)
         {
+            if (ActionInfoMap.Contains(Entry.Key))
+            {
+                UE_LOG(LogTemp, Error, TEXT("UActionInfoSubsystem::Initialize - Duplicate ActionInfoKey (%s, %s). Skipping."),
+                    *Entry.Key.IdentityTag.ToString(), *Entry.Key.WeaponTag.ToString());
+                continue;
+            }
+
             ActionInfoMap.Add(Entry.Key, LoadedActionInfo);
         }
     }
@@ -28,9 +42,6 @@ void UActionInfoSubsystem::Initialize(FSubsystemCollectionBase& Collection)
         }
     }
 #endif // WITH_EDITOR
-
-    // @TEST
-    UE_LOG(LogTemp, Warning, TEXT("UActionInfoSubsystem::Initialize - %s"), *GetName());
 }
 
 void UActionInfoSubsystem::Deinitialize()

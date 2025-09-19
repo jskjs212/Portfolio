@@ -48,6 +48,43 @@ struct FActionInfos
     TArray<FActionInfo> Array;
 };
 
+USTRUCT()
+struct FActionInfoKey
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, meta = (Categories = "Identity"))
+    FGameplayTag IdentityTag;
+
+    UPROPERTY(EditAnywhere, meta = (Categories = "Item.Weapon"))
+    FGameplayTag WeaponTag;
+
+    bool operator==(const FActionInfoKey& Other) const
+    {
+        return IdentityTag == Other.IdentityTag && WeaponTag == Other.WeaponTag;
+    }
+};
+
+/**
+ * Helper struct to make it easier to edit TMap's entries in the editor.
+ */
+USTRUCT()
+struct FActionInfoEntry
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere)
+    FActionInfoKey Key;
+
+    UPROPERTY(EditAnywhere)
+    TSoftObjectPtr<UActionInfoConfig> ActionInfo;
+};
+
+FORCEINLINE uint32 GetTypeHash(const FActionInfoKey& Key)
+{
+    return HashCombine(GetTypeHash(Key.IdentityTag), GetTypeHash(Key.WeaponTag));
+}
+
 /**
  *
  */
