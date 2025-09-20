@@ -24,20 +24,16 @@
 APlayerCharacter::APlayerCharacter() :
     SprintStaminaTimerDelegate{FTimerDelegate::CreateUObject(this, &ThisClass::ConsumeSprintStamina)}
 {
-    PrimaryActorTick.bCanEverTick = true;
-
     // Disable character rotation by controller
     bUseControllerRotationPitch = false;
     bUseControllerRotationRoll = false;
     bUseControllerRotationYaw = false;
 
     UCapsuleComponent* CapsuleComp = GetCapsuleComponent();
-    check(CapsuleComp);
     CapsuleComp->InitCapsuleSize(42.f, 96.f);
 
     // Adjust for Elf_Arden mesh
     USkeletalMeshComponent* MeshComp = GetMesh();
-    check(MeshComp);
     MeshComp->SetRelativeLocation(FVector{0.f, 0.f, -96.f});
     MeshComp->SetRelativeRotation(FRotator{0.f, -90.f, 0.f});
 
@@ -211,6 +207,12 @@ void APlayerCharacter::Look(const FInputActionValue& Value)
 
 void APlayerCharacter::Move(const FInputActionValue& Value)
 {
+    // Some states don't allow movement input.
+    if (!StateManager->CanMoveInCurrentState())
+    {
+        return;
+    }
+
     const FRotator YawRotation = FRotator{0.f, GetControlRotation().Yaw, 0.f};
     const FRotationMatrix RotationMatrix{YawRotation};
     const FVector ForwardDirection = RotationMatrix.GetUnitAxis(EAxis::X);
@@ -376,11 +378,13 @@ void APlayerCharacter::SetMovementSpeedMode(FGameplayTag NewSpeedMode)
 void APlayerCharacter::Test1_Implementation()
 {
     UE_LOG(LogTemp, Warning, TEXT("APlayerCharacter::Test1() called!"));
+
+    SetOrientRotationToMovement(true);
 }
 
 void APlayerCharacter::Test2_Implementation()
 {
     UE_LOG(LogTemp, Warning, TEXT("APlayerCharacter::Test2() called!"));
 
-    StatsComponent->TakeDamage(30.f);
+    SetOrientRotationToMovement(false);
 }

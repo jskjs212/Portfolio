@@ -2,10 +2,11 @@
 - PCH warning
 
 ## TODO
-Organize out parameters
+### Common
+- In-game notifications: Low health, out of stamina
 
 ### Animation
-- Assets needed: Idle, Walk, Run, Sprint, Jump, Attack, Dodge, Hit, Death, Draw/Sheath
+- Assets needed: Idle, Walk, Run, Sprint, Jump, HeavyAttack, Dodge, Hit, Death, Draw/Sheath
 
 ### Combat
 CombatComponent:
@@ -13,17 +14,19 @@ CombatComponent:
 - Dodge, Block
 - 공격 중 장비 변경 금지
 
+### Else
 UI:
 - Bind: OnPossess에서 하기
-- All UI: Z order
+- All UI: Z order (new depth = separate draw calls?)
 - Focus:
 > Page 밖의 Background 클릭 시 Page 단축키 안 먹힘
 
-BPClass:
+Data:
 - 클래스마다 흩어져 있는 BPClass 찾기를 하나의 DataAsset?에 모으기?
+- Class별 EditAnywhere 변수를 DataAsset?으로 처리
 
 PlayerCharacter:
-- Actions, bindinds in generic way.
+- Actions, bindings in generic way -> Map? Array?
 
 ContextMenu:
 - Lock 버튼, LockedImage
@@ -46,6 +49,9 @@ Design:
 ESC:
 - Name: GameMenu? PauseMenu? SystemMenu?
 - Settings, Exit to MainMenu, Exit to Desktop
+
+Animation:
+- Idlebreak
 
 ## check
 ### 모든 클래스: 초기값 세팅이 필요한 변수 세팅 검사하기
@@ -79,7 +85,10 @@ bIsWalkInputTogglesWalk, bIsSprintInputTogglesSprint
 MusicComponent? MusicSystem in GameInstance? SoundClasses?
 
 ### Misc
-Interactable: Glowing effect
+- Interactable: Glowing effect
+- 이펙트 + 문 등장 -> 이동
+- 나침반
+- 중력 이상: 캐릭터마다 중력을 다르게? (https://dev.epicgames.com/community/learning/tutorials/w6l7/unreal-engine-custom-gravity-in-ue-5-4)
 
 ## Debug history
 - Nuget warning: Just update packages...

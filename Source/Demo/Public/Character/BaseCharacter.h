@@ -105,6 +105,8 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Movement")
     virtual void SetMovementSpeedMode(FGameplayTag NewSpeedMode);
 
+    void SetOrientRotationToMovement(bool bOrient);
+
     ////////////////////////////////////////////////////////
     //        Variables
     ////////////////////////////////////////////////////////

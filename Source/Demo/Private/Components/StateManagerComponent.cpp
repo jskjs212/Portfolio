@@ -132,16 +132,27 @@ void UStateManagerComponent::SetupAllowedTransitionsOnlyOnce()
         });
 }
 
+bool UStateManagerComponent::CanMoveInCurrentState() const
+{
+    const FGameplayTagContainer MovementBlockingStates = FGameplayTagContainer::CreateFromArray(TArray<FGameplayTag>{
+        DemoGameplayTags::State_Dead,
+            DemoGameplayTags::State_Disabled,
+            DemoGameplayTags::State_Attack,
+            DemoGameplayTags::State_Dodge
+    });
+    return !CurrentState.MatchesAnyExact(MovementBlockingStates);
+}
+
 bool UStateManagerComponent::CanPerformAction(const FGameplayTag NewAction) const
 {
     const FGameplayTagContainer* const ToStates = AllowedTransitions.Find(CurrentState);
 
-    return ToStates ? NewAction.MatchesAny(*ToStates) : false;
+    return ToStates ? GetStateFromAction(NewAction).MatchesAnyExact(*ToStates) : false;
 }
 
 FGameplayTag UStateManagerComponent::GetStateFromAction(const FGameplayTag InAction) const
 {
-    FGameplayTag DerivedState = InAction;                                       // 'State.[state]'  or 'State.[state].[action]'
+    FGameplayTag DerivedState = InAction;                                   // 'State.[state]'  or 'State.[state].[action]'
     const FGameplayTag ParentTag = InAction.RequestDirectParent();          // 'State'          or 'State.[state]'
     const FGameplayTag GrandParentTag = ParentTag.RequestDirectParent();    // EmptyTag         or 'State'
 

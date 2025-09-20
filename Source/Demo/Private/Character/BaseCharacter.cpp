@@ -361,3 +361,9 @@ void ABaseCharacter::SetMovementSpeedMode(FGameplayTag NewSpeedMode)
         MovementComponent->MaxWalkSpeed = SprintSpeed;
     }
 }
+
+void ABaseCharacter::SetOrientRotationToMovement(bool bOrient)
+{
+    bUseControllerRotationYaw = !bOrient;
+    GetCharacterMovement()->bOrientRotationToMovement = bOrient;
+}

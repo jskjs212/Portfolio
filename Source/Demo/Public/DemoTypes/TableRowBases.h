@@ -14,7 +14,7 @@ class UStaticMesh;
 class UTexture2D;
 
 // Consider adding:
-// Price (Buy/Sell), Weight, Rarity, MaxDurability
+// Price (Buy/Sell), Weight, Rarity, MaxDurability, bCanDrop
 // bIsQuestItem, ItemSubType, Sound, Particle, Animation
 // Requirements
 USTRUCT(BlueprintType)

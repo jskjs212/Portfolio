@@ -16,7 +16,13 @@ struct FDemoAnimState
 {
     FVector Velocity{FVector::ZeroVector};
 
-    //FRotator AimRotation{FRotator::ZeroRotator};
+    float PrevAimOffsetYaw{0.f};
+
+    FRotator ActorRotation{FRotator::ZeroRotator};
+
+    FRotator AimRotation{FRotator::ZeroRotator};
+
+    FRotator PrevStrafeRotation{FRotator::ZeroRotator};
 };
 
 /**
@@ -40,23 +46,41 @@ public:
     ////////////////////////////////////////////////////////
     void UpdateCharacterStateOnGameThread();
 
+    // Thread-safe update functions
     void UpdateSpeed();
+    void UpdateAimOffset(float DeltaSeconds);
+    void UpdateStrafeOffset(float DeltaSeconds);
 
     ////////////////////////////////////////////////////////
     //        Variables
     ////////////////////////////////////////////////////////
 protected:
-    FDemoAnimState AnimState;
-
-    UPROPERTY(BlueprintReadOnly, Category = "Character", Transient)
+    UPROPERTY(BlueprintReadOnly, Transient, Category = "Character")
     bool bIsInAir{false};
 
-    UPROPERTY(BlueprintReadOnly, Category = "Character", Transient)
+    UPROPERTY(BlueprintReadOnly, Transient, Category = "Character")
     bool bIsAccelerating{false};
 
-    UPROPERTY(BlueprintReadOnly, Category = "Character", Transient)
+    UPROPERTY(BlueprintReadOnly, Transient, Category = "Character")
     float GroundSpeed{0.f};
 
-    UPROPERTY(BlueprintReadOnly, Category = "Character", Transient)
+    UPROPERTY(BlueprintReadOnly, Transient, Category = "Character")
+    float AimOffsetYaw{0.f};
+
+    UPROPERTY(BlueprintReadOnly, Transient, Category = "Character")
+    float AimOffsetPitch{0.f};
+
+    UPROPERTY(BlueprintReadOnly, Transient, Category = "Character")
+    float StrafeOffsetYaw{0.f};
+
+    UPROPERTY(BlueprintReadOnly, Transient, Category = "Character")
     TObjectPtr<ABaseCharacter> BaseCharacter;
+
+private:
+    static constexpr float AimOffsetInterpSpeed{6.f};
+    static constexpr float StrafeOffsetInterpSpeed{6.f};
+
+    FRotator StrafeRotation;
+
+    FDemoAnimState AnimState;
 };

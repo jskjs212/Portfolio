@@ -3,6 +3,7 @@
 #include "Animation/DemoAnimInstance.h"
 #include "Character/BaseCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 void UDemoAnimInstance::NativeInitializeAnimation()
 {
@@ -43,6 +44,7 @@ void UDemoAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
     Super::NativeThreadSafeUpdateAnimation(DeltaSeconds);
 
     UpdateSpeed();
+    UpdateAimOffset(DeltaSeconds);
 }
 
 void UDemoAnimInstance::UpdateCharacterStateOnGameThread()
@@ -54,10 +56,14 @@ void UDemoAnimInstance::UpdateCharacterStateOnGameThread()
         return;
     }
 
-    AnimState.Velocity = BaseCharacter->GetVelocity();
-
     bIsInAir = BaseCharacter->GetCharacterMovement()->IsFalling();
     bIsAccelerating = BaseCharacter->GetCharacterMovement()->GetCurrentAcceleration().SizeSquared() > UE_KINDA_SMALL_NUMBER;
+
+    AnimState.Velocity = BaseCharacter->GetVelocity();
+    AnimState.PrevAimOffsetYaw = AimOffsetYaw;
+    AnimState.ActorRotation = BaseCharacter->GetActorRotation();
+    AnimState.AimRotation = BaseCharacter->GetBaseAimRotation();
+    AnimState.PrevStrafeRotation = StrafeRotation;
 }
 
 void UDemoAnimInstance::UpdateSpeed()
@@ -65,4 +71,22 @@ void UDemoAnimInstance::UpdateSpeed()
     FVector Velocity = AnimState.Velocity;
     Velocity.Z = 0.f;
     GroundSpeed = Velocity.Size();
+}
+
+void UDemoAnimInstance::UpdateAimOffset(float DeltaSeconds)
+{
+    const FRotator DeltaRotation = UKismetMathLibrary::NormalizedDeltaRotator(AnimState.AimRotation, AnimState.ActorRotation);
+
+    AimOffsetYaw = UKismetMathLibrary::FInterpTo(AnimState.PrevAimOffsetYaw, DeltaRotation.Yaw, DeltaSeconds, AimOffsetInterpSpeed);
+    AimOffsetPitch = DeltaRotation.Pitch;
+}
+
+void UDemoAnimInstance::UpdateStrafeOffset(float DeltaSeconds)
+{
+    const FRotator MovementRotation = AnimState.Velocity.ToOrientationRotator();
+    const FRotator TargetRotation = UKismetMathLibrary::NormalizedDeltaRotator(MovementRotation, AnimState.AimRotation);
+    const FRotator NewStrafeRotation = UKismetMathLibrary::RInterpTo(AnimState.PrevStrafeRotation, TargetRotation, DeltaSeconds, StrafeOffsetInterpSpeed);
+
+    StrafeRotation = NewStrafeRotation;
+    StrafeOffsetYaw = NewStrafeRotation.Yaw;
 }
