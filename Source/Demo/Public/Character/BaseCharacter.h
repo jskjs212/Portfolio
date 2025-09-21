@@ -63,7 +63,7 @@ protected:
 
     /* Animation */
     // Update CurrentActionInfo according to the weapon.
-    void UpdateActionInfo(FGameplayTag WeaponTag);
+    void UpdateAnimationData(FGameplayTag WeaponTag);
 
     /* Death */
     void DestroyCharacter();
@@ -76,6 +76,8 @@ protected:
     void HandleCurrentResourceStatChanged(FGameplayTag StatTag, float OldValue, float NewValue);
 
     void HandleStateBegan(FGameplayTag NewState);
+
+    void HandleWeaponChanged(FGameplayTag WeaponTag);
 
     ////////////////////////////////////////////////////////
     //        Combat interface
@@ -131,8 +133,8 @@ protected:
     FGameplayTag MovementSpeedMode;
 
     /* Animation */
-    UPROPERTY(EditAnywhere, Category = "Initialization", meta = (Categories = "Identity"))
-    FGameplayTag IdentityTag;
+    UPROPERTY(EditAnywhere, Category = "Initialization", meta = (Categories = "Character"))
+    FGameplayTag CharacterTag;
 
     UPROPERTY(EditAnywhere, Category = "Animation")
     TObjectPtr<UAnimMontage> DeathMontage;

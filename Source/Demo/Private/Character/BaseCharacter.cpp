@@ -2,7 +2,7 @@
 
 
 #include "Character/BaseCharacter.h"
-#include "Animation/ActionInfoSubsystem.h"
+#include "Animation/AnimationDataSubsystem.h"
 #include "Animation/AnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/CombatComponent.h"
@@ -42,14 +42,15 @@ void ABaseCharacter::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (!IdentityTag.IsValid())
+    if (!CharacterTag.IsValid())
     {
-        UE_LOG(LogTemp, Error, TEXT("IdentityTag is not set for %s."), *GetName());
+        UE_LOG(LogTemp, Error, TEXT("CharacterTag is not set for %s."), *GetName());
     }
 
-    UpdateActionInfo(DemoGameplayTags::Item_Weapon_NoWeapon);
+    // @check - Initial equipment settings
+    UpdateAnimationData(DemoGameplayTags::Item_Weapon_NoWeapon);
 
-    EquipmentComponent->OnWeaponChanged.BindUObject(this, &ThisClass::UpdateActionInfo);
+    EquipmentComponent->OnWeaponChanged.BindUObject(this, &ThisClass::HandleWeaponChanged);
 
     StateManager->OnStateBegan.AddUObject(this, &ThisClass::HandleStateBegan);
 
@@ -204,21 +205,37 @@ void ABaseCharacter::HandleStateBegan(FGameplayTag NewState)
     }
 }
 
-void ABaseCharacter::UpdateActionInfo(FGameplayTag WeaponTag)
+void ABaseCharacter::HandleWeaponChanged(FGameplayTag WeaponTag)
 {
-    UActionInfoSubsystem* ActionInfoSubsystem = UGameInstance::GetSubsystem<UActionInfoSubsystem>(GetGameInstance());
-    if (!ActionInfoSubsystem)
+    UpdateAnimationData(WeaponTag);
+}
+
+void ABaseCharacter::UpdateAnimationData(FGameplayTag WeaponTag)
+{
+    UAnimationDataSubsystem* AnimationDataSubsystem = UGameInstance::GetSubsystem<UAnimationDataSubsystem>(GetGameInstance());
+    if (!AnimationDataSubsystem)
     {
-        UE_LOG(LogTemp, Error, TEXT("ActionInfoSubsystem not found."));
+        UE_LOG(LogTemp, Error, TEXT("AnimationDataSubsystem not found."));
         CurrentActionInfo = nullptr;
         return;
     }
 
-    CurrentActionInfo = ActionInfoSubsystem->GetActionInfoConfig(IdentityTag, WeaponTag);
-
-    if (CurrentActionInfo == nullptr)
+    CurrentActionInfo = AnimationDataSubsystem->GetActionInfoConfig(CharacterTag, WeaponTag);
+    if (!CurrentActionInfo)
     {
-        UE_LOG(LogTemp, Error, TEXT("Invalid ActionInfo for (%s, %s)."), *IdentityTag.ToString(), *WeaponTag.ToString());
+        UE_LOG(LogTemp, Error, TEXT("Invalid ActionInfo for (%s, %s)."), *CharacterTag.ToString(), *WeaponTag.ToString());
+    }
+
+    if (GetMesh())
+    {
+        if (TSubclassOf<UAnimInstance> ItemAnimLayerClass = AnimationDataSubsystem->GetItemAnimLayerClass(CharacterTag, WeaponTag))
+        {
+            GetMesh()->LinkAnimClassLayers(ItemAnimLayerClass);
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("Invalid ItemAnimLayerClass for (%s, %s)."), *CharacterTag.ToString(), *WeaponTag.ToString());
+        }
     }
 }
 

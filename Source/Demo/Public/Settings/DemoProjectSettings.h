@@ -4,7 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DeveloperSettings.h"
-#include "DemoTypes/ActionInfoConfig.h"
+#include "DemoTypes/ActionInfoEntryConfig.h"
+#include "DemoTypes/ItemAnimLayerConfig.h"
 #include "DemoProjectSettings.generated.h"
 
 /**
@@ -16,7 +17,10 @@ class DEMO_API UDemoProjectSettings : public UDeveloperSettings
     GENERATED_BODY()
 
 public:
-    // Each ActionInfoConfig should be associated with a unique {IdentityTag, WeaponTag} pair.
+    // Key {CharacterTag
     UPROPERTY(EditAnywhere, Config, Category = "Action Info")
-    TArray<FActionInfoEntry> DefaultActionInfoEntries;
+    TSoftObjectPtr<UActionInfoEntryConfig> ActionInfoEntryConfig;
+
+    UPROPERTY(EditAnywhere, Config, Category = "Animation")
+    TSoftObjectPtr<UItemAnimLayerConfig> ItemAnimLayerConfig;
 };

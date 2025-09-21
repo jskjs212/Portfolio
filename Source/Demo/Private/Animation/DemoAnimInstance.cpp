@@ -45,6 +45,7 @@ void UDemoAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 
     UpdateSpeed();
     UpdateAimOffset(DeltaSeconds);
+    UpdateStrafeOffset(DeltaSeconds);
 }
 
 void UDemoAnimInstance::UpdateCharacterStateOnGameThread()
@@ -84,7 +85,7 @@ void UDemoAnimInstance::UpdateAimOffset(float DeltaSeconds)
 void UDemoAnimInstance::UpdateStrafeOffset(float DeltaSeconds)
 {
     const FRotator MovementRotation = AnimState.Velocity.ToOrientationRotator();
-    const FRotator TargetRotation = UKismetMathLibrary::NormalizedDeltaRotator(MovementRotation, AnimState.AimRotation);
+    const FRotator TargetRotation = UKismetMathLibrary::NormalizedDeltaRotator(MovementRotation, AnimState.ActorRotation);
     const FRotator NewStrafeRotation = UKismetMathLibrary::RInterpTo(AnimState.PrevStrafeRotation, TargetRotation, DeltaSeconds, StrafeOffsetInterpSpeed);
 
     StrafeRotation = NewStrafeRotation;

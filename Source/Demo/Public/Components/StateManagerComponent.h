@@ -81,7 +81,7 @@ private:
     UPROPERTY(VisibleAnywhere, Category = "State", meta = (Categories = "State"))
     FGameplayTag CurrentAction;
 
-    // { FromState, ToStates }
+    // {FromState, ToStates}
     // FromState can transition to any of ToStates.
     static inline TMap<FGameplayTag, FGameplayTagContainer> AllowedTransitions{};
 };

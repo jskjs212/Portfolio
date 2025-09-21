@@ -44,9 +44,13 @@ public:
     ////////////////////////////////////////////////////////
     //        Update functions
     ////////////////////////////////////////////////////////
+protected:
     void UpdateCharacterStateOnGameThread();
 
-    // Thread-safe update functions
+    /* Thread-safe update functions */
+    // Read-only access to AnimState.
+    // Write-only access to member variables.
+    // No other access to game thread data.
     void UpdateSpeed();
     void UpdateAimOffset(float DeltaSeconds);
     void UpdateStrafeOffset(float DeltaSeconds);

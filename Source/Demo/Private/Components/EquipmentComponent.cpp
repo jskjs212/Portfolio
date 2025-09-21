@@ -60,7 +60,7 @@ bool UEquipmentComponent::EquipItem(const FItemSlot& InSlot)
         return false;
     }
 
-    // @TODO - SocketName in FItemData?
+    // @TODO - Move socketName to FItemData?
     // Socket name
     FName* SocketName = EquipDefaultSocketNames.Find(ValidationResult.EquipmentType);
     if (!SocketName)

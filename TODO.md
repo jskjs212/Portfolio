@@ -2,11 +2,11 @@
 - PCH warning
 
 ## TODO
+### Animation
+- Assets needed: Pivot, Idle, Walk, Run, Sprint, Jump, HeavyAttack, Dodge, Hit, Death, Draw/Sheath
+
 ### Common
 - In-game notifications: Low health, out of stamina
-
-### Animation
-- Assets needed: Idle, Walk, Run, Sprint, Jump, HeavyAttack, Dodge, Hit, Death, Draw/Sheath
 
 ### Combat
 CombatComponent:
@@ -52,6 +52,7 @@ ESC:
 
 Animation:
 - Idlebreak
+- BlendSpace - 자연스럽게
 
 ## check
 ### 모든 클래스: 초기값 세팅이 필요한 변수 세팅 검사하기

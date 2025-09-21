@@ -178,7 +178,7 @@ public:
     //        Variables - Inventory
     ////////////////////////////////////////////////////////
 private:
-    // { ItemCategory, Array<ItemSlot> }
+    // {ItemCategory, Array<ItemSlot>}
     UPROPERTY(VisibleAnywhere, Category = "Inventory")
     TMap<FGameplayTag, FItemArray> OwnedItems;
 
