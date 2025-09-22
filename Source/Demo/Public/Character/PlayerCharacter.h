@@ -14,6 +14,7 @@ class UInputMappingContext;
 class UInventoryComponent;
 class USpringArmComponent;
 class USoundBase;
+class UTargetingComponent;
 
 DECLARE_DELEGATE_OneParam(FOnInteractableFocused, IInteractable* /* NewFocusedInteractable */);
 
@@ -37,6 +38,9 @@ protected:
 
     UPROPERTY(VisibleAnywhere)
     TObjectPtr<UInventoryComponent> InventoryComponent;
+
+    UPROPERTY(VisibleAnywhere)
+    TObjectPtr<UTargetingComponent> TargetingComponent;
 
     ////////////////////////////////////////////////////////
     //        Delegates
@@ -64,6 +68,8 @@ private:
 
     // Trace and broadcast if focused interactable changed.
     void HandleInteractable();
+
+    void HandleTargetUnlocked();
 
     ////////////////////////////////////////////////////////
     //        Combat interface
@@ -97,6 +103,8 @@ protected:
     /* Combat */
     void LightAttack();
     void HeavyAttack();
+
+    void ToggleLockOn();
 
     // @TEST
     UFUNCTION(BlueprintNativeEvent)
@@ -152,6 +160,9 @@ protected:
 
     UPROPERTY(EditAnywhere, Category = "Input")
     TObjectPtr<UInputAction> HeavyAttackAction;
+
+    UPROPERTY(EditAnywhere, Category = "Input")
+    TObjectPtr<UInputAction> ToggleLockOnAction;
 
     // @TEST
     UPROPERTY(EditAnywhere, Category = "Input")

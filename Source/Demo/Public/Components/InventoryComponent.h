@@ -14,11 +14,8 @@ DECLARE_LOG_CATEGORY_EXTERN(LogInventory, Log, All);
 /**
  * Used to return validated data from internal functions.
  */
-USTRUCT()
 struct FInventoryValidationResult
 {
-    GENERATED_BODY()
-
     bool bIsValid{false};
 
     FGameplayTag ItemCategory;

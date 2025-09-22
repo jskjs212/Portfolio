@@ -1,18 +1,23 @@
 ## Bugs
+- AimOffset -> 0 세팅 -> 원래 값으로 리셋되는듯?
 - PCH warning
 
 ## TODO
+AI - Widget
+
 ### Animation
 - Assets needed: Pivot, Idle, Walk, Run, Sprint, Jump, HeavyAttack, Dodge, Hit, Death, Draw/Sheath
 
 ### Common
 - In-game notifications: Low health, out of stamina
+- Interact sweep start from character?
 
 ### Combat
 CombatComponent:
 - IsCombatEnabled
 - Dodge, Block
 - 공격 중 장비 변경 금지
+- Unequip shield when two-handing
 
 ### Else
 UI:
@@ -20,6 +25,7 @@ UI:
 - All UI: Z order (new depth = separate draw calls?)
 - Focus:
 > Page 밖의 Background 클릭 시 Page 단축키 안 먹힘
+- Damage number
 
 Data:
 - 클래스마다 흩어져 있는 BPClass 찾기를 하나의 DataAsset?에 모으기?
@@ -86,6 +92,8 @@ bIsWalkInputTogglesWalk, bIsSprintInputTogglesSprint
 MusicComponent? MusicSystem in GameInstance? SoundClasses?
 
 ### Misc
+- Change LockOn target
+- LockOn disadvantages: Can't sprint?
 - Interactable: Glowing effect
 - 이펙트 + 문 등장 -> 이동
 - 나침반

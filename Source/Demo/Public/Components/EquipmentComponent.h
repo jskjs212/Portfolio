@@ -16,11 +16,8 @@ class USoundBase;
 /**
  * Used to return validated data from internal functions.
  */
-USTRUCT()
 struct FEquipmentValidationData
 {
-    GENERATED_BODY()
-
     bool bIsValid{false};
 
     FGameplayTag ItemType;

@@ -76,9 +76,16 @@ void UDemoAnimInstance::UpdateSpeed()
 
 void UDemoAnimInstance::UpdateAimOffset(float DeltaSeconds)
 {
+    constexpr float AimOffsetYawLimit = 135.f;
     const FRotator DeltaRotation = UKismetMathLibrary::NormalizedDeltaRotator(AnimState.AimRotation, AnimState.ActorRotation);
 
     AimOffsetYaw = UKismetMathLibrary::FInterpTo(AnimState.PrevAimOffsetYaw, DeltaRotation.Yaw, DeltaSeconds, AimOffsetInterpSpeed);
+    if (FMath::Abs(AimOffsetYaw) > AimOffsetYawLimit)
+    {
+        // Look front
+        AimOffsetYaw = 0.f;
+    }
+
     AimOffsetPitch = DeltaRotation.Pitch;
 }
 

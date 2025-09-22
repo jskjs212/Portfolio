@@ -36,10 +36,11 @@ void UContextMenuWidget::SetupActions(const TArray<FContextAction>& InActions)
     }
     bSetupDone = true;
 
-    ActionButtons.Empty();
-    HoveredBorders.Empty();
+    const int32 NumActions = InActions.Num();
+    ActionButtons.Empty(NumActions);
+    HoveredBorders.Empty(NumActions);
 
-    for (int32 Index = 0; Index < InActions.Num(); ++Index)
+    for (int32 Index = 0; Index < NumActions; ++Index)
     {
         UTabButton* NewButton = nullptr;
 
@@ -48,7 +49,7 @@ void UContextMenuWidget::SetupActions(const TArray<FContextAction>& InActions)
         {
             NewButton = FirstDesignButton;
         }
-        else if (Index == InActions.Num() - 1) // Last
+        else if (Index == NumActions - 1) // Last
         {
             NewButton = LastDesignButton;
         }
@@ -94,7 +95,7 @@ void UContextMenuWidget::SetupActions(const TArray<FContextAction>& InActions)
         }
     }
 
-    if (ActionButtons.Num() != 0 && ActionButtons.Num() != InActions.Num())
+    if (ActionButtons.Num() != NumActions)
     {
         UE_LOG(LogTemp, Error, TEXT("UContextMenuWidget::SetupActions - ActionButtons.Num() != InActions.Num()"));
     }

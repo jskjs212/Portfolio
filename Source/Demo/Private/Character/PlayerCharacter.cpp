@@ -4,20 +4,18 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/CombatComponent.h"
-#include "Components/EquipmentComponent.h"
 #include "Components/InventoryComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StateManagerComponent.h"
 #include "Components/StatsComponent.h"
-#include "DemoTypes/ActionInfoConfig.h"
+#include "Components/TargetingComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
-#include "DemoTypes/ItemTypes.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "InputActionValue.h"
-#include "Items/Item.h"
+#include "Interfaces/Interactable.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "PlayerController/DemoPlayerController.h"
 
@@ -56,6 +54,8 @@ APlayerCharacter::APlayerCharacter() :
     FollowCamera->bUsePawnControlRotation = false;
 
     InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+
+    TargetingComponent = CreateDefaultSubobject<UTargetingComponent>(TEXT("TargetingComponent"));
 }
 
 void APlayerCharacter::BeginPlay()
@@ -154,6 +154,12 @@ void APlayerCharacter::HandleInteractable()
     }
 }
 
+void APlayerCharacter::HandleTargetUnlocked()
+{
+    // @check - Find next target?
+    SetOrientRotationToMovement(true);
+}
+
 FRotator APlayerCharacter::GetDesiredInputRotation() const
 {
     return UKismetMathLibrary::MakeRotFromX(GetLastMovementInputVector());
@@ -193,6 +199,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
         EnhancedInputComponent->BindAction(LightAttackAction, ETriggerEvent::Started, this, &ThisClass::LightAttack);
         EnhancedInputComponent->BindAction(HeavyAttackAction, ETriggerEvent::Started, this, &ThisClass::HeavyAttack);
 
+        EnhancedInputComponent->BindAction(ToggleLockOnAction, ETriggerEvent::Started, this, &ThisClass::ToggleLockOn);
+
         EnhancedInputComponent->BindAction(Test1Action, ETriggerEvent::Started, this, &ThisClass::Test1);
         EnhancedInputComponent->BindAction(Test2Action, ETriggerEvent::Started, this, &ThisClass::Test2);
     }
@@ -208,6 +216,7 @@ void APlayerCharacter::Look(const FInputActionValue& Value)
 void APlayerCharacter::Move(const FInputActionValue& Value)
 {
     // Some states don't allow movement input.
+    // @TODO - Some attacks may allow movement input i.e. continuous shooting.
     if (!StateManager->CanMoveInCurrentState())
     {
         return;
@@ -350,6 +359,19 @@ void APlayerCharacter::LightAttack()
 void APlayerCharacter::HeavyAttack()
 {
     CombatComponent->Attack(DemoGameplayTags::State_Attack_Heavy);
+}
+
+void APlayerCharacter::ToggleLockOn()
+{
+    TargetingComponent->ToggleTargetLock();
+
+    bool bIsLockedOn = TargetingComponent->IsTargetLocked();
+    if (bIsLockedOn)
+    {
+        // @TODO - Enter combat when not ready
+    }
+
+    SetOrientRotationToMovement(!bIsLockedOn);
 }
 
 void APlayerCharacter::SetMovementSpeedMode(FGameplayTag NewSpeedMode)

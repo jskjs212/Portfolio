@@ -52,7 +52,8 @@ WASD: Move\
 Shift: Sprint\
 Ctrl: Walk\
 Tab: PlayerMenu\
-E: Interact
+E: Interact\
+Q: Toggle Lock-On
 
 ### UI
 Global - Esc: Close\
