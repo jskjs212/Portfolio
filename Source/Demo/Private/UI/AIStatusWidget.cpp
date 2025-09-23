@@ -11,8 +11,6 @@ void UAIStatusWidget::NativeOnInitialized()
     Super::NativeOnInitialized();
 
     checkf(HealthBar && NameText, TEXT("Failed to bind widgets."));
-
-    UE_LOG(LogTemp, Warning, TEXT("AIStatusWidget initialized."));
 }
 
 void UAIStatusWidget::InitAIStatus(AActor* InOwnerActor)

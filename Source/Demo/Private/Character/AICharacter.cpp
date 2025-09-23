@@ -2,6 +2,8 @@
 
 #include "Character/AICharacter.h"
 #include "Components/WidgetComponent.h"
+#include "Components/StateManagerComponent.h"
+#include "DemoTypes/DemoGameplayTags.h"
 
 // @TEST
 #include "Components/StatsComponent.h"
@@ -21,10 +23,11 @@ void AAICharacter::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (!BehaviorTreeOverride)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("This AICharacter (%s) is using default BehaviorTree."), *GetName());
-    }
+    // @debug
+    //if (!BehaviorTreeOverride)
+    //{
+    //    UE_LOG(LogTemp, Warning, TEXT("This AICharacter (%s) is using default BehaviorTree."), *GetName());
+    //}
 
     if (UAIStatusWidget* AIStatusWidget = Cast<UAIStatusWidget>(WidgetComponent->GetWidget()))
     {
@@ -34,8 +37,12 @@ void AAICharacter::BeginPlay()
 
 bool AAICharacter::CanBeTargeted() const
 {
-    // @TODO
-    return false;
+    if (StateManager->IsInState(DemoGameplayTags::State_Dead))
+    {
+        return false;
+    }
+
+    return true;
 }
 
 void AAICharacter::OnTargeted(bool bIsTargeted)

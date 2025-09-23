@@ -21,8 +21,8 @@ void UPlayerMenuWidget::NativeOnInitialized()
         TEXT("Failed to bind widgets."));
 
     // Setup tab entries
-    TabEntries.Add(FTabEntry{DemoGameplayTags::UI_PlayerMenu_Stats, StatsTabButton, nullptr, StatsPageWidget});
-    TabEntries.Add(FTabEntry{DemoGameplayTags::UI_PlayerMenu_Inventory, InventoryTabButton, nullptr, InventoryPageWidget});
+    TabEntries.Emplace(DemoGameplayTags::UI_PlayerMenu_Stats, StatsTabButton, nullptr, StatsPageWidget);
+    TabEntries.Emplace(DemoGameplayTags::UI_PlayerMenu_Inventory, InventoryTabButton, nullptr, InventoryPageWidget);
 
     InitMenu();
 

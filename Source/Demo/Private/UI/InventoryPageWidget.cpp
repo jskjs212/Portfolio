@@ -37,9 +37,9 @@ void UInventoryPageWidget::NativeOnInitialized()
 
     // Setup tab entries
     // MUST sync with DemoGameplayTags::ItemCategories.
-    TabEntries.Add(FTabEntry{DemoGameplayTags::Item_Weapon, WeaponTabButton, WeaponTabImage, WeaponWrapBox});
-    TabEntries.Add(FTabEntry{DemoGameplayTags::Item_Armor, ArmorTabButton, ArmorTabImage, ArmorWrapBox});
-    TabEntries.Add(FTabEntry{DemoGameplayTags::Item_Consumable, ConsumableTabButton, ConsumableTabImage, ConsumableWrapBox});
+    TabEntries.Emplace(DemoGameplayTags::Item_Weapon, WeaponTabButton, WeaponTabImage, WeaponWrapBox);
+    TabEntries.Emplace(DemoGameplayTags::Item_Armor, ArmorTabButton, ArmorTabImage, ArmorWrapBox);
+    TabEntries.Emplace(DemoGameplayTags::Item_Consumable, ConsumableTabButton, ConsumableTabImage, ConsumableWrapBox);
 
     InitMenu();
     SetupContextMenu();
@@ -156,9 +156,9 @@ void UInventoryPageWidget::UpdateItemSlotsUI()
 void UInventoryPageWidget::SetupContextMenu()
 {
     TArray<FContextAction> Actions;
-    Actions.Add(FContextAction{FText::FromString(TEXT("Use")), DemoGameplayTags::UI_Action_Item_Use});
-    Actions.Add(FContextAction{FText::FromString(TEXT("Drop")), DemoGameplayTags::UI_Action_Item_Drop});
-    Actions.Add(FContextAction{FText::FromString(TEXT("Cancel")), DemoGameplayTags::UI_Action_Item_Cancel});
+    Actions.Emplace(FText::FromString(TEXT("Use")), DemoGameplayTags::UI_Action_Item_Use);
+    Actions.Emplace(FText::FromString(TEXT("Drop")), DemoGameplayTags::UI_Action_Item_Drop);
+    Actions.Emplace(FText::FromString(TEXT("Cancel")), DemoGameplayTags::UI_Action_Item_Cancel);
 
     // Create context menu
     ContextMenuWidget = CreateWidget<UContextMenuWidget>(this, ContextMenuWidgetClass);

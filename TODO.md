@@ -3,7 +3,8 @@
 - PCH warning
 
 ## TODO
-AI - Widget
+- AI Widget: AIStatus rotation
+- Target white dot widget name: TargetIndicator? LockOnMarker? TargetReticle?
 
 ### Animation
 - Assets needed: Pivot, Idle, Walk, Run, Sprint, Jump, HeavyAttack, Dodge, Hit, Death, Draw/Sheath
@@ -98,6 +99,8 @@ MusicComponent? MusicSystem in GameInstance? SoundClasses?
 - 이펙트 + 문 등장 -> 이동
 - 나침반
 - 중력 이상: 캐릭터마다 중력을 다르게? (https://dev.epicgames.com/community/learning/tutorials/w6l7/unreal-engine-custom-gravity-in-ue-5-4)
+- 길게 눌러 닫기
+- Targeting point를 특정 Socket으로 고정
 
 ## Debug history
 - Nuget warning: Just update packages...

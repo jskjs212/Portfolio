@@ -353,7 +353,7 @@ bool UInventoryComponent::AddItem_AutoPlacement(
         {
             const int32 ToAdd = FMath::Min(InOutRemainingQuantity, MaxStackSize);
             bSlotExists = true;
-            ItemArray.Add(FItemSlot{InSlotRowHandle, ToAdd});
+            ItemArray.Emplace(InSlotRowHandle, ToAdd);
             InOutRemainingQuantity -= ToAdd;
         }
         // Fill an empty slot

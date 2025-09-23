@@ -42,7 +42,7 @@ APlayerCharacter::APlayerCharacter() :
 
     CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
     CameraBoom->SetupAttachment(GetMesh());
-    CameraBoom->TargetArmLength = 400.0f;
+    CameraBoom->TargetArmLength = 300.0f;
     CameraBoom->bUsePawnControlRotation = true;
 
     // Camera position
@@ -61,6 +61,8 @@ APlayerCharacter::APlayerCharacter() :
 void APlayerCharacter::BeginPlay()
 {
     Super::BeginPlay();
+
+    TargetingComponent->OnTargetUnlocked.BindUObject(this, &ThisClass::HandleTargetUnlocked);
 
     // Init UI
     if (ADemoPlayerController* DemoPlayerController = GetController<ADemoPlayerController>())
