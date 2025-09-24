@@ -4,6 +4,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/CombatComponent.h"
+#include "Components/EquipmentComponent.h"
 #include "Components/InventoryComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StateManagerComponent.h"
@@ -62,7 +63,7 @@ void APlayerCharacter::BeginPlay()
 {
     Super::BeginPlay();
 
-    TargetingComponent->OnTargetUnlocked.BindUObject(this, &ThisClass::HandleTargetUnlocked);
+    TargetingComponent->OnTargetUpdated.AddUObject(this, &ThisClass::HandleTargetUpdated);
 
     // Init UI
     if (ADemoPlayerController* DemoPlayerController = GetController<ADemoPlayerController>())
@@ -134,6 +135,21 @@ IInteractable* APlayerCharacter::TraceForInteractables()
     return bHit ? Cast<IInteractable>(HitResult.GetActor()) : nullptr;
 }
 
+void APlayerCharacter::HandleWeaponChanged(FGameplayTag WeaponTag)
+{
+    Super::HandleWeaponChanged(WeaponTag);
+
+    // @TODO - Orient false if targeting
+    if (WeaponTag == DemoGameplayTags::Item_Weapon_NoWeapon)
+    {
+        SetOrientRotationToMovement(true);
+    }
+    else if (TargetingComponent->IsTargetLocked())
+    {
+        SetOrientRotationToMovement(false);
+    }
+}
+
 void APlayerCharacter::HandleInteractable()
 {
     IInteractable* NewInteractable = TraceForInteractables();
@@ -156,15 +172,33 @@ void APlayerCharacter::HandleInteractable()
     }
 }
 
-void APlayerCharacter::HandleTargetUnlocked()
+void APlayerCharacter::HandleTargetUpdated(AActor* NewActor)
 {
-    // @check - Find next target?
-    SetOrientRotationToMovement(true);
+    const bool bIsTargetLocked = NewActor != nullptr;
+    const bool bEquippedWeapon = EquipmentComponent->GetEquippedItem(DemoGameplayTags::Item_Weapon) != nullptr;
+    const bool bShouldFaceTarget = bIsTargetLocked && bEquippedWeapon;
+    SetOrientRotationToMovement(!bShouldFaceTarget);
+
+    if (bShouldFaceTarget)
+    {
+        // @TODO - Enter combat when not ready
+    }
 }
 
 FRotator APlayerCharacter::GetDesiredInputRotation() const
 {
-    return UKismetMathLibrary::MakeRotFromX(GetLastMovementInputVector());
+    if (CachedMoveInputAxis.IsZero())
+    {
+        return GetActorRotation();
+    }
+
+    const FRotator YawRotation = FRotator{0.f, GetControlRotation().Yaw, 0.f};
+    const FRotationMatrix RotationMatrix{YawRotation};
+    const FVector ForwardDirection = RotationMatrix.GetUnitAxis(EAxis::X);
+    const FVector RightDirection = RotationMatrix.GetUnitAxis(EAxis::Y);
+    const FVector WorldInput = ForwardDirection * CachedMoveInputAxis.X + RightDirection * CachedMoveInputAxis.Y;
+
+    return UKismetMathLibrary::MakeRotFromX(WorldInput);
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -184,7 +218,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
     if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
     {
         EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ThisClass::Look);
+
         EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ThisClass::Move);
+        EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &ThisClass::MoveComplete);
 
         EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ThisClass::Jump);
 
@@ -217,8 +253,10 @@ void APlayerCharacter::Look(const FInputActionValue& Value)
 
 void APlayerCharacter::Move(const FInputActionValue& Value)
 {
+    const FVector2D MoveAxisVector = Value.Get<FVector2D>();
+    CachedMoveInputAxis = MoveAxisVector;
+
     // Some states don't allow movement input.
-    // @TODO - Some attacks may allow movement input i.e. continuous shooting.
     if (!StateManager->CanMoveInCurrentState())
     {
         return;
@@ -229,9 +267,13 @@ void APlayerCharacter::Move(const FInputActionValue& Value)
     const FVector ForwardDirection = RotationMatrix.GetUnitAxis(EAxis::X);
     const FVector RightDirection = RotationMatrix.GetUnitAxis(EAxis::Y);
 
-    const FVector2D MoveAxisVector = Value.Get<FVector2D>();
-    AddMovementInput(ForwardDirection, MoveAxisVector.Y);
-    AddMovementInput(RightDirection, MoveAxisVector.X);
+    AddMovementInput(ForwardDirection, MoveAxisVector.X);
+    AddMovementInput(RightDirection, MoveAxisVector.Y);
+}
+
+void APlayerCharacter::MoveComplete(const FInputActionValue& Value)
+{
+    CachedMoveInputAxis = FVector2D::ZeroVector;
 }
 
 void APlayerCharacter::Jump()
@@ -366,14 +408,6 @@ void APlayerCharacter::HeavyAttack()
 void APlayerCharacter::ToggleLockOn()
 {
     TargetingComponent->ToggleTargetLock();
-
-    bool bIsLockedOn = TargetingComponent->IsTargetLocked();
-    if (bIsLockedOn)
-    {
-        // @TODO - Enter combat when not ready
-    }
-
-    SetOrientRotationToMovement(!bIsLockedOn);
 }
 
 void APlayerCharacter::SetMovementSpeedMode(FGameplayTag NewSpeedMode)
@@ -403,12 +437,13 @@ void APlayerCharacter::Test1_Implementation()
 {
     UE_LOG(LogTemp, Warning, TEXT("APlayerCharacter::Test1() called!"));
 
-    SetOrientRotationToMovement(true);
+    EquipmentComponent->EquipItem(TestItemSlot);
 }
 
 void APlayerCharacter::Test2_Implementation()
 {
     UE_LOG(LogTemp, Warning, TEXT("APlayerCharacter::Test2() called!"));
 
-    SetOrientRotationToMovement(false);
+    EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Weapon);
+    EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Armor_Shield);
 }

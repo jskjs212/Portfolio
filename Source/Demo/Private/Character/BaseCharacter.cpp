@@ -32,7 +32,7 @@ ABaseCharacter::ABaseCharacter()
     CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 
     EquipmentComponent = CreateDefaultSubobject<UEquipmentComponent>(TEXT("EquipmentComponent"));
-
+    OnActorBeginOverlap;
     StateManager = CreateDefaultSubobject<UStateManagerComponent>(TEXT("StateManager"));
 
     StatsComponent = CreateDefaultSubobject<UStatsComponent>(TEXT("StatsComponent"));

@@ -77,7 +77,7 @@ protected:
 
     void HandleStateBegan(FGameplayTag NewState);
 
-    void HandleWeaponChanged(FGameplayTag WeaponTag);
+    virtual void HandleWeaponChanged(FGameplayTag WeaponTag);
 
     ////////////////////////////////////////////////////////
     //        Combat interface

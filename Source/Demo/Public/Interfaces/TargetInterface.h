@@ -20,7 +20,9 @@ class DEMO_API ITargetInterface
     GENERATED_BODY()
 
 public:
+    virtual void OnTargeted(bool bIsTargeted) PURE_VIRTUAL(ITargetInterface::OnTargeted);
+
     virtual bool CanBeTargeted() const PURE_VIRTUAL(ITargetInterface::CanBeTargeted, return false;);
 
-    virtual void OnTargeted(bool bIsTargeted) PURE_VIRTUAL(ITargetInterface::OnTargeted);
+    virtual FVector GetTargetPointLocation() const PURE_VIRTUAL(ITargetInterface::GetTargetPointLocation, return FVector::ZeroVector;);
 };

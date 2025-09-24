@@ -18,6 +18,8 @@ struct FFindTargetResult
     ITargetInterface* TargetInterface{nullptr};
 };
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnTargetUpdated, AActor* /* NewTarget */);
+
 /**
  * Handles targeting (Lock-On) functionality for a character.
  * Search for pawns within the MaxTargetDistance, then lock onto
@@ -33,16 +35,13 @@ class DEMO_API UTargetingComponent : public UActorComponent
     //        Delegates
     ////////////////////////////////////////////////////////
 public:
-    FSimpleDelegate OnTargetUnlocked;
+    FOnTargetUpdated OnTargetUpdated;
 
     ////////////////////////////////////////////////////////
     //        Fundamentals
     ////////////////////////////////////////////////////////
 public:
     UTargetingComponent();
-
-protected:
-    virtual void BeginPlay() override;
 
 public:
     virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -73,6 +72,7 @@ private:
 
     // Rotate the camera to face the locked target.
     // Unlock if the target is no longer valid.
+    // @check - Called every tick.
     void UpdateTargetingCamera(float DeltaTime);
 
     ////////////////////////////////////////////////////////
@@ -82,11 +82,7 @@ public:
     FORCEINLINE bool IsTargetLocked() const { return bIsTargetLocked; }
 
 private:
-    void SetTargetStatus(bool bLocked, AActor* NewTarget = nullptr)
-    {
-        bIsTargetLocked = bLocked;
-        LockedTarget = NewTarget;
-    }
+    void SetTargetStatus(bool bLocked, AActor* NewTarget = nullptr);
 
     ////////////////////////////////////////////////////////
     //        Variables - target status
@@ -120,9 +116,6 @@ protected:
 #endif // WITH_EDITORONLY_DATA
 
     //UPROPERTY(EditAnywhere, Category = "Initialization|Targeting")
-    //TEnumAsByte<EDrawDebugTrace::Type> DrawDebugType{};
-
-    //UPROPERTY(EditAnywhere, Category = "Initialization|Targeting")
     //FName TargetSocketName{TEXT("")};
 
 private:
@@ -131,8 +124,4 @@ private:
     static constexpr float CameraRotationInterpSpeed{7.f};
 
     static inline const FCollisionObjectQueryParams TargetObjectQueryParams{ECC_Pawn};
-
-    //static inline const TArray<TEnumAsByte<EObjectTypeQuery>> TargetObjectTypes{UEngineTypes::ConvertToObjectType(ECC_Pawn)};
-
-    //static inline const TArray<AActor*> ActorsToIgnore{};
 };

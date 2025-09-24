@@ -2,6 +2,7 @@
 
 #include "PlayerController/DemoPlayerController.h"
 #include "Character/PlayerCharacter.h"
+#include "Components/TargetingComponent.h"
 #include "Items/Item.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/DemoHUD.h"
@@ -85,15 +86,20 @@ void ADemoPlayerController::ShowPlayerMenu(bool bShow)
 
 void ADemoPlayerController::InitDemoHUD()
 {
+    APawn* OwnerPawn = GetPawn();
     ADemoHUD* DemoHUD = GetHUD<ADemoHUD>();
-    if (DemoHUD)
+    if (OwnerPawn && DemoHUD)
     {
         DemoHUD->Init();
 
-        // Bind functions that update HUD widgets to character delegates.
-        if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetPawn()))
+        // Bind functions that update HUD widgets.
+        if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OwnerPawn))
         {
             PlayerCharacter->OnInteractableFocused.BindUObject(this, &ThisClass::HandleInteractableFocused);
+        }
+        if (UTargetingComponent* TargetingComponent = OwnerPawn->FindComponentByClass<UTargetingComponent>())
+        {
+            TargetingComponent->OnTargetUpdated.AddUObject(this, &ThisClass::HandleTargetUpdated);
         }
     }
 }
@@ -120,6 +126,17 @@ void ADemoPlayerController::HandleInteractableFocused(IInteractable* NewFocusedI
         if (DemoHUD->DemoHUDWidget)
         {
             DemoHUD->DemoHUDWidget->UpdateInteractWidgets(NewFocusedInteractable);
+        }
+    }
+}
+
+void ADemoPlayerController::HandleTargetUpdated(AActor* NewTarget)
+{
+    if (ADemoHUD* DemoHUD = GetHUD<ADemoHUD>())
+    {
+        if (DemoHUD->DemoHUDWidget)
+        {
+            DemoHUD->DemoHUDWidget->UpdateTargetStatus(NewTarget);
         }
     }
 }

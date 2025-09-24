@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Character/BaseCharacter.h"
+#include "DemoTypes/ItemTypes.h" // @TEST
 #include "PlayerCharacter.generated.h"
 
 struct FInputActionValue;
@@ -66,10 +67,13 @@ private:
     // Trace first visible interactable from camera.
     IInteractable* TraceForInteractables();
 
+    /* Event handlers */
+    virtual void HandleWeaponChanged(FGameplayTag WeaponTag) override;
+
     // Trace and broadcast if focused interactable changed.
     void HandleInteractable();
 
-    void HandleTargetUnlocked();
+    void HandleTargetUpdated(AActor* NewActor);
 
     ////////////////////////////////////////////////////////
     //        Combat interface
@@ -85,7 +89,9 @@ public:
 
 protected:
     void Look(const FInputActionValue& Value);
+
     void Move(const FInputActionValue& Value);
+    void MoveComplete(const FInputActionValue& Value);
 
     virtual void Jump() override;
     virtual void Landed(const FHitResult& Hit) override;
@@ -185,6 +191,8 @@ private:
     bool bIsWalkInputTogglesWalk{true};
     bool bIsSprintInputTogglesSprint{false};
 
+    FVector2D CachedMoveInputAxis;
+
     // Sprint
     UPROPERTY(EditDefaultsOnly, Category = "Movement")
     float SprintStaminaCostPerSecond{10.f};
@@ -203,4 +211,7 @@ private:
 
     FTimerHandle TraceTimerHandle;
     IInteractable* FocusedInteractable{nullptr};
+
+    UPROPERTY(EditAnywhere, Category = "TEST", meta = (AllowPrivateAccess = "true"))
+    FItemSlot TestItemSlot;
 };

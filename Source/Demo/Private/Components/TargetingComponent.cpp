@@ -13,14 +13,6 @@ UTargetingComponent::UTargetingComponent()
     PrimaryComponentTick.bCanEverTick = true;
 }
 
-void UTargetingComponent::BeginPlay()
-{
-    Super::BeginPlay();
-
-    // Trace settings
-    //ActorsToIgnore.Add(GetOwner());
-}
-
 void UTargetingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
@@ -40,6 +32,13 @@ void UTargetingComponent::LockTarget()
         {
             FindResult.TargetInterface->OnTargeted(true);
             SetTargetStatus(true, FindResult.Target);
+
+#if WITH_EDITOR
+            if (bDrawDebugInfo)
+            {
+                UKismetSystemLibrary::DrawDebugSphere(this, FindResult.Target->GetActorLocation(), 50.f, 12, FLinearColor::Red, DrawDebugDuration);
+            }
+#endif // WITH_EDITOR
         }
     }
 }
@@ -53,7 +52,6 @@ void UTargetingComponent::UnlockTarget()
     }
 
     SetTargetStatus(false, nullptr);
-    OnTargetUnlocked.ExecuteIfBound();
 }
 
 void UTargetingComponent::ToggleTargetLock()
@@ -234,6 +232,7 @@ void UTargetingComponent::UpdateTargetingCamera(float DeltaTime)
     AController* OwnerController = OwnerPawn ? OwnerPawn->GetController() : nullptr;
     if (!OwnerController || !IsTargetStillValid())
     {
+        // @check - Find next target automatically?
         UnlockTarget();
         return;
     }
@@ -249,4 +248,12 @@ void UTargetingComponent::UpdateTargetingCamera(float DeltaTime)
     NewRotation.Roll = CurrentRotation.Roll;
 
     OwnerController->SetControlRotation(NewRotation);
+}
+
+void UTargetingComponent::SetTargetStatus(bool bLocked, AActor* NewTarget)
+{
+    bIsTargetLocked = bLocked;
+    LockedTarget = NewTarget;
+
+    OnTargetUpdated.Broadcast(NewTarget);
 }

@@ -23,8 +23,9 @@ class DEMO_API AAICharacter : public ABaseCharacter, public ITargetInterface
     //        Subobjects
     ////////////////////////////////////////////////////////
 protected:
+    // Health bar, nameplate (and maybe CC, level, casting, charging)
     UPROPERTY(VisibleAnywhere, Category = "AI")
-    TObjectPtr<UWidgetComponent> WidgetComponent;
+    TObjectPtr<UWidgetComponent> AIStatusWidgetComponent;
 
     ////////////////////////////////////////////////////////
     //        Fundamentals
@@ -39,9 +40,11 @@ protected:
     //        Target interface
     ////////////////////////////////////////////////////////
 public:
+    virtual void OnTargeted(bool bIsTargeted) override;
+
     virtual bool CanBeTargeted() const override;
 
-    virtual void OnTargeted(bool bIsTargeted) override;
+    virtual FVector GetTargetPointLocation() const override;
 
     ////////////////////////////////////////////////////////
     //        Get & set
@@ -53,6 +56,9 @@ public:
     //        Variables
     ////////////////////////////////////////////////////////
 protected:
+    UPROPERTY(EditAnywhere, Category = "Initialization|AI")
+    FName LockOnSocketName{TEXT("Head")};
+
     UPROPERTY(EditAnywhere, Category = "Initialization|AI")
     TObjectPtr<UBehaviorTree> BehaviorTreeOverride;
 };

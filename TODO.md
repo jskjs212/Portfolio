@@ -1,10 +1,8 @@
 ## Bugs
-- AimOffset -> 0 세팅 -> 원래 값으로 리셋되는듯?
-- PCH warning
+- UDemoHUDWidget::UpdateLockOnPosition: 약간 오른쪽에 표시됨
 
 ## TODO
-- AI Widget: AIStatus rotation
-- Target white dot widget name: TargetIndicator? LockOnMarker? TargetReticle?
+- EquipmentPage
 
 ### Animation
 - Assets needed: Pivot, Idle, Walk, Run, Sprint, Jump, HeavyAttack, Dodge, Hit, Death, Draw/Sheath
@@ -19,14 +17,16 @@ CombatComponent:
 - Dodge, Block
 - 공격 중 장비 변경 금지
 - Unequip shield when two-handing
+- 타격감
 
 ### Else
 UI:
 - Bind: OnPossess에서 하기
 - All UI: Z order (new depth = separate draw calls?)
-- Focus:
-> Page 밖의 Background 클릭 시 Page 단축키 안 먹힘
+- Focus: Page 밖의 Background 클릭 시 Page 단축키 안 먹힘
 - Damage number
+- HUD에 tab키 안내
+- LockOn: Bone or socket에 고정하기
 
 Data:
 - 클래스마다 흩어져 있는 BPClass 찾기를 하나의 DataAsset?에 모으기?
@@ -60,6 +60,11 @@ ESC:
 Animation:
 - Idlebreak
 - BlendSpace - 자연스럽게
+
+Boss:
+- Boss BT
+- AIStatus in HUD
+- Intro sequence?
 
 ## check
 ### 모든 클래스: 초기값 세팅이 필요한 변수 세팅 검사하기
