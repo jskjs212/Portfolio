@@ -6,6 +6,7 @@
 #include "Components/WidgetSwitcher.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "PlayerController/DemoPlayerController.h"
+#include "UI/EquipmentPageWidget.h"
 #include "UI/InventoryPageWidget.h"
 #include "UI/ItemActionDispatcher.h"
 #include "UI/ItemSlotDragDropOp.h"
@@ -17,14 +18,16 @@ void UPlayerMenuWidget::NativeOnInitialized()
 
     checkf(StatsTabButton && StatsPageWidget
         && InventoryTabButton && InventoryPageWidget
+        && EquipmentTabButton && EquipmentPageWidget
         && CloseButton,
         TEXT("Failed to bind widgets."));
 
     // Setup tab entries
     TabEntries.Emplace(DemoGameplayTags::UI_PlayerMenu_Stats, StatsTabButton, nullptr, StatsPageWidget);
     TabEntries.Emplace(DemoGameplayTags::UI_PlayerMenu_Inventory, InventoryTabButton, nullptr, InventoryPageWidget);
+    TabEntries.Emplace(DemoGameplayTags::UI_PlayerMenu_Equipment, EquipmentTabButton, nullptr, EquipmentPageWidget);
 
-    InitMenu();
+    InitTabMenu();
 
     CloseButton->OnClicked.AddDynamic(this, &UPlayerMenuWidget::HideMenu);
 }

@@ -29,7 +29,7 @@ void UTabMenuWidget::SetVisibilityAndFocus(bool bShow)
     }
 }
 
-void UTabMenuWidget::InitMenu()
+void UTabMenuWidget::InitTabMenu()
 {
     if (TabEntries.Num() == 0)
     {

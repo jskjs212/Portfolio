@@ -7,7 +7,9 @@
 #include "DemoTypes/TableRowBases.h"
 #include "GameFramework/Character.h"
 #include "Items/Item.h"
+#include "PlayerController/DemoPlayerController.h"
 #include "Kismet/GameplayStatics.h"
+#include "UI/ItemActionDispatcher.h"
 
 DEFINE_LOG_CATEGORY(LogEquipment);
 
@@ -30,6 +32,8 @@ void UEquipmentComponent::BeginPlay()
     EquipDefaultSocketNames.Add(DemoGameplayTags::Item_Armor_Shield, TEXT("ShieldHandSocket"));
 
     checkf(EquippedItems.Num() == DemoItemTypes::GetEquipmentTypes().Num(), TEXT("EquippedItems should have all EquipmentTypes."));
+
+    BindToItemActionDispatcher();
 }
 
 bool UEquipmentComponent::EquipItem(const FItemSlot& InSlot)
@@ -81,9 +85,10 @@ bool UEquipmentComponent::EquipItem(const FItemSlot& InSlot)
     *(ValidationResult.EquippedItemPtr) = SpawnedItem;
 
     // OnEquipped
+    OnEquipmentChanged.Broadcast(ValidationResult.EquipmentType);
     if (ValidationResult.EquipmentType == DemoGameplayTags::Item_Weapon)
     {
-        OnWeaponChanged.ExecuteIfBound(ValidationResult.ItemType);
+        OnWeaponChanged.Broadcast(ValidationResult.ItemType);
     }
 
     // Update UI, stats, etc.
@@ -134,9 +139,10 @@ bool UEquipmentComponent::UnequipItem(const FGameplayTag EquipmentType)
     EquippedItems[EquipmentType] = nullptr;
 
     // OnUnequipped
+    OnEquipmentChanged.Broadcast(EquipmentType);
     if (EquipmentType == DemoGameplayTags::Item_Weapon)
     {
-        OnWeaponChanged.ExecuteIfBound(DemoGameplayTags::Item_Weapon_NoWeapon);
+        OnWeaponChanged.Broadcast(DemoGameplayTags::Item_Weapon_NoWeapon);
     }
 
     // Update UI, stats, etc.
@@ -203,15 +209,6 @@ FEquipmentValidationData UEquipmentComponent::EquipItem_Validate(const FItemSlot
     return Result;
 }
 
-AItem* UEquipmentComponent::GetEquippedItem(FGameplayTag EquipmentType) const
-{
-    if (const TObjectPtr<AItem>* EquippedItemPtr = EquippedItems.Find(EquipmentType))
-    {
-        return *EquippedItemPtr;
-    }
-    return nullptr;
-}
-
 AItem* UEquipmentComponent::EquipItem_SpawnItem(const FItemSlot& InSlot) const
 {
     UWorld* World = GetWorld();
@@ -266,4 +263,27 @@ bool UEquipmentComponent::AttachActor(AActor* ActorToAttach, const FName SocketN
     }
 
     return true;
+}
+
+void UEquipmentComponent::BindToItemActionDispatcher()
+{
+    if (APawn* Pawn = Cast<APawn>(GetOwner()))
+    {
+        if (ADemoPlayerController* DemoPlayerController = Pawn->GetController<ADemoPlayerController>())
+        {
+            if (UItemActionDispatcher* ItemActionDispatcher = DemoPlayerController->GetItemActionDispatcher())
+            {
+                ItemActionDispatcher->OnUnequipItemRequested.BindUObject(this, &ThisClass::UnequipItem);
+            }
+        }
+    }
+}
+
+AItem* UEquipmentComponent::GetEquippedItem(FGameplayTag EquipmentType) const
+{
+    if (const TObjectPtr<AItem>* EquippedItemPtr = EquippedItems.Find(EquipmentType))
+    {
+        return *EquippedItemPtr;
+    }
+    return nullptr;
 }

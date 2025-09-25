@@ -33,7 +33,7 @@ struct FTabEntry
  * Tab Menu Widget
  * Base class for menu widgets that have multiple tab (page) widgets.
  * i.e. PlayerMenu, TraderMenu, Inventory, etc.
- * Child class should call InitMenu() in OnInitialized().
+ * Child class should call InitTabMenu() in OnInitialized().
  * bUseTabButtonImages: Three colors will be used for images if true, otherwise (false) for buttons.
  */
 UCLASS()
@@ -57,7 +57,7 @@ public:
 protected:
     // Called after setting up TabEntries in child class.
     // Bind tab button events and select the first tab.
-    void InitMenu();
+    void InitTabMenu();
 
     void SelectTab(int32 PageIndex);
 

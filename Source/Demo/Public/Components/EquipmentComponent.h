@@ -27,7 +27,7 @@ struct FEquipmentValidationData
     TObjectPtr<AItem>* EquippedItemPtr{nullptr};
 };
 
-DECLARE_DELEGATE_OneParam(FOnEquipmentChanged, FGameplayTag /* ItemType */);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnEquipmentChanged, FGameplayTag /* ItemType */);
 
 /**
  * Equipment
@@ -44,6 +44,9 @@ class DEMO_API UEquipmentComponent : public UActorComponent
     //        Delegates
     ////////////////////////////////////////////////////////
 public:
+    // @param ItemType is EquipmentType
+    FOnEquipmentChanged OnEquipmentChanged;
+
     // @param ItemType is the type from ItemData.
     FOnEquipmentChanged OnWeaponChanged;
 
@@ -80,12 +83,17 @@ private:
     // @return true if successfully attached
     bool AttachActor(AActor* ActorToAttach, FName SocketName) const;
 
+    // Bind equipment functions to UI's item action dispatcher.
+    void BindToItemActionDispatcher();
+
     ////////////////////////////////////////////////////////
     //        Get & set
     ////////////////////////////////////////////////////////
 public:
     // @return nullptr if not found
     AItem* GetEquippedItem(FGameplayTag EquipmentType) const;
+
+    const TMap<FGameplayTag, TObjectPtr<AItem>>& GetAllEquippedItems() const { return EquippedItems; }
 
     ////////////////////////////////////////////////////////
     //        Variables

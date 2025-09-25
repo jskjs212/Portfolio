@@ -44,6 +44,7 @@ UE_DEFINE_GAMEPLAY_TAG(Item_Consumable_Food, "Item.Consumable.Food");
 // UI.PlayerMenu.*
 UE_DEFINE_GAMEPLAY_TAG(UI_PlayerMenu_Stats, "UI.PlayerMenu.Stats");
 UE_DEFINE_GAMEPLAY_TAG(UI_PlayerMenu_Inventory, "UI.PlayerMenu.Inventory");
+UE_DEFINE_GAMEPLAY_TAG(UI_PlayerMenu_Equipment, "UI.PlayerMenu.Equipment");
 
 // UI.Action.Item.*
 UE_DEFINE_GAMEPLAY_TAG(UI_Action_Item_Use, "UI.Action.Item.Use");

@@ -50,7 +50,7 @@ void ABaseCharacter::BeginPlay()
     // @check - Initial equipment settings
     UpdateAnimationData(DemoGameplayTags::Item_Weapon_NoWeapon);
 
-    EquipmentComponent->OnWeaponChanged.BindUObject(this, &ThisClass::HandleWeaponChanged);
+    EquipmentComponent->OnWeaponChanged.AddUObject(this, &ThisClass::HandleWeaponChanged);
 
     StateManager->OnStateBegan.AddUObject(this, &ThisClass::HandleStateBegan);
 

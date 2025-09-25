@@ -30,6 +30,7 @@ FORCEINLINE const TArray<const FGameplayTag>& GetItemCategories()
 }
 
 // Equipment TMap's keys.
+// MUST sync with EquipmentPageWidget's slots.
 FORCEINLINE const TArray<const FGameplayTag>& GetEquipmentTypes()
 {
     static const TArray<const FGameplayTag> EquipmentTypes{

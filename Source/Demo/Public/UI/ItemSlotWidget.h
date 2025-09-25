@@ -21,7 +21,8 @@ DECLARE_DELEGATE_OneParam(FOnItemSlotHovered, const FItemSlot& /* InSlot */);
 DECLARE_DELEGATE_FourParams(FOnItemSlotDropped, const FItemSlot& /* SrcSlot */, int32 /* SrcIndex */, const FItemSlot& /* DstSlot */, int32 /* DstIndex */);
 
 /**
- *
+ * Item slot widget that can be used in inventory, equipment, etc.
+ * Allows drag & drop, click, hover events.
  */
 UCLASS()
 class DEMO_API UItemSlotWidget : public UUserWidget
@@ -44,16 +45,21 @@ public:
 protected:
     virtual void NativeOnInitialized() override;
 
+    // LMB: Drag, RMB: Event (context menu)
     virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 
+    // Event (hover) + change image, color + sound
     virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 
+    // Event (unhover) + change image, color
     virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
 
+    // Event (use, unequip)
     virtual FReply NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 
     virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
 
+    // Event (swap, move, merge)
     virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 
     virtual void NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
@@ -62,16 +68,13 @@ protected:
     //        UI functions
     ////////////////////////////////////////////////////////
 public:
-    FORCEINLINE void UpdateItemSlot(const FItemSlot& InItemSlot, int32 InIndex)
-    {
-        ItemSlot = InItemSlot;
-        Index = InIndex;
-        UpdateVisuals();
-    }
-
-private:
     void UpdateVisuals();
 
+    FORCEINLINE void SetIndex(int32 InIndex) { Index = InIndex; }
+
+    FORCEINLINE void SetItemSlot(const FItemSlot& InItemSlot) { ItemSlot = InItemSlot; }
+
+private:
     void HandleHovered();
 
     void HandleUnhovered();
@@ -102,10 +105,8 @@ public:
     ////////////////////////////////////////////////////////
 private:
     // Index in the inventory array
-    UPROPERTY(VisibleAnywhere, Category = "Item")
     int32 Index{-1};
 
-    UPROPERTY(VisibleAnywhere, Category = "Item")
     FItemSlot ItemSlot;
 
     ////////////////////////////////////////////////////////
@@ -114,22 +115,22 @@ private:
 private:
     FDataTableRowHandle CurrentItemRowHandle;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Initialization")
+    UPROPERTY(EditAnywhere, Category = "Initialization")
     FLinearColor NormalBorderColor{FLinearColor::White};
 
-    UPROPERTY(EditDefaultsOnly, Category = "Initialization")
+    UPROPERTY(EditAnywhere, Category = "Initialization")
     FLinearColor HoveredBorderColor{FLinearColor{1.f, 1.f, 1.f, 0.3f}};
 
-    UPROPERTY(EditDefaultsOnly, Category = "Initialization")
+    UPROPERTY(EditAnywhere, Category = "Initialization")
     TObjectPtr<UTexture2D> NormalBorderImage;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Initialization")
+    UPROPERTY(EditAnywhere, Category = "Initialization")
     TObjectPtr<UTexture2D> HoveredBorderImage;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Initialization")
+    UPROPERTY(EditAnywhere, Category = "Initialization")
     TSubclassOf<UDraggedItemSlotWidget> DraggedItemSlotWidgetBPClass;
 
     // @TODO - Audio
-    UPROPERTY(EditDefaultsOnly, Category = "Initialization")
+    UPROPERTY(EditAnywhere, Category = "Initialization")
     TObjectPtr<USoundBase> HoveredSound;
 };

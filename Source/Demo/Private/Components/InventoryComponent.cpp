@@ -124,10 +124,11 @@ int32 UInventoryComponent::DropItem(const FItemActionRequest& Request)
     }
 
     const int32 ToDrop = FMath::Min(Request.Quantity, ValidationResult.ItemSlot->Quantity);
-    int32 Dropped = DropItem_Internal(*ValidationResult.ItemSlot, ToDrop);
+    const FItemSlot DropSlot = FItemSlot{ValidationResult.ItemSlot->RowHandle, ToDrop, false};
+    int32 Dropped = AItem::DropItem(GetWorld(), DropSlot, GetOwner());
     if (Dropped < 0)
     {
-        return -1; // Log in DropItem_Internal()
+        return -1; // Log in AItem::DropItem()
     }
 
     int32 Removed = RemoveItem_Internal(ValidationResult, Request.DesignatedIndex, Dropped);
@@ -558,43 +559,4 @@ int32 UInventoryComponent::ConsumeFood(const FConsumableData* ConsumableData, co
 
     StatsComp->Heal(ToUse * ConsumableData->HealAmount);
     return ToUse;
-}
-
-int32 UInventoryComponent::DropItem_Internal(const FItemSlot& InSlot, const int32 Quantity)
-{
-    UWorld* World = GetWorld();
-    AActor* OwnerActor = GetOwner();
-    if (!World || !OwnerActor)
-    {
-        return -1;
-    }
-
-    // Spawn location
-    const FVector LocationOffset = OwnerActor->GetActorForwardVector() * DropDistance + FVector{0.f, 0.f, DropHeight};
-    FTransform SpawnTransform = OwnerActor->GetActorTransform();
-    SpawnTransform.AddToTranslation(LocationOffset);
-
-    // Spawn
-    AItem* DroppedItem = AItem::SpawnItem(World, FItemSlot{InSlot.RowHandle, Quantity}, SpawnTransform);
-    if (!IsValid(DroppedItem))
-    {
-        UE_LOG(LogInventory, Error, TEXT("DropItem() - Failed to spawn item."));
-        return -1;
-    }
-
-    // Check mesh to drop
-    if (!DroppedItem->IsMeshAssetValid())
-    {
-        UE_LOG(LogInventory, Error, TEXT("DropItem() - Item has no mesh."));
-        DroppedItem->Destroy();
-        return -1;
-    }
-
-    // Throw
-    if (UPrimitiveComponent* PrimitiveComp = Cast<UPrimitiveComponent>(DroppedItem->GetMesh()))
-    {
-        PrimitiveComp->AddImpulse(OwnerActor->GetActorForwardVector() * DropImpulseStrength, NAME_None, true);
-    }
-
-    return Quantity;
 }

@@ -29,7 +29,7 @@ void UInventoryPageWidget::NativeOnInitialized()
 
     if (!ItemSlotWidgetClass || !ContextMenuWidgetClass)
     {
-        UE_LOG(LogTemp, Error, TEXT("UInventoryPageWidget::NativeOnInitialized - WBP class are not set."));
+        UE_LOG(LogTemp, Error, TEXT("UInventoryPageWidget::NativeOnInitialized - WBP classes are not set."));
         return;
     }
 
@@ -41,7 +41,7 @@ void UInventoryPageWidget::NativeOnInitialized()
     TabEntries.Emplace(DemoGameplayTags::Item_Armor, ArmorTabButton, ArmorTabImage, ArmorWrapBox);
     TabEntries.Emplace(DemoGameplayTags::Item_Consumable, ConsumableTabButton, ConsumableTabImage, ConsumableWrapBox);
 
-    InitMenu();
+    InitTabMenu();
     SetupContextMenu();
     HideItemInfo();
     BindToInventoryUpdates();
@@ -122,6 +122,7 @@ void UInventoryPageWidget::UpdateItemSlotsUI()
             if (Index >= ExistingNum && Index < ItemNum)
             {
                 SlotWidget = CreateWidget<UItemSlotWidget>(this, ItemSlotWidgetClass);
+                SlotWidget->SetIndex(Index);
                 SlotWidget->OnRightClicked.BindUObject(this, &ThisClass::HandleItemSlotRightClicked);
                 SlotWidget->OnLeftDoubleClicked.BindUObject(this, &ThisClass::HandleItemSlotLeftDoubleClicked);
                 SlotWidget->OnHovered.BindUObject(this, &ThisClass::ShowItemInfo);
@@ -141,7 +142,8 @@ void UInventoryPageWidget::UpdateItemSlotsUI()
             // Update slot
             if (Index < ItemNum)
             {
-                SlotWidget->UpdateItemSlot(ItemArray[Index], Index);
+                SlotWidget->SetItemSlot(ItemArray[Index]);
+                SlotWidget->UpdateVisuals();
                 SlotWidget->SetVisibility(ESlateVisibility::Visible);
             }
             // Hide unused slots
@@ -162,16 +164,16 @@ void UInventoryPageWidget::SetupContextMenu()
 
     // Create context menu
     ContextMenuWidget = CreateWidget<UContextMenuWidget>(this, ContextMenuWidgetClass);
-    checkf(ContextMenuWidget, TEXT("Failed to create ContextMenuWidget."));
     ContextMenuWidget->SetupActions(Actions);
     ContextMenuWidget->SetVisibility(ESlateVisibility::Collapsed);
     ContextMenuWidget->AddToViewport(3);
 
     // Bind context menu buttons
     TArray<TObjectPtr<UTabButton>>& Buttons = ContextMenuWidget->GetActionButtons();
-    Buttons[0]->OnTabButtonClicked.BindUObject(this, &ThisClass::HandleContextMenuButtonClicked);
-    Buttons[1]->OnTabButtonClicked.BindUObject(this, &ThisClass::HandleContextMenuButtonClicked);
-    Buttons[2]->OnTabButtonClicked.BindUObject(this, &ThisClass::HandleContextMenuButtonClicked);
+    for (TObjectPtr<UTabButton>& Button : Buttons)
+    {
+        Button->OnTabButtonClicked.BindUObject(this, &ThisClass::HandleContextMenuButtonClicked);
+    }
 }
 
 void UInventoryPageWidget::BindToInventoryUpdates()
@@ -197,8 +199,6 @@ UItemActionDispatcher* UInventoryPageWidget::GetItemActionDispatcher() const
 
 void UInventoryPageWidget::HandleContextMenuButtonClicked(FGameplayTag InTag)
 {
-    // @misc - Potential bug (fast click, user intend != cached request)
-
     UItemActionDispatcher* ItemActionDispatcher = GetItemActionDispatcher();
     if (!ItemActionDispatcher)
     {
@@ -221,6 +221,10 @@ void UInventoryPageWidget::HandleContextMenuButtonClicked(FGameplayTag InTag)
     else if (InTag == DemoGameplayTags::UI_Action_Item_Cancel)
     {
         // Do nothing
+    }
+    else
+    {
+        checkNoEntry();
     }
 
     ContextMenuWidget->HideContextMenu();

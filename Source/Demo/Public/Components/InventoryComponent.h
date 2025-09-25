@@ -162,9 +162,6 @@ private:
     // @return Actually used quantity, -1 if failed.
     int32 ConsumeFood(const FConsumableData* ConsumableData, int32 Quantity);
 
-    // @return Actually dropped quantity, -1 if failed.
-    int32 DropItem_Internal(const FItemSlot& InSlot, int32 Quantity);
-
     ////////////////////////////////////////////////////////
     //        Get & set
     ////////////////////////////////////////////////////////
@@ -196,13 +193,4 @@ private:
 
     UPROPERTY(EditDefaultsOnly, Category = "Inventory")
     int32 MaxAllowedSlotSize{1000};
-
-    UPROPERTY(EditDefaultsOnly, Category = "Inventory")
-    float DropDistance{50.f};
-
-    UPROPERTY(EditDefaultsOnly, Category = "Inventory")
-    float DropHeight{50.f};
-
-    UPROPERTY(EditDefaultsOnly, Category = "Inventory")
-    float DropImpulseStrength{250.f};
 };

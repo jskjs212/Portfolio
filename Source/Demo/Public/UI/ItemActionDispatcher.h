@@ -8,9 +8,10 @@
 
 DECLARE_DELEGATE_RetVal_OneParam(int32, FOnItemActionRequested, const FItemActionRequest& /* Request */);
 DECLARE_DELEGATE_RetVal_ThreeParams(bool, FOnSwapItemRequested, FGameplayTag /* ItemCategory */, int32 /* FirstIndex */, int32 /* SecondIndex */);
+DECLARE_DELEGATE_RetVal_OneParam(bool, FOnUnequipItemRequested, FGameplayTag /* EquipmentType */);
 
 /**
- *
+ * @TODO - Consider RequestItemAction(ActionTag, Request) instead of separate functions.
  */
 UCLASS()
 class DEMO_API UItemActionDispatcher : public UObject
@@ -26,6 +27,7 @@ public:
     FOnItemActionRequested OnUseItemRequested;
     FOnItemActionRequested OnDropItemRequested;
     FOnSwapItemRequested OnSwapItemRequested;
+    FOnUnequipItemRequested OnUnequipItemRequested;
 
     ////////////////////////////////////////////////////////
     //        Request functions
@@ -64,5 +66,11 @@ public:
     bool RequestSwapItem(FGameplayTag ItemCategory, int32 FirstIndex, int32 SecondIndex) const
     {
         return OnSwapItemRequested.IsBound() ? OnSwapItemRequested.Execute(ItemCategory, FirstIndex, SecondIndex) : false;
+    }
+
+    // @return true if successfully unequipped
+    bool RequestUnequipItem(FGameplayTag EquipmentType) const
+    {
+        return OnUnequipItemRequested.IsBound() ? OnUnequipItemRequested.Execute(EquipmentType) : false;
     }
 };

@@ -7,6 +7,7 @@
 #include "PlayerMenuWidget.generated.h"
 
 class UButton;
+class UEquipmentPageWidget;
 class UInventoryPageWidget;
 class UStatsPageWidget;
 class UTabButton;
@@ -63,6 +64,13 @@ private:
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UInventoryPageWidget> InventoryPageWidget;
+
+    /* Equipment */
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UTabButton> EquipmentTabButton;
+
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UEquipmentPageWidget> EquipmentPageWidget;
 
     /* Else */
     UPROPERTY(meta = (BindWidget))

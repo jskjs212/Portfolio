@@ -72,7 +72,7 @@ FReply UItemSlotWidget::NativeOnMouseButtonDoubleClick(const FGeometry& InGeomet
 {
     if (ItemSlot.IsValid())
     {
-        // LMB -> Use item
+        // LMB -> Use, unequip item
         if (InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
         {
             OnLeftDoubleClicked.ExecuteIfBound(ItemSlot, Index);

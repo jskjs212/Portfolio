@@ -48,6 +48,43 @@ AItem* AItem::SpawnItem(
     return SpawnedItem;
 }
 
+int32 AItem::DropItem(UWorld* World, const FItemSlot& InSlot, AActor* Dropper)
+{
+    if (!World || !Dropper)
+    {
+        return -1;
+    }
+
+    // Spawn location
+    const FVector LocationOffset = Dropper->GetActorForwardVector() * DropDistance + FVector{0.f, 0.f, DropHeight};
+    FTransform SpawnTransform = Dropper->GetActorTransform();
+    SpawnTransform.AddToTranslation(LocationOffset);
+
+    // Spawn
+    AItem* DroppedItem = AItem::SpawnItem(World, InSlot, SpawnTransform);
+    if (!IsValid(DroppedItem))
+    {
+        UE_LOG(LogTemp, Error, TEXT("AItem::DropItem - Failed to spawn item."));
+        return -1;
+    }
+
+    // Check mesh to drop
+    if (!DroppedItem->IsMeshAssetValid())
+    {
+        UE_LOG(LogTemp, Error, TEXT("AItem::DropItem - Item has no mesh."));
+        DroppedItem->Destroy();
+        return -1;
+    }
+
+    // Throw
+    if (UPrimitiveComponent* PrimitiveComp = Cast<UPrimitiveComponent>(DroppedItem->GetMesh()))
+    {
+        PrimitiveComp->AddImpulse(Dropper->GetActorForwardVector() * DropImpulseStrength, NAME_None, true);
+    }
+
+    return InSlot.Quantity;
+}
+
 AItem::AItem()
 {
     PrimaryActorTick.bCanEverTick = false;

@@ -44,7 +44,6 @@ protected:
     //        Statics
     ////////////////////////////////////////////////////////
 public:
-    // @check - What if AItem is inherited by AWeapon, AArmor, etc.?
     static AItem* SpawnItem(
         UWorld* World,
         const FItemSlot& InSlot,
@@ -54,6 +53,9 @@ public:
         APawn* Instigator = nullptr,
         ESpawnActorCollisionHandlingMethod CollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::AlwaysSpawn
     );
+
+    // @return Actually dropped quantity, -1 if failed.
+    static int32 DropItem(UWorld* World, const FItemSlot& InSlot, AActor* Dropper);
 
     ////////////////////////////////////////////////////////
     //        Fundamentals
@@ -119,4 +121,9 @@ protected:
 
     UPROPERTY(EditAnywhere, Category = "Item")
     FItemSlot ItemSlot;
+
+private:
+    static constexpr float DropDistance{50.f};
+    static constexpr float DropHeight{50.f};
+    static constexpr float DropImpulseStrength{250.f};
 };

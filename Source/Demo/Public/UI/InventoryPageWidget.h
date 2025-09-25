@@ -59,7 +59,6 @@ private:
     //        Handlers
     ////////////////////////////////////////////////////////
 private:
-    UFUNCTION()
     void HandleContextMenuButtonClicked(FGameplayTag InTag);
 
     void HandleItemSlotRightClicked(const FItemSlot& InSlot, int32 InIndex);
@@ -128,6 +127,7 @@ private:
     ////////////////////////////////////////////////////////
     //        Variables
     ////////////////////////////////////////////////////////
+private:
     bool bPendingUpdateItemSlots{false};
 
     FItemActionRequest ContextMenuItemActionRequest;

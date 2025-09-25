@@ -1,8 +1,14 @@
 ## Bugs
 - UDemoHUDWidget::UpdateLockOnPosition: 약간 오른쪽에 표시됨
+- EquipmentTabButton: Click
 
 ## TODO
 - EquipmentPage
+> DropItem, DoubleClick,
+
+- Check init & setup
+> Init: One-time, internal setup only\
+> Setup: Might be repeated and involve external dependencies
 
 ### Animation
 - Assets needed: Pivot, Idle, Walk, Run, Sprint, Jump, HeavyAttack, Dodge, Hit, Death, Draw/Sheath
@@ -26,7 +32,8 @@ UI:
 - Focus: Page 밖의 Background 클릭 시 Page 단축키 안 먹힘
 - Damage number
 - HUD에 tab키 안내
-- LockOn: Bone or socket에 고정하기
+- DragDropOp: ItemSlotDragSource? What happens if drag from Inventory to Equipment?
+- WBP_TabButton: Button style
 
 Data:
 - 클래스마다 흩어져 있는 BPClass 찾기를 하나의 DataAsset?에 모으기?
