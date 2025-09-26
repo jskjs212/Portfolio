@@ -10,6 +10,7 @@
 
 class UContextMenuWidget;
 class UItemActionDispatcher;
+class UItemInfoWidget;
 class UItemSlotWidget;
 
 struct FEquipmentSlotData
@@ -45,6 +46,11 @@ public:
     // Update UI of equipment item slots from owner pawn's EquipmentComponent
     void UpdateEquipmentSlotsUI(FGameplayTag EquipmentType);
 
+    FGameplayTag GetEquipmentTypeAtIndex(int32 InIndex) const
+    {
+        return EquipmentSlots.IsValidIndex(InIndex) ? EquipmentSlots[InIndex].EquipmentType : FGameplayTag::EmptyTag;
+    }
+
 private:
     void InitEquipmentSlots();
 
@@ -52,32 +58,42 @@ private:
 
     void BindToEquipmentUpdates();
 
-    void HandleContextMenuButtonClicked(FGameplayTag InTag);
-
     UItemActionDispatcher* GetItemActionDispatcher() const;
 
-    FORCEINLINE void SetActionRequest(const FItemSlot& InSlot, int32 InIndex)
+    // Only for RMB context menu = valid index.
+    FORCEINLINE void SetContextMenuData(int32 InIndex)
     {
-        ContextMenuItemActionRequest.Slot = InSlot;
-        ContextMenuItemActionRequest.DesignatedIndex = InIndex;
-        ContextMenuItemActionRequest.Quantity = 0;
+        ContextMenuEquipmentType = EquipmentSlots[InIndex].EquipmentType;
     }
 
     ////////////////////////////////////////////////////////
     //        Handlers
     ////////////////////////////////////////////////////////
 private:
+    void HandleContextMenuButtonClicked(FGameplayTag InTag);
+
     void HandleItemSlotRightClicked(const FItemSlot& InSlot, int32 InIndex);
+
+    void HandleItemSlotLeftDoubleClicked(const FItemSlot& InSlot, int32 InIndex);
+
+    void ShowItemInfo(const FItemSlot& InSlot);
+
+    void HideItemInfo();
 
     ////////////////////////////////////////////////////////
     //        Widgets
     ////////////////////////////////////////////////////////
 protected:
+    /* Equipment slots */
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UItemSlotWidget> WeaponSlot;
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UItemSlotWidget> ShieldSlot;
+
+    /* Else */
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UItemInfoWidget> ItemInfoWidget;
 
     UPROPERTY(EditDefaultsOnly, Category = "Initialization")
     TSubclassOf<UContextMenuWidget> ContextMenuWidgetClass;
@@ -89,7 +105,7 @@ protected:
     //        Variables
     ////////////////////////////////////////////////////////
 private:
-    FItemActionRequest ContextMenuItemActionRequest;
+    FGameplayTag ContextMenuEquipmentType;
 
     TArray<FEquipmentSlotData> EquipmentSlots;
 };

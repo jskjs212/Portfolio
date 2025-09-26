@@ -62,9 +62,9 @@ bool AAICharacter::CanBeTargeted() const
 
 FVector AAICharacter::GetTargetPointLocation() const
 {
-    if (USkeletalMeshComponent* MeshComp = GetMesh())
+    if (USkeletalMeshComponent* MeshComponent = GetMesh())
     {
-        return GetMesh()->GetSocketLocation(LockOnSocketName);
+        return MeshComponent->GetSocketLocation(LockOnSocketName);
     }
     return GetActorLocation();
 }

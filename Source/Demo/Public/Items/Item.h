@@ -55,7 +55,7 @@ public:
     );
 
     // @return Actually dropped quantity, -1 if failed.
-    static int32 DropItem(UWorld* World, const FItemSlot& InSlot, AActor* Dropper);
+    static int32 DropItem(UWorld* World, const FItemSlot& InSlot, const AActor* Dropper);
 
     ////////////////////////////////////////////////////////
     //        Fundamentals
@@ -75,6 +75,8 @@ public:
     //        Item functions
     ////////////////////////////////////////////////////////
 public:
+    bool Drop(const AActor* Dropper);
+
     void SimulatePhysics();
 
 protected:

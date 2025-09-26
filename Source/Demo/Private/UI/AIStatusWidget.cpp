@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UI/AIStatusWidget.h"
+#include "Components/StatsComponent.h"
 #include "Components/TextBlock.h"
 #include "Components/WidgetComponent.h"
 #include "GameplayTagContainer.h"
@@ -22,6 +23,6 @@ void UAIStatusWidget::InitAIStatus(AActor* InOwnerActor)
     }
 
     OwnerActor = InOwnerActor;
-    HealthBar->InitStatBar(OwnerActor, FGameplayTag::RequestGameplayTag("Stat.Health"));
+    HealthBar->InitStatBar(OwnerActor, UStatsComponent::HealthTag);
     NameText->SetText(FText::FromString(OwnerActor->GetName()));
 }

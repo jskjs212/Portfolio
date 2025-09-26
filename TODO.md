@@ -1,11 +1,11 @@
 ## Bugs
+- FindTarget(): Cone이 캐릭터 다리는 못 잡음
+> GetActorLocation()으로 각도 계산해서 -> Sweep -> ImpactPoint
 - UDemoHUDWidget::UpdateLockOnPosition: 약간 오른쪽에 표시됨
-- EquipmentTabButton: Click
+- 벽 뒤 대상: LockOn 금지 + 해제?
+- ItemSlot Drag시 HoveredImage
 
 ## TODO
-- EquipmentPage
-> DropItem, DoubleClick,
-
 - Check init & setup
 > Init: One-time, internal setup only\
 > Setup: Might be repeated and involve external dependencies
@@ -25,6 +25,11 @@ CombatComponent:
 - Unequip shield when two-handing
 - 타격감
 
+Attack:
+- CollisionComponent?
+- Multiple sockets in actor -> line traces from last frame?
+- HitBox? HitFrame?
+
 ### Else
 UI:
 - Bind: OnPossess에서 하기
@@ -34,6 +39,11 @@ UI:
 - HUD에 tab키 안내
 - DragDropOp: ItemSlotDragSource? What happens if drag from Inventory to Equipment?
 - WBP_TabButton: Button style
+- Cache RowHandle in ItemInfo
+
+ItemActionDispatcher:
+- Names: Include inventory, equipment
+- Too many delegates?
 
 Data:
 - 클래스마다 흩어져 있는 BPClass 찾기를 하나의 DataAsset?에 모으기?
@@ -113,6 +123,7 @@ MusicComponent? MusicSystem in GameInstance? SoundClasses?
 - 중력 이상: 캐릭터마다 중력을 다르게? (https://dev.epicgames.com/community/learning/tutorials/w6l7/unreal-engine-custom-gravity-in-ue-5-4)
 - 길게 눌러 닫기
 - Targeting point를 특정 Socket으로 고정
+- 우편함에서 선물 수령
 
 ## Debug history
 - Nuget warning: Just update packages...

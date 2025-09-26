@@ -108,7 +108,7 @@ void UItemSlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, const FP
             DraggedItemSlotWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
             DraggedItemSlotWidget->SetDesiredSizeInViewport(DesiredSize);
             DragDropOp->DefaultDragVisual = DraggedItemSlotWidget;
-            DragDropOp->Setup(ItemSlot, Index);
+            DragDropOp->Setup(Index, SourceTag, ItemSlot);
             OutOperation = DragDropOp;
         }
         else
@@ -125,15 +125,18 @@ void UItemSlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, const FP
 
 bool UItemSlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
-    UItemSlotDragDropOp* DragDropOp = Cast<UItemSlotDragDropOp>(InOperation);
+    const UItemSlotDragDropOp* DragDropOp = Cast<UItemSlotDragDropOp>(InOperation);
     if (DragDropOp)
     {
-        const int32 SrcIndex = DragDropOp->GetIndex();
-        const FItemSlot& SrcSlot = DragDropOp->GetItemSlot();
+        if (DragDropOp->GetSourceTag() == SourceTag) // Dragged from the same source
+        {
+            const int32 SrcIndex = DragDropOp->GetIndex();
+            const FItemSlot& SrcSlot = DragDropOp->GetItemSlot();
 
-        OnDropped.ExecuteIfBound(SrcSlot, SrcIndex, ItemSlot, Index);
+            OnDropped.ExecuteIfBound(SrcSlot, SrcIndex, ItemSlot, Index);
 
-        return true;
+            return true;
+        }
     }
 
     return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);

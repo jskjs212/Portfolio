@@ -21,7 +21,7 @@ void UStatsComponent::BeginPlay()
     }
 }
 
-void UStatsComponent::InitializeResourceStats()
+void UStatsComponent::ResetAllResourceStats()
 {
     for (auto& [StatTag, ResourceStat] : ResourceStats)
     {

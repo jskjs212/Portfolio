@@ -72,6 +72,8 @@ public:
 
     FORCEINLINE void SetIndex(int32 InIndex) { Index = InIndex; }
 
+    FORCEINLINE void SetSourceTag(FGameplayTag InSourceTag) { SourceTag = InSourceTag; }
+
     FORCEINLINE void SetItemSlot(const FItemSlot& InItemSlot) { ItemSlot = InItemSlot; }
 
 private:
@@ -104,8 +106,13 @@ public:
     //        Variables - Item
     ////////////////////////////////////////////////////////
 private:
-    // Index in the inventory array
+    // The owner allocates an index, and uses it to identify the slot.
+    // i.e. Index in the inventory array.
     int32 Index{-1};
+
+    // Source where the item slot belongs to.
+    // i.e. UI_PlayerMenu_Inventory
+    FGameplayTag SourceTag;
 
     FItemSlot ItemSlot;
 

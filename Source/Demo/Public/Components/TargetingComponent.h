@@ -23,7 +23,7 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnTargetUpdated, AActor* /* NewTarget */);
 /**
  * Handles targeting (Lock-On) functionality for a character.
  * Search for pawns within the MaxTargetDistance, then lock onto
- *     1) the closest target within the TargetingConeAngle from the character to the camera's forward position,
+ *     1) the closest target within the FirstTargetingConeAngle from the character to the camera's forward position,
  *     2) the closest target within the OmnidirectionalTargetDistance from the character (including backwards).
  */
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -61,7 +61,7 @@ private:
     TSet<AActor*> GetOverlappingTargets(const AActor* OwnerActor, FVector StartLocation, FVector DirectionNormal) const;
 
     // 1) Search for pawns within the MaxTargetDistance.
-    // 2) Find the closest target within the TargetingConeAngle from the character to the camera's forward position.
+    // 2) Find the closest target within the FirstTargetingConeAngle from the character to the camera's forward position.
     // 3) If not found, find the closest target within the OmnidirectionalTargetDistance from the character (including backwards).
     // 1.5~5.5ms for 100 pawns
     // To optimize: Decrease the distance, or use AsyncOverlap?
@@ -102,7 +102,10 @@ protected:
 
     // [degree] The half angle of the cone (from center to edge) in front of the character
     UPROPERTY(EditAnywhere, Category = "Initialization|Targeting", meta = (ClampMin = "0.", ClampMax = "180."))
-    float TargetingConeAngle{15.f};
+    float FirstTargetingConeAngle{8.f};
+
+    UPROPERTY(EditAnywhere, Category = "Initialization|Targeting", meta = (ClampMin = "0.", ClampMax = "180."))
+    float SecondTargetingConeAngle{20.f};
 
     UPROPERTY(EditAnywhere, Category = "Initialization|Targeting")
     float OmnidirectionalTargetDistance{500.f}; // 360 degree search

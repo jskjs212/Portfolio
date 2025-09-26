@@ -84,6 +84,7 @@ bool UEquipmentComponent::EquipItem(const FItemSlot& InSlot)
 
     *(ValidationResult.EquippedItemPtr) = SpawnedItem;
 
+    // @check - PostEquip(), PostUnequip()?
     // OnEquipped
     OnEquipmentChanged.Broadcast(ValidationResult.EquipmentType);
     if (ValidationResult.EquipmentType == DemoGameplayTags::Item_Weapon)
@@ -133,6 +134,48 @@ bool UEquipmentComponent::UnequipItem(const FGameplayTag EquipmentType)
     {
         // @TODO - Handle failure, already added to inventory so it should be destroyed
         UE_LOG(LogEquipment, Error, TEXT("UnequipItem() - Failed to destroy item."));
+        return false;
+    }
+
+    EquippedItems[EquipmentType] = nullptr;
+
+    // OnUnequipped
+    OnEquipmentChanged.Broadcast(EquipmentType);
+    if (EquipmentType == DemoGameplayTags::Item_Weapon)
+    {
+        OnWeaponChanged.Broadcast(DemoGameplayTags::Item_Weapon_NoWeapon);
+    }
+
+    // Update UI, stats, etc.
+    if (EquipSound)
+    {
+        UGameplayStatics::PlaySound2D(this, EquipSound);
+    }
+
+    // Unregister active skills
+
+    UE_LOG(LogEquipment, Display, TEXT("Unequipped - %s"), *EquipmentType.ToString());
+    return true;
+}
+
+bool UEquipmentComponent::UnequipAndDropItem(FGameplayTag EquipmentType)
+{
+    AItem* EquippedItem = GetEquippedItem(EquipmentType);
+    if (!EquippedItem)
+    {
+        UE_LOG(LogEquipment, Display, TEXT("UnequipAndDropItem() - Not equipped %s."), *EquipmentType.ToString());
+        return false;
+    }
+
+    // Detach
+    EquippedItem->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+
+    // Drop
+    bool bDropped = EquippedItem->Drop(GetOwner());
+    if (!bDropped) // Unlikely, but just in case
+    {
+        UE_LOG(LogEquipment, Error, TEXT("UnequipAndDropItem() - Failed to drop item."));
+        AttachActor(EquippedItem, EquipDefaultSocketNames[EquipmentType]);
         return false;
     }
 
@@ -247,7 +290,7 @@ bool UEquipmentComponent::AttachActor(AActor* ActorToAttach, const FName SocketN
 
     USkeletalMeshComponent* OwnerMesh = OwnerCharacter->GetMesh();
 
-#if WITH_EDITOR // Debug
+#if WITH_EDITOR
     if (!OwnerMesh->DoesSocketExist(SocketName))
     {
         UE_LOG(LogEquipment, Warning, TEXT("AttachActor() - Socket %s does not exist."), *SocketName.ToString());
@@ -274,6 +317,7 @@ void UEquipmentComponent::BindToItemActionDispatcher()
             if (UItemActionDispatcher* ItemActionDispatcher = DemoPlayerController->GetItemActionDispatcher())
             {
                 ItemActionDispatcher->OnUnequipItemRequested.BindUObject(this, &ThisClass::UnequipItem);
+                ItemActionDispatcher->OnUnequipAndDropItemRequested.BindUObject(this, &ThisClass::UnequipAndDropItem);
             }
         }
     }

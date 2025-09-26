@@ -123,6 +123,7 @@ void UInventoryPageWidget::UpdateItemSlotsUI()
             {
                 SlotWidget = CreateWidget<UItemSlotWidget>(this, ItemSlotWidgetClass);
                 SlotWidget->SetIndex(Index);
+                SlotWidget->SetSourceTag(DemoGameplayTags::UI_PlayerMenu_Inventory);
                 SlotWidget->OnRightClicked.BindUObject(this, &ThisClass::HandleItemSlotRightClicked);
                 SlotWidget->OnLeftDoubleClicked.BindUObject(this, &ThisClass::HandleItemSlotLeftDoubleClicked);
                 SlotWidget->OnHovered.BindUObject(this, &ThisClass::ShowItemInfo);
@@ -232,7 +233,7 @@ void UInventoryPageWidget::HandleContextMenuButtonClicked(FGameplayTag InTag)
 
 void UInventoryPageWidget::HandleItemSlotRightClicked(const FItemSlot& InSlot, int32 InIndex)
 {
-    SetActionRequest(InSlot, InIndex);
+    SetContextMenuData(InSlot, InIndex);
     ContextMenuWidget->ShowContextMenu();
 }
 

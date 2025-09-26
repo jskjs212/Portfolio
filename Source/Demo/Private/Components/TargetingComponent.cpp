@@ -7,6 +7,9 @@
 #include "Interfaces/TargetInterface.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "GameFramework/Character.h" // @TEST
+#include "Components/SkeletalMeshComponent.h" // @TEST
+
 
 UTargetingComponent::UTargetingComponent()
 {
@@ -93,12 +96,14 @@ TSet<AActor*> UTargetingComponent::GetOverlappingTargets(const AActor* OwnerActo
 #if WITH_EDITOR
     if (bDrawDebugInfo)
     {
-        // Draw sphere and cone
+        // Draw spheres and some edges of cones
         const FVector DirectionTotal = DirectionNormal * MaxTargetDistance;
         UKismetSystemLibrary::DrawDebugSphere(this, StartLocation, MaxTargetDistance, 12, FLinearColor::Green, DrawDebugDuration);
-        UKismetSystemLibrary::DrawDebugSphere(this, StartLocation, OmnidirectionalTargetDistance, 12, FLinearColor::Yellow, DrawDebugDuration);
-        UKismetSystemLibrary::DrawDebugLine(this, StartLocation, StartLocation + DirectionTotal.RotateAngleAxis(TargetingConeAngle, FVector::UpVector), FLinearColor::Green, DrawDebugDuration);
-        UKismetSystemLibrary::DrawDebugLine(this, StartLocation, StartLocation + DirectionTotal.RotateAngleAxis(-TargetingConeAngle, FVector::UpVector), FLinearColor::Green, DrawDebugDuration);
+        UKismetSystemLibrary::DrawDebugSphere(this, StartLocation, OmnidirectionalTargetDistance, 12, FLinearColor::Green, DrawDebugDuration);
+        UKismetSystemLibrary::DrawDebugLine(this, StartLocation, StartLocation + DirectionTotal.RotateAngleAxis(FirstTargetingConeAngle, FVector::UpVector), FLinearColor::Gray, DrawDebugDuration);
+        UKismetSystemLibrary::DrawDebugLine(this, StartLocation, StartLocation + DirectionTotal.RotateAngleAxis(-FirstTargetingConeAngle, FVector::UpVector), FLinearColor::Gray, DrawDebugDuration);
+        UKismetSystemLibrary::DrawDebugLine(this, StartLocation, StartLocation + DirectionTotal.RotateAngleAxis(SecondTargetingConeAngle, FVector::UpVector), FLinearColor::Gray, DrawDebugDuration);
+        UKismetSystemLibrary::DrawDebugLine(this, StartLocation, StartLocation + DirectionTotal.RotateAngleAxis(-SecondTargetingConeAngle, FVector::UpVector), FLinearColor::Gray, DrawDebugDuration);
     }
 #endif // WITH_EDITOR
 
@@ -155,31 +160,32 @@ FFindTargetResult UTargetingComponent::FindTarget()
     const FVector DirectionNormal = (EndLocationEstimate - StartLocation).GetUnsafeNormal();
 
     // Get overlapping targets
-    const TSet<AActor*> Targets = GetOverlappingTargets(OwnerActor, StartLocation, DirectionNormal);
+    //const TSet<AActor*> Targets = GetOverlappingTargets(OwnerActor, StartLocation, DirectionNormal);
+    TSet<AActor*> Targets = GetOverlappingTargets(OwnerActor, StartLocation, DirectionNormal);
     if (Targets.IsEmpty())
     {
         return {};
     }
 
-    float ClosestDistanceSqrInCone = UE_MAX_FLT;
-    AActor* ClosestTargetInCone = nullptr;
+    float ClosestDistanceSqrInFirstCone = UE_MAX_FLT;
+    AActor* ClosestTargetInFirstCone = nullptr;
 
     float ClosestDistanceSqr = FMath::Square(OmnidirectionalTargetDistance) + UE_SMALL_NUMBER; // Inside the distance
     AActor* ClosestTarget = nullptr;
 
     // Calculate angle and distance
-    const float DotThreshold = FMath::Cos(FMath::DegreesToRadians(TargetingConeAngle));
+    const float DotThreshold = FMath::Cos(FMath::DegreesToRadians(FirstTargetingConeAngle));
     for (AActor* Target : Targets)
     {
         const FVector ToTarget = Target->GetActorLocation() - StartLocation;
         const float DistanceSqr = ToTarget.SizeSquared();
         const float DotProduct = FVector::DotProduct(DirectionNormal, ToTarget.GetSafeNormal());
 
-        // Find the closest target within the TargetingConeAngle
-        if (DistanceSqr < ClosestDistanceSqrInCone && DotProduct >= DotThreshold)
+        // Find the closest target within the FirstTargetingConeAngle
+        if (DistanceSqr < ClosestDistanceSqrInFirstCone && DotProduct >= DotThreshold)
         {
-            ClosestDistanceSqrInCone = DistanceSqr;
-            ClosestTargetInCone = Target;
+            ClosestDistanceSqrInFirstCone = DistanceSqr;
+            ClosestTargetInFirstCone = Target;
         }
 
         // Find the closest target within OmnidirectionalTargetDistance
@@ -190,9 +196,9 @@ FFindTargetResult UTargetingComponent::FindTarget()
         }
     }
 
-    if (ClosestTargetInCone)
+    if (ClosestTargetInFirstCone)
     {
-        return {true, ClosestTargetInCone, Cast<ITargetInterface>(ClosestTargetInCone)};
+        return {true, ClosestTargetInFirstCone, Cast<ITargetInterface>(ClosestTargetInFirstCone)};
     }
 
     if (ClosestTarget)

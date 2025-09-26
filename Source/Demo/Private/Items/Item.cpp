@@ -48,7 +48,7 @@ AItem* AItem::SpawnItem(
     return SpawnedItem;
 }
 
-int32 AItem::DropItem(UWorld* World, const FItemSlot& InSlot, AActor* Dropper)
+int32 AItem::DropItem(UWorld* World, const FItemSlot& InSlot, const AActor* Dropper)
 {
     if (!World || !Dropper)
     {
@@ -77,10 +77,7 @@ int32 AItem::DropItem(UWorld* World, const FItemSlot& InSlot, AActor* Dropper)
     }
 
     // Throw
-    if (UPrimitiveComponent* PrimitiveComp = Cast<UPrimitiveComponent>(DroppedItem->GetMesh()))
-    {
-        PrimitiveComp->AddImpulse(Dropper->GetActorForwardVector() * DropImpulseStrength, NAME_None, true);
-    }
+    DroppedItem->GetMesh()->AddImpulse(Dropper->GetActorForwardVector() * DropImpulseStrength, NAME_None, true);
 
     return InSlot.Quantity;
 }
@@ -135,6 +132,28 @@ void AItem::PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChan
     Super::PostEditChangeChainProperty(PropertyChangedEvent);
 }
 #endif // WITH_EDITOR
+
+bool AItem::Drop(const AActor* Dropper)
+{
+    UWorld* World = GetWorld();
+    if (!World || !Dropper || !IsMeshAssetValid())
+    {
+        return false;
+    }
+
+    SimulatePhysics();
+
+    // Spawn location
+    const FVector LocationOffset = Dropper->GetActorForwardVector() * DropDistance + FVector{0.f, 0.f, DropHeight};
+    FTransform NewTransform = Dropper->GetActorTransform();
+    NewTransform.AddToTranslation(LocationOffset);
+    SetActorTransform(NewTransform);
+
+    // Throw
+    GetMesh()->AddImpulse(Dropper->GetActorForwardVector() * DropImpulseStrength, NAME_None, true);
+
+    return true;
+}
 
 void AItem::SimulatePhysics()
 {

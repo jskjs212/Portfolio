@@ -28,6 +28,7 @@ public:
     FOnItemActionRequested OnDropItemRequested;
     FOnSwapItemRequested OnSwapItemRequested;
     FOnUnequipItemRequested OnUnequipItemRequested;
+    FOnUnequipItemRequested OnUnequipAndDropItemRequested;
 
     ////////////////////////////////////////////////////////
     //        Request functions
@@ -72,5 +73,11 @@ public:
     bool RequestUnequipItem(FGameplayTag EquipmentType) const
     {
         return OnUnequipItemRequested.IsBound() ? OnUnequipItemRequested.Execute(EquipmentType) : false;
+    }
+
+    // @return true if successfully unequipped and dropped
+    bool RequestUnequipAndDropItem(FGameplayTag EquipmentType) const
+    {
+        return OnUnequipAndDropItemRequested.IsBound() ? OnUnequipAndDropItemRequested.Execute(EquipmentType) : false;
     }
 };

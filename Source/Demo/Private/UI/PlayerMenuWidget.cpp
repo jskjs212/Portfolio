@@ -88,23 +88,17 @@ FReply UPlayerMenuWidget::NativeOnPreviewMouseButtonDown(const FGeometry& InGeom
 
 bool UPlayerMenuWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
-    // Item slot dragged & dropped: Only drop item for now
     // @check - Dragged from other page i.e. unequip, buy, move from stash, etc.
-    UItemSlotDragDropOp* DragDropOp = Cast<UItemSlotDragDropOp>(InOperation);
+    const UItemSlotDragDropOp* DragDropOp = Cast<UItemSlotDragDropOp>(InOperation);
     if (DragDropOp)
     {
-        FItemActionRequest Request;
-        Request.Slot = DragDropOp->GetItemSlot();
-        Request.DesignatedIndex = DragDropOp->GetIndex();
-        Request.Quantity = DragDropOp->GetItemSlot().Quantity;
-
-        if (ADemoPlayerController* DemoPlayerController = GetOwningPlayer<ADemoPlayerController>())
+        if (DragDropOp->GetSourceTag() == DemoGameplayTags::UI_PlayerMenu_Inventory)
         {
-            if (UItemActionDispatcher* ItemActionDispatcher = DemoPlayerController->GetItemActionDispatcher())
-            {
-                ItemActionDispatcher->RequestDropItem(Request);
-                return true;
-            }
+            return DropInventoryItem(DragDropOp);
+        }
+        else if (DragDropOp->GetSourceTag() == DemoGameplayTags::UI_PlayerMenu_Equipment)
+        {
+            return DropEquipmentItem(DragDropOp);
         }
     }
 
@@ -118,6 +112,37 @@ void UPlayerMenuWidget::HideMenu()
         CancelDragDrop();
         DemoPlayerController->ShowPlayerMenu(false);
     }
+}
+
+bool UPlayerMenuWidget::DropInventoryItem(const UItemSlotDragDropOp* InDragDropOp)
+{
+    if (ADemoPlayerController* DemoPlayerController = GetOwningPlayer<ADemoPlayerController>())
+    {
+        if (UItemActionDispatcher* ItemActionDispatcher = DemoPlayerController->GetItemActionDispatcher())
+        {
+            FItemActionRequest Request;
+            Request.Slot = InDragDropOp->GetItemSlot();
+            Request.DesignatedIndex = InDragDropOp->GetIndex();
+            Request.Quantity = InDragDropOp->GetItemSlot().Quantity;
+
+            return ItemActionDispatcher->RequestDropItem(Request) > 0;
+        }
+    }
+    return false;
+}
+
+bool UPlayerMenuWidget::DropEquipmentItem(const UItemSlotDragDropOp* InDragDropOp)
+{
+    if (ADemoPlayerController* DemoPlayerController = GetOwningPlayer<ADemoPlayerController>())
+    {
+        if (UItemActionDispatcher* ItemActionDispatcher = DemoPlayerController->GetItemActionDispatcher())
+        {
+            FGameplayTag EquipmentType = EquipmentPageWidget->GetEquipmentTypeAtIndex(InDragDropOp->GetIndex());
+
+            return ItemActionDispatcher->RequestUnequipAndDropItem(EquipmentType);
+        }
+    }
+    return false;
 }
 
 void UPlayerMenuWidget::SetFocusToWidget(UWidget* InWidget)

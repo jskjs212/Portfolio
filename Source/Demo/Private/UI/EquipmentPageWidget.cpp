@@ -7,6 +7,7 @@
 #include "PlayerController/DemoPlayerController.h"
 #include "UI/ContextMenuWidget.h"
 #include "UI/ItemActionDispatcher.h"
+#include "UI/ItemInfoWidget.h"
 #include "UI/ItemSlotWidget.h"
 #include "UI/TabButton.h"
 
@@ -14,7 +15,7 @@ void UEquipmentPageWidget::NativeOnInitialized()
 {
     Super::NativeOnInitialized();
 
-    checkf(WeaponSlot && ShieldSlot, TEXT("Failed to bind widgets."));
+    checkf(WeaponSlot && ShieldSlot && ItemInfoWidget, TEXT("Failed to bind widgets."));
 
     if (!ContextMenuWidgetClass)
     {
@@ -24,6 +25,7 @@ void UEquipmentPageWidget::NativeOnInitialized()
 
     InitEquipmentSlots();
     InitContextMenu();
+    HideItemInfo();
     BindToEquipmentUpdates();
 }
 
@@ -63,16 +65,21 @@ void UEquipmentPageWidget::UpdateEquipmentSlotsUI(FGameplayTag EquipmentType)
 
 void UEquipmentPageWidget::InitEquipmentSlots()
 {
-    // @TODO - bind to slot events
-    int32 Index = 0;
-
-    WeaponSlot->SetIndex(Index++);
-    WeaponSlot->OnRightClicked.BindUObject(this, &ThisClass::HandleItemSlotRightClicked);
+    // Link slot widgets with equipment types
     EquipmentSlots.Emplace(FEquipmentSlotData{DemoGameplayTags::Item_Weapon, WeaponSlot});
-
-    ShieldSlot->SetIndex(Index++);
-    ShieldSlot->OnRightClicked.BindUObject(this, &ThisClass::HandleItemSlotRightClicked);
     EquipmentSlots.Emplace(FEquipmentSlotData{DemoGameplayTags::Item_Armor_Shield, ShieldSlot});
+
+    // Set index and bind events
+    for (int32 Index = 0; Index < EquipmentSlots.Num(); ++Index)
+    {
+        UItemSlotWidget* SlotWidget = EquipmentSlots[Index].SlotWidget;
+        SlotWidget->SetIndex(Index);
+        SlotWidget->SetSourceTag(DemoGameplayTags::UI_PlayerMenu_Equipment);
+        SlotWidget->OnRightClicked.BindUObject(this, &ThisClass::HandleItemSlotRightClicked);
+        SlotWidget->OnLeftDoubleClicked.BindUObject(this, &ThisClass::HandleItemSlotLeftDoubleClicked);
+        SlotWidget->OnHovered.BindUObject(this, &ThisClass::ShowItemInfo);
+        SlotWidget->OnUnhovered.BindUObject(this, &ThisClass::HideItemInfo);
+    }
 }
 
 void UEquipmentPageWidget::InitContextMenu()
@@ -108,6 +115,15 @@ void UEquipmentPageWidget::BindToEquipmentUpdates()
     }
 }
 
+UItemActionDispatcher* UEquipmentPageWidget::GetItemActionDispatcher() const
+{
+    if (const ADemoPlayerController* DemoPlayerController = GetOwningPlayer<ADemoPlayerController>())
+    {
+        return DemoPlayerController->GetItemActionDispatcher();
+    }
+    return nullptr;
+}
+
 void UEquipmentPageWidget::HandleContextMenuButtonClicked(FGameplayTag InTag)
 {
     UItemActionDispatcher* ItemActionDispatcher = GetItemActionDispatcher();
@@ -119,19 +135,11 @@ void UEquipmentPageWidget::HandleContextMenuButtonClicked(FGameplayTag InTag)
     // Execute action
     if (InTag == DemoGameplayTags::UI_Action_Item_Unequip)
     {
-        const int32 Index = ContextMenuItemActionRequest.DesignatedIndex;
-        const FGameplayTag EquipmentType = EquipmentSlots[Index].EquipmentType;
-        ItemActionDispatcher->RequestUnequipItem(EquipmentType);
+        ItemActionDispatcher->RequestUnequipItem(ContextMenuEquipmentType);
     }
     else if (InTag == DemoGameplayTags::UI_Action_Item_Drop)
     {
-        // @TODO - Drop
-        // 1) Unequip item if equipped
-        // 2) Drop item from inventory
-        // Problem: Should be able to drop even the inventory is full
-        // Solution 1: Add a new unequip & drop in EquipmentComponent?
-        // Solution 2: Just add a bool bAllowDropWhenInventoryFull in DropItem()?
-        UE_LOG(LogTemp, Warning, TEXT("UEquipmentPageWidget::HandleContextMenuButtonClicked - Drop not implemented yet."));
+        ItemActionDispatcher->RequestUnequipAndDropItem(ContextMenuEquipmentType);
     }
     else if (InTag == DemoGameplayTags::UI_Action_Item_Cancel)
     {
@@ -145,17 +153,34 @@ void UEquipmentPageWidget::HandleContextMenuButtonClicked(FGameplayTag InTag)
     ContextMenuWidget->HideContextMenu();
 }
 
-UItemActionDispatcher* UEquipmentPageWidget::GetItemActionDispatcher() const
-{
-    if (const ADemoPlayerController* DemoPlayerController = GetOwningPlayer<ADemoPlayerController>())
-    {
-        return DemoPlayerController->GetItemActionDispatcher();
-    }
-    return nullptr;
-}
-
 void UEquipmentPageWidget::HandleItemSlotRightClicked(const FItemSlot& InSlot, int32 InIndex)
 {
-    SetActionRequest(InSlot, InIndex);
+    SetContextMenuData(InIndex);
     ContextMenuWidget->ShowContextMenu();
+}
+
+void UEquipmentPageWidget::HandleItemSlotLeftDoubleClicked(const FItemSlot& InSlot, int32 InIndex)
+{
+    UItemActionDispatcher* ItemActionDispatcher = GetItemActionDispatcher();
+    if (!ItemActionDispatcher)
+    {
+        return;
+    }
+
+    const FGameplayTag EquipmentType = EquipmentSlots[InIndex].EquipmentType;
+    ItemActionDispatcher->RequestUnequipItem(EquipmentType);
+}
+
+void UEquipmentPageWidget::ShowItemInfo(const FItemSlot& InSlot)
+{
+    const FItemDataBase* ItemData = ItemInfoWidget->UpdateItemInfo(InSlot);
+    if (ItemData)
+    {
+        ItemInfoWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
+    }
+}
+
+void UEquipmentPageWidget::HideItemInfo()
+{
+    ItemInfoWidget->SetVisibility(ESlateVisibility::Collapsed);
 }

@@ -58,7 +58,7 @@ void ABaseCharacter::BeginPlay()
     {
         StatsComponent->AddResourceStat(StatTag, ResourceStat);
     }
-    StatsComponent->InitializeResourceStats();
+    StatsComponent->ResetAllResourceStats();
     StatsComponent->OnCurrentResourceStatChanged.AddUObject(this, &ThisClass::HandleCurrentResourceStatChanged);
 }
 

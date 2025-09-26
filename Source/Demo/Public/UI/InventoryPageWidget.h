@@ -41,19 +41,19 @@ public:
 
     bool IsPendingUpdate() const { return bPendingUpdateItemSlots; }
 
-    FORCEINLINE void SetActionRequest(const FItemSlot& InSlot, int32 DesignatedIndex)
-    {
-        ContextMenuItemActionRequest.Slot = InSlot;
-        ContextMenuItemActionRequest.DesignatedIndex = DesignatedIndex;
-        ContextMenuItemActionRequest.Quantity = 0;
-    }
-
 private:
     void SetupContextMenu();
 
     void BindToInventoryUpdates();
 
     UItemActionDispatcher* GetItemActionDispatcher() const;
+
+    FORCEINLINE void SetContextMenuData(const FItemSlot& InSlot, int32 DesignatedIndex)
+    {
+        ContextMenuItemActionRequest.Slot = InSlot;
+        ContextMenuItemActionRequest.DesignatedIndex = DesignatedIndex;
+        ContextMenuItemActionRequest.Quantity = 0;
+    }
 
     ////////////////////////////////////////////////////////
     //        Handlers

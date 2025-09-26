@@ -9,6 +9,7 @@
 class UButton;
 class UEquipmentPageWidget;
 class UInventoryPageWidget;
+class UItemSlotDragDropOp;
 class UStatsPageWidget;
 class UTabButton;
 class UTextBlock;
@@ -45,6 +46,10 @@ public:
     void HideMenu();
 
 private:
+    bool DropInventoryItem(const UItemSlotDragDropOp* InDragDropOp);
+
+    bool DropEquipmentItem(const UItemSlotDragDropOp* InDragDropOp);
+
     virtual void SetFocusToWidget(UWidget* InWidget) override;
 
     ////////////////////////////////////////////////////////

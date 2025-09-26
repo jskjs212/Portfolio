@@ -48,7 +48,7 @@ protected:
     ////////////////////////////////////////////////////////
 public:
     // Set all current values to max values.
-    void InitializeResourceStats();
+    void ResetAllResourceStats();
 
     // Not considered to be called after BeginPlay.
     void AddResourceStat(FGameplayTag StatTag, const FResourceStat& ResourceStat);

@@ -68,8 +68,13 @@ public:
     // @return true if successfully equipped
     bool EquipItem(const FItemSlot& InSlot);
 
+    // Unequip and keep in inventory.
     // @return true if successfully unequipped
     bool UnequipItem(FGameplayTag EquipmentType);
+
+    // Unequip and drop.
+    // @return true if successfully unequipped and dropped
+    bool UnequipAndDropItem(FGameplayTag EquipmentType);
 
     void DestroyAllEquippedItems();
 
