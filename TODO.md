@@ -1,8 +1,5 @@
 ## Bugs
-- FindTarget(): Cone이 캐릭터 다리는 못 잡음
-> GetActorLocation()으로 각도 계산해서 -> Sweep -> ImpactPoint
 - UDemoHUDWidget::UpdateLockOnPosition: 약간 오른쪽에 표시됨
-- 벽 뒤 대상: LockOn 금지 + 해제?
 - ItemSlot Drag시 HoveredImage
 
 ## TODO
@@ -32,6 +29,7 @@ Attack:
 
 ### Else
 UI:
+- AI health bar image
 - Bind: OnPossess에서 하기
 - All UI: Z order (new depth = separate draw calls?)
 - Focus: Page 밖의 Background 클릭 시 Page 단축키 안 먹힘
@@ -92,17 +90,18 @@ ValidateActionRequest: Index가 -1이면 앞에서부터 찾아서 처리하기를 추가할지?
 ### PickUp
 Box의 중심이 무기의 손잡이 등 Mesh의 Root로 가서 위치가 안 맞음.
 
+### Optimize
+- UTargetingComponent::FindTarget()
+
 ## misc
 ### Life cycle
 - 모든 delegate.AddDynamic의 RemoveDynamic 필요 여부
 - 모든 포인터의 생애 주기?
 
-### DataTable
-- 현재 StaticMesh는 Collision을, SkeletalMesh는 PhysicsAsset을 수동으로 할당해줘야 함.
-> Valid 체크만 할지, 없으면 자동으로 생성해줄지?
-
 ### UX
 - SFX: Drop
+- LockOn 대상이 벽 뒤로 가면 해제
+> 앞에 잠깐 지나가는 물체에 해제되면 불편함
 
 ## Add
 ### Item::Tokens

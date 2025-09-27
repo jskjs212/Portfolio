@@ -2,18 +2,17 @@
 
 #include "Components/TargetingComponent.h"
 #include "Camera/CameraComponent.h"
-#include "Engine/OverlapResult.h"
 #include "GameFramework/Pawn.h"
 #include "Interfaces/TargetInterface.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "GameFramework/Character.h" // @TEST
-#include "Components/SkeletalMeshComponent.h" // @TEST
 
 
 UTargetingComponent::UTargetingComponent()
 {
     PrimaryComponentTick.bCanEverTick = true;
+
+    VisibilityQueryParams.AddIgnoredActor(GetOwner());
 }
 
 void UTargetingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -39,6 +38,7 @@ void UTargetingComponent::LockTarget()
 #if WITH_EDITOR
             if (bDrawDebugInfo)
             {
+                // Draw a sphere at the target
                 UKismetSystemLibrary::DrawDebugSphere(this, FindResult.Target->GetActorLocation(), 50.f, 12, FLinearColor::Red, DrawDebugDuration);
             }
 #endif // WITH_EDITOR
@@ -69,7 +69,7 @@ void UTargetingComponent::ToggleTargetLock()
     }
 }
 
-TSet<AActor*> UTargetingComponent::GetOverlappingTargets(const AActor* OwnerActor, FVector StartLocation, FVector DirectionNormal) const
+TArray<FHitResult> UTargetingComponent::GetSweepResults(const AActor* OwnerActor, FVector StartLocation, FVector DirectionNormal) const
 {
     UWorld* World = GetWorld();
     if (!World)
@@ -77,20 +77,19 @@ TSet<AActor*> UTargetingComponent::GetOverlappingTargets(const AActor* OwnerActo
         return {};
     }
 
-    // Overlap parameters
-    const FCollisionShape Sphere = FCollisionShape::MakeSphere(MaxTargetDistance);
-    TArray<FOverlapResult> OverlapResults;
-    FCollisionQueryParams QueryParams;
-    QueryParams.AddIgnoredActor(OwnerActor);
-
     // Find all pawns within the sphere
-    bool bHit = World->OverlapMultiByObjectType(
-        OverlapResults,
+    TArray<FHitResult> HitResults;
+    UKismetSystemLibrary::SphereTraceMultiForObjects(
+        this, /* WorldContextObject */
         StartLocation,
-        FQuat::Identity,
-        TargetObjectQueryParams,
-        Sphere,
-        QueryParams
+        StartLocation,
+        MaxTargetDistance,
+        TargetObjectTypes,
+        false, /* bTraceComplex */
+        EmptyIgnoredActors,
+        EDrawDebugTrace::None,
+        HitResults,
+        true /* bIgnoreSelf */
     );
 
 #if WITH_EDITOR
@@ -99,48 +98,111 @@ TSet<AActor*> UTargetingComponent::GetOverlappingTargets(const AActor* OwnerActo
         // Draw spheres and some edges of cones
         const FVector DirectionTotal = DirectionNormal * MaxTargetDistance;
         UKismetSystemLibrary::DrawDebugSphere(this, StartLocation, MaxTargetDistance, 12, FLinearColor::Green, DrawDebugDuration);
-        UKismetSystemLibrary::DrawDebugSphere(this, StartLocation, OmnidirectionalTargetDistance, 12, FLinearColor::Green, DrawDebugDuration);
-        UKismetSystemLibrary::DrawDebugLine(this, StartLocation, StartLocation + DirectionTotal.RotateAngleAxis(FirstTargetingConeAngle, FVector::UpVector), FLinearColor::Gray, DrawDebugDuration);
-        UKismetSystemLibrary::DrawDebugLine(this, StartLocation, StartLocation + DirectionTotal.RotateAngleAxis(-FirstTargetingConeAngle, FVector::UpVector), FLinearColor::Gray, DrawDebugDuration);
-        UKismetSystemLibrary::DrawDebugLine(this, StartLocation, StartLocation + DirectionTotal.RotateAngleAxis(SecondTargetingConeAngle, FVector::UpVector), FLinearColor::Gray, DrawDebugDuration);
-        UKismetSystemLibrary::DrawDebugLine(this, StartLocation, StartLocation + DirectionTotal.RotateAngleAxis(-SecondTargetingConeAngle, FVector::UpVector), FLinearColor::Gray, DrawDebugDuration);
+        UKismetSystemLibrary::DrawDebugSphere(this, StartLocation, OmnidirectionalTargetDistance, 12, FLinearColor::Yellow, DrawDebugDuration);
+        UKismetSystemLibrary::DrawDebugLine(this, StartLocation, StartLocation + DirectionTotal.RotateAngleAxis(FirstTargetingConeAngle, FVector::UpVector), FLinearColor::Yellow, DrawDebugDuration);
+        UKismetSystemLibrary::DrawDebugLine(this, StartLocation, StartLocation + DirectionTotal.RotateAngleAxis(-FirstTargetingConeAngle, FVector::UpVector), FLinearColor::Yellow, DrawDebugDuration);
+        UKismetSystemLibrary::DrawDebugLine(this, StartLocation, StartLocation + DirectionTotal.RotateAngleAxis(SecondTargetingConeAngle, FVector::UpVector), FLinearColor::Yellow, DrawDebugDuration);
+        UKismetSystemLibrary::DrawDebugLine(this, StartLocation, StartLocation + DirectionTotal.RotateAngleAxis(-SecondTargetingConeAngle, FVector::UpVector), FLinearColor::Yellow, DrawDebugDuration);
     }
 #endif // WITH_EDITOR
 
-    if (!bHit)
-    {
-        return {};
-    }
+    return HitResults;
+}
 
-    // Filter valid targets
-    TSet<AActor*> UniqueTargets;
-    for (const FOverlapResult& Overlap : OverlapResults)
+bool UTargetingComponent::IsImpactPointVisible(const UWorld* World, const AActor* Target, FVector StartLocation, FVector ImpactPoint) const
+{
+    FHitResult HitResult;
+    bool bHit = World->LineTraceSingleByChannel(
+        HitResult,
+        StartLocation,
+        ImpactPoint,
+        ECC_Visibility,
+        VisibilityQueryParams
+    );
+    return !bHit; // Nothing between the camera and the target
+}
+
+FFindTargetResult UTargetingComponent::FindTargetFromSweepResults(const TArray<FHitResult>& HitResults, FVector StartLocation, FVector DirectionNormal, FVector CameraLocation) const
+{
+    const float FirstDotThreshold = FMath::Cos(FMath::DegreesToRadians(FirstTargetingConeAngle));
+    const float SecondDotThreshold = FMath::Cos(FMath::DegreesToRadians(SecondTargetingConeAngle));
+
+    float ClosestDistanceSqrInFirstCone = UE_MAX_FLT;
+    AActor* ClosestTargetInFirstCone = nullptr;
+
+    float ClosestDistanceSqrInSecondCone = UE_MAX_FLT;
+    AActor* ClosestTargetInSecondCone = nullptr;
+
+    float ClosestDistanceSqr = FMath::Square(OmnidirectionalTargetDistance) + UE_SMALL_NUMBER; // Inside the distance
+    AActor* ClosestTarget = nullptr;
+
+    // Repeat multiple times for the same target, for the case that camera focuses out of center of the target (e.g. hands, feet).
+    const UWorld* World = GetWorld();
+    for (const FHitResult& Hit : HitResults)
     {
-        AActor* OverlappedActor = Overlap.GetActor();
-        if (IsValid(OverlappedActor))
+        AActor* Target = Hit.GetActor();
+        if (!IsValid(Target) || !Cast<ITargetInterface>(Target))
         {
-            if (ITargetInterface* TargetInterface = Cast<ITargetInterface>(OverlappedActor))
+            continue;
+        }
+
+        const FVector ToImpactPoint = Hit.ImpactPoint - StartLocation;
+        const float DistanceSqr = ToImpactPoint.SizeSquared();
+        const float DotProduct = FVector::DotProduct(DirectionNormal, ToImpactPoint.GetSafeNormal());
+
+        // Find the closest target within the FirstTargetingConeAngle
+        if (DistanceSqr < ClosestDistanceSqrInFirstCone && DotProduct >= FirstDotThreshold)
+        {
+            // The number of line traces inside this block is 0.1~2% of total hit results.
+            if (IsImpactPointVisible(World, Target, CameraLocation, Hit.ImpactPoint))
             {
-                UniqueTargets.Add(OverlappedActor);
+                ClosestDistanceSqrInFirstCone = DistanceSqr;
+                ClosestTargetInFirstCone = Target;
+                continue;
+            }
+        }
+
+        // Find the closest target within the SecondTargetingConeAngle
+        if (DistanceSqr < ClosestDistanceSqrInSecondCone && DotProduct >= SecondDotThreshold)
+        {
+            if (IsImpactPointVisible(World, Target, CameraLocation, Hit.ImpactPoint))
+            {
+                ClosestDistanceSqrInSecondCone = DistanceSqr;
+                ClosestTargetInSecondCone = Target;
+                continue;
+            }
+        }
+
+        // Find the closest target within OmnidirectionalTargetDistance
+        if (DistanceSqr < ClosestDistanceSqr)
+        {
+            if (IsImpactPointVisible(World, Target, CameraLocation, Hit.ImpactPoint))
+            {
+                ClosestDistanceSqr = DistanceSqr;
+                ClosestTarget = Target;
             }
         }
     }
 
-#if WITH_EDITOR
-    if (bDrawDebugInfo)
+    if (ClosestTargetInFirstCone)
     {
-        // Draw overlapped targets
-        for (AActor* Target : UniqueTargets)
-        {
-            UKismetSystemLibrary::DrawDebugSphere(this, Target->GetActorLocation(), 30.f, 12, FLinearColor::Blue, DrawDebugDuration);
-        }
+        return {true, ClosestTargetInFirstCone, Cast<ITargetInterface>(ClosestTargetInFirstCone)};
     }
-#endif // WITH_EDITOR
 
-    return UniqueTargets;
+    if (ClosestTargetInSecondCone)
+    {
+        return {true, ClosestTargetInSecondCone, Cast<ITargetInterface>(ClosestTargetInSecondCone)};
+    }
+
+    if (ClosestTarget)
+    {
+        return {true, ClosestTarget, Cast<ITargetInterface>(ClosestTarget)};
+    }
+
+    return {}; // Not found
 }
 
-FFindTargetResult UTargetingComponent::FindTarget()
+FFindTargetResult UTargetingComponent::FindTarget() const
 {
     DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UTargetingComponent::FindTarget"), STAT_TargetingComponent_FindTarget, STATGROUP_Game);
     TRACE_CPUPROFILER_EVENT_SCOPE_STR(__FUNCTION__);
@@ -154,56 +216,17 @@ FFindTargetResult UTargetingComponent::FindTarget()
     }
 
     // Calculate location and direction
-    constexpr float SpringArmLengthEstimate = 300.f; // Maybe variant in-game, but not that important.
+    constexpr float SpringArmLengthEstimate = 300.f; // Maybe vary in-game, but not that important
     const FVector StartLocation = OwnerActor->GetActorLocation();
-    const FVector EndLocationEstimate = Camera->GetComponentLocation() + (Camera->GetForwardVector() * (MaxTargetDistance + SpringArmLengthEstimate));
+    const FVector CameraLocation = Camera->GetComponentLocation();
+    const FVector EndLocationEstimate = CameraLocation + (Camera->GetForwardVector() * (MaxTargetDistance + SpringArmLengthEstimate)); // Rough estimate of end location
     const FVector DirectionNormal = (EndLocationEstimate - StartLocation).GetUnsafeNormal();
 
-    // Get overlapping targets
-    //const TSet<AActor*> Targets = GetOverlappingTargets(OwnerActor, StartLocation, DirectionNormal);
-    TSet<AActor*> Targets = GetOverlappingTargets(OwnerActor, StartLocation, DirectionNormal);
-    if (Targets.IsEmpty())
+    // Get pawns inside the sphere
+    const TArray<FHitResult> HitResults = GetSweepResults(OwnerActor, StartLocation, DirectionNormal);
+    if (!HitResults.IsEmpty())
     {
-        return {};
-    }
-
-    float ClosestDistanceSqrInFirstCone = UE_MAX_FLT;
-    AActor* ClosestTargetInFirstCone = nullptr;
-
-    float ClosestDistanceSqr = FMath::Square(OmnidirectionalTargetDistance) + UE_SMALL_NUMBER; // Inside the distance
-    AActor* ClosestTarget = nullptr;
-
-    // Calculate angle and distance
-    const float DotThreshold = FMath::Cos(FMath::DegreesToRadians(FirstTargetingConeAngle));
-    for (AActor* Target : Targets)
-    {
-        const FVector ToTarget = Target->GetActorLocation() - StartLocation;
-        const float DistanceSqr = ToTarget.SizeSquared();
-        const float DotProduct = FVector::DotProduct(DirectionNormal, ToTarget.GetSafeNormal());
-
-        // Find the closest target within the FirstTargetingConeAngle
-        if (DistanceSqr < ClosestDistanceSqrInFirstCone && DotProduct >= DotThreshold)
-        {
-            ClosestDistanceSqrInFirstCone = DistanceSqr;
-            ClosestTargetInFirstCone = Target;
-        }
-
-        // Find the closest target within OmnidirectionalTargetDistance
-        if (DistanceSqr < ClosestDistanceSqr)
-        {
-            ClosestDistanceSqr = DistanceSqr;
-            ClosestTarget = Target;
-        }
-    }
-
-    if (ClosestTargetInFirstCone)
-    {
-        return {true, ClosestTargetInFirstCone, Cast<ITargetInterface>(ClosestTargetInFirstCone)};
-    }
-
-    if (ClosestTarget)
-    {
-        return {true, ClosestTarget, Cast<ITargetInterface>(ClosestTarget)};
+        return FindTargetFromSweepResults(HitResults, StartLocation, DirectionNormal, CameraLocation);
     }
 
     return {}; // Not found
@@ -245,7 +268,7 @@ void UTargetingComponent::UpdateTargetingCamera(float DeltaTime)
 
     const FVector OwnerLocation = OwnerPawn->GetActorLocation();
     FVector TargetLocation = LockedTarget->GetActorLocation();
-    TargetLocation.Z += TargetingPointHeightAdjustment; // Look lower than the center
+    TargetLocation.Z += TargetingPointHeightAdjustment; // Look lower than the target location
 
     const FRotator CurrentRotation = OwnerController->GetControlRotation();
     const FRotator TargetRotation = UKismetMathLibrary::FindLookAtRotation(OwnerLocation, TargetLocation);

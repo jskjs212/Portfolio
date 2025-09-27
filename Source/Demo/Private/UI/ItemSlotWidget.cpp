@@ -185,6 +185,7 @@ void UItemSlotWidget::HandleHovered()
     {
         OnHovered.ExecuteIfBound(ItemSlot);
     }
+
     ItemBorder->SetBrushColor(HoveredBorderColor);
     ItemBorder->SetBrushFromTexture(HoveredBorderImage);
     HoveredBorderTriangleImage->SetVisibility(ESlateVisibility::HitTestInvisible);
