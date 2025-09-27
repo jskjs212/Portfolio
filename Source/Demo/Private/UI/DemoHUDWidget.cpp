@@ -98,7 +98,7 @@ void UDemoHUDWidget::UpdateLockOnPosition()
     bool bProjected = UGameplayStatics::ProjectWorldToScreen(GetOwningPlayer(), TargetLocation, ScreenPosition);
     if (bProjected)
     {
-        const float DPI = UWidgetLayoutLibrary::GetViewportScale(this);
+        const float DPI = UWidgetLayoutLibrary::GetViewportScale(this); // @check - cache
         LockOnMarkerSlot->SetPosition(ScreenPosition / DPI);
     }
 }

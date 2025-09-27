@@ -22,38 +22,23 @@ void UEquipmentComponent::BeginPlay()
 {
     Super::BeginPlay();
 
-    for (const FGameplayTag& EquipmentType : DemoItemTypes::GetEquipmentTypes())
-    {
-        EquippedItems.Add(EquipmentType, nullptr);
-    }
-
-    // @TODO - Config file or data table?
-    EquipDefaultSocketNames.Add(DemoGameplayTags::Item_Weapon, TEXT("MeleeHandSocket"));
-    EquipDefaultSocketNames.Add(DemoGameplayTags::Item_Armor_Shield, TEXT("ShieldHandSocket"));
-
-    checkf(EquippedItems.Num() == DemoItemTypes::GetEquipmentTypes().Num(), TEXT("EquippedItems should have all EquipmentTypes."));
-
+    InitEquipmentComponent();
     BindToItemActionDispatcher();
 }
 
 bool UEquipmentComponent::EquipItem(const FItemSlot& InSlot)
 {
     // Validate and get data
-    FEquipmentValidationData ValidationResult = EquipItem_Validate(InSlot);
+    FEquipmentValidationResult ValidationResult = EquipItem_Validate(InSlot);
     if (!ValidationResult.bIsValid)
     {
         return false; // Log in EquipItem_Validate()
     }
 
-    // Unequip
-    AItem* EquippedItem = *(ValidationResult.EquippedItemPtr);
-    if (EquippedItem)
+    // Handle conflicts
+    if (!EquipItem_HandleConflicts(ValidationResult))
     {
-        if (!UnequipItem(ValidationResult.EquipmentType))
-        {
-            UE_LOG(LogEquipment, Warning, TEXT("EquipItem() - Failed to unequip."));
-            return false;
-        }
+        return false;
     }
 
     // Spawn
@@ -64,18 +49,8 @@ bool UEquipmentComponent::EquipItem(const FItemSlot& InSlot)
         return false;
     }
 
-    // @TODO - Move socketName to FItemData?
-    // Socket name
-    FName* SocketName = EquipDefaultSocketNames.Find(ValidationResult.EquipmentType);
-    if (!SocketName)
-    {
-        UE_LOG(LogEquipment, Error, TEXT("EquipItem() - No default socket name for %s."), *ValidationResult.EquipmentType.ToString());
-        SpawnedItem->Destroy();
-        return false;
-    }
-
     // Attach
-    if (!AttachActor(SpawnedItem, *SocketName))
+    if (!AttachActor(SpawnedItem, ValidationResult.EquipmentType))
     {
         UE_LOG(LogEquipment, Warning, TEXT("EquipItem() - Failed to attach item."));
         SpawnedItem->Destroy();
@@ -84,21 +59,7 @@ bool UEquipmentComponent::EquipItem(const FItemSlot& InSlot)
 
     *(ValidationResult.EquippedItemPtr) = SpawnedItem;
 
-    // @check - PostEquip(), PostUnequip()?
-    // OnEquipped
-    OnEquipmentChanged.Broadcast(ValidationResult.EquipmentType);
-    if (ValidationResult.EquipmentType == DemoGameplayTags::Item_Weapon)
-    {
-        OnWeaponChanged.Broadcast(ValidationResult.ItemType);
-    }
-
-    // Update UI, stats, etc.
-    if (EquipSound)
-    {
-        UGameplayStatics::PlaySound2D(this, EquipSound);
-    }
-
-    // Register active skills
+    EquipItem_PostProcess(ValidationResult);
 
     UE_LOG(LogEquipment, Display, TEXT("Equipped - %s"), *InSlot.RowHandle.RowName.ToString());
     return true;
@@ -139,20 +100,7 @@ bool UEquipmentComponent::UnequipItem(const FGameplayTag EquipmentType)
 
     EquippedItems[EquipmentType] = nullptr;
 
-    // OnUnequipped
-    OnEquipmentChanged.Broadcast(EquipmentType);
-    if (EquipmentType == DemoGameplayTags::Item_Weapon)
-    {
-        OnWeaponChanged.Broadcast(DemoGameplayTags::Item_Weapon_NoWeapon);
-    }
-
-    // Update UI, stats, etc.
-    if (EquipSound)
-    {
-        UGameplayStatics::PlaySound2D(this, EquipSound);
-    }
-
-    // Unregister active skills
+    UnequipItem_PostProcess(EquipmentType);
 
     UE_LOG(LogEquipment, Display, TEXT("Unequipped - %s"), *EquipmentType.ToString());
     return true;
@@ -175,26 +123,13 @@ bool UEquipmentComponent::UnequipAndDropItem(FGameplayTag EquipmentType)
     if (!bDropped) // Unlikely, but just in case
     {
         UE_LOG(LogEquipment, Error, TEXT("UnequipAndDropItem() - Failed to drop item."));
-        AttachActor(EquippedItem, EquipDefaultSocketNames[EquipmentType]);
+        AttachActor(EquippedItem, EquipmentType);
         return false;
     }
 
     EquippedItems[EquipmentType] = nullptr;
 
-    // OnUnequipped
-    OnEquipmentChanged.Broadcast(EquipmentType);
-    if (EquipmentType == DemoGameplayTags::Item_Weapon)
-    {
-        OnWeaponChanged.Broadcast(DemoGameplayTags::Item_Weapon_NoWeapon);
-    }
-
-    // Update UI, stats, etc.
-    if (EquipSound)
-    {
-        UGameplayStatics::PlaySound2D(this, EquipSound);
-    }
-
-    // Unregister active skills
+    UnequipItem_PostProcess(EquipmentType);
 
     UE_LOG(LogEquipment, Display, TEXT("Unequipped - %s"), *EquipmentType.ToString());
     return true;
@@ -213,7 +148,36 @@ void UEquipmentComponent::DestroyAllEquippedItems()
     }
 }
 
-FEquipmentValidationData UEquipmentComponent::EquipItem_Validate(const FItemSlot& InSlot)
+void UEquipmentComponent::InitEquipmentComponent()
+{
+    for (const FGameplayTag& EquipmentType : DemoItemTypes::GetEquipmentTypes())
+    {
+        EquippedItems.Add(EquipmentType, nullptr);
+    }
+
+    checkf(EquippedItems.Num() == DemoItemTypes::GetEquipmentTypes().Num(), TEXT("EquippedItems should have all EquipmentTypes."));
+
+    // @TODO - Config file or data table?
+    EquipDefaultSocketNames.Add(DemoGameplayTags::Item_Weapon, TEXT("MeleeHandSocket"));
+    EquipDefaultSocketNames.Add(DemoGameplayTags::Item_Armor_Shield, TEXT("ShieldHandSocket"));
+}
+
+void UEquipmentComponent::BindToItemActionDispatcher()
+{
+    if (APawn* Pawn = Cast<APawn>(GetOwner()))
+    {
+        if (ADemoPlayerController* DemoPlayerController = Pawn->GetController<ADemoPlayerController>())
+        {
+            if (UItemActionDispatcher* ItemActionDispatcher = DemoPlayerController->GetItemActionDispatcher())
+            {
+                ItemActionDispatcher->OnUnequipItemRequested.BindUObject(this, &ThisClass::UnequipItem);
+                ItemActionDispatcher->OnUnequipAndDropItemRequested.BindUObject(this, &ThisClass::UnequipAndDropItem);
+            }
+        }
+    }
+}
+
+FEquipmentValidationResult UEquipmentComponent::EquipItem_Validate(const FItemSlot& InSlot)
 {
     if (!InSlot.IsValid())
     {
@@ -221,7 +185,7 @@ FEquipmentValidationData UEquipmentComponent::EquipItem_Validate(const FItemSlot
         return {};
     }
 
-    FItemDataBase* ItemData = InSlot.RowHandle.GetRow<FItemDataBase>(TEXT("UEquipmentComponent::EquipItem_Validate"));
+    const FItemDataBase* ItemData = InSlot.RowHandle.GetRow<FItemDataBase>(TEXT("UEquipmentComponent::EquipItem_Validate"));
     if (!ItemData)
     {
         return {}; // Log in GetRow()
@@ -243,13 +207,53 @@ FEquipmentValidationData UEquipmentComponent::EquipItem_Validate(const FItemSlot
         return {};
     }
 
-    FEquipmentValidationData Result;
+    FEquipmentValidationResult Result;
     Result.bIsValid = true;
     Result.ItemType = ItemType;
     Result.EquipmentType = EquipmentType;
     Result.EquippedItemPtr = EquippedItemPtr;
 
     return Result;
+}
+
+bool UEquipmentComponent::EquipItem_HandleConflicts(const FEquipmentValidationResult& ValidationResult)
+{
+    // Unequip already equipped item of the same type
+    const AItem* EquippedItem = *(ValidationResult.EquippedItemPtr);
+    if (EquippedItem)
+    {
+        if (!UnequipItem(ValidationResult.EquipmentType))
+        {
+            UE_LOG(LogEquipment, Warning, TEXT("EquipItem() - Failed to unequip."));
+            return false;
+        }
+    }
+
+    // Unequip shield when two-handing
+    if (ValidationResult.ItemType.MatchesTag(DemoGameplayTags::Item_Weapon_Melee_TwoHanded))
+    {
+        if (GetEquippedItem(DemoGameplayTags::Item_Armor_Shield))
+        {
+            if (!UnequipItem(DemoGameplayTags::Item_Armor_Shield))
+            {
+                UE_LOG(LogEquipment, Warning, TEXT("EquipItem() - Failed to unequip shield."));
+                return false;
+            }
+        }
+    }
+
+    // Can't equip shield when two-handing
+    if (ValidationResult.EquipmentType == DemoGameplayTags::Item_Armor_Shield)
+    {
+        if (CurrentWeaponType.MatchesTag(DemoGameplayTags::Item_Weapon_Melee_TwoHanded))
+        {
+            // @misc - In-game notification?
+            UE_LOG(LogEquipment, Display, TEXT("EquipItem() - Can't equip shield when two-handing."));
+            return false;
+        }
+    }
+
+    return true; // Can equip
 }
 
 AItem* UEquipmentComponent::EquipItem_SpawnItem(const FItemSlot& InSlot) const
@@ -280,15 +284,24 @@ AItem* UEquipmentComponent::EquipItem_SpawnItem(const FItemSlot& InSlot) const
     return SpawnedItem;
 }
 
-bool UEquipmentComponent::AttachActor(AActor* ActorToAttach, const FName SocketName) const
+bool UEquipmentComponent::AttachActor(AActor* ActorToAttach, FGameplayTag EquipmentType) const
 {
     ACharacter* OwnerCharacter = GetOwner<ACharacter>();
-    if (!ActorToAttach || !OwnerCharacter)
+    USkeletalMeshComponent* OwnerMesh = OwnerCharacter ? OwnerCharacter->GetMesh() : nullptr;
+    if (!ActorToAttach || !OwnerMesh)
     {
         return false;
     }
 
-    USkeletalMeshComponent* OwnerMesh = OwnerCharacter->GetMesh();
+    // @TODO - Move socketName to FItemData?
+    // Socket name
+    const FName* SocketNamePtr = EquipDefaultSocketNames.Find(EquipmentType);
+    if (!SocketNamePtr)
+    {
+        UE_LOG(LogEquipment, Error, TEXT("EquipItem() - No default socket name for %s."), *EquipmentType.ToString());
+        return false;
+    }
+    const FName SocketName = *SocketNamePtr;
 
 #if WITH_EDITOR
     if (!OwnerMesh->DoesSocketExist(SocketName))
@@ -308,19 +321,42 @@ bool UEquipmentComponent::AttachActor(AActor* ActorToAttach, const FName SocketN
     return true;
 }
 
-void UEquipmentComponent::BindToItemActionDispatcher()
+void UEquipmentComponent::EquipItem_PostProcess(const FEquipmentValidationResult& ValidationResult)
 {
-    if (APawn* Pawn = Cast<APawn>(GetOwner()))
+    CurrentWeaponType = ValidationResult.ItemType;
+
+    // OnEquipped: Update UI, stats, etc.
+    OnEquipmentChanged.Broadcast(ValidationResult.EquipmentType);
+    if (ValidationResult.EquipmentType == DemoGameplayTags::Item_Weapon)
     {
-        if (ADemoPlayerController* DemoPlayerController = Pawn->GetController<ADemoPlayerController>())
-        {
-            if (UItemActionDispatcher* ItemActionDispatcher = DemoPlayerController->GetItemActionDispatcher())
-            {
-                ItemActionDispatcher->OnUnequipItemRequested.BindUObject(this, &ThisClass::UnequipItem);
-                ItemActionDispatcher->OnUnequipAndDropItemRequested.BindUObject(this, &ThisClass::UnequipAndDropItem);
-            }
-        }
+        OnWeaponChanged.Broadcast(ValidationResult.ItemType);
     }
+
+    if (EquipSound)
+    {
+        UGameplayStatics::PlaySound2D(this, EquipSound);
+    }
+
+    // Register active skills
+}
+
+void UEquipmentComponent::UnequipItem_PostProcess(FGameplayTag EquipmentType)
+{
+    CurrentWeaponType = DemoGameplayTags::Item_Weapon_NoWeapon;
+
+    // OnUnequipped: Update UI, stats, etc.
+    OnEquipmentChanged.Broadcast(EquipmentType);
+    if (EquipmentType == DemoGameplayTags::Item_Weapon)
+    {
+        OnWeaponChanged.Broadcast(DemoGameplayTags::Item_Weapon_NoWeapon);
+    }
+
+    if (EquipSound)
+    {
+        UGameplayStatics::PlaySound2D(this, EquipSound);
+    }
+
+    // Unregister active skills
 }
 
 AItem* UEquipmentComponent::GetEquippedItem(FGameplayTag EquipmentType) const

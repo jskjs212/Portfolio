@@ -96,6 +96,8 @@ public:
     //        Inventory helper functions
     ////////////////////////////////////////////////////////
 private:
+    void InitInventoryComponent();
+
     // Set initial max slot sizes, and fill with empty slots if bFixSlotSizeAndExposeEmptySlots == true.
     void InitMaxSlots();
 

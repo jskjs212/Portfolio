@@ -1,25 +1,15 @@
 ## Bugs
 - UDemoHUDWidget::UpdateLockOnPosition: 약간 오른쪽에 표시됨
-- ItemSlot Drag시 HoveredImage
 
 ## TODO
-- Check init & setup
-> Init: One-time, internal setup only\
-> Setup: Might be repeated and involve external dependencies
-
 ### Animation
 - Assets needed: Pivot, Idle, Walk, Run, Sprint, Jump, HeavyAttack, Dodge, Hit, Death, Draw/Sheath
-
-### Common
-- In-game notifications: Low health, out of stamina
-- Interact sweep start from character?
 
 ### Combat
 CombatComponent:
 - IsCombatEnabled
 - Dodge, Block
 - 공격 중 장비 변경 금지
-- Unequip shield when two-handing
 - 타격감
 
 Attack:

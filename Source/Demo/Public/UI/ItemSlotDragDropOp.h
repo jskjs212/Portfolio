@@ -23,7 +23,7 @@ public:
 
     FORCEINLINE const FItemSlot& GetItemSlot() const { return ItemSlot; }
 
-    FORCEINLINE void Setup(int32 InIndex, FGameplayTag InSourceTag, const FItemSlot& InSlot)
+    FORCEINLINE void SetItemSlotData(int32 InIndex, FGameplayTag InSourceTag, const FItemSlot& InSlot)
     {
         Index = InIndex;
         SourceTag = InSourceTag;

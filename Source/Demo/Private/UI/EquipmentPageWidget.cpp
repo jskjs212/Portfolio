@@ -91,7 +91,7 @@ void UEquipmentPageWidget::InitContextMenu()
 
     // Create context menu
     ContextMenuWidget = CreateWidget<UContextMenuWidget>(this, ContextMenuWidgetClass);
-    ContextMenuWidget->SetupActions(Actions);
+    ContextMenuWidget->InitActions(Actions);
     ContextMenuWidget->SetVisibility(ESlateVisibility::Collapsed);
     ContextMenuWidget->AddToViewport(3);
 

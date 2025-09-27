@@ -108,7 +108,7 @@ void UItemSlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, const FP
             DraggedItemSlotWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
             DraggedItemSlotWidget->SetDesiredSizeInViewport(DesiredSize);
             DragDropOp->DefaultDragVisual = DraggedItemSlotWidget;
-            DragDropOp->Setup(Index, SourceTag, ItemSlot);
+            DragDropOp->SetItemSlotData(Index, SourceTag, ItemSlot);
             OutOperation = DragDropOp;
         }
         else
@@ -140,6 +140,18 @@ bool UItemSlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropE
     }
 
     return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
+}
+
+void UItemSlotWidget::NativeOnDragEnter(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
+{
+    Super::NativeOnDragEnter(InGeometry, InDragDropEvent, InOperation);
+    HandleHovered();
+}
+
+void UItemSlotWidget::NativeOnDragLeave(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
+{
+    Super::NativeOnDragLeave(InDragDropEvent, InOperation);
+    HandleUnhovered();
 }
 
 void UItemSlotWidget::NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
@@ -178,7 +190,7 @@ void UItemSlotWidget::HandleHovered()
 {
     if (HoveredSound)
     {
-        UGameplayStatics::PlaySound2D(this, HoveredSound, 0.5f);
+        UGameplayStatics::PlaySound2D(this, HoveredSound, 0.3f);
     }
 
     if (ItemSlot.IsValid())

@@ -1,4 +1,8 @@
 # Memo for docs for later
+## Common
+- Init: One-time, internal setup only
+- Setup: Might be repeated and involve external dependencies
+
 ## Character
 BaseCharacter <- PlayerCharacter, AICharacter\
 AICharacter <- Enemy, NPC로 상속할지, 하나에서 모두 처리할지 고민\

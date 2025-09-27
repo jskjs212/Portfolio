@@ -23,16 +23,7 @@ void UInventoryComponent::BeginPlay()
 {
     Super::BeginPlay();
 
-    // Inventory setup for fixed item categories.
-    for (const FGameplayTag& ItemCategory : DemoItemTypes::GetItemCategories())
-    {
-        OwnedItems.Add(ItemCategory, FItemArray{});
-        MaxSlotSizes.Add(ItemCategory, 0);
-    }
-
-    checkf(OwnedItems.Num() == DemoItemTypes::GetItemCategories().Num(), TEXT("OwnedItems should have all ItemCategories."));
-    checkf(MaxSlotSizes.Num() == DemoItemTypes::GetItemCategories().Num(), TEXT("MaxSlotSizes should have all ItemCategories."));
-
+    InitInventoryComponent();
     InitMaxSlots();
     BindToItemActionDispatcher();
 }
@@ -199,6 +190,19 @@ bool UInventoryComponent::AddMaxSlotSize(FGameplayTag ItemCategory, const int32 
     }
 
     return true;
+}
+
+void UInventoryComponent::InitInventoryComponent()
+{
+    // Inventory setup for fixed item categories.
+    for (const FGameplayTag& ItemCategory : DemoItemTypes::GetItemCategories())
+    {
+        OwnedItems.Add(ItemCategory, FItemArray{});
+        MaxSlotSizes.Add(ItemCategory, 0);
+    }
+
+    checkf(OwnedItems.Num() == DemoItemTypes::GetItemCategories().Num(), TEXT("OwnedItems should have all ItemCategories."));
+    checkf(MaxSlotSizes.Num() == DemoItemTypes::GetItemCategories().Num(), TEXT("MaxSlotSizes should have all ItemCategories."));
 }
 
 void UInventoryComponent::InitMaxSlots()

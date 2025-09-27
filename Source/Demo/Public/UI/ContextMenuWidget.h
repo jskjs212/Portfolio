@@ -24,8 +24,8 @@ struct FContextAction
 
 /**
  * Context menu widget.
- * SetupActions() creates buttons and binds hover events.
- * You should bind click events to the buttons after SetupActions().
+ * InitActions() creates buttons and binds hover events.
+ * You should bind click events to the buttons after InitActions().
  */
 UCLASS()
 class DEMO_API UContextMenuWidget : public UUserWidget
@@ -44,7 +44,7 @@ protected:
     //        UI functions
     ////////////////////////////////////////////////////////
 public:
-    void SetupActions(const TArray<FContextAction>& InActions);
+    void InitActions(const TArray<FContextAction>& InActions);
 
     void ShowContextMenu();
 

@@ -16,7 +16,7 @@ class USoundBase;
 /**
  * Used to return validated data from internal functions.
  */
-struct FEquipmentValidationData
+struct FEquipmentValidationResult
 {
     bool bIsValid{false};
 
@@ -79,17 +79,26 @@ public:
     void DestroyAllEquippedItems();
 
 private:
+    void InitEquipmentComponent();
+
+    // Bind equipment functions to UI's item action dispatcher.
+    void BindToItemActionDispatcher();
+
     // @return .bIsValid is true if valid. If false, data is not valid.
-    FEquipmentValidationData EquipItem_Validate(const FItemSlot& InSlot);
+    FEquipmentValidationResult EquipItem_Validate(const FItemSlot& InSlot);
+
+    // Check equipped items and unequip if necessary to equip the new item.
+    bool EquipItem_HandleConflicts(const FEquipmentValidationResult& ValidationResult);
 
     // @return nullptr if failed
     AItem* EquipItem_SpawnItem(const FItemSlot& InSlot) const;
 
     // @return true if successfully attached
-    bool AttachActor(AActor* ActorToAttach, FName SocketName) const;
+    bool AttachActor(AActor* ActorToAttach, FGameplayTag EquipmentType) const;
 
-    // Bind equipment functions to UI's item action dispatcher.
-    void BindToItemActionDispatcher();
+    void EquipItem_PostProcess(const FEquipmentValidationResult& ValidationResult);
+
+    void UnequipItem_PostProcess(FGameplayTag EquipmentType);
 
     ////////////////////////////////////////////////////////
     //        Get & set
@@ -109,6 +118,9 @@ public:
     TObjectPtr<USoundBase> EquipSound;
 
 private:
+    // Cache ItemType of weapon
+    FGameplayTag CurrentWeaponType;
+
     // nullptr = not equipped
     UPROPERTY(VisibleAnywhere, Category = "Item", meta = (Categories = "Item"))
     TMap<FGameplayTag, TObjectPtr<AItem>> EquippedItems;
