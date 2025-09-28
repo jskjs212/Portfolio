@@ -2,6 +2,7 @@
 
 #include "Components/EquipmentComponent.h"
 #include "Components/InventoryComponent.h"
+#include "Components/StateManagerComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "DemoTypes/ItemTypes.h"
 #include "DemoTypes/TableRowBases.h"
@@ -67,6 +68,14 @@ bool UEquipmentComponent::EquipItem(const FItemSlot& InSlot)
 
 bool UEquipmentComponent::UnequipItem(const FGameplayTag EquipmentType)
 {
+    if (const UStateManagerComponent* StateManager = GetStateManager())
+    {
+        if (!StateManager->CanChangeEquipment())
+        {
+            return false;
+        }
+    }
+
     AItem* EquippedItem = GetEquippedItem(EquipmentType);
     if (!EquippedItem)
     {
@@ -75,19 +84,9 @@ bool UEquipmentComponent::UnequipItem(const FGameplayTag EquipmentType)
     }
 
     // Add to inventory if possible
-    UInventoryComponent* InventoryComp = GetOwner()->FindComponentByClass<UInventoryComponent>();
-    if (InventoryComp)
+    if (!UnequipItem_AddToInventory(EquippedItem->GetItemSlot()))
     {
-        FItemActionRequest Request;
-        Request.Slot = EquippedItem->GetItemSlot();
-        Request.Quantity = 1;
-
-        if (InventoryComp->AddItem(Request) <= 0)
-        {
-            // @misc - In-game notification?
-            UE_LOG(LogEquipment, Warning, TEXT("UnequipItem() - Failed to add item to inventory."));
-            return false;
-        }
+        return false; // Log in UnequipItem_AddToInventory()
     }
 
     // Destroy
@@ -106,8 +105,16 @@ bool UEquipmentComponent::UnequipItem(const FGameplayTag EquipmentType)
     return true;
 }
 
-bool UEquipmentComponent::UnequipAndDropItem(FGameplayTag EquipmentType)
+bool UEquipmentComponent::UnequipAndDropItem(const FGameplayTag EquipmentType)
 {
+    if (const UStateManagerComponent* StateManager = GetStateManager())
+    {
+        if (!StateManager->CanChangeEquipment())
+        {
+            return false;
+        }
+    }
+
     AItem* EquippedItem = GetEquippedItem(EquipmentType);
     if (!EquippedItem)
     {
@@ -179,6 +186,14 @@ void UEquipmentComponent::BindToItemActionDispatcher()
 
 FEquipmentValidationResult UEquipmentComponent::EquipItem_Validate(const FItemSlot& InSlot)
 {
+    if (const UStateManagerComponent* StateManager = GetStateManager())
+    {
+        if (!StateManager->CanChangeEquipment())
+        {
+            return {};
+        }
+    }
+
     if (!InSlot.IsValid())
     {
         UE_LOG(LogEquipment, Warning, TEXT("EquipItem() - Slot is not valid."));
@@ -340,6 +355,29 @@ void UEquipmentComponent::EquipItem_PostProcess(const FEquipmentValidationResult
     // Register active skills
 }
 
+bool UEquipmentComponent::UnequipItem_AddToInventory(const FItemSlot& InSlot)
+{
+    UInventoryComponent* InventoryComponent = GetInventoryComponent();
+    if (!InventoryComponent)
+    {
+        UE_LOG(LogEquipment, Error, TEXT("UnequipItem() - Can't unequip without InventoryComponent."));
+        return false;
+    }
+
+    FItemActionRequest Request;
+    Request.Slot = InSlot;
+    Request.Quantity = 1;
+
+    if (InventoryComponent->AddItem(Request) <= 0)
+    {
+        // @misc - In-game notification?
+        UE_LOG(LogEquipment, Warning, TEXT("UnequipItem() - Failed to add item to inventory."));
+        return false;
+    }
+
+    return true;
+}
+
 void UEquipmentComponent::UnequipItem_PostProcess(FGameplayTag EquipmentType)
 {
     CurrentWeaponType = DemoGameplayTags::Item_Weapon_NoWeapon;
@@ -366,4 +404,28 @@ AItem* UEquipmentComponent::GetEquippedItem(FGameplayTag EquipmentType) const
         return *EquippedItemPtr;
     }
     return nullptr;
+}
+
+UInventoryComponent* UEquipmentComponent::GetInventoryComponent()
+{
+    if (!CachedInventoryComponent.IsValid())
+    {
+        if (AActor* OwnerActor = GetOwner())
+        {
+            CachedInventoryComponent = OwnerActor->FindComponentByClass<UInventoryComponent>();
+        }
+    }
+    return CachedInventoryComponent.Get();
+}
+
+const UStateManagerComponent* UEquipmentComponent::GetStateManager()
+{
+    if (!CachedStateManager.IsValid())
+    {
+        if (AActor* OwnerActor = GetOwner())
+        {
+            CachedStateManager = OwnerActor->FindComponentByClass<UStateManagerComponent>();
+        }
+    }
+    return CachedStateManager.Get();
 }

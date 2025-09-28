@@ -11,7 +11,9 @@
 DECLARE_LOG_CATEGORY_EXTERN(LogEquipment, Log, All);
 
 class AItem;
+class UInventoryComponent;
 class USoundBase;
+class UStateManagerComponent;
 
 /**
  * Used to return validated data from internal functions.
@@ -34,6 +36,8 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnEquipmentChanged, FGameplayTag /* ItemTyp
  * Fixed EquipmentTypes and SocketNames:
  *   Item.Weapon = MeleeHandSocket
  *   Item.Armor.Shield = ShieldHandSocket
+ * @Dependency - UnequipItem() needs InventoryComponent.
+ * @Dependency - Equip & unequip functions query StateManagerComponent if it exists.
  */
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class DEMO_API UEquipmentComponent : public UActorComponent
@@ -98,6 +102,8 @@ private:
 
     void EquipItem_PostProcess(const FEquipmentValidationResult& ValidationResult);
 
+    bool UnequipItem_AddToInventory(const FItemSlot& InSlot);
+
     void UnequipItem_PostProcess(FGameplayTag EquipmentType);
 
     ////////////////////////////////////////////////////////
@@ -109,6 +115,10 @@ public:
 
     const TMap<FGameplayTag, TObjectPtr<AItem>>& GetAllEquippedItems() const { return EquippedItems; }
 
+private:
+    UInventoryComponent* GetInventoryComponent();
+    const UStateManagerComponent* GetStateManager();
+
     ////////////////////////////////////////////////////////
     //        Variables
     ////////////////////////////////////////////////////////
@@ -118,13 +128,16 @@ public:
     TObjectPtr<USoundBase> EquipSound;
 
 private:
-    // Cache ItemType of weapon
-    FGameplayTag CurrentWeaponType;
-
     // nullptr = not equipped
     UPROPERTY(VisibleAnywhere, Category = "Item", meta = (Categories = "Item"))
     TMap<FGameplayTag, TObjectPtr<AItem>> EquippedItems;
 
     UPROPERTY(EditDefaultsOnly, Category = "Item", meta = (Categories = "Item"))
     TMap<FGameplayTag, FName> EquipDefaultSocketNames;
+
+    // Cache ItemType of weapon
+    FGameplayTag CurrentWeaponType;
+
+    TWeakObjectPtr<UInventoryComponent> CachedInventoryComponent;
+    TWeakObjectPtr<const UStateManagerComponent> CachedStateManager;
 };

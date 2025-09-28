@@ -7,9 +7,10 @@
 
 ### Combat
 CombatComponent:
+- Dodge, Block action
+- Dodge: i-Frames
+- Block: Block mechanics
 - IsCombatEnabled
-- Dodge, Block
-- 공격 중 장비 변경 금지
 - 타격감
 
 Attack:
@@ -25,7 +26,6 @@ UI:
 - Focus: Page 밖의 Background 클릭 시 Page 단축키 안 먹힘
 - Damage number
 - HUD에 tab키 안내
-- DragDropOp: ItemSlotDragSource? What happens if drag from Inventory to Equipment?
 - WBP_TabButton: Button style
 - Cache RowHandle in ItemInfo
 
@@ -126,7 +126,7 @@ AnimInstance: MultiThreadUpdate
 Others: Multi-threading, replication not considered.
 
 ### 정리
-@TODO, @check, @misc, @hardcoded, @TEST, @debug 등 주석 확인 및 정리하기\
+@TODO, @check, @misc, @hardcoded, @TEST, @debug, @Dependency 등 주석 확인 및 정리하기\
 테스트 코드 제거하기
 
 @debug -> 중요한 곳은 알림 메시지 등 게임 로직으로 처리하고, 나머지는 LogCategory 구분하여 중요한 로그만 남기기

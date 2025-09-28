@@ -61,7 +61,9 @@ public:
 
     FORCEINLINE bool IsInAction(FGameplayTag Action) const { return CurrentAction == Action; }
 
-    FORCEINLINE bool CanMoveInCurrentState() const;
+    bool CanMoveInCurrentState() const;
+
+    bool CanChangeEquipment() const;
 
     // Determine if the current state allows performing the NewAction.
     // Only state and action are considered, other conditions like character's immune state are not.

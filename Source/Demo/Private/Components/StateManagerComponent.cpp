@@ -134,13 +134,23 @@ void UStateManagerComponent::SetupAllowedTransitionsOnlyOnce()
 
 bool UStateManagerComponent::CanMoveInCurrentState() const
 {
-    const FGameplayTagContainer MovementBlockingStates = FGameplayTagContainer::CreateFromArray(TArray<FGameplayTag>{
+    static const FGameplayTagContainer MovementBlockingStates = FGameplayTagContainer::CreateFromArray(TArray<FGameplayTag>{
         DemoGameplayTags::State_Dead,
             DemoGameplayTags::State_Disabled,
             DemoGameplayTags::State_Attack,
             DemoGameplayTags::State_Dodge
     });
     return !CurrentState.MatchesAnyExact(MovementBlockingStates);
+}
+
+bool UStateManagerComponent::CanChangeEquipment() const
+{
+    static const FGameplayTagContainer ChangeEquipmentBlockingStates = FGameplayTagContainer::CreateFromArray(TArray<FGameplayTag>{
+        DemoGameplayTags::State_Dead,
+            DemoGameplayTags::State_Disabled,
+            DemoGameplayTags::State_Attack
+    });
+    return !CurrentState.MatchesAnyExact(ChangeEquipmentBlockingStates);
 }
 
 bool UStateManagerComponent::CanPerformAction(const FGameplayTag NewAction) const

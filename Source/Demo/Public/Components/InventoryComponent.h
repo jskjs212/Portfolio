@@ -11,6 +11,9 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogInventory, Log, All);
 
+class UEquipmentComponent;
+class UStatsComponent;
+
 /**
  * Used to return validated data from internal functions.
  */
@@ -40,6 +43,8 @@ struct FInventoryValidationResult
  *
  * bAllowMultipleSlots is true by default.
  * -> Same items can take multiple slots.
+ *
+ * @Dependency - Some ItemTypes in UseItem() need EquipmentComponent and StatsComponent.
  */
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class DEMO_API UInventoryComponent : public UActorComponent
@@ -158,6 +163,9 @@ private:
     // @return Actually used quantity, -1 if failed.
     int32 UseItem_Internal(const FItemSlot& InSlot, FGameplayTag ItemType, int32 Quantity);
 
+    // @return true if successfully equipped.
+    bool UseItem_Equip(const FItemSlot& InSlot);
+
     // @return Actually used quantity, -1 if failed.
     int32 UseItem_Consume(const FItemSlot& InSlot, FGameplayTag ItemType, int32 Quantity);
 
@@ -169,6 +177,10 @@ private:
     ////////////////////////////////////////////////////////
 public:
     const TMap<FGameplayTag, FItemArray>& GetOwnedItems() const { return OwnedItems; }
+
+private:
+    UEquipmentComponent* GetEquipmentComponent();
+    UStatsComponent* GetStatsComponent();
 
     ////////////////////////////////////////////////////////
     //        Variables - Inventory
@@ -195,4 +207,7 @@ private:
 
     UPROPERTY(EditDefaultsOnly, Category = "Inventory")
     int32 MaxAllowedSlotSize{1000};
+
+    TWeakObjectPtr<UEquipmentComponent> CachedEquipmentComponent;
+    TWeakObjectPtr<UStatsComponent>    CachedStatsComponent;
 };

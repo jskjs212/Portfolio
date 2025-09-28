@@ -2,7 +2,7 @@
 
 #include "Components/InventoryComponent.h"
 #include "Components/EquipmentComponent.h"
-#include "Components/PrimitiveComponent.h"
+//#include "Components/PrimitiveComponent.h"
 #include "Components/StatsComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "DemoTypes/ItemTypes.h"
@@ -513,10 +513,7 @@ int32 UInventoryComponent::UseItem_Internal(const FItemSlot& InSlot, const FGame
     FGameplayTag EquipmentType = DemoItemTypes::GetEquipmentType(ItemType);
     if (EquipmentType.IsValid())
     {
-        // Equip item
-        UEquipmentComponent* EquipmentComp = GetOwner()->FindComponentByClass<UEquipmentComponent>();
-        checkf(EquipmentComp, TEXT("UseItem() - Equip action was requested, but EquipmentComponent is not found."));
-        return EquipmentComp->EquipItem(InSlot) ? 1 : -1;
+        return UseItem_Equip(InSlot) ? 1 : -1;
     }
     // Consumable types
     else if (ItemType.MatchesTag(DemoGameplayTags::Item_Consumable))
@@ -526,6 +523,18 @@ int32 UInventoryComponent::UseItem_Internal(const FItemSlot& InSlot, const FGame
 
     UE_LOG(LogInventory, Error, TEXT("UseItem() - ItemType %s is not supported."), *ItemType.ToString());
     return -1;
+}
+
+bool UInventoryComponent::UseItem_Equip(const FItemSlot& InSlot)
+{
+    UEquipmentComponent* EquipmentComponent = GetEquipmentComponent();
+    if (!EquipmentComponent)
+    {
+        UE_LOG(LogInventory, Error, TEXT("UseItem() - Can't equip item without EquipmentComponent."));
+        return false;
+    }
+
+    return EquipmentComponent->EquipItem(InSlot);
 }
 
 int32 UInventoryComponent::UseItem_Consume(const FItemSlot& InSlot, const FGameplayTag ItemType, const int32 Quantity)
@@ -552,15 +561,45 @@ int32 UInventoryComponent::UseItem_Consume(const FItemSlot& InSlot, const FGamep
 
 int32 UInventoryComponent::ConsumeFood(const FConsumableData* ConsumableData, const int32 Quantity)
 {
-    UStatsComponent* StatsComp = GetOwner()->FindComponentByClass<UStatsComponent>();
-    checkf(StatsComp, TEXT("ConsumeFood() - StatsComponent is not found."));
+    UStatsComponent* StatsComponent = GetStatsComponent();
+    if (!StatsComponent)
+    {
+        UE_LOG(LogInventory, Error, TEXT("ConsumeFood() - Can't consume food without StatsComponent."));
+        return -1;
+    }
 
     // Just heal for now.
-    // If health is 50/100 and HealAmount is 30, use 2 to fully heal.
-    const float CurrentHealth = StatsComp->GetCurrentHealth();
-    const float MaxHealth = StatsComp->GetMaxHealth();
+    // If health is 50/100 and HealAmount is 30, use 2 to heal 50.
+    const float CurrentHealth = StatsComponent->GetCurrentHealth();
+    const float MaxHealth = StatsComponent->GetMaxHealth();
     const int32 ToUse = FMath::Min(Quantity, FMath::CeilToInt32((MaxHealth - CurrentHealth) / ConsumableData->HealAmount));
 
-    StatsComp->Heal(ToUse * ConsumableData->HealAmount);
+    StatsComponent->Heal(ConsumableData->HealAmount * ToUse);
     return ToUse;
+}
+
+UEquipmentComponent* UInventoryComponent::GetEquipmentComponent()
+{
+    UE_LOG(LogInventory, Warning, TEXT("GetEquipmentComponent() - 1"));
+    if (!CachedEquipmentComponent.IsValid())
+    {
+        UE_LOG(LogInventory, Warning, TEXT("GetEquipmentComponent() - 2"));
+        if (AActor* OwnerActor = GetOwner())
+        {
+            CachedEquipmentComponent = OwnerActor->FindComponentByClass<UEquipmentComponent>();
+        }
+    }
+    return CachedEquipmentComponent.Get();
+}
+
+UStatsComponent* UInventoryComponent::GetStatsComponent()
+{
+    if (!CachedStatsComponent.IsValid())
+    {
+        if (AActor* OwnerActor = GetOwner())
+        {
+            CachedStatsComponent = OwnerActor->FindComponentByClass<UStatsComponent>();
+        }
+    }
+    return CachedStatsComponent.Get();
 }
