@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "DemoTypes/AttackTypes.h"
 #include "GameplayTagContainer.h"
 #include "CombatInterface.generated.h"
 
@@ -21,9 +22,15 @@ class DEMO_API ICombatInterface
     GENERATED_BODY()
 
 public:
+    /* Functions */
+
     // @param bIgnoreState: If true, ignore current state.
     // @return Duration of the action's AnimMontage, or 0.f if failed to perform action.
     virtual float PerformAction(FGameplayTag InAction, bool bIgnoreCurrentState, int32 MontageIndex, bool bUseRandomIndex = false) PURE_VIRTUAL(ICombatInterface::PerformAction, return 0.f;);
+
+    virtual void SetAttackCollisionEnabled(EAttackCollisionType InType, bool bEnabled) PURE_VIRTUAL(ICombatInterface::SetAttackCollisionEnabled);
+
+    /* Get & set */
 
     virtual bool IsInAction(FGameplayTag InAction) const PURE_VIRTUAL(ICombatInterface::IsInAction, return false;);
 

@@ -3,6 +3,7 @@
 #include "Character/PlayerCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/CollisionComponent.h"
 #include "Components/CombatComponent.h"
 #include "Components/EquipmentComponent.h"
 #include "Components/InventoryComponent.h"
@@ -438,6 +439,10 @@ void APlayerCharacter::Test1_Implementation()
     UE_LOG(LogTemp, Warning, TEXT("APlayerCharacter::Test1() called!"));
 
     EquipmentComponent->EquipItem(TestItemSlot);
+    FAttackCollisionDefinition TestCollisionDef;
+    TestCollisionDef.CollisionType = EAttackCollisionType::MainWeapon;
+    TestCollisionDef.Segments.Add(FAttackCollisionSegment{});
+    CollisionComponent->AddAttackCollisionDefinition(TestCollisionDef);
 }
 
 void APlayerCharacter::Test2_Implementation()
@@ -446,4 +451,5 @@ void APlayerCharacter::Test2_Implementation()
 
     EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Weapon);
     EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Armor_Shield);
+    CollisionComponent->RemoveAttackCollisionDefinition(EAttackCollisionType::MainWeapon);
 }

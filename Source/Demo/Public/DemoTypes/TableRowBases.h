@@ -22,28 +22,28 @@ struct FItemDataBase : public FTableRowBase
 {
     GENERATED_BODY()
 
-    UPROPERTY(EditDefaultsOnly)
+    UPROPERTY(EditAnywhere)
     FName Name;
 
-    UPROPERTY(EditDefaultsOnly, meta = (Categories = "Item"))
+    UPROPERTY(EditAnywhere, meta = (Categories = "Item"))
     FGameplayTag ItemType;
 
-    UPROPERTY(EditDefaultsOnly, meta = (MultiLine = "true"))
+    UPROPERTY(EditAnywhere, meta = (MultiLine = "true"))
     FText Description;
 
-    UPROPERTY(EditDefaultsOnly)
+    UPROPERTY(EditAnywhere, meta = (ClampMin = "1"))
     int32 MaxStackSize{1};
 
-    UPROPERTY(EditDefaultsOnly)
+    UPROPERTY(EditAnywhere)
     TObjectPtr<UTexture2D> Icon;
 
-    UPROPERTY(EditDefaultsOnly)
+    UPROPERTY(EditAnywhere)
     TObjectPtr<UStaticMesh> StaticMesh;
 
-    UPROPERTY(EditDefaultsOnly)
+    UPROPERTY(EditAnywhere)
     TObjectPtr<USkeletalMesh> SkeletalMesh;
 
-    //UPROPERTY(EditDefaultsOnly)
+    //UPROPERTY(EditAnywhere)
     //TMap<FGameplayTag, float> Attributes;
     //
     //// @return { bFound, Value }
@@ -64,6 +64,11 @@ struct FItemDataBase : public FTableRowBase
             Context.AddError(FText::FromString(TEXT("Name is None or MaxStackSize < 1.")));
             return EDataValidationResult::Invalid;
         }
+        if (!Icon)
+        {
+            Context.AddError(FText::FromString(TEXT("Icon is not valid.")));
+            return EDataValidationResult::Invalid;
+        }
         if (!StaticMesh && !SkeletalMesh)
         {
             Context.AddError(FText::FromString(TEXT("Mesh is not valid.")));
@@ -81,7 +86,7 @@ struct FWeaponData : public FItemDataBase
 {
     GENERATED_BODY()
 
-    UPROPERTY(EditDefaultsOnly)
+    UPROPERTY(EditAnywhere)
     float Damage{10.f};
 
 #if WITH_EDITOR
@@ -105,7 +110,7 @@ USTRUCT(BlueprintType)
 struct FArmorData : public FItemDataBase
 {
     GENERATED_BODY()
-    UPROPERTY(EditDefaultsOnly)
+    UPROPERTY(EditAnywhere)
     float Armor{10.f};
 
 #if WITH_EDITOR
@@ -130,7 +135,7 @@ struct FConsumableData : public FItemDataBase
 {
     GENERATED_BODY()
 
-    UPROPERTY(EditDefaultsOnly)
+    UPROPERTY(EditAnywhere)
     float HealAmount{10.f};
 
 #if WITH_EDITOR

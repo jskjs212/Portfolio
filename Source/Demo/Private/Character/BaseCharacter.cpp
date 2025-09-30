@@ -5,6 +5,7 @@
 #include "Animation/AnimationDataSubsystem.h"
 #include "Animation/AnimInstance.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/CollisionComponent.h"
 #include "Components/CombatComponent.h"
 #include "Components/EquipmentComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -28,6 +29,8 @@ ABaseCharacter::ABaseCharacter()
     MovementComp->MaxWalkSpeed = JogSpeed;
     MovementComp->GravityScale = 1.75f;
     MovementComp->MaxAcceleration = 1500.f;
+
+    CollisionComponent = CreateDefaultSubobject<UCollisionComponent>(TEXT("CollisionComponent"));
 
     CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 
@@ -296,6 +299,11 @@ float ABaseCharacter::PerformAction(FGameplayTag InAction, bool bIgnoreCurrentSt
     StatsComponent->ConsumeStamina(ActionInfo->StaminaCost);
 
     return Duration;
+}
+
+void ABaseCharacter::SetAttackCollisionEnabled(EAttackCollisionType InType, bool bEnabled)
+{
+    CollisionComponent->SetAttackCollisionEnabled(InType, bEnabled);
 }
 
 const FActionInfo* ABaseCharacter::CanPerformAction(FGameplayTag InAction, bool bIgnoreCurrentState, int32 MontageIndex, bool bUseRandomIndex) const

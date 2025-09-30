@@ -12,6 +12,7 @@
 struct FActionInfo;
 class UActionInfoConfig;
 class UAnimMontage;
+class UCollisionComponent;
 class UCombatComponent;
 class UEquipmentComponent;
 class UStateManagerComponent;
@@ -26,6 +27,9 @@ class DEMO_API ABaseCharacter : public ACharacter, public ICombatInterface
     //        Subobjects
     ////////////////////////////////////////////////////////
 protected:
+    UPROPERTY(VisibleAnywhere)
+    TObjectPtr<UCollisionComponent> CollisionComponent;
+
     UPROPERTY(VisibleAnywhere)
     TObjectPtr<UCombatComponent> CombatComponent;
 
@@ -86,6 +90,8 @@ public:
     // @param bIgnoreState: If true, ignore current state.
     // @return Duration of the action's AnimMontage, or 0.f if failed to perform action.
     virtual float PerformAction(FGameplayTag InAction, bool bIgnoreCurrentState, int32 MontageIndex, bool bUseRandomIndex = false) override;
+
+    virtual void SetAttackCollisionEnabled(EAttackCollisionType InType, bool bEnabled) override;
 
     virtual bool IsInAction(FGameplayTag InAction) const override;
 
