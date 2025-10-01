@@ -1,7 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Components/CollisionComponent.h"
+#include "Components/EquipmentComponent.h"
+#include "DemoTypes/DemoGameplayTags.h"
+#include "DemoTypes/TableRowBases.h"
+#include "GameFramework/Character.h"
 #include "Interfaces/CombatInterface.h"
+#include "Items/Item.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 DEFINE_LOG_CATEGORY(LogCollisionComponent);
 
@@ -14,12 +21,26 @@ void UCollisionComponent::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (AttackCollisionDefinitions.Num() == 0)
+    ActorsToIgnore.Add(GetOwner());
+
+    // Bind to EquipmentComponent
+    if (AActor* OwnerActor = GetOwner())
     {
-        UE_LOG(LogCollisionComponent, Warning, TEXT("No CollisionDefinitions set in %s."), *GetNameSafe(GetOwner()));
+        if (UEquipmentComponent* EquipmentComponent = OwnerActor->FindComponentByClass<UEquipmentComponent>())
+        {
+            CachedEquipmentComponent = EquipmentComponent;
+            EquipmentComponent->OnWeaponChanged.AddUObject(this, &ThisClass::HandleWeaponChanged);
+        }
+        else
+        {
+            UE_LOG(LogCollisionComponent, Warning, TEXT("%s can't attack with weapon without EquipmentComponent."), *GetNameSafe(OwnerActor));
+        }
     }
 
-    // @TODO - Validate CollisionDefinitions: Valid sockets, types, etc.
+    for (const FAttackCollisionDefinition& Definition : AttackCollisionDefinitions)
+    {
+        // @TODO - Validate CollisionDefinitions: Valid sockets, types, etc.
+    }
 }
 
 void UCollisionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -28,22 +49,8 @@ void UCollisionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 
     for (const FAttackCollisionDefinition* Definition : ActiveCollisions)
     {
-        // @TODO - Trace, apply damage, etc.
-        // @TEST
-        UE_LOG(LogCollisionComponent, Warning, TEXT("Tracing collision radius %.1f"), Definition->Segments[0].Radius);
+        ProcessCollisionDefinition(Definition);
     }
-}
-
-const FAttackCollisionDefinition* UCollisionComponent::GetAttackCollisionDefinition(EAttackCollisionType InType) const
-{
-    for (const FAttackCollisionDefinition& Definition : AttackCollisionDefinitions)
-    {
-        if (Definition.CollisionType == InType)
-        {
-            return &Definition;
-        }
-    }
-    return nullptr;
 }
 
 void UCollisionComponent::AddAttackCollisionDefinition(const FAttackCollisionDefinition& InDefinition)
@@ -73,8 +80,8 @@ void UCollisionComponent::RemoveAttackCollisionDefinition(EAttackCollisionType I
     {
         if (AttackCollisionDefinitions[Index].CollisionType == InType)
         {
-            AttackCollisionDefinitions.RemoveAt(Index);
             SetAttackCollisionEnabled(InType, false);
+            AttackCollisionDefinitions.RemoveAt(Index);
             return;
         }
     }
@@ -84,10 +91,10 @@ void UCollisionComponent::SetAttackCollisionEnabled(EAttackCollisionType InType,
 {
     if (bEnabled)
     {
-        // @TODO
         const FAttackCollisionDefinition* Definition = GetAttackCollisionDefinition(InType);
         if (!Definition)
         {
+            // Maybe anim triggered a type that has been removed by body part loss or smth.
             UE_LOG(LogCollisionComponent, Error, TEXT("UCollisionComponent::SetAttackCollisionEnabled - Invalid EAttackCollisionType for (%s, %s)."), *GetNameSafe(GetOwner()), *UEnum::GetValueAsString(InType));
             return;
         }
@@ -95,9 +102,10 @@ void UCollisionComponent::SetAttackCollisionEnabled(EAttackCollisionType InType,
         if (!ActiveCollisions.Contains(Definition))
         {
             ActiveCollisions.Add(Definition);
-            // @TEST
-            UE_LOG(LogCollisionComponent, Warning, TEXT("Enabled collision for type %d."), static_cast<int32>(InType));
+            HitActors.Empty(); // @TODO
         }
+        // @TEST
+        UE_LOG(LogCollisionComponent, Warning, TEXT("Enabled collision for type %d."), static_cast<int32>(InType));
     }
     else // Disable
     {
@@ -112,4 +120,133 @@ void UCollisionComponent::SetAttackCollisionEnabled(EAttackCollisionType InType,
             }
         }
     }
+}
+
+void UCollisionComponent::ProcessCollisionDefinition(const FAttackCollisionDefinition* InDefinition)
+{
+    for (const FAttackCollisionSegment& Segment : InDefinition->Segments)
+    {
+        const FVector StartLocation = GetSocketLocation(InDefinition->CollisionType, Segment.StartSocketName);
+        const FVector EndLocation = GetSocketLocation(InDefinition->CollisionType, Segment.EndSocketName);
+
+        // @TODO - Multiple times per frame?
+        TArray<FHitResult> HitResults;
+        bool bHit = UKismetSystemLibrary::SphereTraceMultiForObjects(
+            this, /* WorldContextObject */
+            StartLocation,
+            EndLocation,
+            Segment.Radius,
+            TraceObjectTypes,
+            false, /* bTraceComplex */
+            ActorsToIgnore,
+            DrawDebugType,
+            HitResults,
+            false, /* bIgnoreSelf, already in ActorsToIgnore */
+            FLinearColor::Red,
+            FLinearColor::Green,
+            DrawDebugDuration
+        );
+
+        for (const FHitResult& HitResult : HitResults)
+        {
+            AActor* HitActor = HitResult.GetActor();
+            if (!HitActors.Contains(HitActor))
+            {
+                HitActors.Add(HitActor);
+                ProcessHit(HitResult, InDefinition);
+            }
+        }
+    }
+}
+
+void UCollisionComponent::ProcessHit(const FHitResult& HitResult, const FAttackCollisionDefinition* InDefinition)
+{
+    AActor* OwnerActor = GetOwner();
+    ICombatInterface* OwnerCombatInterface = Cast<ICombatInterface>(OwnerActor);
+    ICombatInterface* HitCombatInterface = Cast<ICombatInterface>(HitResult.GetActor());
+    if (!OwnerActor || !OwnerCombatInterface || !HitCombatInterface || !HitCombatInterface->CanReceiveDamage())
+    {
+        // Only combat interface actors for now.
+        return;
+    }
+
+    // @TODO - check team
+
+    float Damage = OwnerCombatInterface->GetDamage(InDefinition->CollisionType);
+
+    UGameplayStatics::ApplyPointDamage(
+        HitResult.GetActor(),
+        Damage,
+        HitResult.ImpactNormal, /* HitFromDirection */
+        HitResult,
+        OwnerActor->GetInstigatorController(),
+        OwnerActor,
+        InDefinition->DamageType
+    );
+}
+
+void UCollisionComponent::HandleWeaponChanged(const FWeaponData* WeaponData)
+{
+    if (WeaponData) // Equipped
+    {
+        AddAttackCollisionDefinition(WeaponData->AttackCollisionDefinition);
+    }
+    else // Unequipped
+    {
+        RemoveAttackCollisionDefinition(EAttackCollisionType::MainWeapon);
+    }
+}
+
+const FAttackCollisionDefinition* UCollisionComponent::GetAttackCollisionDefinition(EAttackCollisionType InType) const
+{
+    for (const FAttackCollisionDefinition& Definition : AttackCollisionDefinitions)
+    {
+        if (Definition.CollisionType == InType)
+        {
+            return &Definition;
+        }
+    }
+    return nullptr;
+}
+
+FVector UCollisionComponent::GetSocketLocation(EAttackCollisionType InType, FName InSocketName)
+{
+    if (InType == EAttackCollisionType::MainWeapon)
+    {
+        if (const UEquipmentComponent* EquipmentComponent = GetEquipmentComponent())
+        {
+            if (const AItem* MainWeapon = EquipmentComponent->GetEquippedItem(DemoGameplayTags::Item_Weapon))
+            {
+                if (const UMeshComponent* WeaponMesh = MainWeapon->GetMesh())
+                {
+                    return WeaponMesh->GetSocketLocation(InSocketName);
+                }
+            }
+        }
+    }
+    else // Not MainWeapon
+    {
+        if (const ACharacter* OwnerCharacter = GetOwner<ACharacter>())
+        {
+            if (const USkeletalMeshComponent* CharacterMesh = OwnerCharacter->GetMesh())
+            {
+                return CharacterMesh->GetSocketLocation(InSocketName);
+            }
+        }
+    }
+
+    UE_LOG(LogCollisionComponent, Error, TEXT("GetSocketLocation() - Failed to get socket location for type %s and socket %s."), *UEnum::GetValueAsString(InType), *InSocketName.ToString());
+    return FVector::ZeroVector;
+}
+
+const UEquipmentComponent* UCollisionComponent::GetEquipmentComponent()
+{
+    if (!CachedEquipmentComponent.IsValid())
+    {
+        if (AActor* OwnerActor = GetOwner())
+        {
+            CachedEquipmentComponent = OwnerActor->FindComponentByClass<UEquipmentComponent>();
+        }
+    }
+    return CachedEquipmentComponent.Get();
 }

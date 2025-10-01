@@ -10,6 +10,7 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogEquipment, Log, All);
 
+struct FWeaponData;
 class AItem;
 class UInventoryComponent;
 class USoundBase;
@@ -29,7 +30,8 @@ struct FEquipmentValidationResult
     TObjectPtr<AItem>* EquippedItemPtr{nullptr};
 };
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnEquipmentChanged, FGameplayTag /* ItemType */);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnEquipmentChanged, FGameplayTag /* EquipmentType */);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnWeaponChanged, const FWeaponData* /* WeaponData */);
 
 /**
  * Equipment
@@ -48,11 +50,11 @@ class DEMO_API UEquipmentComponent : public UActorComponent
     //        Delegates
     ////////////////////////////////////////////////////////
 public:
-    // @param ItemType is EquipmentType
+    // @param Tag is the EquipmentType.
     FOnEquipmentChanged OnEquipmentChanged;
 
-    // @param ItemType is the type from ItemData.
-    FOnEquipmentChanged OnWeaponChanged;
+    // @param nullptr if unequipped.
+    FOnWeaponChanged OnWeaponChanged;
 
     ////////////////////////////////////////////////////////
     //        Fundamentals

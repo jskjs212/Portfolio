@@ -47,6 +47,8 @@ private:
 public:
     FORCEINLINE bool IsCombatReady() const { return !bCanToggleCombat || bIsCombatReady; }
 
+    FORCEINLINE int32 GetCurrentActionIndex() const { return CurrentActionIndex; }
+
     ////////////////////////////////////////////////////////
     //        Variables
     ////////////////////////////////////////////////////////
@@ -59,6 +61,9 @@ private:
 
     // Save attack input for combo system.
     bool bIsAttackBuffered{false};
+
+    // Current index of any action being performed.
+    int32 CurrentActionIndex{0};
 
     // Index of next attack.
     int32 AttackIndex{0};

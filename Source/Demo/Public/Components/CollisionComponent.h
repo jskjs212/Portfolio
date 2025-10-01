@@ -9,6 +9,19 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogCollisionComponent, Log, All);
 
+namespace EDrawDebugTrace { enum Type : int; }
+struct FWeaponData;
+class UEquipmentComponent;
+
+/**
+ * Collision component that handles attack collisions.
+ * Non-weapon AttackCollisionDefinitions should be configured in the component.
+ * Activate or deactivate with SetAttackCollisionEnabled().
+ * Process active collisions in TickComponent().
+ * Trace only for pawns for now.
+ *
+ * @Dependency - Some AttackCollisionTypes need EquipmentComponent.
+ */
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class DEMO_API UCollisionComponent : public UActorComponent
 {
@@ -42,10 +55,23 @@ public:
     void SetAttackCollisionEnabled(EAttackCollisionType InType, bool bEnabled);
 
 private:
+    // Process each active collision definition.
+    void ProcessCollisionDefinition(const FAttackCollisionDefinition* InDefinition);
+
+    void ProcessHit(const FHitResult& HitResult, const FAttackCollisionDefinition* InDefinition);
+
+    void HandleWeaponChanged(const FWeaponData* WeaponData);
+
     const FAttackCollisionDefinition* GetAttackCollisionDefinition(EAttackCollisionType InType) const;
 
+    // Get the world location of a socket depending on the collision type.
+    // Following the rules in "DemoTypes/AttackTypes.h"
+    FVector GetSocketLocation(EAttackCollisionType InType, FName InSocketName);
+
+    const UEquipmentComponent* GetEquipmentComponent();
+
     ////////////////////////////////////////////////////////
-    //        Variables
+    //        Variables - collision
     ////////////////////////////////////////////////////////
 private:
     // Current active collision definitions.
@@ -53,8 +79,27 @@ private:
     TArray<const FAttackCollisionDefinition*> ActiveCollisions;
 
     /* Attack collision */
-    // All collision definitions. Not modified at runtime.
+    // All collision definitions.
     // @TODO - DataAsset?
     UPROPERTY(EditAnywhere, Category = "Initialization")
     TArray<FAttackCollisionDefinition> AttackCollisionDefinitions;
+
+    ////////////////////////////////////////////////////////
+    //        Variables
+    ////////////////////////////////////////////////////////
+private:
+    static inline const TArray<TEnumAsByte<EObjectTypeQuery>> TraceObjectTypes{UEngineTypes::ConvertToObjectType(ECC_Pawn)};
+
+    UPROPERTY(EditAnywhere, Category = "Initialization|Debug")
+    float DrawDebugDuration{3.f};
+
+    UPROPERTY(EditAnywhere, Category = "Initialization|Debug")
+    TEnumAsByte<EDrawDebugTrace::Type> DrawDebugType{};
+
+    TArray<AActor*> ActorsToIgnore;
+
+    // @TODO - Can't handle multiple active collisions.
+    TSet<AActor*> HitActors;
+
+    TWeakObjectPtr<const UEquipmentComponent> CachedEquipmentComponent;
 };

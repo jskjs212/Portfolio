@@ -13,6 +13,7 @@
 #include "Components/StatsComponent.h"
 #include "DemoTypes/ActionInfoConfig.h"
 #include "DemoTypes/DemoGameplayTags.h"
+#include "DemoTypes/TableRowBases.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Items/Item.h"
 
@@ -63,6 +64,21 @@ void ABaseCharacter::BeginPlay()
     }
     StatsComponent->ResetAllResourceStats();
     StatsComponent->OnCurrentResourceStatChanged.AddUObject(this, &ThisClass::HandleCurrentResourceStatChanged);
+}
+
+float ABaseCharacter::InternalTakePointDamage(float Damage, FPointDamageEvent const& PointDamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+    Damage = Super::InternalTakePointDamage(Damage, PointDamageEvent, EventInstigator, DamageCauser);
+    
+    // @TODO
+    // Deal with damage types
+    Damage = StatsComponent->TakeDamage(Damage);
+
+    // Sounds, particles, etc.
+
+    // Hit reaction
+
+    return Damage;
 }
 
 bool ABaseCharacter::CanPerformJump() const
@@ -208,9 +224,10 @@ void ABaseCharacter::HandleStateBegan(FGameplayTag NewState)
     }
 }
 
-void ABaseCharacter::HandleWeaponChanged(FGameplayTag WeaponTag)
+void ABaseCharacter::HandleWeaponChanged(const FWeaponData* WeaponData)
 {
-    UpdateAnimationData(WeaponTag);
+    const FGameplayTag NewWeaponTag = WeaponData ? WeaponData->ItemType : DemoGameplayTags::Item_Weapon_NoWeapon;
+    UpdateAnimationData(NewWeaponTag);
 }
 
 void ABaseCharacter::UpdateAnimationData(FGameplayTag WeaponTag)
@@ -245,6 +262,48 @@ void ABaseCharacter::UpdateAnimationData(FGameplayTag WeaponTag)
 bool ABaseCharacter::IsInAction(FGameplayTag Action) const
 {
     return StateManager->IsInAction(Action);
+}
+
+bool ABaseCharacter::CanReceiveDamage() const
+{
+    // @TODO - iFrames
+    return !StateManager->IsInAction(DemoGameplayTags::State_Dead);
+}
+
+float ABaseCharacter::GetDamage(EAttackCollisionType InType) const
+{
+    float Damage = 0.f;
+
+    // Get base damage
+    if (InType == EAttackCollisionType::MainWeapon)
+    {
+        if (AItem* MainWeapon = EquipmentComponent->GetEquippedItem(DemoGameplayTags::Item_Weapon))
+        {
+            if (const FWeaponData* WeaponData = MainWeapon->GetItemSlot().RowHandle.GetRow<FWeaponData>(TEXT("ABaseCharacter::GetDamage")))
+            {
+                Damage = WeaponData->Damage;
+            }
+        }
+    }
+    else
+    {
+        // @TODO - unarmed damage
+    }
+
+    // Damage multiplier from action
+    const FGameplayTag CurrentAction = StateManager->GetCurrentAction();
+    if (const TArray<FActionInfo>* ActionInfosPtr = CurrentActionInfo->GetActionInfoArray(CurrentAction))
+    {
+        int32 Index = CombatComponent->GetCurrentActionIndex();
+        if (ActionInfosPtr->IsValidIndex(Index))
+        {
+            Damage *= (*ActionInfosPtr)[Index].DamageMultiplier;
+        }
+    }
+
+    // @TODO - Damage multiplier from stats, buffs, etc.
+
+    return Damage;
 }
 
 int32 ABaseCharacter::GetActionInfoCount(FGameplayTag InAction) const

@@ -7,12 +7,18 @@
 
 class UDamageType;
 
+// Types of attack collision.
+// AnimNotifyState_CollisionTrace will enable a certain type during its duration.
+// When a monster has multiple attack sources like 6 arms, they can be differentiated by type and enabled in their own attack timings.
+// !!! AttackCollisionDefinition should be added to the CollisionComponent first for each type.
+// !!! MainWeapon type will find sockets from the equipped weapon's mesh.
+// !!! Other types will find sockets from the owner character's mesh.
+// Not implemented examples: Shield (bash), SecondWeapon (dual wield), etc.
 UENUM(BlueprintType)
 enum class EAttackCollisionType : uint8
 {
     None UMETA(Hidden),
     MainWeapon UMETA(DisplayName = "Main Weapon"),
-    ShieldWeapon UMETA(DisplayName = "Shield Weapon"),
     RightFist UMETA(DisplayName = "RightFist"),
     LeftFist UMETA(DisplayName = "LeftFist"),
     Kick UMETA(DisplayName = "Kick"),
@@ -24,7 +30,7 @@ struct FAttackCollisionSegment
 {
     GENERATED_BODY()
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, meta = (ClampMin = "0.001"))
     float Radius{30.f};
 
     UPROPERTY(EditAnywhere)
@@ -43,11 +49,13 @@ struct FAttackCollisionDefinition
     EAttackCollisionType CollisionType{EAttackCollisionType::None};
 
     UPROPERTY(EditAnywhere)
-    float CollisionRadius{30.f};
+    TSubclassOf<UDamageType> DamageType;
 
     UPROPERTY(EditAnywhere)
     TArray<FAttackCollisionSegment> Segments;
 
-    UPROPERTY(EditAnywhere)
-    TSubclassOf<UDamageType> DamageType;
+    bool IsValid() const
+    {
+        return CollisionType != EAttackCollisionType::None && Segments.Num() > 0 && DamageType != nullptr;
+    }
 };

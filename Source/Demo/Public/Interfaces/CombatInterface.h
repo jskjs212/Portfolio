@@ -34,6 +34,10 @@ public:
 
     virtual bool IsInAction(FGameplayTag InAction) const PURE_VIRTUAL(ICombatInterface::IsInAction, return false;);
 
+    virtual bool CanReceiveDamage() const PURE_VIRTUAL(ICombatInterface::CanReceiveDamage, return false;);
+
+    virtual float GetDamage(EAttackCollisionType InType) const PURE_VIRTUAL(ICombatInterface::GetDamage, return 0.f;);
+
     virtual int32 GetActionInfoCount(FGameplayTag InAction) const PURE_VIRTUAL(ICombatInterface::GetActionInfoCount, return 0;);
 
     // @return Desired control rotation while performing action.

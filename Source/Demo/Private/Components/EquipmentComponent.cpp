@@ -338,14 +338,22 @@ bool UEquipmentComponent::AttachActor(AActor* ActorToAttach, FGameplayTag Equipm
 
 void UEquipmentComponent::EquipItem_PostProcess(const FEquipmentValidationResult& ValidationResult)
 {
-    CurrentWeaponType = ValidationResult.ItemType;
+    if (ValidationResult.EquipmentType == DemoGameplayTags::Item_Weapon)
+    {
+        // Add attack collision definition if it's a weapon
+        const AItem* EquippedWeapon = *(ValidationResult.EquippedItemPtr);
+        const FItemSlot& WeaponSlot = EquippedWeapon->GetItemSlot();
+        const FWeaponData* WeaponData = WeaponSlot.RowHandle.GetRow<FWeaponData>(TEXT("UEquipmentComponent::EquipItem_PostProcess"));
+
+        if (WeaponData)
+        {
+            CurrentWeaponType = ValidationResult.ItemType;
+            OnWeaponChanged.Broadcast(WeaponData);
+        }
+    }
 
     // OnEquipped: Update UI, stats, etc.
     OnEquipmentChanged.Broadcast(ValidationResult.EquipmentType);
-    if (ValidationResult.EquipmentType == DemoGameplayTags::Item_Weapon)
-    {
-        OnWeaponChanged.Broadcast(ValidationResult.ItemType);
-    }
 
     if (EquipSound)
     {
@@ -380,14 +388,14 @@ bool UEquipmentComponent::UnequipItem_AddToInventory(const FItemSlot& InSlot)
 
 void UEquipmentComponent::UnequipItem_PostProcess(FGameplayTag EquipmentType)
 {
-    CurrentWeaponType = DemoGameplayTags::Item_Weapon_NoWeapon;
+    if (EquipmentType == DemoGameplayTags::Item_Weapon)
+    {
+        CurrentWeaponType = DemoGameplayTags::Item_Weapon_NoWeapon;
+        OnWeaponChanged.Broadcast(nullptr);
+    }
 
     // OnUnequipped: Update UI, stats, etc.
     OnEquipmentChanged.Broadcast(EquipmentType);
-    if (EquipmentType == DemoGameplayTags::Item_Weapon)
-    {
-        OnWeaponChanged.Broadcast(DemoGameplayTags::Item_Weapon_NoWeapon);
-    }
 
     if (EquipSound)
     {

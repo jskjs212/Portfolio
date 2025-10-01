@@ -6,7 +6,6 @@
 #include "Components/ActorComponent.h"
 #include "TargetingComponent.generated.h"
 
-//namespace EDrawDebugTrace { enum Type : int; }
 class ITargetInterface;
 
 struct FFindTargetResult
@@ -114,10 +113,10 @@ protected:
     float OmnidirectionalTargetDistance{500.f}; // 360 degree search
 
 #if WITH_EDITORONLY_DATA
-    UPROPERTY(EditDefaultsOnly, Category = "Initialization|Targeting")
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization|Debug")
     bool bDrawDebugInfo{false};
 
-    UPROPERTY(EditDefaultsOnly, Category = "Initialization|Targeting")
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization|Debug")
     float DrawDebugDuration{3.f};
 #endif // WITH_EDITORONLY_DATA
 
@@ -128,7 +127,7 @@ private:
 
     static inline const TArray<TEnumAsByte<EObjectTypeQuery>> TargetObjectTypes{UEngineTypes::ConvertToObjectType(ECC_Pawn)};
 
-    static inline const TArray<AActor*> EmptyIgnoredActors{};
+    static inline const TArray<AActor*> EmptyIgnoredActors;
 
     FCollisionQueryParams VisibilityQueryParams;
 };

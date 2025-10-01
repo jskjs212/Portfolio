@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DemoTypes/AttackTypes.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "Engine/DataTable.h"
 #include "GameplayTagContainer.h"
@@ -89,6 +90,9 @@ struct FWeaponData : public FItemDataBase
     UPROPERTY(EditAnywhere)
     float Damage{10.f};
 
+    UPROPERTY(EditAnywhere)
+    FAttackCollisionDefinition AttackCollisionDefinition{.CollisionType = EAttackCollisionType::MainWeapon};
+
 #if WITH_EDITOR
     virtual EDataValidationResult IsDataValid(FDataValidationContext& Context) const override
     {
@@ -98,6 +102,35 @@ struct FWeaponData : public FItemDataBase
         {
             Context.AddError(FText::FromString(TEXT("ItemType is not Weapon.")));
             return EDataValidationResult::Invalid;
+        }
+        if (!AttackCollisionDefinition.IsValid())
+        {
+            Context.AddError(FText::FromString(TEXT("AttackCollisionDefinition is not valid.")));
+            return EDataValidationResult::Invalid;
+        }
+        if (SkeletalMesh)
+        {
+            for (const FAttackCollisionSegment& Segment : AttackCollisionDefinition.Segments)
+            {
+                if (!SkeletalMesh->FindSocket(Segment.StartSocketName) || !SkeletalMesh->FindSocket(Segment.EndSocketName))
+                {
+                    Context.AddError(FText::FromString(FString::Printf(TEXT("SkeletalMesh does not have socket: %s or %s."),
+                        *Segment.StartSocketName.ToString(), *Segment.EndSocketName.ToString())));
+                    return EDataValidationResult::Invalid;
+                }
+            }
+        }
+        if (StaticMesh)
+        {
+            for (const FAttackCollisionSegment& Segment : AttackCollisionDefinition.Segments)
+            {
+                if (!StaticMesh->FindSocket(Segment.StartSocketName) || !StaticMesh->FindSocket(Segment.EndSocketName))
+                {
+                    Context.AddError(FText::FromString(FString::Printf(TEXT("StaticMesh does not have socket: %s or %s."),
+                        *Segment.StartSocketName.ToString(), *Segment.EndSocketName.ToString())));
+                    return EDataValidationResult::Invalid;
+                }
+            }
         }
         return EDataValidationResult::Valid;
     }

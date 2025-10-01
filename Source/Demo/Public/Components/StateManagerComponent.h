@@ -69,6 +69,11 @@ public:
     // Only state and action are considered, other conditions like character's immune state are not.
     bool CanPerformAction(FGameplayTag NewAction) const;
 
+    FGameplayTag GetCurrentState() const { return CurrentState; }
+
+    FGameplayTag GetCurrentAction() const { return CurrentAction; }
+
+private:
     FGameplayTag GetStateFromAction(FGameplayTag InAction) const;
 
     ////////////////////////////////////////////////////////

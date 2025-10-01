@@ -68,7 +68,7 @@ private:
     IInteractable* TraceForInteractables();
 
     /* Event handlers */
-    virtual void HandleWeaponChanged(FGameplayTag WeaponTag) override;
+    virtual void HandleWeaponChanged(const FWeaponData* WeaponData) override;
 
     // Trace and broadcast if focused interactable changed.
     void HandleInteractable();

@@ -580,10 +580,8 @@ int32 UInventoryComponent::ConsumeFood(const FConsumableData* ConsumableData, co
 
 UEquipmentComponent* UInventoryComponent::GetEquipmentComponent()
 {
-    UE_LOG(LogInventory, Warning, TEXT("GetEquipmentComponent() - 1"));
     if (!CachedEquipmentComponent.IsValid())
     {
-        UE_LOG(LogInventory, Warning, TEXT("GetEquipmentComponent() - 2"));
         if (AActor* OwnerActor = GetOwner())
         {
             CachedEquipmentComponent = OwnerActor->FindComponentByClass<UEquipmentComponent>();

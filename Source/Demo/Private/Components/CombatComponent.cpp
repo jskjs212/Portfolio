@@ -56,6 +56,7 @@ float UCombatComponent::Attack(FGameplayTag AttackAction)
     }
 
     // Attack
+    CurrentActionIndex = AttackIndex;
     return CombatInterface->PerformAction(AttackAction, false, AttackIndex);
 }
 
@@ -70,6 +71,7 @@ float UCombatComponent::ContinueAttack(FGameplayTag AttackAction)
         {
             if (ICombatInterface* CombatInterface = GetOwner<ICombatInterface>())
             {
+                CurrentActionIndex = AttackIndex;
                 return CombatInterface->PerformAction(AttackAction, true, AttackIndex);
             }
         }
@@ -80,6 +82,7 @@ float UCombatComponent::ContinueAttack(FGameplayTag AttackAction)
 void UCombatComponent::ResetCombat()
 {
     bIsAttackBuffered = false;
+    CurrentActionIndex = 0;
     AttackIndex = 0;
 }
 

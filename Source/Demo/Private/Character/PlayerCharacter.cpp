@@ -12,6 +12,7 @@
 #include "Components/StatsComponent.h"
 #include "Components/TargetingComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
+#include "DemoTypes/TableRowBases.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -136,16 +137,15 @@ IInteractable* APlayerCharacter::TraceForInteractables()
     return bHit ? Cast<IInteractable>(HitResult.GetActor()) : nullptr;
 }
 
-void APlayerCharacter::HandleWeaponChanged(FGameplayTag WeaponTag)
+void APlayerCharacter::HandleWeaponChanged(const FWeaponData* WeaponData)
 {
-    Super::HandleWeaponChanged(WeaponTag);
+    Super::HandleWeaponChanged(WeaponData);
 
-    // @TODO - Orient false if targeting
-    if (WeaponTag == DemoGameplayTags::Item_Weapon_NoWeapon)
+    if (!WeaponData) // Unequipped
     {
         SetOrientRotationToMovement(true);
     }
-    else if (TargetingComponent->IsTargetLocked())
+    else if (TargetingComponent->IsTargetLocked()) // Equipped and target locked
     {
         SetOrientRotationToMovement(false);
     }
@@ -439,10 +439,6 @@ void APlayerCharacter::Test1_Implementation()
     UE_LOG(LogTemp, Warning, TEXT("APlayerCharacter::Test1() called!"));
 
     EquipmentComponent->EquipItem(TestItemSlot);
-    FAttackCollisionDefinition TestCollisionDef;
-    TestCollisionDef.CollisionType = EAttackCollisionType::MainWeapon;
-    TestCollisionDef.Segments.Add(FAttackCollisionSegment{});
-    CollisionComponent->AddAttackCollisionDefinition(TestCollisionDef);
 }
 
 void APlayerCharacter::Test2_Implementation()
@@ -451,5 +447,4 @@ void APlayerCharacter::Test2_Implementation()
 
     EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Weapon);
     EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Armor_Shield);
-    CollisionComponent->RemoveAttackCollisionDefinition(EAttackCollisionType::MainWeapon);
 }

@@ -10,6 +10,7 @@
 #include "BaseCharacter.generated.h"
 
 struct FActionInfo;
+struct FWeaponData;
 class UActionInfoConfig;
 class UAnimMontage;
 class UCollisionComponent;
@@ -51,6 +52,8 @@ public:
 protected:
     virtual void BeginPlay() override;
 
+    virtual float InternalTakePointDamage(float Damage, struct FPointDamageEvent const& PointDamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
     ////////////////////////////////////////////////////////
     //        Character functions
     ////////////////////////////////////////////////////////
@@ -81,7 +84,7 @@ protected:
 
     void HandleStateBegan(FGameplayTag NewState);
 
-    virtual void HandleWeaponChanged(FGameplayTag WeaponTag);
+    virtual void HandleWeaponChanged(const FWeaponData* WeaponData);
 
     ////////////////////////////////////////////////////////
     //        Combat interface
@@ -94,6 +97,10 @@ public:
     virtual void SetAttackCollisionEnabled(EAttackCollisionType InType, bool bEnabled) override;
 
     virtual bool IsInAction(FGameplayTag InAction) const override;
+
+    virtual bool CanReceiveDamage() const override;
+
+    virtual float GetDamage(EAttackCollisionType InType) const override;
 
     virtual int32 GetActionInfoCount(FGameplayTag InAction) const override;
 
