@@ -14,8 +14,10 @@
 #include "DemoTypes/ActionInfoConfig.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "DemoTypes/TableRowBases.h"
+#include "Engine/DamageEvents.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Items/Item.h"
+#include "Kismet/GameplayStatics.h"
 
 ABaseCharacter::ABaseCharacter()
 {
@@ -24,7 +26,6 @@ ABaseCharacter::ABaseCharacter()
 
     // @check - temporary values
     UCharacterMovementComponent* MovementComp = GetCharacterMovement();
-    check(MovementComp);
     MovementComp->JumpZVelocity = 700.f;
     MovementComp->AirControl = 0.2f;
     MovementComp->MaxWalkSpeed = JogSpeed;
@@ -36,7 +37,7 @@ ABaseCharacter::ABaseCharacter()
     CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 
     EquipmentComponent = CreateDefaultSubobject<UEquipmentComponent>(TEXT("EquipmentComponent"));
-    OnActorBeginOverlap;
+
     StateManager = CreateDefaultSubobject<UStateManagerComponent>(TEXT("StateManager"));
 
     StatsComponent = CreateDefaultSubobject<UStatsComponent>(TEXT("StatsComponent"));
@@ -49,6 +50,10 @@ void ABaseCharacter::BeginPlay()
     if (!CharacterTag.IsValid())
     {
         UE_LOG(LogTemp, Error, TEXT("CharacterTag is not set for %s."), *GetName());
+    }
+    if (!HitReactFrontMontage || !HitReactBackMontage || !HitSound || !HitParticle)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("HitReact assets are not set for %s."), *GetName());
     }
 
     // @check - Initial equipment settings
@@ -69,14 +74,12 @@ void ABaseCharacter::BeginPlay()
 float ABaseCharacter::InternalTakePointDamage(float Damage, FPointDamageEvent const& PointDamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
     Damage = Super::InternalTakePointDamage(Damage, PointDamageEvent, EventInstigator, DamageCauser);
-    
+
     // @TODO
     // Deal with damage types
     Damage = StatsComponent->TakeDamage(Damage);
 
-    // Sounds, particles, etc.
-
-    // Hit reaction
+    PlayPointHitEffects(PointDamageEvent, EventInstigator);
 
     return Damage;
 }
@@ -133,6 +136,56 @@ void ABaseCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8
             StateManager->SetAction(DemoGameplayTags::State_Jump);
         }
     }
+}
+
+void ABaseCharacter::PlayPointHitEffects(const FPointDamageEvent& PointDamageEvent, const AController* EventInstigator)
+{
+    AActor* OtherActor = EventInstigator ? EventInstigator->GetPawn() : nullptr;
+    if (!OtherActor)
+    {
+        return;
+    }
+
+    const FVector ToOther = (OtherActor->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+    const float FrontDot = FVector::DotProduct(GetActorForwardVector(), ToOther);
+    const float RightDot = FVector::DotProduct(GetActorRightVector(), ToOther);
+    const FVector HitLocation = PointDamageEvent.HitInfo.ImpactPoint;
+
+    // Sound
+    UGameplayStatics::PlaySoundAtLocation(this, HitSound, HitLocation);
+
+    // Particle
+    FTransform ParticleTransform;
+    ParticleTransform.SetLocation(HitLocation);
+    ParticleTransform.SetRotation(PointDamageEvent.HitInfo.ImpactNormal.ToOrientationQuat());
+    UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticle, ParticleTransform);
+
+    // Animation
+    const float Cos45 = 1.f / FMath::Sqrt(2.f);
+    if (!IsDead() && GetMesh())
+    {
+        if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+        {
+            UAnimMontage* HitReactMontage = FrontDot >= 0.f ? HitReactFrontMontage : HitReactBackMontage;
+            if (FMath::Abs(FrontDot) < Cos45) // Side
+            {
+                if (RightDot >= 0.f)
+                {
+                    HitReactMontage = HitReactRightMontage ? HitReactRightMontage.Get() : HitReactMontage;
+                }
+                else
+                {
+                    HitReactMontage = HitReactLeftMontage ? HitReactLeftMontage.Get() : HitReactMontage;
+                }
+            }
+            AnimInstance->Montage_Play(HitReactMontage);
+        }
+    }
+}
+
+bool ABaseCharacter::IsDead() const
+{
+    return StateManager->IsInState(DemoGameplayTags::State_Dead);
 }
 
 void ABaseCharacter::DestroyCharacter()

@@ -81,7 +81,7 @@ private:
     /* Attack collision */
     // All collision definitions.
     // @TODO - DataAsset?
-    UPROPERTY(EditAnywhere, Category = "Initialization")
+    UPROPERTY(EditAnywhere, Category = "Initialization|Collision")
     TArray<FAttackCollisionDefinition> AttackCollisionDefinitions;
 
     ////////////////////////////////////////////////////////
@@ -90,10 +90,10 @@ private:
 private:
     static inline const TArray<TEnumAsByte<EObjectTypeQuery>> TraceObjectTypes{UEngineTypes::ConvertToObjectType(ECC_Pawn)};
 
-    UPROPERTY(EditAnywhere, Category = "Initialization|Debug")
+    UPROPERTY(EditAnywhere, Category = "Initialization|Collision")
     float DrawDebugDuration{3.f};
 
-    UPROPERTY(EditAnywhere, Category = "Initialization|Debug")
+    UPROPERTY(EditAnywhere, Category = "Initialization|Collision")
     TEnumAsByte<EDrawDebugTrace::Type> DrawDebugType{};
 
     TArray<AActor*> ActorsToIgnore;

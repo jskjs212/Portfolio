@@ -16,6 +16,8 @@ class UAnimMontage;
 class UCollisionComponent;
 class UCombatComponent;
 class UEquipmentComponent;
+class UParticleSystem;
+class USoundBase;
 class UStateManagerComponent;
 class UStatsComponent;
 
@@ -72,7 +74,13 @@ protected:
     // Update CurrentActionInfo according to the weapon.
     void UpdateAnimationData(FGameplayTag WeaponTag);
 
+    /* Hit */
+    // Play hit sound, particle, and animation.
+    void PlayPointHitEffects(const FPointDamageEvent& PointDamageEvent, const AController* EventInstigator);
+
     /* Death */
+    bool IsDead() const;
+
     void DestroyCharacter();
 
     void EnableRagdoll();
@@ -123,34 +131,56 @@ public:
     void SetOrientRotationToMovement(bool bOrient);
 
     ////////////////////////////////////////////////////////
+    //        Variables - Hit
+    ////////////////////////////////////////////////////////
+protected:
+    UPROPERTY(EditAnywhere, Category = "Initialization|Animation")
+    TObjectPtr<UAnimMontage> HitReactFrontMontage;
+
+    UPROPERTY(EditAnywhere, Category = "Initialization|Animation")
+    TObjectPtr<UAnimMontage> HitReactBackMontage;
+
+    UPROPERTY(EditAnywhere, Category = "Initialization|Animation")
+    TObjectPtr<UAnimMontage> HitReactLeftMontage;
+
+    UPROPERTY(EditAnywhere, Category = "Initialization|Animation")
+    TObjectPtr<UAnimMontage> HitReactRightMontage;
+
+    UPROPERTY(EditAnywhere, Category = "Initialization|Animation")
+    TObjectPtr<UAnimMontage> DeathMontage;
+
+    UPROPERTY(EditAnywhere, Category = "Initialization|Hit")
+    TObjectPtr<USoundBase> HitSound;
+
+    UPROPERTY(EditAnywhere, Category = "Initialization|Hit")
+    TObjectPtr<UParticleSystem> HitParticle;
+
+    ////////////////////////////////////////////////////////
     //        Variables
     ////////////////////////////////////////////////////////
 protected:
     /* Stats */
     // @TODO - Use data table or config file
-    UPROPERTY(EditAnywhere, Category = "Initialization", meta = (Categories = "Stat"))
+    UPROPERTY(EditAnywhere, Category = "Initialization|Stats", meta = (Categories = "Stat"))
     TMap<FGameplayTag, FResourceStat> ResourceStats;
 
     /* Movement */
-    UPROPERTY(EditAnywhere, Category = "Movement")
+    UPROPERTY(EditAnywhere, Category = "Initialization|Movement")
     float WalkSpeed{180.f};
-    UPROPERTY(EditAnywhere, Category = "Movement")
+    UPROPERTY(EditAnywhere, Category = "Initialization|Movement")
     float JogSpeed{450.f};
-    UPROPERTY(EditAnywhere, Category = "Movement")
+    UPROPERTY(EditAnywhere, Category = "Initialization|Movement")
     float SprintSpeed{800.f};
 
-    UPROPERTY(EditAnywhere, Category = "Movement")
+    UPROPERTY(EditAnywhere, Category = "Initialization|Movement")
     float JumpStaminaCost{10.f};
 
     // Should not modify directly, use SetMovementSpeedMode instead.
     FGameplayTag MovementSpeedMode;
 
     /* Animation */
-    UPROPERTY(EditAnywhere, Category = "Initialization", meta = (Categories = "Character"))
+    UPROPERTY(EditAnywhere, Category = "Initialization|Character", meta = (Categories = "Character"))
     FGameplayTag CharacterTag;
-
-    UPROPERTY(EditAnywhere, Category = "Animation")
-    TObjectPtr<UAnimMontage> DeathMontage;
 
     UPROPERTY(VisibleAnywhere, Transient, Category = "Combat")
     TObjectPtr<const UActionInfoConfig> CurrentActionInfo;

@@ -113,10 +113,10 @@ protected:
     float OmnidirectionalTargetDistance{500.f}; // 360 degree search
 
 #if WITH_EDITORONLY_DATA
-    UPROPERTY(EditDefaultsOnly, Category = "Initialization|Debug")
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization|Targeting")
     bool bDrawDebugInfo{false};
 
-    UPROPERTY(EditDefaultsOnly, Category = "Initialization|Debug")
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization|Targeting")
     float DrawDebugDuration{3.f};
 #endif // WITH_EDITORONLY_DATA
 
