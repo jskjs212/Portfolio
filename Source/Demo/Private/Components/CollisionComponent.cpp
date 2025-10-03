@@ -47,9 +47,9 @@ void UCollisionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-    for (const FAttackCollisionDefinition* Definition : ActiveCollisions)
+    for (const FActiveAttackCollisionDefinition& ActiveDefinition : ActiveDefinitions)
     {
-        ProcessCollisionDefinition(Definition);
+        ProcessCollisionDefinition(ActiveDefinition);
     }
 }
 
@@ -80,54 +80,79 @@ void UCollisionComponent::RemoveAttackCollisionDefinition(EAttackCollisionType I
     {
         if (AttackCollisionDefinitions[Index].CollisionType == InType)
         {
-            SetAttackCollisionEnabled(InType, false);
+            DeactivateCollisionDefinition(InType);
             AttackCollisionDefinitions.RemoveAt(Index);
             return;
         }
     }
 }
 
-void UCollisionComponent::SetAttackCollisionEnabled(EAttackCollisionType InType, bool bEnabled)
+void UCollisionComponent::ActivateCollisionDefinition(EAttackCollisionType InType, int32 HitGroup, bool bClearHitActorsOnBegin)
 {
-    if (bEnabled)
-    {
-        const FAttackCollisionDefinition* Definition = GetAttackCollisionDefinition(InType);
-        if (!Definition)
-        {
-            // Maybe anim triggered a type that has been removed by body part loss or smth.
-            UE_LOG(LogCollisionComponent, Error, TEXT("UCollisionComponent::SetAttackCollisionEnabled - Invalid EAttackCollisionType for (%s, %s)."), *GetNameSafe(GetOwner()), *UEnum::GetValueAsString(InType));
-            return;
-        }
+    checkf(HitGroup >= 0, TEXT("Owner: %s, Type: %s"), *GetNameSafe(GetOwner()), *UEnum::GetValueAsString(InType)); // unlikely
 
-        if (!ActiveCollisions.Contains(Definition))
-        {
-            ActiveCollisions.Add(Definition);
-            HitActors.Empty(); // @TODO
-        }
-        // @TEST
-        UE_LOG(LogCollisionComponent, Warning, TEXT("Enabled collision for type %d."), static_cast<int32>(InType));
-    }
-    else // Disable
+    const FAttackCollisionDefinition* Definition = GetAttackCollisionDefinition(InType);
+    if (!Definition)
     {
-        for (int32 Index = 0; Index < ActiveCollisions.Num(); ++Index)
+        // Maybe anim triggered a type that has been removed by body part loss or smth.
+        UE_LOG(LogCollisionComponent, Warning, TEXT("ActivateCollisionDefinition - Invalid EAttackCollisionType for (%s, %s)."), *GetNameSafe(GetOwner()), *UEnum::GetValueAsString(InType));
+        return;
+    }
+
+    // Add hit actor group if necessary.
+    if (HitGroup >= HitActorGroups.Num())
+    {
+        HitActorGroups.SetNum(HitGroup + 1);
+    }
+
+    // Activate
+    auto ActiveDefinition = FActiveAttackCollisionDefinition{Definition, HitGroup};
+    if (!ActiveDefinitions.Contains(ActiveDefinition))
+    {
+        ActiveDefinitions.Add(ActiveDefinition);
+
+        if (bClearHitActorsOnBegin)
         {
-            if (ActiveCollisions[Index]->CollisionType == InType)
-            {
-                ActiveCollisions.RemoveAt(Index);
-                // @TEST
-                UE_LOG(LogCollisionComponent, Warning, TEXT("Disabled collision for type %d."), static_cast<int32>(InType));
-                return;
-            }
+            HitActorGroups[HitGroup].Empty();
+        }
+    }
+
+    UE_LOG(LogCollisionComponent, Verbose, TEXT("Enabled collision - Type: %s, HitGroup: %d"), *UEnum::GetValueAsString(InType), HitGroup);
+}
+
+void UCollisionComponent::DeactivateCollisionDefinition(EAttackCollisionType InType, int32 HitGroup)
+{
+    for (int32 Index = 0; Index < ActiveDefinitions.Num(); ++Index)
+    {
+        if (ActiveDefinitions[Index].HitGroup == HitGroup && ActiveDefinitions[Index].Definition->CollisionType == InType)
+        {
+            ActiveDefinitions.RemoveAt(Index);
+
+            UE_LOG(LogCollisionComponent, Verbose, TEXT("Disabled collision - Type: %s, HitGroup: %d"), *UEnum::GetValueAsString(InType), HitGroup);
+            return;
         }
     }
 }
 
-void UCollisionComponent::ProcessCollisionDefinition(const FAttackCollisionDefinition* InDefinition)
+void UCollisionComponent::DeactivateCollisionDefinition(EAttackCollisionType InType)
 {
-    for (const FAttackCollisionSegment& Segment : InDefinition->Segments)
+    for (int32 Index = ActiveDefinitions.Num() - 1; Index >= 0; --Index)
     {
-        const FVector StartLocation = GetSocketLocation(InDefinition->CollisionType, Segment.StartSocketName);
-        const FVector EndLocation = GetSocketLocation(InDefinition->CollisionType, Segment.EndSocketName);
+        if (ActiveDefinitions[Index].Definition->CollisionType == InType)
+        {
+            ActiveDefinitions.RemoveAt(Index);
+        }
+    }
+}
+
+void UCollisionComponent::ProcessCollisionDefinition(const FActiveAttackCollisionDefinition& ActiveDefinition)
+{
+    // Trace each segment.
+    const FAttackCollisionDefinition* Definition = ActiveDefinition.Definition;
+    for (const FAttackCollisionSegment& Segment : Definition->Segments)
+    {
+        const FVector StartLocation = GetSocketLocation(Definition->CollisionType, Segment.StartSocketName);
+        const FVector EndLocation = Segment.StartSocketName == Segment.EndSocketName ? StartLocation : GetSocketLocation(Definition->CollisionType, Segment.EndSocketName);
 
         // @TODO - Multiple times per frame?
         TArray<FHitResult> HitResults;
@@ -150,16 +175,18 @@ void UCollisionComponent::ProcessCollisionDefinition(const FAttackCollisionDefin
         for (const FHitResult& HitResult : HitResults)
         {
             AActor* HitActor = HitResult.GetActor();
+
+            TSet<AActor*>& HitActors = HitActorGroups[ActiveDefinition.HitGroup];
             if (!HitActors.Contains(HitActor))
             {
                 HitActors.Add(HitActor);
-                ProcessHit(HitResult, InDefinition);
+                ProcessHit(HitResult, Definition->CollisionType, Definition->DamageType);
             }
         }
     }
 }
 
-void UCollisionComponent::ProcessHit(const FHitResult& HitResult, const FAttackCollisionDefinition* InDefinition)
+void UCollisionComponent::ProcessHit(const FHitResult& HitResult, EAttackCollisionType InType, TSubclassOf<UDamageType> InDamageType)
 {
     AActor* OwnerActor = GetOwner();
     ICombatInterface* OwnerCombatInterface = Cast<ICombatInterface>(OwnerActor);
@@ -172,7 +199,7 @@ void UCollisionComponent::ProcessHit(const FHitResult& HitResult, const FAttackC
 
     // @TODO - check team
 
-    float Damage = OwnerCombatInterface->GetDamage(InDefinition->CollisionType);
+    float Damage = OwnerCombatInterface->GetDamage(InType);
 
     UGameplayStatics::ApplyPointDamage(
         HitResult.GetActor(),
@@ -181,7 +208,7 @@ void UCollisionComponent::ProcessHit(const FHitResult& HitResult, const FAttackC
         HitResult,
         OwnerActor->GetInstigatorController(),
         OwnerActor,
-        InDefinition->DamageType
+        InDamageType
     );
 }
 

@@ -19,6 +19,7 @@ enum class EAttackCollisionType : uint8
 {
     None UMETA(Hidden),
     MainWeapon UMETA(DisplayName = "Main Weapon"),
+    Mouth UMETA(DisplayName = "Mouth"),
     RightFist UMETA(DisplayName = "RightFist"),
     LeftFist UMETA(DisplayName = "LeftFist"),
     Kick UMETA(DisplayName = "Kick"),

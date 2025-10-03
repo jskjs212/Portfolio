@@ -13,12 +13,24 @@ namespace EDrawDebugTrace { enum Type : int; }
 struct FWeaponData;
 class UEquipmentComponent;
 
+struct FActiveAttackCollisionDefinition
+{
+    const FAttackCollisionDefinition* Definition{nullptr};
+    int32 HitGroup{-1};
+
+    bool operator==(const FActiveAttackCollisionDefinition& Other) const
+    {
+        return Definition == Other.Definition && HitGroup == Other.HitGroup;
+    }
+};
+
 /**
  * Collision component that handles attack collisions.
  * Non-weapon AttackCollisionDefinitions should be configured in the component.
  * Activate or deactivate with SetAttackCollisionEnabled().
  * Process active collisions in TickComponent().
  * Trace only for pawns for now.
+ * !!! HitActors are not cleared on deactivation.
  *
  * @Dependency - Some AttackCollisionTypes need EquipmentComponent.
  */
@@ -51,14 +63,18 @@ public:
     // i.e. unequip weapon, lose body part, etc.
     void RemoveAttackCollisionDefinition(EAttackCollisionType InType);
 
-    // Activate or deactivate a certain collision type.
-    void SetAttackCollisionEnabled(EAttackCollisionType InType, bool bEnabled);
+    void ActivateCollisionDefinition(EAttackCollisionType InType, int32 HitGroup, bool bClearHitActorsOnBegin);
+
+    void DeactivateCollisionDefinition(EAttackCollisionType InType, int32 HitGroup);
+
+    // Deactivate all hit groups of the type.
+    void DeactivateCollisionDefinition(EAttackCollisionType InType);
 
 private:
     // Process each active collision definition.
-    void ProcessCollisionDefinition(const FAttackCollisionDefinition* InDefinition);
+    void ProcessCollisionDefinition(const FActiveAttackCollisionDefinition& ActiveDefinition);
 
-    void ProcessHit(const FHitResult& HitResult, const FAttackCollisionDefinition* InDefinition);
+    void ProcessHit(const FHitResult& HitResult, EAttackCollisionType InType, TSubclassOf<UDamageType> InDamageType);
 
     void HandleWeaponChanged(const FWeaponData* WeaponData);
 
@@ -74,9 +90,8 @@ private:
     //        Variables - collision
     ////////////////////////////////////////////////////////
 private:
-    // Current active collision definitions.
-    // Doesn't need TSet, usually 0~3 active unless the owner is a dragon?
-    TArray<const FAttackCollisionDefinition*> ActiveCollisions;
+    // Current active attack collision definitions.
+    TArray<FActiveAttackCollisionDefinition> ActiveDefinitions;
 
     /* Attack collision */
     // All collision definitions.
@@ -98,8 +113,7 @@ private:
 
     TArray<AActor*> ActorsToIgnore;
 
-    // @TODO - Can't handle multiple active collisions.
-    TSet<AActor*> HitActors;
+    TArray<TSet<AActor*>> HitActorGroups;
 
     TWeakObjectPtr<const UEquipmentComponent> CachedEquipmentComponent;
 };

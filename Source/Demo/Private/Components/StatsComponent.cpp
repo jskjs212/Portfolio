@@ -31,6 +31,17 @@ void UStatsComponent::ResetAllResourceStats()
 
 void UStatsComponent::AddResourceStat(const FGameplayTag StatTag, const FResourceStat& ResourceStat)
 {
+    static const FGameplayTagContainer AllowedResouceStatTags = FGameplayTagContainer::CreateFromArray(TArray<FGameplayTag>{
+        HealthTag,
+            StaminaTag
+    });
+
+    if (!StatTag.MatchesAnyExact(AllowedResouceStatTags))
+    {
+        UE_LOG(LogTemp, Error, TEXT("UStatsComponent::AddResourceStat - Stat %s is not allowed."), *StatTag.GetTagName().ToString());
+        return;
+    }
+
     if (ResourceStats.Contains(StatTag))
     {
         UE_LOG(LogTemp, Warning, TEXT("UStatsComponent::AddResourceStat - Stat %s already exists."), *StatTag.GetTagName().ToString());
@@ -38,9 +49,8 @@ void UStatsComponent::AddResourceStat(const FGameplayTag StatTag, const FResourc
     }
 
     FResourceStat& ResourceStatRef = ResourceStats.Add(StatTag, ResourceStat);
-    if (GetWorld())
+    if (HasBegunPlay())
     {
-        // Just in case added after BeginPlay
         ResourceStatRef.TimerDelegate.BindUObject(this, &ThisClass::RegenChecked, /* Payload Data */ StatTag);
     }
 }

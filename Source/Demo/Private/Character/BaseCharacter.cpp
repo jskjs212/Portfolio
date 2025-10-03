@@ -413,11 +413,6 @@ float ABaseCharacter::PerformAction(FGameplayTag InAction, bool bIgnoreCurrentSt
     return Duration;
 }
 
-void ABaseCharacter::SetAttackCollisionEnabled(EAttackCollisionType InType, bool bEnabled)
-{
-    CollisionComponent->SetAttackCollisionEnabled(InType, bEnabled);
-}
-
 const FActionInfo* ABaseCharacter::CanPerformAction(FGameplayTag InAction, bool bIgnoreCurrentState, int32 MontageIndex, bool bUseRandomIndex) const
 {
     USkeletalMeshComponent* CharacterMesh = GetMesh();

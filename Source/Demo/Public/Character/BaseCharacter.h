@@ -102,8 +102,6 @@ public:
     // @return Duration of the action's AnimMontage, or 0.f if failed to perform action.
     virtual float PerformAction(FGameplayTag InAction, bool bIgnoreCurrentState, int32 MontageIndex, bool bUseRandomIndex = false) override;
 
-    virtual void SetAttackCollisionEnabled(EAttackCollisionType InType, bool bEnabled) override;
-
     virtual bool IsInAction(FGameplayTag InAction) const override;
 
     virtual bool CanReceiveDamage() const override;
