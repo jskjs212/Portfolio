@@ -4,6 +4,7 @@
 #include "Blueprint/WidgetTree.h"
 #include "Components/ProgressBar.h"
 #include "Components/StatsComponent.h"
+#include "DemoTypes/LogCategories.h"
 #include "GameFramework/Pawn.h"
 
 void UStatBarWidget::NativeOnInitialized()
@@ -47,12 +48,12 @@ void UStatBarWidget::InitStatBar(AActor* OwnerActor, FGameplayTag InStatTag)
 
         if (!StatsComponent)
         {
-            UE_LOG(LogTemp, Error, TEXT("UStatBarWidget - Failed to find StatsComponent from %s."), *OwnerActor->GetName());
+            DemoLOG_CF(LogUI, Error, TEXT("Failed to find StatsComponent from %s."), *OwnerActor->GetName());
             return;
         }
         if (!StatsComponent->HasStatType(StatTag))
         {
-            UE_LOG(LogTemp, Error, TEXT("UStatBarWidget - StatsComponent doesn't have stat type: %s, owner: %s"), *StatTag.ToString(), *OwnerActor->GetName());
+            DemoLOG_CF(LogUI, Error, TEXT("StatsComponent doesn't have stat type: %s, owner: %s"), *StatTag.ToString(), *OwnerActor->GetName());
             return;
         }
 

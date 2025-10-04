@@ -5,14 +5,13 @@
 #include "Components/StateManagerComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "DemoTypes/ItemTypes.h"
+#include "DemoTypes/LogCategories.h"
 #include "DemoTypes/TableRowBases.h"
 #include "GameFramework/Character.h"
 #include "Items/Item.h"
 #include "PlayerController/DemoPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/ItemActionDispatcher.h"
-
-DEFINE_LOG_CATEGORY(LogEquipment);
 
 UEquipmentComponent::UEquipmentComponent()
 {
@@ -46,14 +45,14 @@ bool UEquipmentComponent::EquipItem(const FItemSlot& InSlot)
     AItem* SpawnedItem = EquipItem_SpawnItem(InSlot);
     if (!IsValid(SpawnedItem))
     {
-        UE_LOG(LogEquipment, Warning, TEXT("EquipItem() - Failed to spawn item."));
+        DemoLOG_F(LogEquipment, Warning, TEXT("Failed to spawn item."));
         return false;
     }
 
     // Attach
     if (!AttachActor(SpawnedItem, ValidationResult.EquipmentType))
     {
-        UE_LOG(LogEquipment, Warning, TEXT("EquipItem() - Failed to attach item."));
+        DemoLOG_F(LogEquipment, Warning, TEXT("Failed to attach item."));
         SpawnedItem->Destroy();
         return false;
     }
@@ -62,7 +61,7 @@ bool UEquipmentComponent::EquipItem(const FItemSlot& InSlot)
 
     EquipItem_PostProcess(ValidationResult);
 
-    UE_LOG(LogEquipment, Display, TEXT("Equipped - %s"), *InSlot.RowHandle.RowName.ToString());
+    UE_LOG(LogEquipment, Verbose, TEXT("Equipped - %s"), *InSlot.RowHandle.RowName.ToString());
     return true;
 }
 
@@ -79,7 +78,7 @@ bool UEquipmentComponent::UnequipItem(const FGameplayTag EquipmentType)
     AItem* EquippedItem = GetEquippedItem(EquipmentType);
     if (!EquippedItem)
     {
-        UE_LOG(LogEquipment, Display, TEXT("UnequipItem() - Not equipped %s."), *EquipmentType.ToString());
+        DemoLOG_F(LogEquipment, Display, TEXT("Not equipped %s."), *EquipmentType.ToString());
         return false;
     }
 
@@ -93,7 +92,7 @@ bool UEquipmentComponent::UnequipItem(const FGameplayTag EquipmentType)
     if (!EquippedItem->Destroy())
     {
         // @TODO - Handle failure, already added to inventory so it should be destroyed
-        UE_LOG(LogEquipment, Error, TEXT("UnequipItem() - Failed to destroy item."));
+        DemoLOG_F(LogEquipment, Fatal, TEXT("Failed to destroy item, but already added to inventory."));
         return false;
     }
 
@@ -101,7 +100,7 @@ bool UEquipmentComponent::UnequipItem(const FGameplayTag EquipmentType)
 
     UnequipItem_PostProcess(EquipmentType);
 
-    UE_LOG(LogEquipment, Display, TEXT("Unequipped - %s"), *EquipmentType.ToString());
+    UE_LOG(LogEquipment, Verbose, TEXT("Unequipped - %s"), *EquipmentType.ToString());
     return true;
 }
 
@@ -118,7 +117,7 @@ bool UEquipmentComponent::UnequipAndDropItem(const FGameplayTag EquipmentType)
     AItem* EquippedItem = GetEquippedItem(EquipmentType);
     if (!EquippedItem)
     {
-        UE_LOG(LogEquipment, Display, TEXT("UnequipAndDropItem() - Not equipped %s."), *EquipmentType.ToString());
+        DemoLOG_F(LogEquipment, Display, TEXT("Not equipped %s."), *EquipmentType.ToString());
         return false;
     }
 
@@ -129,7 +128,7 @@ bool UEquipmentComponent::UnequipAndDropItem(const FGameplayTag EquipmentType)
     bool bDropped = EquippedItem->Drop(GetOwner());
     if (!bDropped) // Unlikely, but just in case
     {
-        UE_LOG(LogEquipment, Error, TEXT("UnequipAndDropItem() - Failed to drop item."));
+        DemoLOG_F(LogEquipment, Error, TEXT("Failed to drop item, re-attaching."));
         AttachActor(EquippedItem, EquipmentType);
         return false;
     }
@@ -138,7 +137,7 @@ bool UEquipmentComponent::UnequipAndDropItem(const FGameplayTag EquipmentType)
 
     UnequipItem_PostProcess(EquipmentType);
 
-    UE_LOG(LogEquipment, Display, TEXT("Unequipped - %s"), *EquipmentType.ToString());
+    UE_LOG(LogEquipment, Verbose, TEXT("Unequipped - %s"), *EquipmentType.ToString());
     return true;
 }
 
@@ -196,7 +195,7 @@ FEquipmentValidationResult UEquipmentComponent::EquipItem_Validate(const FItemSl
 
     if (!InSlot.IsValid())
     {
-        UE_LOG(LogEquipment, Warning, TEXT("EquipItem() - Slot is not valid."));
+        DemoLOG_F(LogEquipment, Warning, TEXT("Slot is not valid."));
         return {};
     }
 
@@ -210,7 +209,7 @@ FEquipmentValidationResult UEquipmentComponent::EquipItem_Validate(const FItemSl
     FGameplayTag EquipmentType = DemoItemTypes::GetEquipmentType(ItemData->ItemType);
     if (!EquipmentType.IsValid())
     {
-        UE_LOG(LogEquipment, Error, TEXT("EquipItem() - Item is not equippable."));
+        DemoLOG_F(LogEquipment, Error, TEXT("Item is not equippable."));
         return {};
     }
 
@@ -218,7 +217,7 @@ FEquipmentValidationResult UEquipmentComponent::EquipItem_Validate(const FItemSl
     TObjectPtr<AItem>* EquippedItemPtr = EquippedItems.Find(EquipmentType);
     if (!EquippedItemPtr)
     {
-        UE_LOG(LogEquipment, Error, TEXT("EquipItem() - EquipmentType is not valid."));
+        DemoLOG_F(LogEquipment, Error, TEXT("EquipmentType is not valid."));
         return {};
     }
 
@@ -239,7 +238,7 @@ bool UEquipmentComponent::EquipItem_HandleConflicts(const FEquipmentValidationRe
     {
         if (!UnequipItem(ValidationResult.EquipmentType))
         {
-            UE_LOG(LogEquipment, Warning, TEXT("EquipItem() - Failed to unequip."));
+            DemoLOG_F(LogEquipment, Warning, TEXT("Failed to unequip."));
             return false;
         }
     }
@@ -251,7 +250,7 @@ bool UEquipmentComponent::EquipItem_HandleConflicts(const FEquipmentValidationRe
         {
             if (!UnequipItem(DemoGameplayTags::Item_Armor_Shield))
             {
-                UE_LOG(LogEquipment, Warning, TEXT("EquipItem() - Failed to unequip shield."));
+                DemoLOG_F(LogEquipment, Warning, TEXT("Failed to unequip shield."));
                 return false;
             }
         }
@@ -263,7 +262,7 @@ bool UEquipmentComponent::EquipItem_HandleConflicts(const FEquipmentValidationRe
         if (CurrentWeaponType.MatchesTag(DemoGameplayTags::Item_Weapon_Melee_TwoHanded))
         {
             // @misc - In-game notification?
-            UE_LOG(LogEquipment, Display, TEXT("EquipItem() - Can't equip shield when two-handing."));
+            DemoLOG_F(LogEquipment, Display, TEXT("Can't equip shield when two-handing."));
             return false;
         }
     }
@@ -291,7 +290,7 @@ AItem* UEquipmentComponent::EquipItem_SpawnItem(const FItemSlot& InSlot) const
     // Destroy without mesh -> change if there exists no-mesh-EquipmentType
     if (!SpawnedItem->IsMeshAssetValid())
     {
-        UE_LOG(LogEquipment, Error, TEXT("EquipItem_SpawnItem() - Spawned item has no mesh."));
+        DemoLOG_F(LogEquipment, Error, TEXT("Spawned item has no mesh."));
         SpawnedItem->Destroy();
         return nullptr;
     }
@@ -313,7 +312,7 @@ bool UEquipmentComponent::AttachActor(AActor* ActorToAttach, FGameplayTag Equipm
     const FName* SocketNamePtr = EquipDefaultSocketNames.Find(EquipmentType);
     if (!SocketNamePtr)
     {
-        UE_LOG(LogEquipment, Error, TEXT("EquipItem() - No default socket name for %s."), *EquipmentType.ToString());
+        DemoLOG_F(LogEquipment, Error, TEXT("No default socket name for %s."), *EquipmentType.ToString());
         return false;
     }
     const FName SocketName = *SocketNamePtr;
@@ -321,7 +320,7 @@ bool UEquipmentComponent::AttachActor(AActor* ActorToAttach, FGameplayTag Equipm
 #if WITH_EDITOR
     if (!OwnerMesh->DoesSocketExist(SocketName))
     {
-        UE_LOG(LogEquipment, Warning, TEXT("AttachActor() - Socket %s does not exist."), *SocketName.ToString());
+        DemoLOG_F(LogEquipment, Warning, TEXT("Socket %s does not exist."), *SocketName.ToString());
         return false;
     }
 #endif // WITH_EDITOR
@@ -329,7 +328,7 @@ bool UEquipmentComponent::AttachActor(AActor* ActorToAttach, FGameplayTag Equipm
     const auto AttachRules = FAttachmentTransformRules::SnapToTargetNotIncludingScale;
     if (!ActorToAttach->AttachToComponent(OwnerMesh, AttachRules, SocketName))
     {
-        UE_LOG(LogEquipment, Warning, TEXT("AttachActor() - Failed to attach %s to %s."), *ActorToAttach->GetName(), *SocketName.ToString());
+        DemoLOG_F(LogEquipment, Warning, TEXT("Failed to attach %s to %s."), *ActorToAttach->GetName(), *SocketName.ToString());
         return false;
     }
 
@@ -368,7 +367,7 @@ bool UEquipmentComponent::UnequipItem_AddToInventory(const FItemSlot& InSlot)
     UInventoryComponent* InventoryComponent = GetInventoryComponent();
     if (!InventoryComponent)
     {
-        UE_LOG(LogEquipment, Error, TEXT("UnequipItem() - Can't unequip without InventoryComponent."));
+        DemoLOG_F(LogEquipment, Error, TEXT("Can't unequip without InventoryComponent."));
         return false;
     }
 
@@ -379,7 +378,7 @@ bool UEquipmentComponent::UnequipItem_AddToInventory(const FItemSlot& InSlot)
     if (InventoryComponent->AddItem(Request) <= 0)
     {
         // @misc - In-game notification?
-        UE_LOG(LogEquipment, Warning, TEXT("UnequipItem() - Failed to add item to inventory."));
+        DemoLOG_F(LogEquipment, Warning, TEXT("Failed to add item to inventory."));
         return false;
     }
 

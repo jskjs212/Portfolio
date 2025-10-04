@@ -3,6 +3,7 @@
 #include "Animation/AnimationDataSubsystem.h"
 #include "DemoTypes/ActionInfoConfig.h"
 #include "DemoTypes/ActionInfoEntryConfig.h"
+#include "DemoTypes/LogCategories.h"
 #include "Settings/DemoProjectSettings.h"
 
 void UAnimationDataSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -13,7 +14,7 @@ void UAnimationDataSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     const UDemoProjectSettings* DemoProjectSettings = GetDefault<UDemoProjectSettings>();
     if (!DemoProjectSettings)
     {
-        UE_LOG(LogTemp, Error, TEXT("UAnimationDataSubsystem::Initialize - Failed to get UDemoProjectSettings."));
+        DemoLOG_CF(LogDemoGame, Error, TEXT("Failed to get UDemoProjectSettings."));
         return;
     }
 
@@ -21,7 +22,7 @@ void UAnimationDataSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     const UActionInfoEntryConfig* ActionInfoEntryConfig = DemoProjectSettings->ActionInfoEntryConfig.LoadSynchronous();
     if (!ActionInfoEntryConfig)
     {
-        UE_LOG(LogTemp, Error, TEXT("UAnimationDataSubsystem::Initialize - Failed to load ActionInfoEntryConfig from DemoProjectSettings."));
+        DemoLOG_CF(LogDemoGame, Error, TEXT("Failed to load ActionInfoEntryConfig from DemoProjectSettings."));
         return;
     }
 
@@ -29,7 +30,7 @@ void UAnimationDataSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     const UItemAnimLayerConfig* ItemAnimLayerConfig = DemoProjectSettings->ItemAnimLayerConfig.LoadSynchronous();
     if (!ItemAnimLayerConfig)
     {
-        UE_LOG(LogTemp, Error, TEXT("UAnimationDataSubsystem::Initialize - Failed to load ItemAnimLayerConfig from DemoProjectSettings."));
+        DemoLOG_CF(LogDemoGame, Error, TEXT("Failed to load ItemAnimLayerConfig from DemoProjectSettings."));
         return;
     }
 
@@ -43,8 +44,7 @@ void UAnimationDataSubsystem::Initialize(FSubsystemCollectionBase& Collection)
         {
             if (ActionInfoMap.Contains(Entry.Key))
             {
-                UE_LOG(LogTemp, Error, TEXT("UAnimationDataSubsystem::Initialize - Duplicate ActionInfoKey (%s, %s). Skipping."),
-                    *Entry.Key.CharacterTag.ToString(), *Entry.Key.WeaponTag.ToString());
+                DemoLOG_CF(LogDemoGame, Error, TEXT("Duplicate ActionInfoKey (%s, %s). Skipping."), *Entry.Key.CharacterTag.ToString(), *Entry.Key.WeaponTag.ToString());
                 continue;
             }
 
@@ -60,7 +60,7 @@ void UAnimationDataSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     {
         if (!ActionInfoKey.CharacterTag.IsValid() || !ActionInfoKey.WeaponTag.IsValid() || !ActionInfoConfig->IsValid())
         {
-            UE_LOG(LogTemp, Error, TEXT("UAnimationDataSubsystem::Initialize: Invalid ActionInfoConfig (%s, %s)."), *ActionInfoKey.CharacterTag.ToString(), *ActionInfoKey.WeaponTag.ToString());
+            DemoLOG_CF(LogDemoGame, Error, TEXT("Invalid ActionInfoConfig (%s, %s)."), *ActionInfoKey.CharacterTag.ToString(), *ActionInfoKey.WeaponTag.ToString());
         }
     }
 #endif // WITH_EDITOR

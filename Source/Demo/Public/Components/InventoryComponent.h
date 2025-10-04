@@ -9,8 +9,6 @@
 #include "GameplayTagContainer.h"
 #include "InventoryComponent.generated.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogInventory, Log, All);
-
 class UEquipmentComponent;
 class UStatsComponent;
 

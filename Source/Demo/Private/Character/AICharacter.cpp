@@ -1,9 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Character/AICharacter.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Components/StateManagerComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
+#include "DemoTypes/LogCategories.h"
 
 // @TEST
 #include "Components/StatsComponent.h"
@@ -11,6 +14,9 @@
 
 AAICharacter::AAICharacter()
 {
+    GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+    GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+
     AIStatusWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("AIStatusWidget"));
     AIStatusWidgetComponent->SetupAttachment(GetMesh());
     AIStatusWidgetComponent->SetRelativeLocation(FVector{0.f, 0.f, 220.f});
@@ -25,15 +31,13 @@ void AAICharacter::BeginPlay()
 
     if (!GetMesh()->DoesSocketExist(LockOnSocketName))
     {
-        UE_LOG(LogTemp, Warning, TEXT("LockOnSocketName '%s' does not exist in '%s'. Using actor location instead."),
-            *LockOnSocketName.ToString(), *GetName());
+        DemoLOG_CF(LogCharacter, Warning, TEXT("LockOnSocketName '%s' does not exist in '%s'. Using actor location instead."), *LockOnSocketName.ToString(), *GetName());
     }
 
-    // @debug
-    //if (!BehaviorTreeOverride)
-    //{
-    //    UE_LOG(LogTemp, Warning, TEXT("This AICharacter (%s) is using default BehaviorTree."), *GetName());
-    //}
+    if (!BehaviorTreeOverride)
+    {
+        DemoLOG_CF(LogCharacter, Display, TEXT("This AICharacter (%s) is using default BehaviorTree."), *GetName());
+    }
 
     if (UAIStatusWidget* AIStatusWidget = Cast<UAIStatusWidget>(AIStatusWidgetComponent->GetWidget()))
     {
@@ -41,7 +45,7 @@ void AAICharacter::BeginPlay()
     }
     else
     {
-        UE_LOG(LogTemp, Warning, TEXT("AIStatusWidget is not valid for %s."), *GetName());
+        DemoLOG_CF(LogCharacter, Warning, TEXT("AIStatusWidget is not valid for %s."), *GetName());
     }
 }
 

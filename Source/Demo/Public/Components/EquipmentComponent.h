@@ -8,8 +8,6 @@
 #include "GameplayTagContainer.h"
 #include "EquipmentComponent.generated.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogEquipment, Log, All);
-
 struct FWeaponData;
 class AItem;
 class UInventoryComponent;

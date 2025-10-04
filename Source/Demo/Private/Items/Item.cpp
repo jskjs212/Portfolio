@@ -6,6 +6,7 @@
 #include "Components/MeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "DemoTypes/LogCategories.h"
 #include "DemoTypes/TableRowBases.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -64,14 +65,14 @@ int32 AItem::DropItem(UWorld* World, const FItemSlot& InSlot, const AActor* Drop
     AItem* DroppedItem = AItem::SpawnItem(World, InSlot, SpawnTransform);
     if (!IsValid(DroppedItem))
     {
-        UE_LOG(LogTemp, Error, TEXT("AItem::DropItem - Failed to spawn item."));
+        DemoLOG_CF(LogTemp, Error, TEXT("Failed to spawn item."));
         return -1;
     }
 
     // Check mesh to drop
     if (!DroppedItem->IsMeshAssetValid())
     {
-        UE_LOG(LogTemp, Error, TEXT("AItem::DropItem - Item has no mesh."));
+        DemoLOG_CF(LogTemp, Error, TEXT("Item has no mesh."));
         DroppedItem->Destroy();
         return -1;
     }
@@ -113,7 +114,7 @@ void AItem::BeginPlay()
     }
     else
     {
-        UE_LOG(LogTemp, Error, TEXT("AItem::BeginPlay() - ItemSlot is not set properly from %s."), *GetName());
+        DemoLOG_CF(LogTemp, Error, TEXT("ItemSlot is not set properly from %s."), *GetName());
     }
 }
 
@@ -252,7 +253,7 @@ void AItem::SetupMesh()
         UKismetSystemLibrary::GetComponentBounds(CurrentMesh, Origin, BoxExtent, Radius);
         InteractCollision->SetBoxExtent(BoxExtent);
         // @TEST
-        //UE_LOG(LogTemp, Display, TEXT("AItem::SetupMesh() - BoxExtent: %s, Origin: %s."), *BoxExtent.ToString(), *Origin.ToString());
+        //DemoLOG_CF(LogTemp, Display, TEXT("BoxExtent: %s, Origin: %s."), *BoxExtent.ToString(), *Origin.ToString());
     }
 }
 

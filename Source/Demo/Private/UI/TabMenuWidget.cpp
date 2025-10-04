@@ -4,6 +4,7 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Components/Image.h"
 #include "Components/WidgetSwitcher.h"
+#include "DemoTypes/LogCategories.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/TabButton.h"
 
@@ -33,7 +34,7 @@ void UTabMenuWidget::InitTabMenu()
 {
     if (TabEntries.Num() == 0)
     {
-        UE_LOG(LogTemp, Warning, TEXT("UTabMenuWidget - No tab entries."));
+        DemoLOG_CF(LogUI, Warning, TEXT("No tab entries."));
         return;
     }
 

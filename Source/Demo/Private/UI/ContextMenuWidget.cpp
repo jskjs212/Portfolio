@@ -6,6 +6,7 @@
 #include "Components/Overlay.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
+#include "DemoTypes/LogCategories.h"
 #include "Framework/Application/SlateApplication.h"
 #include "UI/TabButton.h"
 
@@ -31,7 +32,7 @@ void UContextMenuWidget::InitActions(const TArray<FContextAction>& InActions)
 {
     if (bSetupDone)
     {
-        UE_LOG(LogTemp, Error, TEXT("UContextMenuWidget::InitActions - Already setup."));
+        DemoLOG_CF(LogUI, Error, TEXT("Already setup."));
         return;
     }
     bSetupDone = true;
@@ -63,14 +64,14 @@ void UContextMenuWidget::InitActions(const TArray<FContextAction>& InActions)
             UBorder* HoveredBorder = Cast<UBorder>(NewButton->GetChildAt(0));
             if (!HoveredBorder)
             {
-                UE_LOG(LogTemp, Error, TEXT("UContextMenuWidget::InitActions - HoveredBorder is null for index %d"), Index);
+                DemoLOG_CF(LogUI, Error, TEXT("HoveredBorder is null for index %d"), Index);
                 continue;
             }
 
             UTextBlock* TextBlock = Cast<UTextBlock>(HoveredBorder->GetChildAt(0));
             if (!TextBlock)
             {
-                UE_LOG(LogTemp, Error, TEXT("UContextMenuWidget::InitActions - TextBlock is null for index %d"), Index);
+                DemoLOG_CF(LogUI, Error, TEXT("TextBlock is null for index %d"), Index);
                 continue;
             }
 
@@ -91,13 +92,13 @@ void UContextMenuWidget::InitActions(const TArray<FContextAction>& InActions)
         }
         else
         {
-            UE_LOG(LogTemp, Error, TEXT("UContextMenuWidget::InitActions - Failed to duplicate button for index %d"), Index);
+            DemoLOG_CF(LogUI, Error, TEXT("Failed to duplicate button for index %d"), Index);
         }
     }
 
     if (ActionButtons.Num() != NumActions)
     {
-        UE_LOG(LogTemp, Error, TEXT("UContextMenuWidget::InitActions - ActionButtons.Num() != InActions.Num()"));
+        DemoLOG_CF(LogUI, Error, TEXT("ActionButtons.Num() != InActions.Num()"));
     }
 }
 

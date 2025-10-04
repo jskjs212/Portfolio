@@ -12,6 +12,7 @@
 #include "Components/StatsComponent.h"
 #include "Components/TargetingComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
+#include "DemoTypes/LogCategories.h"
 #include "DemoTypes/TableRowBases.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -436,14 +437,14 @@ void APlayerCharacter::SetMovementSpeedMode(FGameplayTag NewSpeedMode)
 
 void APlayerCharacter::Test1_Implementation()
 {
-    UE_LOG(LogTemp, Warning, TEXT("APlayerCharacter::Test1() called!"));
+    DemoLOG_CF(LogCharacter, Warning, TEXT("called!"));
 
     EquipmentComponent->EquipItem(TestItemSlot);
 }
 
 void APlayerCharacter::Test2_Implementation()
 {
-    UE_LOG(LogTemp, Warning, TEXT("APlayerCharacter::Test2() called!"));
+    DemoLOG_CF(LogCharacter, Warning, TEXT("called!"));
 
     EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Weapon);
     EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Armor_Shield);

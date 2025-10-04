@@ -34,7 +34,7 @@ public:
 
     virtual bool CanReceiveDamage() const = 0;
 
-    virtual float GetDamage(EAttackCollisionType InType) const = 0;
+    virtual float CalculateDamage(EAttackCollisionType InType) const = 0;
 
     virtual int32 GetActionInfoCount(FGameplayTag InAction) const = 0;
 

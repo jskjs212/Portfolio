@@ -3,6 +3,7 @@
 #include "Animation/AnimNotifies/AnimNotify_ContinueAttack.h"
 #include "Components/CombatComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "DemoTypes/LogCategories.h"
 
 void UAnimNotify_ContinueAttack::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
@@ -10,7 +11,7 @@ void UAnimNotify_ContinueAttack::Notify(USkeletalMeshComponent* MeshComp, UAnimS
 
     if (!AttackAction.IsValid())
     {
-        UE_LOG(LogTemp, Error, TEXT("UAnimNotify_ContinueAttack - AttackAction tag is not set."));
+        DemoLOG_CF(LogAnimation, Error, TEXT("AttackAction tag is not valid."));
         return;
     }
 

@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UI/DemoHUD.h"
+#include "DemoTypes/LogCategories.h"
 #include "UI/DemoHUDWidget.h"
 #include "UI/PlayerMenuWidget.h"
 
@@ -14,7 +15,7 @@ ADemoHUD::ADemoHUD()
     }
     else
     {
-        UE_LOG(LogTemp, Error, TEXT("ADemoHUD - DemoHUDWidget BP not found."));
+        DemoLOG_CF(LogUI, Error, TEXT("DemoHUDWidget BP is not found."));
         DemoHUDWidgetClass = UDemoHUDWidget::StaticClass();
     }
 }

@@ -3,6 +3,7 @@
 #include "UI/EquipmentPageWidget.h"
 #include "Components/EquipmentComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
+#include "DemoTypes/LogCategories.h"
 #include "Items/Item.h"
 #include "PlayerController/DemoPlayerController.h"
 #include "UI/ContextMenuWidget.h"
@@ -19,7 +20,7 @@ void UEquipmentPageWidget::NativeOnInitialized()
 
     if (!ContextMenuWidgetClass)
     {
-        UE_LOG(LogTemp, Error, TEXT("UEquipmentPageWidget::NativeOnInitialized - WBP classes are not set."));
+        DemoLOG_CF(LogUI, Error, TEXT("ContextMenuWidgetClass is not set."));
         return;
     }
 

@@ -2,6 +2,7 @@
 
 #include "Animation/DemoAnimInstance.h"
 #include "Character/BaseCharacter.h"
+#include "DemoTypes/LogCategories.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -24,7 +25,7 @@ void UDemoAnimInstance::NativeInitializeAnimation()
 
     if (!BaseCharacter)
     {
-        UE_LOG(LogTemp, Error, TEXT("UDemoAnimInstance::NativeInitializeAnimation - BaseCharacter is nullptr."));
+        DemoLOG_CF(LogAnimation, Error, TEXT("Owning actor is not ABaseCharacter."));
     }
 }
 

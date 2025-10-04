@@ -5,6 +5,7 @@
 #include "Components/Image.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/StatsComponent.h"
+#include "DemoTypes/LogCategories.h"
 #include "Interfaces/Interactable.h"
 #include "Interfaces/TargetInterface.h"
 #include "Items/Item.h"
@@ -41,7 +42,7 @@ void UDemoHUDWidget::NativeConstruct()
     LockOnMarkerSlot = Cast<UCanvasPanelSlot>(LockOnMarker->Slot);
     if (!LockOnMarkerSlot)
     {
-        UE_LOG(LogTemp, Error, TEXT("UDemoHUDWidget::NativeConstruct - LockOnMarkerSlot is not valid."));
+        DemoLOG_CF(LogUI, Error, TEXT("LockOnMarker is not in a CanvasPanel."));
     }
 }
 

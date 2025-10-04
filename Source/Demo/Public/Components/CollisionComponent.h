@@ -7,8 +7,6 @@
 #include "DemoTypes/AttackTypes.h"
 #include "CollisionComponent.generated.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogCollisionComponent, Log, All);
-
 namespace EDrawDebugTrace { enum Type : int; }
 struct FWeaponData;
 class UEquipmentComponent;

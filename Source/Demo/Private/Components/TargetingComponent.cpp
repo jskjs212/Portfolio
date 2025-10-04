@@ -205,7 +205,7 @@ FFindTargetResult UTargetingComponent::FindTargetFromSweepResults(const TArray<F
 FFindTargetResult UTargetingComponent::FindTarget() const
 {
     DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UTargetingComponent::FindTarget"), STAT_TargetingComponent_FindTarget, STATGROUP_Game);
-    TRACE_CPUPROFILER_EVENT_SCOPE_STR(__FUNCTION__);
+    TRACE_CPUPROFILER_EVENT_SCOPE_STR(TEXT(__FUNCTION__));
 
     // Assumes that the owner has only one camera component.
     const AActor* OwnerActor = GetOwner();

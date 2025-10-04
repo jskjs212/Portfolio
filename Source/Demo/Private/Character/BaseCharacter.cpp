@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "Character/BaseCharacter.h"
 #include "Animation/AnimationDataSubsystem.h"
 #include "Animation/AnimInstance.h"
+#include "Animation/AnimLayerInterface.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/CollisionComponent.h"
 #include "Components/CombatComponent.h"
@@ -13,6 +13,7 @@
 #include "Components/StatsComponent.h"
 #include "DemoTypes/ActionInfoConfig.h"
 #include "DemoTypes/DemoGameplayTags.h"
+#include "DemoTypes/LogCategories.h"
 #include "DemoTypes/TableRowBases.h"
 #include "Engine/DamageEvents.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -49,17 +50,23 @@ void ABaseCharacter::BeginPlay()
 
     if (!CharacterTag.IsValid())
     {
-        UE_LOG(LogTemp, Error, TEXT("CharacterTag is not set for %s."), *GetName());
+        DemoLOG_CF(LogCharacter, Error, TEXT("CharacterTag is not set for %s."), *GetName());
     }
     if (!HitReactFrontMontage || !HitReactBackMontage || !HitSound || !HitParticle)
     {
-        UE_LOG(LogTemp, Warning, TEXT("HitReact assets are not set for %s."), *GetName());
+        DemoLOG_CF(LogCharacter, Warning, TEXT("HitReact assets are not set for %s."), *GetName());
     }
 
-    // @check - Initial equipment settings
-    UpdateAnimationData(DemoGameplayTags::Item_Weapon_NoWeapon);
-
     EquipmentComponent->OnWeaponChanged.AddUObject(this, &ThisClass::HandleWeaponChanged);
+    for (const FItemSlot& Slot : StartingItems)
+    {
+        EquipmentComponent->EquipItem(Slot);
+    }
+    const AItem* StartingWeapon = EquipmentComponent->GetEquippedItem(DemoGameplayTags::Item_Weapon);
+    if (!StartingWeapon)
+    {
+        UpdateAnimationData(DemoGameplayTags::Item_Weapon_NoWeapon);
+    }
 
     StateManager->OnStateBegan.AddUObject(this, &ThisClass::HandleStateBegan);
 
@@ -209,6 +216,8 @@ void ABaseCharacter::EnableRagdoll()
 
 void ABaseCharacter::HandleDeath()
 {
+    DemoLOG_F(LogCharacter, Display, TEXT("%s has died."), *GetName());
+
     // @TODO
     // Stop animations to prevent notifies
     UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -288,7 +297,7 @@ void ABaseCharacter::UpdateAnimationData(FGameplayTag WeaponTag)
     UAnimationDataSubsystem* AnimationDataSubsystem = UGameInstance::GetSubsystem<UAnimationDataSubsystem>(GetGameInstance());
     if (!AnimationDataSubsystem)
     {
-        UE_LOG(LogTemp, Error, TEXT("AnimationDataSubsystem not found."));
+        DemoLOG_CF(LogCharacter, Error, TEXT("AnimationDataSubsystem not found."));
         CurrentActionInfo = nullptr;
         return;
     }
@@ -296,18 +305,24 @@ void ABaseCharacter::UpdateAnimationData(FGameplayTag WeaponTag)
     CurrentActionInfo = AnimationDataSubsystem->GetActionInfoConfig(CharacterTag, WeaponTag);
     if (!CurrentActionInfo)
     {
-        UE_LOG(LogTemp, Error, TEXT("Invalid ActionInfo for (%s, %s)."), *CharacterTag.ToString(), *WeaponTag.ToString());
+        DemoLOG_CF(LogCharacter, Error, TEXT("Invalid ActionInfo for (%s, %s)."), *CharacterTag.ToString(), *WeaponTag.ToString());
     }
 
     if (GetMesh())
     {
-        if (TSubclassOf<UAnimInstance> ItemAnimLayerClass = AnimationDataSubsystem->GetItemAnimLayerClass(CharacterTag, WeaponTag))
+        if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
         {
-            GetMesh()->LinkAnimClassLayers(ItemAnimLayerClass);
-        }
-        else
-        {
-            UE_LOG(LogTemp, Error, TEXT("Invalid ItemAnimLayerClass for (%s, %s)."), *CharacterTag.ToString(), *WeaponTag.ToString());
+            if (AnimInstance->Implements<UAnimLayerInterface>())
+            {
+                if (TSubclassOf<UAnimInstance> ItemAnimLayerClass = AnimationDataSubsystem->GetItemAnimLayerClass(CharacterTag, WeaponTag))
+                {
+                    GetMesh()->LinkAnimClassLayers(ItemAnimLayerClass);
+                }
+                else
+                {
+                    DemoLOG_CF(LogCharacter, Error, TEXT("Invalid ItemAnimLayerClass for (%s, %s)."), *CharacterTag.ToString(), *WeaponTag.ToString());
+                }
+            }
         }
     }
 }
@@ -323,7 +338,7 @@ bool ABaseCharacter::CanReceiveDamage() const
     return !StateManager->IsInAction(DemoGameplayTags::State_Dead);
 }
 
-float ABaseCharacter::GetDamage(EAttackCollisionType InType) const
+float ABaseCharacter::CalculateDamage(EAttackCollisionType InType) const
 {
     float Damage = 0.f;
 
@@ -332,15 +347,20 @@ float ABaseCharacter::GetDamage(EAttackCollisionType InType) const
     {
         if (AItem* MainWeapon = EquipmentComponent->GetEquippedItem(DemoGameplayTags::Item_Weapon))
         {
-            if (const FWeaponData* WeaponData = MainWeapon->GetItemSlot().RowHandle.GetRow<FWeaponData>(TEXT("ABaseCharacter::GetDamage")))
+            if (const FWeaponData* WeaponData = MainWeapon->GetItemSlot().RowHandle.GetRow<FWeaponData>(TEXT("ABaseCharacter::CalculateDamage")))
             {
                 Damage = WeaponData->Damage;
             }
         }
     }
+    // @TODO - unarmed damage
+    else if (const float* DamagePtr = ActionToDamageMap.Find(StateManager->GetCurrentAction()))
+    {
+        Damage = *DamagePtr;
+    }
     else
     {
-        // @TODO - unarmed damage
+        DemoLOG_CF(LogCharacter, Error, TEXT("No damage found for action %s."), *StateManager->GetCurrentAction().ToString());
     }
 
     // Damage multiplier from action
@@ -397,7 +417,7 @@ float ABaseCharacter::PerformAction(FGameplayTag InAction, bool bIgnoreCurrentSt
     float Duration = AnimInstance->Montage_Play(ActionInfo->AnimMontage, ActionInfo->PlayRate, EMontagePlayReturnType::Duration);
     if (Duration == 0.f)
     {
-        UE_LOG(LogTemp, Error, TEXT("ABaseCharacter::PerformAction - Failed to play montage for %s."), *InAction.ToString());
+        DemoLOG_CF(LogCharacter, Error, TEXT("Failed to play montage for %s."), *InAction.ToString());
         return 0.f;
     }
 
@@ -436,7 +456,7 @@ const FActionInfo* ABaseCharacter::CanPerformAction(FGameplayTag InAction, bool 
     const TArray<FActionInfo>* ActionInfoArray = CurrentActionInfo->GetActionInfoArray(InAction);
     if (!ActionInfoArray)
     {
-        UE_LOG(LogTemp, Error, TEXT("ABaseCharacter::CanPerformAction - Invalid ActionInfo for action %s."), *InAction.ToString());
+        DemoLOG_CF(LogCharacter, Error, TEXT("Invalid ActionInfo for action %s."), *InAction.ToString());
         return nullptr;
     }
 
@@ -448,7 +468,7 @@ const FActionInfo* ABaseCharacter::CanPerformAction(FGameplayTag InAction, bool 
     }
     else if (MontageIndex < 0 || MontageIndex >= ActionInfoArray->Num())
     {
-        UE_LOG(LogTemp, Error, TEXT("ABaseCharacter::CanPerformAction - Invalid index %d for action %s."), MontageIndex, *InAction.ToString());
+        DemoLOG_CF(LogCharacter, Error, TEXT("Invalid index %d for action %s."), MontageIndex, *InAction.ToString());
         return nullptr;
     }
 
@@ -462,7 +482,7 @@ const FActionInfo* ABaseCharacter::CanPerformAction(FGameplayTag InAction, bool 
     // Check montage
     if (!ActionInfo.AnimMontage)
     {
-        UE_LOG(LogTemp, Error, TEXT("ABaseCharacter::CanPerformAction - Invalid AnimMontage for action %s."), *InAction.ToString());
+        DemoLOG_CF(LogCharacter, Error, TEXT("Invalid AnimMontage for action %s."), *InAction.ToString());
         return nullptr;
     }
 

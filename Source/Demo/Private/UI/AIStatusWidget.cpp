@@ -4,6 +4,7 @@
 #include "Components/StatsComponent.h"
 #include "Components/TextBlock.h"
 #include "Components/WidgetComponent.h"
+#include "DemoTypes/LogCategories.h"
 #include "GameplayTagContainer.h"
 #include "UI/StatBarWidget.h"
 
@@ -18,7 +19,7 @@ void UAIStatusWidget::InitAIStatus(AActor* InOwnerActor)
 {
     if (!InOwnerActor)
     {
-        UE_LOG(LogTemp, Warning, TEXT("UAIStatusWidget::InitAIStatus - InOwnerActor is null."));
+        DemoLOG_CF(LogUI, Warning, TEXT("InOwnerActor is null."));
         return;
     }
 

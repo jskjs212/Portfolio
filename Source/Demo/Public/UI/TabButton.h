@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/Button.h"
+#include "DemoTypes/LogCategories.h"
 #include "GameplayTagContainer.h"
 #include "TabButton.generated.h"
 
@@ -36,7 +37,7 @@ public:
 
         if (!TabTag.IsValid())
         {
-            UE_LOG(LogTemp, Error, TEXT("TabTag is not set in %s"), *GetName());
+            DemoLOG_CF(LogUI, Error, TEXT("TabTag is not set in %s"), *GetName());
         }
 
         OnClicked.AddDynamic(this, &ThisClass::HandleOnClicked);

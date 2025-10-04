@@ -3,14 +3,13 @@
 #include "Components/CollisionComponent.h"
 #include "Components/EquipmentComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
+#include "DemoTypes/LogCategories.h"
 #include "DemoTypes/TableRowBases.h"
 #include "GameFramework/Character.h"
 #include "Interfaces/CombatInterface.h"
 #include "Items/Item.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
-
-DEFINE_LOG_CATEGORY(LogCollisionComponent);
 
 UCollisionComponent::UCollisionComponent()
 {
@@ -33,7 +32,7 @@ void UCollisionComponent::BeginPlay()
         }
         else
         {
-            UE_LOG(LogCollisionComponent, Warning, TEXT("%s can't attack with weapon without EquipmentComponent."), *GetNameSafe(OwnerActor));
+            DemoLOG_CF(LogCombat, Warning, TEXT("%s can't attack with weapon without EquipmentComponent."), *GetNameSafe(OwnerActor));
         }
     }
 
@@ -57,7 +56,7 @@ void UCollisionComponent::AddAttackCollisionDefinition(const FAttackCollisionDef
 {
     if (InDefinition.CollisionType == EAttackCollisionType::None)
     {
-        UE_LOG(LogCollisionComponent, Error, TEXT("AddAttackCollisionDefinition() - None type."));
+        DemoLOG_CF(LogCombat, Error, TEXT("None type."));
         return;
     }
 
@@ -66,7 +65,7 @@ void UCollisionComponent::AddAttackCollisionDefinition(const FAttackCollisionDef
         if (AttackCollisionDefinitions[Index].CollisionType == InDefinition.CollisionType)
         {
             AttackCollisionDefinitions[Index] = InDefinition;
-            UE_LOG(LogCollisionComponent, Display, TEXT("AddAttackCollisionDefinition() - Overwrote existing definition for type %s."), *UEnum::GetValueAsString(InDefinition.CollisionType));
+            DemoLOG_CF(LogCombat, Display, TEXT("Overwrote existing definition for type %s."), *UEnum::GetValueAsString(InDefinition.CollisionType));
             return;
         }
     }
@@ -95,7 +94,7 @@ void UCollisionComponent::ActivateCollisionDefinition(EAttackCollisionType InTyp
     if (!Definition)
     {
         // Maybe anim triggered a type that has been removed by body part loss or smth.
-        UE_LOG(LogCollisionComponent, Warning, TEXT("ActivateCollisionDefinition - Invalid EAttackCollisionType for (%s, %s)."), *GetNameSafe(GetOwner()), *UEnum::GetValueAsString(InType));
+        DemoLOG_CF(LogCombat, Warning, TEXT("Invalid EAttackCollisionType for (%s, %s)."), *GetNameSafe(GetOwner()), *UEnum::GetValueAsString(InType));
         return;
     }
 
@@ -117,7 +116,8 @@ void UCollisionComponent::ActivateCollisionDefinition(EAttackCollisionType InTyp
         }
     }
 
-    UE_LOG(LogCollisionComponent, Verbose, TEXT("Enabled collision - Type: %s, HitGroup: %d"), *UEnum::GetValueAsString(InType), HitGroup);
+    // @TEST
+    UE_LOG(LogCombat, Verbose, TEXT("Enabled collision - Type: %s, HitGroup: %d"), *UEnum::GetValueAsString(InType), HitGroup);
 }
 
 void UCollisionComponent::DeactivateCollisionDefinition(EAttackCollisionType InType, int32 HitGroup)
@@ -127,8 +127,8 @@ void UCollisionComponent::DeactivateCollisionDefinition(EAttackCollisionType InT
         if (ActiveDefinitions[Index].HitGroup == HitGroup && ActiveDefinitions[Index].Definition->CollisionType == InType)
         {
             ActiveDefinitions.RemoveAt(Index);
-
-            UE_LOG(LogCollisionComponent, Verbose, TEXT("Disabled collision - Type: %s, HitGroup: %d"), *UEnum::GetValueAsString(InType), HitGroup);
+            // @TEST
+            UE_LOG(LogCombat, Verbose, TEXT("Disabled collision - Type: %s, HitGroup: %d"), *UEnum::GetValueAsString(InType), HitGroup);
             return;
         }
     }
@@ -154,7 +154,6 @@ void UCollisionComponent::ProcessCollisionDefinition(const FActiveAttackCollisio
         const FVector StartLocation = GetSocketLocation(Definition->CollisionType, Segment.StartSocketName);
         const FVector EndLocation = Segment.StartSocketName == Segment.EndSocketName ? StartLocation : GetSocketLocation(Definition->CollisionType, Segment.EndSocketName);
 
-        // @TODO - Multiple times per frame?
         TArray<FHitResult> HitResults;
         bool bHit = UKismetSystemLibrary::SphereTraceMultiForObjects(
             this, /* WorldContextObject */
@@ -199,7 +198,7 @@ void UCollisionComponent::ProcessHit(const FHitResult& HitResult, EAttackCollisi
 
     // @TODO - check team
 
-    float Damage = OwnerCombatInterface->GetDamage(InType);
+    float Damage = OwnerCombatInterface->CalculateDamage(InType);
 
     UGameplayStatics::ApplyPointDamage(
         HitResult.GetActor(),
@@ -262,7 +261,7 @@ FVector UCollisionComponent::GetSocketLocation(EAttackCollisionType InType, FNam
         }
     }
 
-    UE_LOG(LogCollisionComponent, Error, TEXT("GetSocketLocation() - Failed to get socket location for type %s and socket %s."), *UEnum::GetValueAsString(InType), *InSocketName.ToString());
+    DemoLOG_CF(LogCombat, Error, TEXT("Failed to get socket location for type %s and socket %s."), *UEnum::GetValueAsString(InType), *InSocketName.ToString());
     return FVector::ZeroVector;
 }
 

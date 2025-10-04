@@ -2,6 +2,7 @@
 
 #include "Animation/AnimNotifies/AnimNotifyState_CollisionTrace.h"
 #include "Components/CollisionComponent.h"
+#include "DemoTypes/LogCategories.h"
 
 void UAnimNotifyState_CollisionTrace::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration, const FAnimNotifyEventReference& EventReference)
 {
@@ -15,7 +16,7 @@ void UAnimNotifyState_CollisionTrace::NotifyBegin(USkeletalMeshComponent* MeshCo
         }
         else
         {
-            UE_LOG(LogTemp, Error, TEXT("AnimNotifyState_CollisionTrace: %s has no CollisionComponent."), *OwnerActor->GetName());
+            DemoLOG_CF(LogAnimation, Error, TEXT("%s has no CollisionComponent."), *OwnerActor->GetName());
         }
     }
 }

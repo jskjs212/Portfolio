@@ -7,8 +7,6 @@
 #include "GameplayTagContainer.h"
 #include "StateManagerComponent.generated.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogStateManager, Log, All);
-
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnStateChanged, FGameplayTag /* InState */);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))

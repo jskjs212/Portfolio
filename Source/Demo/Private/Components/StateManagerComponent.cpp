@@ -2,11 +2,10 @@
 
 #include "Components/StateManagerComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
+#include "DemoTypes/LogCategories.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 #include <mutex>
-
-DEFINE_LOG_CATEGORY(LogStateManager);
 
 UStateManagerComponent::UStateManagerComponent()
 {
@@ -37,7 +36,7 @@ void UStateManagerComponent::SetAction(const FGameplayTag NewAction)
     }
 
     // @debug
-    UE_LOG(LogStateManager, Display, TEXT("SetAction: %s"), *NewAction.ToString());
+    DemoLOG_F(LogStateManager, Verbose, TEXT("to %s"), *NewAction.ToString());
 
     // Set state and action
     SetState(NewState);
@@ -126,9 +125,6 @@ void UStateManagerComponent::SetupAllowedTransitionsOnlyOnce()
             // @check - Allow canceling attacks by toggling combat or dodging?
             // @check - Allow canceling ToggleCombat_Exit by attacking or dodging?
             //          -> Currently it's meaningless to ToggleCombat_Exit, because there's no advantage to do so.
-
-            // @TEST
-            UE_LOG(LogStateManager, Warning, TEXT("UStateManagerComponent::SetupAllowedTransitionsOnlyOnce"));
         });
 }
 
@@ -174,7 +170,7 @@ FGameplayTag UStateManagerComponent::GetStateFromAction(const FGameplayTag InAct
     // ParentTag is not 'State' or 'State.[state]' == invalid action input
     else if (!ParentTag.MatchesTagExact(DemoGameplayTags::State))
     {
-        UE_LOG(LogStateManager, Error, TEXT("UStateManagerComponent::SetAction: Invalid action tag %s"), *InAction.ToString());
+        DemoLOG_CF(LogStateManager, Error, TEXT("Invalid action tag %s"), *InAction.ToString());
         return FGameplayTag::EmptyTag;
     }
 

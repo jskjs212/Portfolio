@@ -2,17 +2,15 @@
 
 #include "Components/InventoryComponent.h"
 #include "Components/EquipmentComponent.h"
-//#include "Components/PrimitiveComponent.h"
 #include "Components/StatsComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "DemoTypes/ItemTypes.h"
+#include "DemoTypes/LogCategories.h"
 #include "DemoTypes/TableRowBases.h"
 #include "GameFramework/Pawn.h"
 #include "Items/Item.h"
 #include "PlayerController/DemoPlayerController.h"
 #include "UI/ItemActionDispatcher.h"
-
-DEFINE_LOG_CATEGORY(LogInventory);
 
 UInventoryComponent::UInventoryComponent()
 {
@@ -63,7 +61,7 @@ int32 UInventoryComponent::AddItem(const FItemActionRequest& Request)
         OnInventoryUpdated.Broadcast();
     }
 
-    UE_LOG(LogInventory, Display, TEXT("Add item - %s, %d"), *ValidationResult.ItemData->Name.ToString(), Added);
+    UE_LOG(LogInventory, Verbose, TEXT("Add item - %s, %d"), *ValidationResult.ItemData->Name.ToString(), Added);
     return Added;
 }
 
@@ -78,7 +76,7 @@ int32 UInventoryComponent::RemoveItem(const FItemActionRequest& Request)
 
     int32 Removed = RemoveItem_Internal(ValidationResult, Request.DesignatedIndex, Request.Quantity);
 
-    UE_LOG(LogInventory, Display, TEXT("Remove item - %s, %d"), *ValidationResult.ItemData->Name.ToString(), Removed);
+    UE_LOG(LogInventory, VeryVerbose, TEXT("Remove item - %s, %d"), *ValidationResult.ItemData->Name.ToString(), Removed);
     return Removed;
 }
 
@@ -101,7 +99,7 @@ int32 UInventoryComponent::UseItem(const FItemActionRequest& Request)
     int32 Removed = RemoveItem_Internal(ValidationResult, Request.DesignatedIndex, Used);
     checkf(Used == Removed, TEXT("Used %d, but removed %d"), Used, Removed);
 
-    UE_LOG(LogInventory, Display, TEXT("Use item - %s, %d"), *ValidationResult.ItemData->Name.ToString(), Removed);
+    UE_LOG(LogInventory, Verbose, TEXT("Use item - %s, %d"), *ValidationResult.ItemData->Name.ToString(), Removed);
     return Removed;
 }
 
@@ -125,7 +123,7 @@ int32 UInventoryComponent::DropItem(const FItemActionRequest& Request)
     int32 Removed = RemoveItem_Internal(ValidationResult, Request.DesignatedIndex, Dropped);
     checkf(Dropped == Removed, TEXT("Dropped %d, but removed %d"), Dropped, Removed);
 
-    UE_LOG(LogInventory, Display, TEXT("Drop item - %s, %d"), *ValidationResult.ItemData->Name.ToString(), Removed);
+    UE_LOG(LogInventory, Verbose, TEXT("Drop item - %s, %d"), *ValidationResult.ItemData->Name.ToString(), Removed);
     return Removed;
 }
 
@@ -133,21 +131,21 @@ bool UInventoryComponent::SwapItem(const FGameplayTag ItemCategory, const int32 
 {
     if (FirstIndex == SecondIndex)
     {
-        UE_LOG(LogInventory, Display, TEXT("SwapItem() - Same index."));
+        DemoLOG_F(LogInventory, Display, TEXT("Same index."));
         return false;
     }
 
     FItemArray* ItemArrayPtr = OwnedItems.Find(ItemCategory);
     if (!ItemArrayPtr)
     {
-        UE_LOG(LogInventory, Error, TEXT("SwapItem() - ItemCategory is not valid."));
+        DemoLOG_F(LogInventory, Error, TEXT("ItemCategory is not valid."));
         return false;
     }
 
     TArray<FItemSlot>& ItemArray = ItemArrayPtr->ItemArray;
     if (!ItemArray.IsValidIndex(FirstIndex) || !ItemArray.IsValidIndex(SecondIndex))
     {
-        UE_LOG(LogInventory, Warning, TEXT("SwapItem() - Out of range."));
+        DemoLOG_F(LogInventory, Warning, TEXT("Out of range."));
         return false;
     }
 
@@ -155,7 +153,7 @@ bool UInventoryComponent::SwapItem(const FGameplayTag ItemCategory, const int32 
     const FItemSlot& SecondSlot = ItemArray[SecondIndex];
     if (FirstSlot.bIsLocked || SecondSlot.bIsLocked)
     {
-        UE_LOG(LogInventory, Display, TEXT("SwapItem() - Slot is locked."));
+        DemoLOG_F(LogInventory, Display, TEXT("Slot is locked."));
         return false;
     }
 
@@ -169,13 +167,13 @@ bool UInventoryComponent::AddMaxSlotSize(FGameplayTag ItemCategory, const int32 
     int32* MaxSlotSizePtr = MaxSlotSizes.Find(ItemCategory);
     if (!MaxSlotSizePtr)
     {
-        UE_LOG(LogInventory, Error, TEXT("AddMaxSlotSize() - ItemCategory is not valid."));
+        DemoLOG_F(LogInventory, Error, TEXT("ItemCategory is not valid."));
         return false;
     }
 
     if (ToAdd <= 0 || *MaxSlotSizePtr + ToAdd > MaxAllowedSlotSize)
     {
-        UE_LOG(LogInventory, Warning, TEXT("AddMaxSlotSize() - ToAdd is not valid."));
+        DemoLOG_F(LogInventory, Warning, TEXT("ToAdd is not valid."));
         return false;
     }
 
@@ -251,13 +249,13 @@ FInventoryValidationResult UInventoryComponent::AddItem_Validate(const FItemSlot
 {
     if (!InSlot.IsValid())
     {
-        UE_LOG(LogInventory, Warning, TEXT("AddItem() - Slot is not valid."));
+        DemoLOG_F(LogInventory, Warning, TEXT("Slot is not valid."));
         return {};
     }
 
     if (InSlot.bIsLocked)
     {
-        UE_LOG(LogInventory, Warning, TEXT("AddItem() - Slot is locked."));
+        DemoLOG_F(LogInventory, Warning, TEXT("Slot is locked."));
         return {};
     }
 
@@ -278,7 +276,7 @@ FInventoryValidationResult UInventoryComponent::AddItem_Validate(const FItemSlot
     }
     if (!ItemArray)
     {
-        UE_LOG(LogInventory, Error, TEXT("AddItem() - ItemType is not valid."));
+        DemoLOG_F(LogInventory, Error, TEXT("ItemType is not valid."));
         return {};
     }
 
@@ -310,7 +308,7 @@ bool UInventoryComponent::AddItem_Internal(
     }
     else
     {
-        UE_LOG(LogInventory, Error, TEXT("AddItem() - DesignatedIndex is out of range."));
+        DemoLOG_F(LogInventory, Error, TEXT("DesignatedIndex is out of range."));
         return false;
     }
 }
@@ -349,7 +347,7 @@ bool UInventoryComponent::AddItem_AutoPlacement(
         // !allow && !exists - continue
         if (!bAllowMultipleSlots && bSlotExists)
         {
-            UE_LOG(LogInventory, Display, TEXT("AddItem() - Multiple slots are not allowed."));
+            DemoLOG_F(LogInventory, Display, TEXT("Multiple slots are not allowed."));
             break;
         }
 
@@ -379,13 +377,14 @@ bool UInventoryComponent::AddItem_AutoPlacement(
             }
             else // Out of empty slots
             {
-                UE_LOG(LogInventory, Display, TEXT("AddItem() - Inventory is full."));
+                // @misc - In-game notification?
+                DemoLOG_F(LogInventory, Display, TEXT("Inventory is full."));
                 break;
             }
         }
         else if (ItemArray.Num() == MaxSlotSize)
         {
-            UE_LOG(LogInventory, Display, TEXT("AddItem() - Inventory is full."));
+            DemoLOG_F(LogInventory, Display, TEXT("Inventory is full."));
             break;
         }
         else
@@ -414,7 +413,7 @@ bool UInventoryComponent::AddItem_ToDesignatedSlot(
         {
             if (DesignatedIndex != Index && !IsInventorySlotEmpty(Slot) && Slot.RowHandle == InSlotRowHandle)
             {
-                UE_LOG(LogInventory, Display, TEXT("AddItem() - Multiple slots are not allowed."));
+                DemoLOG_F(LogInventory, Display, TEXT("Multiple slots are not allowed."));
                 return false;
             }
             ++Index;
@@ -432,7 +431,7 @@ bool UInventoryComponent::AddItem_ToDesignatedSlot(
     }
     else // Different item -> cancel
     {
-        UE_LOG(LogInventory, Display, TEXT("AddItem() - Different item exists at designated index."));
+        DemoLOG_F(LogInventory, Display, TEXT("Different item exists at designated index."));
         return false;
     }
 
@@ -443,7 +442,7 @@ FInventoryValidationResult UInventoryComponent::ValidateActionRequest(const FIte
 {
     if (Request.Quantity <= 0)
     {
-        UE_LOG(LogInventory, Error, TEXT("ValidateActionRequest() - Quantity is not valid."));
+        DemoLOG_F(LogInventory, Error, TEXT("Quantity is not valid."));
         return {};
     }
 
@@ -459,20 +458,20 @@ FInventoryValidationResult UInventoryComponent::ValidateActionRequest(const FIte
     TArray<FItemSlot>& ItemArray = OwnedItems[ItemCategory].ItemArray;
     if (Request.DesignatedIndex < 0 || Request.DesignatedIndex >= ItemArray.Num())
     {
-        UE_LOG(LogInventory, Error, TEXT("ValidateActionRequest() - DesignatedIndex is out of range."));
+        DemoLOG_F(LogInventory, Error, TEXT("DesignatedIndex is out of range."));
         return {};
     }
 
     FItemSlot& Slot = ItemArray[Request.DesignatedIndex];
     if (IsInventorySlotEmpty(Slot) || Slot.RowHandle != Request.Slot.RowHandle)
     {
-        UE_LOG(LogInventory, Error, TEXT("ValidateActionRequest() - Item at DesignatedIndex is different. This request is not from user input."));
+        DemoLOG_F(LogInventory, Error, TEXT("Item at DesignatedIndex is different. This request is not from user input."));
         return {};
     }
 
     if (Slot.bIsLocked)
     {
-        UE_LOG(LogInventory, Warning, TEXT("ValidateActionRequest() - Slot is locked."));
+        DemoLOG_F(LogInventory, Warning, TEXT("Slot is locked."));
         return {};
     }
 
@@ -521,7 +520,7 @@ int32 UInventoryComponent::UseItem_Internal(const FItemSlot& InSlot, const FGame
         return UseItem_Consume(InSlot, ItemType, Quantity);
     }
 
-    UE_LOG(LogInventory, Error, TEXT("UseItem() - ItemType %s is not supported."), *ItemType.ToString());
+    DemoLOG_F(LogInventory, Error, TEXT("ItemType %s is not supported."), *ItemType.ToString());
     return -1;
 }
 
@@ -530,7 +529,7 @@ bool UInventoryComponent::UseItem_Equip(const FItemSlot& InSlot)
     UEquipmentComponent* EquipmentComponent = GetEquipmentComponent();
     if (!EquipmentComponent)
     {
-        UE_LOG(LogInventory, Error, TEXT("UseItem() - Can't equip item without EquipmentComponent."));
+        DemoLOG_F(LogInventory, Error, TEXT("Can't equip item without EquipmentComponent."));
         return false;
     }
 
@@ -555,7 +554,7 @@ int32 UInventoryComponent::UseItem_Consume(const FItemSlot& InSlot, const FGamep
     // Grenade
     // etc.
 
-    UE_LOG(LogInventory, Error, TEXT("UseItem_Consume() - ItemType %s is not supported."), *ItemType.ToString());
+    DemoLOG_F(LogInventory, Error, TEXT("ItemType %s is not supported."), *ItemType.ToString());
     return -1;
 }
 
@@ -564,7 +563,7 @@ int32 UInventoryComponent::ConsumeFood(const FConsumableData* ConsumableData, co
     UStatsComponent* StatsComponent = GetStatsComponent();
     if (!StatsComponent)
     {
-        UE_LOG(LogInventory, Error, TEXT("ConsumeFood() - Can't consume food without StatsComponent."));
+        DemoLOG_F(LogInventory, Error, TEXT("Can't consume food without StatsComponent."));
         return -1;
     }
 

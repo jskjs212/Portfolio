@@ -7,6 +7,7 @@
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
 #include "DemoTypes/ItemTypes.h"
+#include "DemoTypes/LogCategories.h"
 #include "DemoTypes/TableRowBases.h"
 #include "Kismet/GameplayStatics.h"
 #include "Styling/SlateBrush.h"
@@ -23,7 +24,7 @@ void UItemSlotWidget::NativeOnInitialized()
 
     if (!NormalBorderImage || !HoveredBorderImage || !DraggedItemSlotWidgetBPClass)
     {
-        UE_LOG(LogTemp, Warning, TEXT("UItemSlotWidget - Properties are not set."));
+        DemoLOG_CF(LogUI, Error, TEXT("Properties are not set."));
     }
 
     HandleUnhovered();
@@ -101,7 +102,7 @@ void UItemSlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, const FP
             UTexture2D* ItemIconResource = Cast<UTexture2D>(ItemIcon->GetBrush().GetResourceObject());
             if (!ItemIconResource)
             {
-                UE_LOG(LogTemp, Error, TEXT("UItemSlotWidget::NativeOnDragDetected - ItemIconResource is null."));
+                DemoLOG_CF(LogUI, Error, TEXT("ItemIconResource is null."));
             }
 
             DraggedItemSlotWidget->SetItemIcon(ItemIconResource, Opacity);
@@ -113,13 +114,13 @@ void UItemSlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, const FP
         }
         else
         {
-            UE_LOG(LogTemp, Error, TEXT("UItemSlotWidget::NativeOnDragDetected - Failed to create UItemSlotDragDropOp."));
+            DemoLOG_CF(LogUI, Error, TEXT("Failed to create UItemSlotDragDropOp."));
             DraggedItemSlotWidget->RemoveFromParent();
         }
     }
     else
     {
-        UE_LOG(LogTemp, Error, TEXT("UItemSlotWidget::NativeOnDragDetected - Failed to create UDraggedItemSlotWidget."));
+        DemoLOG_CF(LogUI, Error, TEXT("Failed to create UDraggedItemSlotWidget."));
     }
 }
 

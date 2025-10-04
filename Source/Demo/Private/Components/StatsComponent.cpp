@@ -2,6 +2,7 @@
 
 #include "Components/StatsComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
+#include "DemoTypes/LogCategories.h"
 
 const FGameplayTag UStatsComponent::HealthTag = FGameplayTag::RequestGameplayTag("Stat.Health");
 const FGameplayTag UStatsComponent::StaminaTag = FGameplayTag::RequestGameplayTag("Stat.Stamina");
@@ -38,13 +39,13 @@ void UStatsComponent::AddResourceStat(const FGameplayTag StatTag, const FResourc
 
     if (!StatTag.MatchesAnyExact(AllowedResouceStatTags))
     {
-        UE_LOG(LogTemp, Error, TEXT("UStatsComponent::AddResourceStat - Stat %s is not allowed."), *StatTag.GetTagName().ToString());
+        DemoLOG_F(LogAttributes, Error, TEXT("Stat %s is not allowed."), *StatTag.GetTagName().ToString());
         return;
     }
 
     if (ResourceStats.Contains(StatTag))
     {
-        UE_LOG(LogTemp, Warning, TEXT("UStatsComponent::AddResourceStat - Stat %s already exists."), *StatTag.GetTagName().ToString());
+        DemoLOG_F(LogAttributes, Warning, TEXT("Stat %s already exists."), *StatTag.GetTagName().ToString());
         return;
     }
 
@@ -60,7 +61,7 @@ void UStatsComponent::RemoveResourceStat(FGameplayTag StatTag)
     FResourceStat* ResourceStat = ResourceStats.Find(StatTag);
     if (!ResourceStat)
     {
-        UE_LOG(LogTemp, Warning, TEXT("UStatsComponent::RemoveResourceStat - Stat %s doesn't exist."), *StatTag.GetTagName().ToString());
+        DemoLOG_F(LogAttributes, Warning, TEXT("Stat %s doesn't exist."), *StatTag.GetTagName().ToString());
         return;
     }
 
@@ -96,7 +97,7 @@ void UStatsComponent::StartRegenChecked(const FGameplayTag StatTag)
     UWorld* World = GetWorld();
     if (!World)
     {
-        UE_LOG(LogTemp, Error, TEXT("UStatsComponent::StartRegenChecked - No world."));
+        DemoLOG_F(LogAttributes, Error, TEXT("No world."));
         return;
     }
 
@@ -118,7 +119,7 @@ void UStatsComponent::RegenChecked(const FGameplayTag StatTag)
     UWorld* World = GetWorld();
     if (!World)
     {
-        UE_LOG(LogTemp, Error, TEXT("UStatsComponent::RegenChecked - No world."));
+        DemoLOG_F(LogAttributes, Error, TEXT("No world."));
         return;
     }
 
@@ -161,7 +162,7 @@ float UStatsComponent::TakeDamage(const float InDamage)
     Damage = ModifyCurrentResourceStatChecked(HealthTag, -Damage, true) * -1.f;
 
     // @debug
-    UE_LOG(LogTemp, Display, TEXT("UStatsComponent::TakeDamage - %.2f"), Damage);
+    DemoLOG_F(LogAttributes, Display, TEXT("%.2f"), Damage);
     return Damage;
 }
 

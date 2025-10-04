@@ -3,6 +3,7 @@
 #include "UI/ItemInfoWidget.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
+#include "DemoTypes/LogCategories.h"
 #include "DemoTypes/TableRowBases.h"
 
 UItemInfoWidget::UItemInfoWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
@@ -22,14 +23,14 @@ void UItemInfoWidget::NativeOnInitialized()
 
     if (CategoryImages.Num() != DemoItemTypes::GetItemCategories().Num())
     {
-        UE_LOG(LogTemp, Error, TEXT("UItemInfoWidget - CategoryImages should have all ItemCategories."));
+        DemoLOG_CF(LogUI, Error, TEXT("CategoryImages should have all ItemCategories."));
     }
 
     for (const auto& [ItemCategory, CategoryImageRef] : CategoryImages)
     {
         if (!CategoryImageRef)
         {
-            UE_LOG(LogTemp, Error, TEXT("UItemInfoWidget - CategoryImages has no image for %s."), *ItemCategory.ToString());
+            DemoLOG_CF(LogUI, Error, TEXT("CategoryImages has no image for %s."), *ItemCategory.ToString());
         }
     }
 }

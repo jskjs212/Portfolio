@@ -3,6 +3,7 @@
 #include "PlayerController/DemoPlayerController.h"
 #include "Character/PlayerCharacter.h"
 #include "Components/TargetingComponent.h"
+#include "DemoTypes/LogCategories.h"
 #include "Items/Item.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/DemoHUD.h"
@@ -19,7 +20,7 @@ ADemoPlayerController::ADemoPlayerController()
     }
     else
     {
-        UE_LOG(LogTemp, Error, TEXT("ADemoHUD - PlayerMenuWidget BP not found."));
+        DemoLOG_CF(LogUI, Error, TEXT("PlayerMenuWidget BP is not found."));
         PlayerMenuWidgetClass = UPlayerMenuWidget::StaticClass();
     }
 

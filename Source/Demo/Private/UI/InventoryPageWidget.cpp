@@ -7,6 +7,7 @@
 #include "Components/WrapBox.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "DemoTypes/ItemTypes.h"
+#include "DemoTypes/LogCategories.h"
 #include "DemoTypes/TableRowBases.h"
 #include "GameFramework/Pawn.h"
 #include "GameplayTagContainer.h"
@@ -29,7 +30,7 @@ void UInventoryPageWidget::NativeOnInitialized()
 
     if (!ItemSlotWidgetClass || !ContextMenuWidgetClass)
     {
-        UE_LOG(LogTemp, Error, TEXT("UInventoryPageWidget::NativeOnInitialized - WBP classes are not set."));
+        DemoLOG_CF(LogUI, Error, TEXT("WBP classes are not set."));
         return;
     }
 

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "DemoTypes/ItemTypes.h"
 #include "DemoTypes/StatsTypes.h"
 #include "GameplayTagContainer.h"
 #include "Interfaces/CombatInterface.h"
@@ -21,6 +22,9 @@ class USoundBase;
 class UStateManagerComponent;
 class UStatsComponent;
 
+/**
+ * If input action is not working, check if AnimMontage has AnimNotify_ResetState.
+ */
 UCLASS()
 class DEMO_API ABaseCharacter : public ACharacter, public ICombatInterface
 {
@@ -106,7 +110,7 @@ public:
 
     virtual bool CanReceiveDamage() const override;
 
-    virtual float GetDamage(EAttackCollisionType InType) const override;
+    virtual float CalculateDamage(EAttackCollisionType InType) const override;
 
     virtual int32 GetActionInfoCount(FGameplayTag InAction) const override;
 
@@ -162,6 +166,10 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Initialization|Stats", meta = (Categories = "Stat"))
     TMap<FGameplayTag, FResourceStat> ResourceStats;
 
+    /* Equipment */
+    UPROPERTY(EditAnywhere, Category = "Initialization|Equipment")
+    TArray<FItemSlot> StartingItems;
+
     /* Movement */
     UPROPERTY(EditAnywhere, Category = "Initialization|Movement")
     float WalkSpeed{180.f};
@@ -182,4 +190,8 @@ protected:
 
     UPROPERTY(VisibleAnywhere, Transient, Category = "Combat")
     TObjectPtr<const UActionInfoConfig> CurrentActionInfo;
+
+    // @TEST - Temporary
+    UPROPERTY(EditAnywhere, Category = "Initialization|Collision", meta = (Categories = "State"))
+    TMap<FGameplayTag, float> ActionToDamageMap;
 };
