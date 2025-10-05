@@ -157,6 +157,9 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Initialization|Hit")
     TObjectPtr<UParticleSystem> HitParticle;
 
+    UPROPERTY(EditAnywhere, Category = "Initialization|Hit")
+    FTransform HitParticleTransform;
+
     ////////////////////////////////////////////////////////
     //        Variables
     ////////////////////////////////////////////////////////

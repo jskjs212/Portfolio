@@ -70,9 +70,11 @@ void UDemoAnimInstance::UpdateCharacterStateOnGameThread()
 
 void UDemoAnimInstance::UpdateSpeed()
 {
-    FVector Velocity = AnimState.Velocity;
-    Velocity.Z = 0.f;
-    GroundSpeed = Velocity.Size();
+    constexpr float AscendThreshold = 100.f;
+    bIsAscending = AnimState.Velocity.Z > AscendThreshold;
+
+    const float GroundSpeedTemp = AnimState.Velocity.Size2D();
+    GroundSpeed = GroundSpeedTemp;
 }
 
 void UDemoAnimInstance::UpdateAimOffset(float DeltaSeconds)

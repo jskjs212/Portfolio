@@ -6,7 +6,7 @@
 #include "AIController.h"
 #include "DemoAIController.generated.h"
 
-class UBehaviorTree;
+class UAIPerceptionComponent;
 
 /**
  *
@@ -17,22 +17,18 @@ class DEMO_API ADemoAIController : public AAIController
     GENERATED_BODY()
 
     ////////////////////////////////////////////////////////
+    //        Subobjects
+    ////////////////////////////////////////////////////////
+protected:
+    UPROPERTY(VisibleAnywhere)
+    TObjectPtr<UAIPerceptionComponent> DemoPerceptionComponent;
+
+    ////////////////////////////////////////////////////////
     //        AIController
     ////////////////////////////////////////////////////////
+public:
+    ADemoAIController();
+
 protected:
     virtual void OnPossess(APawn* InPawn) override;
-
-    ////////////////////////////////////////////////////////
-    //        Get & set
-    ////////////////////////////////////////////////////////
-protected:
-    // Overrides the default BT if it exists
-    UBehaviorTree* GetBehaviorTreeToRun() const;
-
-    ////////////////////////////////////////////////////////
-    //        Variables
-    ////////////////////////////////////////////////////////
-protected:
-    UPROPERTY(EditAnywhere, Category = "AI")
-    TObjectPtr<UBehaviorTree> DefaultBehaviorTree;
 };

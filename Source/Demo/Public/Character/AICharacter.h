@@ -8,7 +8,7 @@
 #include "AICharacter.generated.h"
 
 class UAIStatusWidget;
-class UBehaviorTree;
+class UStateTreeComponent;
 class UWidgetComponent;
 
 /**
@@ -23,8 +23,11 @@ class DEMO_API AAICharacter : public ABaseCharacter, public ITargetInterface
     //        Subobjects
     ////////////////////////////////////////////////////////
 protected:
+    UPROPERTY(VisibleAnywhere)
+    TObjectPtr<UStateTreeComponent> StateTreeComponent;
+
     // Health bar, nameplate (and maybe CC, level, casting, charging)
-    UPROPERTY(VisibleAnywhere, Category = "AI")
+    UPROPERTY(VisibleAnywhere)
     TObjectPtr<UWidgetComponent> AIStatusWidgetComponent;
 
     ////////////////////////////////////////////////////////
@@ -47,18 +50,9 @@ public:
     virtual FVector GetTargetPointLocation() const override;
 
     ////////////////////////////////////////////////////////
-    //        Get & set
-    ////////////////////////////////////////////////////////
-public:
-    FORCEINLINE UBehaviorTree* GetBehaviorTreeOverride() const { return BehaviorTreeOverride; }
-
-    ////////////////////////////////////////////////////////
     //        Variables
     ////////////////////////////////////////////////////////
 protected:
     UPROPERTY(EditAnywhere, Category = "Initialization|AI")
     FName LockOnSocketName{TEXT("Head")};
-
-    UPROPERTY(EditAnywhere, Category = "Initialization|AI")
-    TObjectPtr<UBehaviorTree> BehaviorTreeOverride;
 };

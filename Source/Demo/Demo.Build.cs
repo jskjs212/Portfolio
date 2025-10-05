@@ -29,7 +29,9 @@ public class Demo : ModuleRules
                 "UMG",
                 "Slate",
                 "SlateCore",
-                "GameplayTags"
+                "GameplayTags",
+                "StateTreeModule",
+                "GameplayStateTreeModule"
             }
         );
 

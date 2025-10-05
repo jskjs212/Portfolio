@@ -63,6 +63,9 @@ protected:
     bool bIsInAir{false};
 
     UPROPERTY(BlueprintReadOnly, Transient, Category = "Character")
+    bool bIsAscending{false};
+
+    UPROPERTY(BlueprintReadOnly, Transient, Category = "Character")
     bool bIsAccelerating{false};
 
     UPROPERTY(BlueprintReadOnly, Transient, Category = "Character")

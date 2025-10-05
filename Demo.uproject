@@ -13,7 +13,8 @@
 				"AIModule",
 				"UMG",
 				"CoreUObject",
-				"DeveloperSettings"
+				"DeveloperSettings",
+				"StateTreeModule"
 			]
 		}
 	],
@@ -27,6 +28,14 @@
 		},
 		{
 			"Name": "WaveformEditor",
+			"Enabled": true
+		},
+		{
+			"Name": "StateTree",
+			"Enabled": true
+		},
+		{
+			"Name": "GameplayStateTree",
 			"Enabled": true
 		}
 	]

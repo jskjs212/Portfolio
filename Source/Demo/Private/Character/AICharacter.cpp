@@ -5,17 +5,17 @@
 #include "Components/WidgetComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StateManagerComponent.h"
+#include "Components/StateTreeComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "DemoTypes/LogCategories.h"
-
-// @TEST
-#include "Components/StatsComponent.h"
 #include "UI/AIStatusWidget.h"
 
 AAICharacter::AAICharacter()
 {
     GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
     GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+
+    StateTreeComponent = CreateDefaultSubobject<UStateTreeComponent>(TEXT("StateTreeComponent"));
 
     AIStatusWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("AIStatusWidget"));
     AIStatusWidgetComponent->SetupAttachment(GetMesh());
@@ -32,11 +32,6 @@ void AAICharacter::BeginPlay()
     if (!GetMesh()->DoesSocketExist(LockOnSocketName))
     {
         DemoLOG_CF(LogCharacter, Warning, TEXT("LockOnSocketName '%s' does not exist in '%s'. Using actor location instead."), *LockOnSocketName.ToString(), *GetName());
-    }
-
-    if (!BehaviorTreeOverride)
-    {
-        DemoLOG_CF(LogCharacter, Display, TEXT("This AICharacter (%s) is using default BehaviorTree."), *GetName());
     }
 
     if (UAIStatusWidget* AIStatusWidget = Cast<UAIStatusWidget>(AIStatusWidgetComponent->GetWidget()))

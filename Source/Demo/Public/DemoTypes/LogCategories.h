@@ -6,6 +6,7 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogDemoGame, Log, All); // General game logs
 
+DECLARE_LOG_CATEGORY_EXTERN(LogAI, Log, All);
 DECLARE_LOG_CATEGORY_EXTERN(LogCharacter, Log, All);
 DECLARE_LOG_CATEGORY_EXTERN(LogCombat, Log, All);
 DECLARE_LOG_CATEGORY_EXTERN(LogEquipment, Log, All);

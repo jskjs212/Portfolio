@@ -3,25 +3,15 @@
 
 #include "AI/DemoAIController.h"
 #include "Character/AICharacter.h"
+#include "Perception/AIPerceptionComponent.h"
+
+ADemoAIController::ADemoAIController()
+{
+    DemoPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("PerceptionComponent"));
+    SetPerceptionComponent(*DemoPerceptionComponent);
+}
 
 void ADemoAIController::OnPossess(APawn* InPawn)
 {
     Super::OnPossess(InPawn);
-
-    if (GetPawn<AAICharacter>())
-    {
-        RunBehaviorTree(GetBehaviorTreeToRun());
-    }
-}
-
-UBehaviorTree* ADemoAIController::GetBehaviorTreeToRun() const
-{
-    if (AAICharacter* AICharacter = GetPawn<AAICharacter>())
-    {
-        if (UBehaviorTree* BehaviorTree = AICharacter->GetBehaviorTreeOverride())
-        {
-            return BehaviorTree;
-        }
-    }
-    return DefaultBehaviorTree;
 }

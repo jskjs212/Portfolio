@@ -163,8 +163,8 @@ void ABaseCharacter::PlayPointHitEffects(const FPointDamageEvent& PointDamageEve
 
     // Particle
     FTransform ParticleTransform;
-    ParticleTransform.SetLocation(HitLocation);
-    ParticleTransform.SetRotation(PointDamageEvent.HitInfo.ImpactNormal.ToOrientationQuat());
+    ParticleTransform.AddToTranslation(HitParticleTransform.GetTranslation() + HitLocation);
+    ParticleTransform.SetRotation(PointDamageEvent.HitInfo.ImpactNormal.ToOrientationQuat() * HitParticleTransform.GetRotation());
     UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticle, ParticleTransform);
 
     // Animation
