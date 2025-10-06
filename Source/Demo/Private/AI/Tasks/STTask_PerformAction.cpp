@@ -2,21 +2,31 @@
 
 #include "AI/Tasks/STTask_PerformAction.h"
 #include "Interfaces/CombatInterface.h"
+#include "StateTreeExecutionContext.h"
 
-EStateTreeRunStatus USTTask_PerformAction::EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition)
+FSTTask_PerformAction::FSTTask_PerformAction()
 {
-    if (Super::EnterState(Context, Transition) == EStateTreeRunStatus::Failed)
-    {
-        return EStateTreeRunStatus::Failed;
-    }
+    bShouldStateChangeOnReselect = false;
+    bShouldCallTick = false;
+}
 
-    ICombatInterface* CombatInterface = Cast<ICombatInterface>(Actor);
+EStateTreeRunStatus FSTTask_PerformAction::EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) const
+{
+    FInstanceDataType& InstanceData = Context.GetInstanceData<FInstanceDataType>(*this);
+
+    ICombatInterface* CombatInterface = Cast<ICombatInterface>(InstanceData.Actor);
     if (!CombatInterface)
     {
         return EStateTreeRunStatus::Failed;
     }
 
-    const float Duration = CombatInterface->PerformAction(ActionTag, bIgnoreCurrentState, MontageIndex, bUseRandomIndex);
+    const float Duration = CombatInterface->PerformAction(
+        InstanceData.ActionTag,
+        InstanceData.bIgnoreCurrentState,
+        InstanceData.MontageIndex,
+        InstanceData.bUseRandomIndex
+    );
 
+    // @TODO - Return Running vs Succeeded when started to perform an action?
     return Duration > 0.f ? EStateTreeRunStatus::Succeeded : EStateTreeRunStatus::Failed;
 }

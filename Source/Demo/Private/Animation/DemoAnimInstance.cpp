@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Animation/DemoAnimInstance.h"
+#include "AIController.h"
 #include "Character/BaseCharacter.h"
 #include "DemoTypes/LogCategories.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -59,7 +60,9 @@ void UDemoAnimInstance::UpdateCharacterStateOnGameThread()
     }
 
     bIsInAir = BaseCharacter->GetCharacterMovement()->IsFalling();
-    bIsAccelerating = BaseCharacter->GetCharacterMovement()->GetCurrentAcceleration().SizeSquared() > UE_KINDA_SMALL_NUMBER;
+    bIsAccelerating =
+        BaseCharacter->GetCharacterMovement()->GetCurrentAcceleration().SizeSquared() > UE_KINDA_SMALL_NUMBER
+        || BaseCharacter->GetController<AAIController>() != nullptr; // for AI
 
     AnimState.Velocity = BaseCharacter->GetVelocity();
     AnimState.PrevAimOffsetYaw = AimOffsetYaw;

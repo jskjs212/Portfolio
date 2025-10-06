@@ -21,7 +21,7 @@ AAICharacter::AAICharacter()
     AIStatusWidgetComponent->SetupAttachment(GetMesh());
     AIStatusWidgetComponent->SetRelativeLocation(FVector{0.f, 0.f, 220.f});
     AIStatusWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen); // @TODO - Face the player when targeted?
-    AIStatusWidgetComponent->SetDrawSize(FVector2D{180.f, 45.f});
+    AIStatusWidgetComponent->SetDrawSize(FVector2D{190.f, 50.f});
     AIStatusWidgetComponent->SetVisibility(false);
 }
 

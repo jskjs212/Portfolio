@@ -12,6 +12,13 @@ Enemy <- Boss, Mob?
 - Transition rules are set in:
 > UStateManagerComponent::SetupAllowedTransitionsOnlyOnce()
 
+## AI
+### StateTree
+- Inherit FStateTreeTaskCommonBase
+> Can modify the parameters of the state tree by accessing the pointer from the context, by defining FStateTreePropertyRef in the instance data struct.
+- Inherit UStateTreeTaskBlueprintBase
+> Can define UFUNCTION that binds to the dynamic delegate in other systems.
+
 ## UI
 ### Manager
 UIManagementSubsystem (Àü¿ª UI)
@@ -51,6 +58,7 @@ DemoHUDWidget: Resource, Crosshair, Interact, QuickSlot, Minimap, etc.
 Color: #F5F5E7
 
 ## Key bindings
+### Basic
 Mouse: Look\
 WASD: Move\
 Shift: Sprint\

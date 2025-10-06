@@ -30,6 +30,7 @@ public class Demo : ModuleRules
                 "Slate",
                 "SlateCore",
                 "GameplayTags",
+                "PropertyBindingUtils",
                 "StateTreeModule",
                 "GameplayStateTreeModule"
             }

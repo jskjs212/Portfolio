@@ -3,33 +3,45 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/StateTreeTaskBlueprintBase.h"
-#include "StateTreeInstanceData.h"
+#include "StateTreeTaskBase.h"
+#include "StateTreePropertyRef.h"
 #include "STTask_FindNextTargetLocation.generated.h"
 
 class ATargetPoint;
 
-/**
- *
- */
-UCLASS()
-class DEMO_API USTTask_FindNextTargetLocation : public UStateTreeTaskBlueprintBase
+USTRUCT(BlueprintType)
+struct FSTTask_FindNextTargetLocationInstanceData
 {
     GENERATED_BODY()
 
-protected:
-    virtual EStateTreeRunStatus EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) override;
-
-protected:
     UPROPERTY(EditAnywhere, Category = "Context")
     AActor* Actor;
 
+    // Reference to int32
     UPROPERTY(EditAnywhere, Category = "Input")
-    TArray<TObjectPtr<const ATargetPoint>> TargetPoints;
+    TStateTreePropertyRef<int32> RefToPreviousTargetIndex;
 
+    // Reference to TArray<ATargetPoint*>
     UPROPERTY(EditAnywhere, Category = "Input")
-    int32 CurrentTargetIndex{-1};
+    TStateTreePropertyRef<TArray<ATargetPoint*>> RefToArrayOfTargetPoints;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Output")
     FVector TargetLocation;
+};
+
+USTRUCT()
+struct DEMO_API FSTTask_FindNextTargetLocation : public FStateTreeTaskCommonBase
+{
+    GENERATED_BODY()
+
+    using FInstanceDataType = FSTTask_FindNextTargetLocationInstanceData;
+
+    virtual const UStruct* GetInstanceDataType() const override
+    {
+        return FInstanceDataType::StaticStruct();
+    };
+
+    FSTTask_FindNextTargetLocation();
+
+    virtual EStateTreeRunStatus EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) const override;
 };

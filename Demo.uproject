@@ -14,7 +14,8 @@
 				"UMG",
 				"CoreUObject",
 				"DeveloperSettings",
-				"StateTreeModule"
+				"StateTreeModule",
+				"GameplayStateTreeModule"
 			]
 		}
 	],

@@ -9,12 +9,15 @@
 namespace EPathFollowingResult { enum Type : int; }
 
 /**
- *
+ * HandleMoveCompleted() is bound to AAIController::ReceiveMoveCompleted delegate, which is called when MoveTo request is finished.
  */
 UCLASS()
 class DEMO_API USTTask_MoveTo : public UStateTreeTaskBlueprintBase
 {
     GENERATED_BODY()
+
+public:
+    USTTask_MoveTo(const FObjectInitializer& ObjectInitializer);
 
 protected:
     virtual EStateTreeRunStatus EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) override;

@@ -3,22 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/StateTreeTaskBlueprintBase.h"
+#include "StateTreeTaskBase.h"
 #include "GameplayTagContainer.h"
 #include "STTask_PerformAction.generated.h"
 
-/**
- *
- */
-UCLASS()
-class DEMO_API USTTask_PerformAction : public UStateTreeTaskBlueprintBase
+USTRUCT()
+struct FSTTask_PerformActionInstanceData
 {
     GENERATED_BODY()
 
-protected:
-    virtual EStateTreeRunStatus EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) override;
-
-protected:
     UPROPERTY(EditAnywhere, Category = "Context")
     AActor* Actor;
 
@@ -33,4 +26,24 @@ protected:
 
     UPROPERTY(EditAnywhere, Category = "Initialization")
     bool bUseRandomIndex{false};
+};
+
+/**
+ *
+ */
+USTRUCT()
+struct DEMO_API FSTTask_PerformAction : public FStateTreeTaskCommonBase
+{
+    GENERATED_BODY()
+
+    using FInstanceDataType = FSTTask_PerformActionInstanceData;
+
+    virtual const UStruct* GetInstanceDataType() const override
+    {
+        return FInstanceDataType::StaticStruct();
+    };
+
+    FSTTask_PerformAction();
+
+    virtual EStateTreeRunStatus EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) const override;
 };

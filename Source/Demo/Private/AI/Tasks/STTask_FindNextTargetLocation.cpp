@@ -5,34 +5,55 @@
 #include "Engine/TargetPoint.h"
 #include "StateTreeExecutionContext.h"
 
-EStateTreeRunStatus USTTask_FindNextTargetLocation::EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition)
+FSTTask_FindNextTargetLocation::FSTTask_FindNextTargetLocation()
 {
-    if (Super::EnterState(Context, Transition) == EStateTreeRunStatus::Failed)
+    bShouldStateChangeOnReselect = false;
+    bShouldCallTick = false;
+}
+
+EStateTreeRunStatus FSTTask_FindNextTargetLocation::EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) const
+{
+    FInstanceDataType& InstanceData = Context.GetInstanceData<FInstanceDataType>(*this);
+
+    // Get mutable references to the properties (previous index and target points array)
+    int32* PreviousIndexPtr = InstanceData.RefToPreviousTargetIndex.GetMutablePtr(Context);
+    if (!PreviousIndexPtr)
     {
+        DemoLOG_CF(LogAI, Error, TEXT("Failed to get previous target index for %s"), *GetNameSafe(InstanceData.Actor));
+        return EStateTreeRunStatus::Failed;
+    }
+    const TArray<ATargetPoint*>* TargetPointsPtr = InstanceData.RefToArrayOfTargetPoints.GetMutablePtr(Context);
+    if (!TargetPointsPtr)
+    {
+        DemoLOG_CF(LogAI, Error, TEXT("Failed to get target points array for %s"), *GetNameSafe(InstanceData.Actor));
         return EStateTreeRunStatus::Failed;
     }
 
-    if (TargetPoints.IsEmpty())
+    // Validate the array
+    if (TargetPointsPtr->IsEmpty())
     {
-        DemoLOG_CF(LogAI, Warning, TEXT("Target points are empty for %s"), *GetNameSafe(Actor));
+        DemoLOG_CF(LogAI, Error, TEXT("Target points are empty for %s"), *GetNameSafe(InstanceData.Actor));
         return EStateTreeRunStatus::Failed;
     }
 
-    int32 NewIndex = CurrentTargetIndex + 1;
-    if (NewIndex >= TargetPoints.Num())
+    // Calculate the current index
+    int32 CurrentIndex = *PreviousIndexPtr + 1;
+    if (CurrentIndex >= TargetPointsPtr->Num())
     {
-        NewIndex = 0;
+        CurrentIndex = 0;
     }
 
-    const ATargetPoint* TargetPoint = TargetPoints[NewIndex];
+    // Get the target point
+    const ATargetPoint* TargetPoint = (*TargetPointsPtr)[CurrentIndex];
     if (!TargetPoint)
     {
-        DemoLOG_CF(LogAI, Warning, TEXT("Target point is null for %s (index: %d)"), *GetNameSafe(Actor), NewIndex);
+        DemoLOG_CF(LogAI, Warning, TEXT("Target point is null for %s (index: %d)"), *GetNameSafe(InstanceData.Actor), CurrentIndex);
         return EStateTreeRunStatus::Failed;
     }
 
-    CurrentTargetIndex = NewIndex;
-    TargetLocation = TargetPoint->GetActorLocation();
+    // Update
+    *PreviousIndexPtr = CurrentIndex;
+    InstanceData.TargetLocation = TargetPoint->GetActorLocation();
 
     return EStateTreeRunStatus::Succeeded;
 }

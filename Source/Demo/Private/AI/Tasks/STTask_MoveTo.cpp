@@ -5,6 +5,13 @@
 #include "GameFramework/Pawn.h"
 #include "Navigation/PathFollowingComponent.h"
 
+USTTask_MoveTo::USTTask_MoveTo(const FObjectInitializer& ObjectInitializer)
+    : Super(ObjectInitializer)
+{
+    bShouldStateChangeOnReselect = false;
+    bShouldCallTick = false;
+}
+
 EStateTreeRunStatus USTTask_MoveTo::EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition)
 {
     if (Super::EnterState(Context, Transition) == EStateTreeRunStatus::Failed)
@@ -18,11 +25,8 @@ EStateTreeRunStatus USTTask_MoveTo::EnterState(FStateTreeExecutionContext& Conte
         return EStateTreeRunStatus::Failed;
     }
 
-    FAIMoveRequest MoveRequest = FAIMoveRequest{TargetLocation};
-    MoveRequest.SetAcceptanceRadius(AcceptanceRadius);
-
-    FPathFollowingRequestResult RequestResult = AIController->MoveTo(MoveRequest);
-    switch (RequestResult.Code)
+    EPathFollowingRequestResult::Type RequestResult = AIController->MoveToLocation(TargetLocation, AcceptanceRadius);
+    switch (RequestResult)
     {
     case EPathFollowingRequestResult::RequestSuccessful:
         AIController->ReceiveMoveCompleted.AddDynamic(this, &ThisClass::HandleMoveCompleted);
