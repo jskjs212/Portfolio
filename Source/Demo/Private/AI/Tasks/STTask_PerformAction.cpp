@@ -2,6 +2,7 @@
 
 #include "AI/Tasks/STTask_PerformAction.h"
 #include "Interfaces/CombatInterface.h"
+#include "GameFramework/Pawn.h"
 #include "StateTreeExecutionContext.h"
 
 FSTTask_PerformAction::FSTTask_PerformAction()
@@ -14,7 +15,7 @@ EStateTreeRunStatus FSTTask_PerformAction::EnterState(FStateTreeExecutionContext
 {
     FInstanceDataType& InstanceData = Context.GetInstanceData<FInstanceDataType>(*this);
 
-    ICombatInterface* CombatInterface = Cast<ICombatInterface>(InstanceData.Actor);
+    ICombatInterface* CombatInterface = Cast<ICombatInterface>(InstanceData.Pawn);
     if (!CombatInterface)
     {
         return EStateTreeRunStatus::Failed;
@@ -27,6 +28,5 @@ EStateTreeRunStatus FSTTask_PerformAction::EnterState(FStateTreeExecutionContext
         InstanceData.bUseRandomIndex
     );
 
-    // @TODO - Return Running vs Succeeded when started to perform an action?
     return Duration > 0.f ? EStateTreeRunStatus::Succeeded : EStateTreeRunStatus::Failed;
 }

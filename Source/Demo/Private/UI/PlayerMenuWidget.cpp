@@ -153,7 +153,14 @@ void UPlayerMenuWidget::SetFocusToWidget(UWidget* InWidget)
     {
         if (InventoryPage->IsPendingUpdate())
         {
-            InventoryPage->UpdateItemSlotsUI();
+            InventoryPage->UpdateInventorySlotsUI();
+        }
+    }
+    else if (UEquipmentPageWidget* EquipmentPage = Cast<UEquipmentPageWidget>(InWidget))
+    {
+        if (EquipmentPage->IsPendingUpdate())
+        {
+            EquipmentPage->UpdateAllEquipmentSlotsUI();
         }
     }
 }

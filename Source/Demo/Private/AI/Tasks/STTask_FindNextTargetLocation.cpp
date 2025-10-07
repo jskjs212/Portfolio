@@ -19,20 +19,20 @@ EStateTreeRunStatus FSTTask_FindNextTargetLocation::EnterState(FStateTreeExecuti
     int32* PreviousIndexPtr = InstanceData.RefToPreviousTargetIndex.GetMutablePtr(Context);
     if (!PreviousIndexPtr)
     {
-        DemoLOG_CF(LogAI, Error, TEXT("Failed to get previous target index for %s"), *GetNameSafe(InstanceData.Actor));
+        DemoLOG_CF(LogAI, Error, TEXT("Failed to get previous target index for %s"), *GetNameSafe(InstanceData.Pawn));
         return EStateTreeRunStatus::Failed;
     }
     const TArray<ATargetPoint*>* TargetPointsPtr = InstanceData.RefToArrayOfTargetPoints.GetMutablePtr(Context);
     if (!TargetPointsPtr)
     {
-        DemoLOG_CF(LogAI, Error, TEXT("Failed to get target points array for %s"), *GetNameSafe(InstanceData.Actor));
+        DemoLOG_CF(LogAI, Error, TEXT("Failed to get target points array for %s"), *GetNameSafe(InstanceData.Pawn));
         return EStateTreeRunStatus::Failed;
     }
 
     // Validate the array
     if (TargetPointsPtr->IsEmpty())
     {
-        DemoLOG_CF(LogAI, Error, TEXT("Target points are empty for %s"), *GetNameSafe(InstanceData.Actor));
+        DemoLOG_CF(LogAI, Error, TEXT("Target points are empty for %s"), *GetNameSafe(InstanceData.Pawn));
         return EStateTreeRunStatus::Failed;
     }
 
@@ -47,7 +47,7 @@ EStateTreeRunStatus FSTTask_FindNextTargetLocation::EnterState(FStateTreeExecuti
     const ATargetPoint* TargetPoint = (*TargetPointsPtr)[CurrentIndex];
     if (!TargetPoint)
     {
-        DemoLOG_CF(LogAI, Warning, TEXT("Target point is null for %s (index: %d)"), *GetNameSafe(InstanceData.Actor), CurrentIndex);
+        DemoLOG_CF(LogAI, Error, TEXT("Target point is null for %s (index: %d)"), *GetNameSafe(InstanceData.Pawn), CurrentIndex);
         return EStateTreeRunStatus::Failed;
     }
 

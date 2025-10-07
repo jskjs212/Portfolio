@@ -15,7 +15,7 @@ struct FSTTask_FindNextTargetLocationInstanceData
     GENERATED_BODY()
 
     UPROPERTY(EditAnywhere, Category = "Context")
-    AActor* Actor;
+    TObjectPtr<APawn> Pawn;
 
     // Reference to int32
     UPROPERTY(EditAnywhere, Category = "Input")
@@ -29,7 +29,7 @@ struct FSTTask_FindNextTargetLocationInstanceData
     FVector TargetLocation;
 };
 
-USTRUCT()
+USTRUCT(meta = (DisplayName = "Find Next Target Location", Category = "Demo|Common"))
 struct DEMO_API FSTTask_FindNextTargetLocation : public FStateTreeTaskCommonBase
 {
     GENERATED_BODY()

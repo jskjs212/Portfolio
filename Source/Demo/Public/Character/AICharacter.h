@@ -5,10 +5,10 @@
 #include "CoreMinimal.h"
 #include "Character/BaseCharacter.h"
 #include "Interfaces/TargetInterface.h"
+#include "StateTreeReference.h"
 #include "AICharacter.generated.h"
 
 class UAIStatusWidget;
-class UStateTreeComponent;
 class UWidgetComponent;
 
 /**
@@ -23,9 +23,6 @@ class DEMO_API AAICharacter : public ABaseCharacter, public ITargetInterface
     //        Subobjects
     ////////////////////////////////////////////////////////
 protected:
-    UPROPERTY(VisibleAnywhere)
-    TObjectPtr<UStateTreeComponent> StateTreeComponent;
-
     // Health bar, nameplate (and maybe CC, level, casting, charging)
     UPROPERTY(VisibleAnywhere)
     TObjectPtr<UWidgetComponent> AIStatusWidgetComponent;
@@ -49,10 +46,15 @@ public:
 
     virtual FVector GetTargetPointLocation() const override;
 
+    FORCEINLINE const FStateTreeReference& GetStateTreeRefOverride() const { return StateTreeRefOverride; }
+
     ////////////////////////////////////////////////////////
     //        Variables
     ////////////////////////////////////////////////////////
 protected:
     UPROPERTY(EditAnywhere, Category = "Initialization|AI")
     FName LockOnSocketName{TEXT("Head")};
+
+    UPROPERTY(EditAnywhere, Category = "Initialization|AI|StateTreeOverride")
+    FStateTreeReference StateTreeRefOverride;
 };

@@ -15,7 +15,8 @@ Enemy <- Boss, Mob?
 ## AI
 ### StateTree
 - Inherit FStateTreeTaskCommonBase
-> Can modify the parameters of the state tree by accessing the pointer from the context, by defining FStateTreePropertyRef in the instance data struct.
+> Can modify the parameters of the state tree by accessing the pointer from the context, by defining FStateTreePropertyRef in the instance data struct.\
+> UCLASS에서 USTRUCT로 바꾸면 에디터에서 바로 인식하는데, USTRUCT에서 UCLASS로 바꾸면 "Corrupt data found"로 에디터 자체가 실행 불가 -> 해당 클래스가 있는 uasset을 삭제해야 함 -> 클래스 바꾸기 전에 코드 백업하거나, Task 등 해당 클래스를 에셋에서 제거하고 바꾸기
 - Inherit UStateTreeTaskBlueprintBase
 > Can define UFUNCTION that binds to the dynamic delegate in other systems.
 

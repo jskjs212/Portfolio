@@ -37,9 +37,9 @@ protected:
     ////////////////////////////////////////////////////////
 public:
     // Update UI of inventory item slots from owner pawn's InventoryComponent (when visible)
-    void UpdateItemSlotsUI();
+    void UpdateInventorySlotsUI();
 
-    bool IsPendingUpdate() const { return bPendingUpdateItemSlots; }
+    bool IsPendingUpdate() const { return bPendingUpdateSlotsUI; }
 
 private:
     void SetupContextMenu();
@@ -128,7 +128,7 @@ private:
     //        Variables
     ////////////////////////////////////////////////////////
 private:
-    bool bPendingUpdateItemSlots{false};
+    bool bPendingUpdateSlotsUI{true};
 
     FItemActionRequest ContextMenuItemActionRequest;
 };

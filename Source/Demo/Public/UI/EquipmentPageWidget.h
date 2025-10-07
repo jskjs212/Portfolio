@@ -46,6 +46,10 @@ public:
     // Update UI of equipment item slots from owner pawn's EquipmentComponent
     void UpdateEquipmentSlotsUI(FGameplayTag EquipmentType);
 
+    void UpdateAllEquipmentSlotsUI();
+
+    bool IsPendingUpdate() const { return bPendingUpdateSlotsUI; }
+
     FGameplayTag GetEquipmentTypeAtIndex(int32 InIndex) const
     {
         return EquipmentSlots.IsValidIndex(InIndex) ? EquipmentSlots[InIndex].EquipmentType : FGameplayTag::EmptyTag;
@@ -105,6 +109,8 @@ protected:
     //        Variables
     ////////////////////////////////////////////////////////
 private:
+    bool bPendingUpdateSlotsUI{true};
+
     FGameplayTag ContextMenuEquipmentType;
 
     TArray<FEquipmentSlotData> EquipmentSlots;

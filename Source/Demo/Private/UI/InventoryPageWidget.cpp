@@ -76,14 +76,14 @@ FReply UInventoryPageWidget::NativeOnPreviewKeyDown(const FGeometry& InGeometry,
     return Super::NativeOnPreviewKeyDown(InGeometry, InKeyEvent);
 }
 
-void UInventoryPageWidget::UpdateItemSlotsUI()
+void UInventoryPageWidget::UpdateInventorySlotsUI()
 {
     if (!IsVisible())
     {
-        bPendingUpdateItemSlots = true;
+        bPendingUpdateSlotsUI = true;
         return;
     }
-    bPendingUpdateItemSlots = false;
+    bPendingUpdateSlotsUI = false;
 
     const APawn* OwningPawn = GetOwningPlayerPawn();
     if (!OwningPawn)
@@ -184,8 +184,8 @@ void UInventoryPageWidget::BindToInventoryUpdates()
     {
         if (UInventoryComponent* InventoryComponent = OwningPawn->FindComponentByClass<UInventoryComponent>())
         {
-            InventoryComponent->OnInventoryUpdated.AddUObject(this, &ThisClass::UpdateItemSlotsUI);
-            UpdateItemSlotsUI();
+            InventoryComponent->OnInventoryUpdated.AddUObject(this, &ThisClass::UpdateInventorySlotsUI);
+            UpdateInventorySlotsUI();
         }
     }
 }

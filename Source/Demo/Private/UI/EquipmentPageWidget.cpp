@@ -32,6 +32,13 @@ void UEquipmentPageWidget::NativeOnInitialized()
 
 void UEquipmentPageWidget::UpdateEquipmentSlotsUI(FGameplayTag EquipmentType)
 {
+    if (!IsVisible())
+    {
+        bPendingUpdateSlotsUI = true;
+        return;
+    }
+    bPendingUpdateSlotsUI = false;
+
     const APawn* OwningPawn = GetOwningPlayerPawn();
     if (!OwningPawn)
     {
@@ -61,6 +68,14 @@ void UEquipmentPageWidget::UpdateEquipmentSlotsUI(FGameplayTag EquipmentType)
             }
             SlotData.SlotWidget->UpdateVisuals();
         }
+    }
+}
+
+void UEquipmentPageWidget::UpdateAllEquipmentSlotsUI()
+{
+    for (const FEquipmentSlotData& SlotData : EquipmentSlots)
+    {
+        UpdateEquipmentSlotsUI(SlotData.EquipmentType);
     }
 }
 

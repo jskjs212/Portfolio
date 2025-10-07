@@ -7,11 +7,13 @@
 #include "STTask_MoveTo.generated.h"
 
 namespace EPathFollowingResult { enum Type : int; }
+class AAIController;
 
 /**
- * HandleMoveCompleted() is bound to AAIController::ReceiveMoveCompleted delegate, which is called when MoveTo request is finished.
+ * Simple version of MoveTo task (inflexible) using AAIController::MoveTo.
+ * Priority: TargetActor > TargetLocation.
  */
-UCLASS()
+UCLASS(meta = (DisplayName = "Simple Move To", Category = "AI|Action"))
 class DEMO_API USTTask_MoveTo : public UStateTreeTaskBlueprintBase
 {
     GENERATED_BODY()
@@ -23,14 +25,21 @@ protected:
     virtual EStateTreeRunStatus EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) override;
 
 private:
+    // Bound to AAIController::ReceiveMoveCompleted delegate, which is called when MoveTo request is finished.
     UFUNCTION()
     void HandleMoveCompleted(FAIRequestID RequestID, EPathFollowingResult::Type Result);
 
 protected:
     UPROPERTY(EditAnywhere, Category = "Context")
-    APawn* Pawn;
+    TObjectPtr<APawn> Pawn;
 
-    UPROPERTY(EditAnywhere, Category = "Input")
+    UPROPERTY(EditAnywhere, Category = "Context")
+    TObjectPtr<AAIController> AIController;
+
+    UPROPERTY(EditAnywhere, Category = "Parameter")
+    TObjectPtr<AActor> TargetActor;
+
+    UPROPERTY(EditAnywhere, Category = "Parameter")
     FVector TargetLocation;
 
     UPROPERTY(EditAnywhere, Category = "Initialization", meta = (ClampMin = "0."))

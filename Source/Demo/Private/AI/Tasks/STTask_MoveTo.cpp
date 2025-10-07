@@ -2,6 +2,7 @@
 
 #include "AI/Tasks/STTask_MoveTo.h"
 #include "AIController.h"
+#include "DemoTypes/LogCategories.h"
 #include "GameFramework/Pawn.h"
 #include "Navigation/PathFollowingComponent.h"
 
@@ -19,13 +20,27 @@ EStateTreeRunStatus USTTask_MoveTo::EnterState(FStateTreeExecutionContext& Conte
         return EStateTreeRunStatus::Failed;
     }
 
-    AAIController* AIController = Pawn ? Pawn->GetController<AAIController>() : nullptr;
     if (!AIController)
     {
+        DemoLOG_CF(LogAI, Error, TEXT("Invalid AIController for %s"), *GetNameSafe(Pawn));
         return EStateTreeRunStatus::Failed;
     }
 
-    EPathFollowingRequestResult::Type RequestResult = AIController->MoveToLocation(TargetLocation, AcceptanceRadius);
+    EPathFollowingRequestResult::Type RequestResult;
+    if (TargetActor)
+    {
+        RequestResult = AIController->MoveToActor(TargetActor, AcceptanceRadius);
+    }
+    else if (!TargetLocation.IsZero())
+    {
+        RequestResult = AIController->MoveToLocation(TargetLocation, AcceptanceRadius);
+    }
+    else
+    {
+        DemoLOG_CF(LogAI, Error, TEXT("Neither TargetActor nor TargetLocation is set for %s"), *GetNameSafe(Pawn));
+        return EStateTreeRunStatus::Failed;
+    }
+
     switch (RequestResult)
     {
     case EPathFollowingRequestResult::RequestSuccessful:
@@ -40,7 +55,6 @@ EStateTreeRunStatus USTTask_MoveTo::EnterState(FStateTreeExecutionContext& Conte
 
 void USTTask_MoveTo::HandleMoveCompleted(FAIRequestID RequestID, EPathFollowingResult::Type Result)
 {
-    AAIController* AIController = Pawn ? Pawn->GetController<AAIController>() : nullptr;
     if (AIController)
     {
         AIController->ReceiveMoveCompleted.RemoveDynamic(this, &ThisClass::HandleMoveCompleted);

@@ -185,7 +185,13 @@ void ABaseCharacter::PlayPointHitEffects(const FPointDamageEvent& PointDamageEve
                     HitReactMontage = HitReactLeftMontage ? HitReactLeftMontage.Get() : HitReactMontage;
                 }
             }
-            AnimInstance->Montage_Play(HitReactMontage);
+
+            const float Duration = AnimInstance->Montage_Play(HitReactMontage);
+            if (Duration > 0.f)
+            {
+                // Cancel current action, but allow performing another action.
+                StateManager->SetAction(DemoGameplayTags::State_General);
+            }
         }
     }
 }

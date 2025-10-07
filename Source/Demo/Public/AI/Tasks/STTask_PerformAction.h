@@ -13,7 +13,7 @@ struct FSTTask_PerformActionInstanceData
     GENERATED_BODY()
 
     UPROPERTY(EditAnywhere, Category = "Context")
-    AActor* Actor;
+    TObjectPtr<APawn> Pawn;
 
     UPROPERTY(EditAnywhere, Category = "Initialization", meta = (Categories = "State"))
     FGameplayTag ActionTag;
@@ -29,9 +29,9 @@ struct FSTTask_PerformActionInstanceData
 };
 
 /**
- *
+ * Succeeds immediately after requesting the action. Fails if it couldn't request the action.
  */
-USTRUCT()
+USTRUCT(meta = (DisplayName = "Perform Action", Category = "Demo|Action"))
 struct DEMO_API FSTTask_PerformAction : public FStateTreeTaskCommonBase
 {
     GENERATED_BODY()
