@@ -21,6 +21,11 @@ void ADemoAIController::OnPossess(APawn* InPawn)
 {
     Super::OnPossess(InPawn);
 
+    SetupStateTree(InPawn);
+}
+
+void ADemoAIController::SetupStateTree(const APawn* InPawn)
+{
     if (const AAICharacter* AICharacter = Cast<AAICharacter>(InPawn))
     {
         if (DemoStateTreeAIComponent->IsRunning())

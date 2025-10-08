@@ -41,6 +41,8 @@ public:
 protected:
     virtual void OnPossess(APawn* InPawn) override;
 
+    void SetupStateTree(const APawn* InPawn);
+
     ////////////////////////////////////////////////////////
     //        Variables
     ////////////////////////////////////////////////////////

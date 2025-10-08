@@ -2,9 +2,7 @@
 
 #include "PlayerController/DemoPlayerController.h"
 #include "Character/PlayerCharacter.h"
-#include "Components/TargetingComponent.h"
 #include "DemoTypes/LogCategories.h"
-#include "Items/Item.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/DemoHUD.h"
 #include "UI/DemoHUDWidget.h"
@@ -25,7 +23,6 @@ ADemoPlayerController::ADemoPlayerController()
     }
 
     ItemActionDispatcher = CreateDefaultSubobject<UItemActionDispatcher>(TEXT("ItemActionDispatcher"));
-    check(ItemActionDispatcher);
 }
 
 void ADemoPlayerController::ShowPlayerMenu(bool bShow)
@@ -98,10 +95,6 @@ void ADemoPlayerController::InitDemoHUD()
         {
             PlayerCharacter->OnInteractableFocused.BindUObject(this, &ThisClass::HandleInteractableFocused);
         }
-        if (UTargetingComponent* TargetingComponent = OwnerPawn->FindComponentByClass<UTargetingComponent>())
-        {
-            TargetingComponent->OnTargetUpdated.AddUObject(this, &ThisClass::HandleTargetUpdated);
-        }
     }
 }
 
@@ -127,17 +120,6 @@ void ADemoPlayerController::HandleInteractableFocused(IInteractable* NewFocusedI
         if (DemoHUD->DemoHUDWidget)
         {
             DemoHUD->DemoHUDWidget->UpdateInteractWidgets(NewFocusedInteractable);
-        }
-    }
-}
-
-void ADemoPlayerController::HandleTargetUpdated(AActor* NewTarget)
-{
-    if (ADemoHUD* DemoHUD = GetHUD<ADemoHUD>())
-    {
-        if (DemoHUD->DemoHUDWidget)
-        {
-            DemoHUD->DemoHUDWidget->UpdateTargetStatus(NewTarget);
         }
     }
 }

@@ -51,9 +51,6 @@ private:
     // HUD widget will decide what to show based on actual type (open, pickup, etc.).
     void HandleInteractableFocused(IInteractable* NewFocusedInteractable);
 
-    // Show or hide lock-on image.
-    void HandleTargetUpdated(AActor* NewTarget);
-
     ////////////////////////////////////////////////////////
     //        Get & set
     ////////////////////////////////////////////////////////

@@ -267,7 +267,7 @@ void UTargetingComponent::UpdateTargetingCamera(float DeltaTime)
     }
 
     const FVector OwnerLocation = OwnerPawn->GetActorLocation();
-    FVector TargetLocation = LockedTarget->GetActorLocation();
+    FVector TargetLocation = Cast<ITargetInterface>(LockedTarget)->GetTargetPointLocation();
     TargetLocation.Z += TargetingPointHeightAdjustment; // Look lower than the target location
 
     const FRotator CurrentRotation = OwnerController->GetControlRotation();

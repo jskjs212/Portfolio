@@ -27,6 +27,9 @@ protected:
     UPROPERTY(VisibleAnywhere)
     TObjectPtr<UWidgetComponent> AIStatusWidgetComponent;
 
+    UPROPERTY(VisibleAnywhere)
+    TObjectPtr<UWidgetComponent> LockOnMarkerWidgetComponent;
+
     ////////////////////////////////////////////////////////
     //        Fundamentals
     ////////////////////////////////////////////////////////
