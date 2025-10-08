@@ -32,7 +32,7 @@ void ADemoAIController::OnPossess(APawn* InPawn)
         if (StateTreeRefOverride.IsValid())
         {
             DemoStateTreeAIComponent->RemoveLinkedStateTreeOverrides(StateTreeTag);
-            DemoStateTreeAIComponent->AddLinkedStateTreeOverridesFixed(StateTreeTag, StateTreeRefOverride);
+            DemoStateTreeAIComponent->AddLinkedStateTreeOverrides_Fixed(StateTreeTag, StateTreeRefOverride);
             DemoStateTreeAIComponent->StartLogic();
         }
         else
