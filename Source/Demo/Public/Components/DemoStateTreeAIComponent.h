@@ -7,7 +7,7 @@
 #include "DemoStateTreeAIComponent.generated.h"
 
 /**
- *
+ * Use AddLinkedStateTreeOverrides_Fixed() instead of AddLinkedStateTreeOverrides().
  */
 UCLASS()
 class DEMO_API UDemoStateTreeAIComponent : public UStateTreeAIComponent

@@ -42,6 +42,6 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Parameter")
     FVector TargetLocation;
 
-    UPROPERTY(EditAnywhere, Category = "Initialization", meta = (ClampMin = "0."))
+    UPROPERTY(EditAnywhere, Category = "Parameter", meta = (ClampMin = "0."))
     float AcceptanceRadius{10.0f};
 };
