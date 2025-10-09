@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(meta = (DisplayName = "Reset State"))
 class DEMO_API UAnimNotify_ResetState : public UAnimNotify
 {
 	GENERATED_BODY()

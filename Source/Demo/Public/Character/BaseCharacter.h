@@ -151,6 +151,9 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Initialization|Animation")
     TObjectPtr<UAnimMontage> DeathMontage;
 
+    UPROPERTY(EditAnywhere, Category = "Initialization|Animation")
+    float DeathDestroyDelay{5.f};
+
     UPROPERTY(EditAnywhere, Category = "Initialization|Hit")
     TObjectPtr<USoundBase> HitSound;
 

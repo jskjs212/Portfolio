@@ -10,7 +10,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(meta = (DisplayName = "Continue Attack"))
 class DEMO_API UAnimNotify_ContinueAttack : public UAnimNotify
 {
 	GENERATED_BODY()

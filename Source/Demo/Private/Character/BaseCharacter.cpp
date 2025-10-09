@@ -267,10 +267,9 @@ void ABaseCharacter::HandleDeath()
     StatsComponent->StopAllRegen();
 
     // Destroy actor after some time
-    constexpr float DestroyDelay = 5.f;
     FTimerHandle DestroyTimerHandle;
     FTimerManager& TimerManager = GetWorldTimerManager();
-    TimerManager.SetTimer(DestroyTimerHandle, this, &ThisClass::DestroyCharacter, DestroyDelay);
+    TimerManager.SetTimer(DestroyTimerHandle, this, &ThisClass::DestroyCharacter, DeathDestroyDelay);
 }
 
 void ABaseCharacter::HandleCurrentResourceStatChanged(FGameplayTag StatTag, float OldValue, float NewValue)

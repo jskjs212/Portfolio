@@ -11,7 +11,7 @@
  * Activate attack collision of a certain type (definition) during the notify duration.
  * Same type and same hit group at the same time will be deactivated at the end of the first notify.
  */
-UCLASS()
+UCLASS(meta = (DisplayName = "Collision Trace"))
 class DEMO_API UAnimNotifyState_CollisionTrace : public UAnimNotifyState
 {
     GENERATED_BODY()

@@ -16,7 +16,7 @@ enum class ERotateType : uint8
 /**
  * Rotate the ICombatInterface actor to face the desired rotation.
  */
-UCLASS()
+UCLASS(meta = (DisplayName = "Rotate Actor"))
 class DEMO_API UAnimNotifyState_RotateActor : public UAnimNotifyState
 {
     GENERATED_BODY()
