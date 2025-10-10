@@ -7,6 +7,7 @@
 #include "GameplayTagContainer.h"
 #include "DemoAIController.generated.h"
 
+struct FActorPerceptionUpdateInfo;
 struct FStateTreeReference;
 class UAIPerceptionComponent;
 class UAISenseConfig_Damage;
@@ -55,7 +56,18 @@ protected:
     void OverrideStateTree(const APawn* InPawn);
 
     UFUNCTION()
-    void HandlePerceptionUpdated(const TArray<AActor*>& UpdatedActors);
+    void HandleTargetPerceptionInfoUpdated(const FActorPerceptionUpdateInfo& UpdateInfo);
+
+    ////////////////////////////////////////////////////////
+    //        StateTree (like Blackboard keys)
+    ////////////////////////////////////////////////////////
+public:
+    FORCEINLINE AActor* GetTargetActor() const { return TargetActor; }
+
+protected:
+    // Target actor that AI is attacking or moving to.
+    UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "StateTree")
+    TObjectPtr<AActor> TargetActor;
 
     ////////////////////////////////////////////////////////
     //        Variables

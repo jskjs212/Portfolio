@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Character/BaseCharacter.h"
+#include "DemoTypes/DemoTypes.h"
 #include "DemoTypes/ItemTypes.h" // @TEST
+#include "GenericTeamAgentInterface.h"
 #include "PlayerCharacter.generated.h"
 
 struct FInputActionValue;
@@ -23,7 +25,7 @@ DECLARE_DELEGATE_OneParam(FOnInteractableFocused, IInteractable* /* NewFocusedIn
  *
  */
 UCLASS()
-class DEMO_API APlayerCharacter : public ABaseCharacter
+class DEMO_API APlayerCharacter : public ABaseCharacter, public IGenericTeamAgentInterface
 {
     GENERATED_BODY()
 
@@ -82,6 +84,12 @@ public:
     virtual FRotator GetDesiredInputRotation() const override;
 
     ////////////////////////////////////////////////////////
+    //        GenericTeamAgentInterface
+    ////////////////////////////////////////////////////////
+public:
+    virtual FGenericTeamId GetGenericTeamId() const override { return TeamID; }
+
+    ////////////////////////////////////////////////////////
     //        Input functions
     ////////////////////////////////////////////////////////
 public:
@@ -124,12 +132,7 @@ protected:
     ////////////////////////////////////////////////////////
 public:
     // @check - Call in AnimInstance?
-    FORCEINLINE float GetGroundSpeed() const
-    {
-        FVector Velocity = GetVelocity();
-        Velocity.Z = 0.f;
-        return Velocity.Size();
-    }
+    FORCEINLINE float GetGroundSpeed() const { return GetVelocity().Size2D(); }
 
     virtual void SetMovementSpeedMode(FGameplayTag NewSpeedMode) override;
 
@@ -186,6 +189,8 @@ public:
     TObjectPtr<USoundBase> PickupSound;
 
 private:
+    FGenericTeamId TeamID{DemoTeamID::Player};
+
     /* Movement */
     // Options: true = toggle, false = hold
     bool bIsWalkInputTogglesWalk{true};

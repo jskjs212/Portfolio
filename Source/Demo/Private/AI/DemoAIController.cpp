@@ -4,6 +4,7 @@
 #include "AI/DemoAIController.h"
 #include "Character/AICharacter.h"
 #include "Components/DemoStateTreeAIComponent.h"
+#include "DemoTypes/DemoTypes.h"
 #include "DemoTypes/LogCategories.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AIPerceptionTypes.h"
@@ -13,6 +14,8 @@
 
 ADemoAIController::ADemoAIController()
 {
+    SetGenericTeamId(DemoTeamID::Enemy); // @TODO - Enemy and Neutral
+
     DemoStateTreeAIComponent = CreateDefaultSubobject<UDemoStateTreeAIComponent>(TEXT("DemoStateTreeAIComponent"));
     DemoStateTreeAIComponent->SetStartLogicAutomatically(false);
 
@@ -25,16 +28,16 @@ ADemoAIController::ADemoAIController()
     SenseSightConfig->DetectionByAffiliation.bDetectEnemies = true;
     SenseSightConfig->DetectionByAffiliation.bDetectNeutrals = false;
     SenseSightConfig->DetectionByAffiliation.bDetectFriendlies = false;
-    SenseSightConfig->SightRadius = 1200.f;
-    SenseSightConfig->LoseSightRadius = 1800.f;
+    SenseSightConfig->SightRadius = 1000.f;
+    SenseSightConfig->LoseSightRadius = 1500.f;
     SenseSightConfig->PeripheralVisionAngleDegrees = 45.f;
-    SenseSightConfig->AutoSuccessRangeFromLastSeenLocation = 500.f;
+    SenseSightConfig->AutoSuccessRangeFromLastSeenLocation = 300.f;
 
     DemoPerceptionComponent->ConfigureSense(*SenseDamageConfig);
     DemoPerceptionComponent->ConfigureSense(*SenseSightConfig);
     DemoPerceptionComponent->SetDominantSense(SenseSightConfig->GetSenseImplementation());
 
-    DemoPerceptionComponent->OnPerceptionUpdated.AddDynamic(this, &ThisClass::HandlePerceptionUpdated);
+    DemoPerceptionComponent->OnTargetPerceptionInfoUpdated.AddDynamic(this, &ThisClass::HandleTargetPerceptionInfoUpdated);
 }
 
 void ADemoAIController::OnPossess(APawn* InPawn)
@@ -75,6 +78,28 @@ void ADemoAIController::OverrideStateTree(const APawn* InPawn)
     }
 }
 
-void ADemoAIController::HandlePerceptionUpdated(const TArray<AActor*>& UpdatedActors)
+void ADemoAIController::HandleTargetPerceptionInfoUpdated(const FActorPerceptionUpdateInfo& UpdateInfo)
 {
+    if (UpdateInfo.Stimulus.WasSuccessfullySensed())
+    {
+        TargetActor = UpdateInfo.Target.Get();
+
+        if (DemoStateTreeAIComponent->IsRunning())
+        {
+            FStateTreeEvent Event{DemoGameplayTags::StateTree_Event_TargetSensed};
+            Event.Origin = TEXT("DemoAIController::HandleTargetPerceptionInfoUpdated");
+            DemoStateTreeAIComponent->SendStateTreeEvent(Event);
+        }
+    }
+    else if (TargetActor == UpdateInfo.Target.Get())
+    {
+        TargetActor = nullptr;
+
+        if (DemoStateTreeAIComponent->IsRunning())
+        {
+            FStateTreeEvent Event{DemoGameplayTags::StateTree_Event_TargetLost};
+            Event.Origin = TEXT("DemoAIController::HandleTargetPerceptionInfoUpdated");
+            DemoStateTreeAIComponent->SendStateTreeEvent(Event);
+        }
+    }
 }

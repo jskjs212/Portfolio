@@ -3,7 +3,6 @@
 #include "Character/PlayerCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "Components/CollisionComponent.h"
 #include "Components/CombatComponent.h"
 #include "Components/EquipmentComponent.h"
 #include "Components/InventoryComponent.h"

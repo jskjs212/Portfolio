@@ -9,6 +9,25 @@
  */
 namespace DemoGameplayTags
 {
+// Item.Weapon.*
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Item_Weapon);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Item_Weapon_NoWeapon);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Item_Weapon_Melee_OneHanded);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Item_Weapon_Melee_TwoHanded);
+
+// Item.Armor.*
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Item_Armor);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Item_Armor_Shield);
+
+// Item.Consumable.*
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Item_Consumable);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Item_Consumable_Food);
+
+// Movement.SpeedMode.*
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Movement_SpeedMode_Walk);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Movement_SpeedMode_Jog);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Movement_SpeedMode_Sprint);
+
 // Character states: State.[state]
 // These can also be used as action tags.
 // MUST sync with UStateManagerComponent::UStateManagerComponent() - std::call_once - AllStates
@@ -30,24 +49,10 @@ DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Attack_Light);
 DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Attack_Heavy);
 DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Attack_Charged);
 
-// Movement.SpeedMode.*
-DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Movement_SpeedMode_Walk);
-DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Movement_SpeedMode_Jog);
-DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Movement_SpeedMode_Sprint);
-
-// Item.Weapon.*
-DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Item_Weapon);
-DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Item_Weapon_NoWeapon);
-DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Item_Weapon_Melee_OneHanded);
-DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Item_Weapon_Melee_TwoHanded);
-
-// Item.Armor.*
-DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Item_Armor);
-DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Item_Armor_Shield);
-
-// Item.Consumable.*
-DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Item_Consumable);
-DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Item_Consumable_Food);
+// StateTree.*
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(StateTree_Tree_Main);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(StateTree_Event_TargetLost);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(StateTree_Event_TargetSensed);
 
 // UI.PlayerMenu.*
 DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(UI_PlayerMenu_Stats);

@@ -4,7 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
+#include "GenericTeamAgentInterface.h"
 #include "DemoTypes.generated.h"
+
+namespace DemoTeamID
+{
+const FGenericTeamId Player{1};
+const FGenericTeamId Enemy{2};
+const FGenericTeamId Neutral{3};
+} // namespace DemoTeamID
 
 USTRUCT()
 struct FCharacterWeaponKey
