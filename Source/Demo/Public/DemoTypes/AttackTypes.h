@@ -23,6 +23,9 @@ enum class EAttackCollisionType : uint8
     RightArm UMETA(DisplayName = "Right Arm"),
     LeftArm UMETA(DisplayName = "Left Arm"),
     ThirdArm UMETA(DisplayName = "Third Arm"),
+    FourthArm UMETA(DisplayName = "Fourth Arm"),
+    FifthArm UMETA(DisplayName = "Fifth Arm"),
+    SixthArm UMETA(DisplayName = "Sixth Arm"),
     Leg UMETA(DisplayName = "Leg"),
     Tail UMETA(DisplayName = "Tail")
 };

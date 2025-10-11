@@ -6,6 +6,7 @@
 #include "Components/DemoStateTreeAIComponent.h"
 #include "DemoTypes/DemoTypes.h"
 #include "DemoTypes/LogCategories.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AIPerceptionTypes.h"
 #include "Perception/AISenseConfig_Damage.h"
@@ -45,6 +46,17 @@ void ADemoAIController::OnPossess(APawn* InPawn)
     Super::OnPossess(InPawn);
 
     OverrideStateTree(InPawn);
+}
+
+void ADemoAIController::SetControlRotationToTarget()
+{
+    const APawn* MyPawn = GetPawn();
+    if (MyPawn && TargetActor)
+    {
+        const FVector Direction = TargetActor->GetActorLocation() - MyPawn->GetActorLocation();
+        const FRotator DesiredRotation = UKismetMathLibrary::MakeRotFromX(Direction);
+        SetControlRotation(DesiredRotation);
+    }
 }
 
 void ADemoAIController::OverrideStateTree(FStateTreeReference InStateTreeRef)

@@ -1,12 +1,17 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Character/AICharacter.h"
+#include "AI/DemoAIController.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StateManagerComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "DemoTypes/LogCategories.h"
+
+#include "Engine/DamageEvents.h"
+#include "GenericTeamAgentInterface.h"
+#include "Perception/AISense_Damage.h"
 #include "UI/AIStatusWidget.h"
 
 AAICharacter::AAICharacter()
@@ -53,6 +58,49 @@ void AAICharacter::BeginPlay()
     {
         DemoLOG_CF(LogCharacter, Warning, TEXT("AIStatusWidget is not valid for %s."), *GetName());
     }
+}
+
+float AAICharacter::InternalTakePointDamage(float Damage, FPointDamageEvent const& PointDamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+    Damage = Super::InternalTakePointDamage(Damage, PointDamageEvent, EventInstigator, DamageCauser);
+
+    // Notify AI
+    FVector HitLocation = PointDamageEvent.HitInfo.ImpactPoint;
+    FVector EventLocation = DamageCauser ? DamageCauser->GetActorLocation() : HitLocation;
+    UAISense_Damage::ReportDamageEvent(
+        this, /* WorldContextObject */
+        this, /* DamagedActor */
+        EventInstigator,
+        Damage,
+        EventLocation,
+        HitLocation
+    );
+
+    return Damage;
+}
+
+bool AAICharacter::CanReceiveDamageFrom(const AActor* Attacker) const
+{
+    if (!Super::CanReceiveDamageFrom(Attacker))
+    {
+        return false;
+    }
+
+    // Only from players
+    if (const IGenericTeamAgentInterface* AITeamAgent = GetController<IGenericTeamAgentInterface>())
+    {
+        return AITeamAgent->GetTeamAttitudeTowards(*Attacker) == ETeamAttitude::Hostile;
+    }
+    return false;
+}
+
+FRotator AAICharacter::GetDesiredControlRotation() const
+{
+    if (ADemoAIController* DemoAIController = GetController<ADemoAIController>())
+    {
+        DemoAIController->SetControlRotationToTarget();
+    }
+    return Super::GetDesiredControlRotation();
 }
 
 void AAICharacter::OnTargeted(bool bIsTargeted)

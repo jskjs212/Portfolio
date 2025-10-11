@@ -9,6 +9,7 @@
 
 namespace EDrawDebugTrace { enum Type : int; }
 struct FWeaponData;
+class AItem;
 class UEquipmentComponent;
 
 struct FActiveAttackCollisionDefinition
@@ -29,6 +30,9 @@ struct FActiveAttackCollisionDefinition
  * Process active collisions in TickComponent().
  * Trace only for pawns for now.
  * !!! HitActors are not cleared on deactivation.
+ * !!! Assume that bClearHitActorsOnBegin is true at least once for each AnimMontage.
+ *     Assume that weapons are not changed during an AnimMontage.
+ *     So HitActors and CachedMainWeapon are cleared when bClearHitActorsOnBegin is true.
  *
  * @Dependency - Some AttackCollisionTypes need EquipmentComponent.
  */
@@ -83,6 +87,7 @@ private:
     FVector GetSocketLocation(EAttackCollisionType InType, FName InSocketName);
 
     const UEquipmentComponent* GetEquipmentComponent();
+    AItem* GetMainWeapon();
 
     ////////////////////////////////////////////////////////
     //        Variables - collision
@@ -114,4 +119,5 @@ private:
     TArray<TSet<AActor*>> HitActorGroups;
 
     TWeakObjectPtr<const UEquipmentComponent> CachedEquipmentComponent;
+    TWeakObjectPtr<AItem> CachedMainWeapon;
 };

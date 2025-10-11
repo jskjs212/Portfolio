@@ -17,6 +17,7 @@
 #include "DemoTypes/TableRowBases.h"
 #include "Engine/DamageEvents.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GenericTeamAgentInterface.h"
 #include "Items/Item.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -337,10 +338,10 @@ bool ABaseCharacter::IsInAction(FGameplayTag Action) const
     return StateManager->IsInAction(Action);
 }
 
-bool ABaseCharacter::CanReceiveDamage() const
+bool ABaseCharacter::CanReceiveDamageFrom(const AActor* Attacker) const
 {
     // @TODO - iFrames
-    return !StateManager->IsInAction(DemoGameplayTags::State_Dead);
+    return Attacker && !StateManager->IsInAction(DemoGameplayTags::State_Dead);
 }
 
 float ABaseCharacter::CalculateDamage(EAttackCollisionType InType) const

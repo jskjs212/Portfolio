@@ -32,7 +32,7 @@ public:
 
     virtual bool IsInAction(FGameplayTag InAction) const = 0;
 
-    virtual bool CanReceiveDamage() const = 0;
+    virtual bool CanReceiveDamageFrom(const AActor* Attacker) const = 0;
 
     virtual float CalculateDamage(EAttackCollisionType InType) const = 0;
 

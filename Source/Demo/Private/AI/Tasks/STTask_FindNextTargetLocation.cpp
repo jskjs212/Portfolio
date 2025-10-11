@@ -7,7 +7,6 @@
 
 FSTTask_FindNextTargetLocation::FSTTask_FindNextTargetLocation()
 {
-    bShouldStateChangeOnReselect = false;
     bShouldCallTick = false;
 }
 

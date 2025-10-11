@@ -39,6 +39,17 @@ public:
 protected:
     virtual void BeginPlay() override;
 
+    virtual float InternalTakePointDamage(float Damage, struct FPointDamageEvent const& PointDamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
+    ////////////////////////////////////////////////////////
+    //        Combat interface
+    ////////////////////////////////////////////////////////
+public:
+    virtual bool CanReceiveDamageFrom(const AActor* Attacker) const override;
+
+    // Sets control rotation to face the target actor.
+    virtual FRotator GetDesiredControlRotation() const override;
+
     ////////////////////////////////////////////////////////
     //        Target interface
     ////////////////////////////////////////////////////////

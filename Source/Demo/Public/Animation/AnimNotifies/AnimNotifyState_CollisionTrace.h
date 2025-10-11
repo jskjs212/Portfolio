@@ -17,6 +17,8 @@ class DEMO_API UAnimNotifyState_CollisionTrace : public UAnimNotifyState
     GENERATED_BODY()
 
 public:
+    UAnimNotifyState_CollisionTrace(const FObjectInitializer& ObjectInitializer);
+
     virtual void NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration, const FAnimNotifyEventReference& EventReference) override;
 
     virtual void NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;

@@ -51,6 +51,10 @@ public:
 protected:
     virtual void OnPossess(APawn* InPawn) override;
 
+public:
+    void SetControlRotationToTarget();
+
+protected:
     void OverrideStateTree(FStateTreeReference InStateTreeRef);
 
     void OverrideStateTree(const APawn* InPawn);
@@ -66,7 +70,6 @@ public:
 
 protected:
     // Target actor that AI is attacking or moving to.
-    UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "StateTree")
     TObjectPtr<AActor> TargetActor;
 
     ////////////////////////////////////////////////////////

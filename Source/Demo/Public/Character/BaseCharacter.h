@@ -108,7 +108,7 @@ public:
 
     virtual bool IsInAction(FGameplayTag InAction) const override;
 
-    virtual bool CanReceiveDamage() const override;
+    virtual bool CanReceiveDamageFrom(const AActor* Attacker) const override;
 
     virtual float CalculateDamage(EAttackCollisionType InType) const override;
 
@@ -127,7 +127,7 @@ private:
     //        Get & set
     ////////////////////////////////////////////////////////
 public:
-    UFUNCTION(BlueprintCallable, Category = "Movement")
+    UFUNCTION(BlueprintCallable, Category = "Movement", meta = (Categories = "Movement.SpeedMode"))
     virtual void SetMovementSpeedMode(FGameplayTag NewSpeedMode);
 
     void SetOrientRotationToMovement(bool bOrient);

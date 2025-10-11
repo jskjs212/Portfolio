@@ -81,6 +81,8 @@ private:
     //        Combat interface
     ////////////////////////////////////////////////////////
 public:
+    virtual bool CanReceiveDamageFrom(const AActor* Attacker) const override;
+
     virtual FRotator GetDesiredInputRotation() const override;
 
     ////////////////////////////////////////////////////////

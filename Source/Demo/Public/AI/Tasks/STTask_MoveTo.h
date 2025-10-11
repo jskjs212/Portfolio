@@ -11,6 +11,7 @@ class AAIController;
 
 /**
  * Simple version of MoveTo task (inflexible) using AAIController::MoveTo.
+ * Completes when AAIController::ReceiveMoveCompleted is triggered.
  * Priority: TargetActor > TargetLocation.
  */
 UCLASS(meta = (DisplayName = "Simple Move To", Category = "AI|Action"))
@@ -24,16 +25,18 @@ public:
 protected:
     virtual EStateTreeRunStatus EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) override;
 
+    virtual void ExitState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) override;
+
 private:
     // Bound to AAIController::ReceiveMoveCompleted delegate, which is called when MoveTo request is finished.
     UFUNCTION()
     void HandleMoveCompleted(FAIRequestID RequestID, EPathFollowingResult::Type Result);
 
 protected:
-    UPROPERTY(EditAnywhere, Category = "Context")
+    UPROPERTY(VisibleAnywhere, Category = "Context")
     TObjectPtr<APawn> Pawn;
 
-    UPROPERTY(EditAnywhere, Category = "Context")
+    UPROPERTY(VisibleAnywhere, Category = "Context")
     TObjectPtr<AAIController> AIController;
 
     UPROPERTY(EditAnywhere, Category = "Parameter")

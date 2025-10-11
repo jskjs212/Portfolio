@@ -1,32 +1,74 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "AI/Tasks/STTask_PerformAction.h"
-#include "Interfaces/CombatInterface.h"
+#include "Components/StateManagerComponent.h"
+#include "DemoTypes/LogCategories.h"
 #include "GameFramework/Pawn.h"
+#include "Interfaces/CombatInterface.h"
 #include "StateTreeExecutionContext.h"
 
-FSTTask_PerformAction::FSTTask_PerformAction()
+USTTask_PerformAction::USTTask_PerformAction(const FObjectInitializer& ObjectInitializer)
+    : Super(ObjectInitializer)
 {
-    bShouldStateChangeOnReselect = false;
     bShouldCallTick = false;
 }
 
-EStateTreeRunStatus FSTTask_PerformAction::EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) const
+EStateTreeRunStatus USTTask_PerformAction::EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition)
 {
-    FInstanceDataType& InstanceData = Context.GetInstanceData<FInstanceDataType>(*this);
+    if (Super::EnterState(Context, Transition) == EStateTreeRunStatus::Failed)
+    {
+        return EStateTreeRunStatus::Failed;
+    }
 
-    ICombatInterface* CombatInterface = Cast<ICombatInterface>(InstanceData.Pawn);
+    ICombatInterface* CombatInterface = Cast<ICombatInterface>(Pawn);
     if (!CombatInterface)
     {
         return EStateTreeRunStatus::Failed;
     }
 
     const float Duration = CombatInterface->PerformAction(
-        InstanceData.ActionTag,
-        InstanceData.bIgnoreCurrentState,
-        InstanceData.MontageIndex,
-        InstanceData.bUseRandomIndex
+        ActionTag,
+        bIgnoreCurrentState,
+        MontageIndex,
+        bUseRandomIndex
     );
+    if (Duration <= 0.f)
+    {
+        return EStateTreeRunStatus::Failed;
+    }
 
-    return Duration > 0.f ? EStateTreeRunStatus::Succeeded : EStateTreeRunStatus::Failed;
+    if (UStateManagerComponent* StateManager = Pawn->FindComponentByClass<UStateManagerComponent>())
+    {
+        StateEndedHandle = StateManager->OnStateEnded.AddUObject(this, &ThisClass::HandleStateEnded);
+        return EStateTreeRunStatus::Running;
+    }
+
+    return EStateTreeRunStatus::Succeeded;
+
+}
+
+void USTTask_PerformAction::ExitState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition)
+{
+    Super::ExitState(Context, Transition);
+
+    if (UStateManagerComponent* StateManager = Pawn->FindComponentByClass<UStateManagerComponent>())
+    {
+        if (StateManager->OnStateEnded.Remove(StateEndedHandle))
+        {
+            StateEndedHandle.Reset();
+        }
+    }
+}
+
+void USTTask_PerformAction::HandleStateEnded(FGameplayTag InState)
+{
+    if (UStateManagerComponent* StateManager = Pawn->FindComponentByClass<UStateManagerComponent>())
+    {
+        if (StateManager->OnStateEnded.Remove(StateEndedHandle))
+        {
+            StateEndedHandle.Reset();
+        }
+    }
+
+    FinishTask(true);
 }

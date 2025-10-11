@@ -9,7 +9,6 @@
 USTTask_MoveTo::USTTask_MoveTo(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
 {
-    bShouldStateChangeOnReselect = false;
     bShouldCallTick = false;
 }
 
@@ -50,6 +49,16 @@ EStateTreeRunStatus USTTask_MoveTo::EnterState(FStateTreeExecutionContext& Conte
         return EStateTreeRunStatus::Succeeded;
     default:
         return EStateTreeRunStatus::Failed;
+    }
+}
+
+void USTTask_MoveTo::ExitState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition)
+{
+    Super::ExitState(Context, Transition);
+
+    if (AIController)
+    {
+        AIController->ReceiveMoveCompleted.RemoveDynamic(this, &ThisClass::HandleMoveCompleted);
     }
 }
 

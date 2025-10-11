@@ -113,6 +113,7 @@ void UCollisionComponent::ActivateCollisionDefinition(EAttackCollisionType InTyp
         if (bClearHitActorsOnBegin)
         {
             HitActorGroups[HitGroup].Empty();
+            CachedMainWeapon = nullptr;
         }
     }
 
@@ -171,11 +172,10 @@ void UCollisionComponent::ProcessCollisionDefinition(const FActiveAttackCollisio
             DrawDebugDuration
         );
 
+        TSet<AActor*>& HitActors = HitActorGroups[ActiveDefinition.HitGroup];
         for (const FHitResult& HitResult : HitResults)
         {
             AActor* HitActor = HitResult.GetActor();
-
-            TSet<AActor*>& HitActors = HitActorGroups[ActiveDefinition.HitGroup];
             if (!HitActors.Contains(HitActor))
             {
                 HitActors.Add(HitActor);
@@ -190,23 +190,34 @@ void UCollisionComponent::ProcessHit(const FHitResult& HitResult, EAttackCollisi
     AActor* OwnerActor = GetOwner();
     ICombatInterface* OwnerCombatInterface = Cast<ICombatInterface>(OwnerActor);
     ICombatInterface* HitCombatInterface = Cast<ICombatInterface>(HitResult.GetActor());
-    if (!OwnerActor || !OwnerCombatInterface || !HitCombatInterface || !HitCombatInterface->CanReceiveDamage())
+    if (!OwnerActor || !OwnerCombatInterface || !HitCombatInterface)
     {
         // Only combat interface actors for now.
         return;
     }
 
-    // @TODO - check team
+    if (!HitCombatInterface->CanReceiveDamageFrom(OwnerActor))
+    {
+        // Dead, friendly, etc.
+        return;
+    }
 
     float Damage = OwnerCombatInterface->CalculateDamage(InType);
+    if (Damage <= 0.f)
+    {
+        return;
+    }
 
+    // Apply damage
+    AController* Instigator = OwnerActor->GetInstigatorController();
+    AActor* DamageCauser = InType == EAttackCollisionType::MainWeapon ? GetMainWeapon() : OwnerActor;
     UGameplayStatics::ApplyPointDamage(
         HitResult.GetActor(),
         Damage,
         HitResult.ImpactNormal, /* HitFromDirection */
         HitResult,
-        OwnerActor->GetInstigatorController(),
-        OwnerActor,
+        Instigator,
+        DamageCauser,
         InDamageType
     );
 }
@@ -239,14 +250,11 @@ FVector UCollisionComponent::GetSocketLocation(EAttackCollisionType InType, FNam
 {
     if (InType == EAttackCollisionType::MainWeapon)
     {
-        if (const UEquipmentComponent* EquipmentComponent = GetEquipmentComponent())
+        if (const AItem* MainWeapon = GetMainWeapon())
         {
-            if (const AItem* MainWeapon = EquipmentComponent->GetEquippedItem(DemoGameplayTags::Item_Weapon))
+            if (const UMeshComponent* WeaponMesh = MainWeapon->GetMesh())
             {
-                if (const UMeshComponent* WeaponMesh = MainWeapon->GetMesh())
-                {
-                    return WeaponMesh->GetSocketLocation(InSocketName);
-                }
+                return WeaponMesh->GetSocketLocation(InSocketName);
             }
         }
     }
@@ -275,4 +283,16 @@ const UEquipmentComponent* UCollisionComponent::GetEquipmentComponent()
         }
     }
     return CachedEquipmentComponent.Get();
+}
+
+AItem* UCollisionComponent::GetMainWeapon()
+{
+    if (!CachedMainWeapon.IsValid())
+    {
+        if (const UEquipmentComponent* EquipmentComponent = GetEquipmentComponent())
+        {
+            CachedMainWeapon = EquipmentComponent->GetEquippedItem(DemoGameplayTags::Item_Weapon);
+        }
+    }
+    return CachedMainWeapon.Get();
 }

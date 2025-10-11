@@ -3,47 +3,46 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "StateTreeTaskBase.h"
+#include "Blueprint/StateTreeTaskBlueprintBase.h"
 #include "GameplayTagContainer.h"
 #include "STTask_PerformAction.generated.h"
 
-USTRUCT()
-struct FSTTask_PerformActionInstanceData
-{
-    GENERATED_BODY()
-
-    UPROPERTY(EditAnywhere, Category = "Context")
-    TObjectPtr<APawn> Pawn;
-
-    UPROPERTY(EditAnywhere, Category = "Initialization", meta = (Categories = "State"))
-    FGameplayTag ActionTag;
-
-    UPROPERTY(EditAnywhere, Category = "Initialization")
-    bool bIgnoreCurrentState{false};
-
-    UPROPERTY(EditAnywhere, Category = "Initialization", meta = (ClampMin = "0"))
-    int32 MontageIndex{0};
-
-    UPROPERTY(EditAnywhere, Category = "Initialization")
-    bool bUseRandomIndex{false};
-};
-
 /**
  * Succeeds immediately after requesting the action. Fails if it couldn't request the action.
+ * Completes when StateManager->OnStateEnded is triggered.
  */
-USTRUCT(meta = (DisplayName = "Perform Action", Category = "Demo|Action"))
-struct DEMO_API FSTTask_PerformAction : public FStateTreeTaskCommonBase
+UCLASS(meta = (DisplayName = "Perform Action", Category = "Demo|Action"))
+class DEMO_API USTTask_PerformAction : public UStateTreeTaskBlueprintBase
 {
     GENERATED_BODY()
 
-    using FInstanceDataType = FSTTask_PerformActionInstanceData;
+public:
+    USTTask_PerformAction(const FObjectInitializer& ObjectInitializer);
 
-    virtual const UStruct* GetInstanceDataType() const override
-    {
-        return FInstanceDataType::StaticStruct();
-    };
+protected:
+    virtual EStateTreeRunStatus EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) override;
 
-    FSTTask_PerformAction();
+    virtual void ExitState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) override;
 
-    virtual EStateTreeRunStatus EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) const override;
+private:
+    void HandleStateEnded(FGameplayTag InState);
+
+protected:
+    UPROPERTY(VisibleAnywhere, Category = "Context")
+    TObjectPtr<APawn> Pawn;
+
+    UPROPERTY(EditAnywhere, Category = "Parameter", meta = (Categories = "State"))
+    FGameplayTag ActionTag;
+
+    UPROPERTY(EditAnywhere, Category = "Parameter")
+    bool bIgnoreCurrentState{false};
+
+    UPROPERTY(EditAnywhere, Category = "Parameter", meta = (ClampMin = "0"))
+    int32 MontageIndex{0};
+
+    UPROPERTY(EditAnywhere, Category = "Parameter")
+    bool bUseRandomIndex{false};
+
+private:
+    FDelegateHandle StateEndedHandle;
 };

@@ -14,18 +14,18 @@ struct FSTTask_FindNextTargetLocationInstanceData
 {
     GENERATED_BODY()
 
-    UPROPERTY(EditAnywhere, Category = "Context")
+    UPROPERTY(VisibleAnywhere, Category = "Context")
     TObjectPtr<APawn> Pawn;
 
     // Reference to int32
-    UPROPERTY(EditAnywhere, Category = "Input")
+    UPROPERTY(VisibleAnywhere, Category = "Input")
     TStateTreePropertyRef<int32> RefToPreviousTargetIndex;
 
     // Reference to TArray<ATargetPoint*>
-    UPROPERTY(EditAnywhere, Category = "Input")
+    UPROPERTY(VisibleAnywhere, Category = "Input")
     TStateTreePropertyRef<TArray<ATargetPoint*>> RefToArrayOfTargetPoints;
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Output")
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Output")
     FVector TargetLocation;
 };
 

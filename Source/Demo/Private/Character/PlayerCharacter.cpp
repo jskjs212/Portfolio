@@ -186,6 +186,24 @@ void APlayerCharacter::HandleTargetUpdated(AActor* NewActor)
     }
 }
 
+bool APlayerCharacter::CanReceiveDamageFrom(const AActor* Attacker) const
+{
+    if (!Super::CanReceiveDamageFrom(Attacker))
+    {
+        return false;
+    }
+
+    // Only from enemies
+    if (const APawn* AttackerPawn = Cast<APawn>(Attacker))
+    {
+        if (const AController* AttackerController = AttackerPawn->GetController())
+        {
+            return GetTeamAttitudeTowards(*AttackerController) == ETeamAttitude::Hostile;
+        }
+    }
+    return false;
+}
+
 FRotator APlayerCharacter::GetDesiredInputRotation() const
 {
     if (CachedMoveInputAxis.IsZero())
