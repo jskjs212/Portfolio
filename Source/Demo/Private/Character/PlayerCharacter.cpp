@@ -243,18 +243,22 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
         EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ThisClass::Jump);
 
-        EnhancedInputComponent->BindAction(WalkAction, ETriggerEvent::Started, this, &ThisClass::StartWalk);
-        EnhancedInputComponent->BindAction(WalkAction, ETriggerEvent::Completed, this, &ThisClass::StopWalk);
+        EnhancedInputComponent->BindAction(WalkAction, ETriggerEvent::Started, this, &ThisClass::StartWalking);
+        EnhancedInputComponent->BindAction(WalkAction, ETriggerEvent::Completed, this, &ThisClass::StopWalking);
 
-        EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ThisClass::StartSprint);
-        EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ThisClass::StopSprint);
+        EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ThisClass::StartSprinting);
+        EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ThisClass::StopSprinting);
 
         EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ThisClass::Interact);
 
         EnhancedInputComponent->BindAction(ShowPlayerMenuAction, ETriggerEvent::Started, this, &ThisClass::ShowPlayerMenu);
 
         EnhancedInputComponent->BindAction(LightAttackAction, ETriggerEvent::Started, this, &ThisClass::LightAttack);
-        EnhancedInputComponent->BindAction(HeavyAttackAction, ETriggerEvent::Started, this, &ThisClass::HeavyAttack);
+
+        EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Started, this, &ThisClass::StartBlocking);
+        EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Completed, this, &ThisClass::StopBlocking);
+
+        EnhancedInputComponent->BindAction(DodgeAction, ETriggerEvent::Started, this, &ThisClass::Dodge);
 
         EnhancedInputComponent->BindAction(ToggleLockOnAction, ETriggerEvent::Started, this, &ThisClass::ToggleLockOn);
 
@@ -326,7 +330,7 @@ void APlayerCharacter::Landed(const FHitResult& Hit)
     }
 }
 
-void APlayerCharacter::StartWalk()
+void APlayerCharacter::StartWalking()
 {
     if (bIsWalkInputTogglesWalk)
     {
@@ -345,7 +349,7 @@ void APlayerCharacter::StartWalk()
     }
 }
 
-void APlayerCharacter::StopWalk()
+void APlayerCharacter::StopWalking()
 {
     if (bIsWalkInputTogglesWalk)
     {
@@ -360,7 +364,7 @@ void APlayerCharacter::StopWalk()
     }
 }
 
-void APlayerCharacter::StartSprint()
+void APlayerCharacter::StartSprinting()
 {
     if (bIsSprintInputTogglesSprint)
     {
@@ -379,7 +383,7 @@ void APlayerCharacter::StartSprint()
     }
 }
 
-void APlayerCharacter::StopSprint()
+void APlayerCharacter::StopSprinting()
 {
     if (bIsSprintInputTogglesSprint)
     {
@@ -419,9 +423,9 @@ void APlayerCharacter::LightAttack()
     CombatComponent->Attack(DemoGameplayTags::State_Attack_Light);
 }
 
-void APlayerCharacter::HeavyAttack()
+void APlayerCharacter::Dodge()
 {
-    CombatComponent->Attack(DemoGameplayTags::State_Attack_Heavy);
+    PerformAction(DemoGameplayTags::State_Dodge, false, 0);
 }
 
 void APlayerCharacter::ToggleLockOn()

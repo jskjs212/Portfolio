@@ -22,6 +22,8 @@ class USoundBase;
 class UStateManagerComponent;
 class UStatsComponent;
 
+DECLARE_DELEGATE_OneParam(FOnBlockingStateChanged, bool /* bNewBlocking */);
+
 /**
  * If input action is not working, check if AnimMontage has AnimNotify_ResetState.
  */
@@ -50,6 +52,12 @@ protected:
     TObjectPtr<UStatsComponent> StatsComponent;
 
     ////////////////////////////////////////////////////////
+    //        Delegates
+    ////////////////////////////////////////////////////////
+public:
+    FOnBlockingStateChanged OnBlockingStateChanged;
+
+    ////////////////////////////////////////////////////////
     //        Fundamentals
     ////////////////////////////////////////////////////////
 public:
@@ -70,6 +78,11 @@ protected:
     virtual void Jump() override;
 
     virtual void Landed(const FHitResult& Hit) override;
+
+    /* Combat */
+    void SetBlockingState(bool bNewBlocking);
+    void StartBlocking();
+    void StopBlocking();
 
     // CharacterMovementComponent's movement mode
     virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode = 0) override;
@@ -106,6 +119,8 @@ public:
     // @return Duration of the action's AnimMontage, or 0.f if failed to perform action.
     virtual float PerformAction(FGameplayTag InAction, bool bIgnoreCurrentState, int32 MontageIndex, bool bUseRandomIndex = false) override;
 
+    virtual void EnableIFrame(bool bEnable) override { bIFrameEnabled = bEnable; }
+
     virtual bool IsInAction(FGameplayTag InAction) const override;
 
     virtual bool CanReceiveDamageFrom(const AActor* Attacker) const override;
@@ -121,16 +136,38 @@ public:
 private:
     // Helper function that validates all conditions for PerformAction.
     // @return nullptr if can't perform the action.
-    const FActionInfo* CanPerformAction(FGameplayTag InAction, bool bIgnoreCurrentState, int32 MontageIndex, bool bUseRandomIndex) const;
+    const FActionInfo* PerformAction_Validate(FGameplayTag InAction, bool bIgnoreCurrentState, int32 MontageIndex, bool bUseRandomIndex) const;
 
     ////////////////////////////////////////////////////////
     //        Get & set
     ////////////////////////////////////////////////////////
 public:
+    bool IsBlocking() const { return bIsBlocking; }
+
     UFUNCTION(BlueprintCallable, Category = "Movement", meta = (Categories = "Movement.SpeedMode"))
     virtual void SetMovementSpeedMode(FGameplayTag NewSpeedMode);
 
     void SetOrientRotationToMovement(bool bOrient);
+
+    ////////////////////////////////////////////////////////
+    //        Variables - Core
+    ////////////////////////////////////////////////////////
+protected:
+    /* Stats */
+    // @TODO - Use data table or config file
+    UPROPERTY(EditAnywhere, Category = "Initialization|Stats", meta = (Categories = "Stat"))
+    TMap<FGameplayTag, FResourceStat> ResourceStats;
+
+    /* Animation */
+    UPROPERTY(EditAnywhere, Category = "Initialization|Character", meta = (Categories = "Character"))
+    FGameplayTag CharacterTag;
+
+    UPROPERTY(VisibleAnywhere, Transient, Category = "Combat")
+    TObjectPtr<const UActionInfoConfig> CurrentActionInfo;
+
+    // @TEST - Temporary logic for determining damage without weapon.
+    UPROPERTY(EditAnywhere, Category = "Initialization|Collision", meta = (Categories = "State"))
+    TMap<FGameplayTag, float> ActionToDamageMap;
 
     ////////////////////////////////////////////////////////
     //        Variables - Hit
@@ -167,11 +204,6 @@ protected:
     //        Variables
     ////////////////////////////////////////////////////////
 protected:
-    /* Stats */
-    // @TODO - Use data table or config file
-    UPROPERTY(EditAnywhere, Category = "Initialization|Stats", meta = (Categories = "Stat"))
-    TMap<FGameplayTag, FResourceStat> ResourceStats;
-
     /* Equipment */
     UPROPERTY(EditAnywhere, Category = "Initialization|Equipment")
     TArray<FItemSlot> StartingItems;
@@ -190,14 +222,10 @@ protected:
     // Should not modify directly, use SetMovementSpeedMode instead.
     FGameplayTag MovementSpeedMode;
 
-    /* Animation */
-    UPROPERTY(EditAnywhere, Category = "Initialization|Character", meta = (Categories = "Character"))
-    FGameplayTag CharacterTag;
+    /* Combat */
+    // Blocking with a shield.
+    bool bIsBlocking{false};
 
-    UPROPERTY(VisibleAnywhere, Transient, Category = "Combat")
-    TObjectPtr<const UActionInfoConfig> CurrentActionInfo;
-
-    // @TEST - Temporary
-    UPROPERTY(EditAnywhere, Category = "Initialization|Collision", meta = (Categories = "State"))
-    TMap<FGameplayTag, float> ActionToDamageMap;
+    // Invincibile
+    bool bIFrameEnabled{false};
 };

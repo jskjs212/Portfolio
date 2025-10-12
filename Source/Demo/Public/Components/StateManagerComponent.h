@@ -9,6 +9,13 @@
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnStateChanged, FGameplayTag /* InState */);
 
+/**
+ * Manages character states and actions using GameplayTags.
+ * Handles state transitions, based on predefined rules.
+ * This component doesn't know anything but its own state.
+ * Use SetAction() to change state and action only if you are sure that the transition is valid.
+ * Use IsInState(), IsInAction(), and CanPerformAction() to judge if new action can be performed.
+ */
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class DEMO_API UStateManagerComponent : public UActorComponent
 {
@@ -36,6 +43,7 @@ protected:
 public:
     // Set action tag and state tag.
     // State tag will be set to 'State.[state]'.
+    // Always overwrite current state and action.
     // @param NewAction should be 'State.[state]' or 'State.[state].[action]'
     void SetAction(FGameplayTag NewAction);
 

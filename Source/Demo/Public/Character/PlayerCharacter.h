@@ -106,11 +106,11 @@ protected:
     virtual void Jump() override;
     virtual void Landed(const FHitResult& Hit) override;
 
-    void StartWalk();
-    void StopWalk();
+    void StartWalking();
+    void StopWalking();
 
-    void StartSprint();
-    void StopSprint();
+    void StartSprinting();
+    void StopSprinting();
 
     void Interact();
 
@@ -118,7 +118,8 @@ protected:
 
     /* Combat */
     void LightAttack();
-    void HeavyAttack();
+
+    void Dodge();
 
     void ToggleLockOn();
 
@@ -170,7 +171,10 @@ protected:
     TObjectPtr<UInputAction> LightAttackAction;
 
     UPROPERTY(EditAnywhere, Category = "Input")
-    TObjectPtr<UInputAction> HeavyAttackAction;
+    TObjectPtr<UInputAction> BlockAction;
+
+    UPROPERTY(EditAnywhere, Category = "Input")
+    TObjectPtr<UInputAction> DodgeAction;
 
     UPROPERTY(EditAnywhere, Category = "Input")
     TObjectPtr<UInputAction> ToggleLockOnAction;

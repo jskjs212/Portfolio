@@ -64,6 +64,8 @@ Mouse: Look\
 WASD: Move\
 Shift: Sprint\
 Ctrl: Walk\
+F: Jump\
+Space: Dodge\
 Tab: PlayerMenu\
 E: Interact\
 Q: Toggle Lock-On

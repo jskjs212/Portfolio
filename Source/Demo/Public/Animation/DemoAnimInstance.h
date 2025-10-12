@@ -40,6 +40,7 @@ public:
     virtual void NativeInitializeAnimation() override;
     virtual void NativeUpdateAnimation(float DeltaSeconds) override;
     virtual void NativeThreadSafeUpdateAnimation(float DeltaSeconds) override;
+    virtual void NativeBeginPlay() override;
 
     ////////////////////////////////////////////////////////
     //        Update functions
@@ -56,6 +57,12 @@ protected:
     void UpdateStrafeOffset(float DeltaSeconds);
 
     ////////////////////////////////////////////////////////
+    //        Handlers
+    ////////////////////////////////////////////////////////
+private:
+    void HandleBlockingStateChanged(bool bNewBlocking) { bIsBlocking = bNewBlocking; }
+
+    ////////////////////////////////////////////////////////
     //        Variables
     ////////////////////////////////////////////////////////
 protected:
@@ -67,6 +74,9 @@ protected:
 
     UPROPERTY(BlueprintReadOnly, Transient, Category = "Character")
     bool bIsAccelerating{false};
+
+    UPROPERTY(BlueprintReadOnly, Transient, Category = "Character")
+    bool bIsBlocking{false};
 
     UPROPERTY(BlueprintReadOnly, Transient, Category = "Character")
     float GroundSpeed{0.f};

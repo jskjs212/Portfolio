@@ -85,6 +85,26 @@ float ABaseCharacter::InternalTakePointDamage(float Damage, FPointDamageEvent co
 
     // @TODO
     // Deal with damage types
+
+    // Block
+    // @TODO - function
+    constexpr float BlockDamageMultiplier = 0.3f;
+    constexpr float AllowBlockDegree = 45.f;
+    if (bIsBlocking)
+    {
+        if (AActor* OtherActor = EventInstigator ? EventInstigator->GetPawn() : nullptr)
+        {
+            const FVector ToOther = (OtherActor->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+            const float FrontDot = FVector::DotProduct(GetActorForwardVector(), ToOther);
+
+            if (FrontDot >= FMath::Cos(FMath::DegreesToRadians(AllowBlockDegree)))
+            {
+                // Successful block
+                Damage *= BlockDamageMultiplier;
+            }
+        }
+    }
+
     Damage = StatsComponent->TakeDamage(Damage);
 
     PlayPointHitEffects(PointDamageEvent, EventInstigator);
@@ -129,6 +149,39 @@ void ABaseCharacter::Landed(const FHitResult& Hit)
 {
     StateManager->OnLanded();
     Super::Landed(Hit);
+}
+
+void ABaseCharacter::SetBlockingState(bool bNewBlocking)
+{
+    if (bIsBlocking == bNewBlocking)
+    {
+        return;
+    }
+    bIsBlocking = bNewBlocking;
+
+    OnBlockingStateChanged.ExecuteIfBound(bIsBlocking);
+}
+
+void ABaseCharacter::StartBlocking()
+{
+    bool bCanBlock = StateManager->CanPerformAction(DemoGameplayTags::State_Block);
+    bCanBlock &= EquipmentComponent->GetEquippedItem(DemoGameplayTags::Item_Armor_Shield) != nullptr;
+
+    if (bCanBlock)
+    {
+        SetBlockingState(true);
+        StateManager->SetAction(DemoGameplayTags::State_Block);
+    }
+}
+
+void ABaseCharacter::StopBlocking()
+{
+    SetBlockingState(false);
+
+    if (StateManager->IsInState(DemoGameplayTags::State_Block))
+    {
+        StateManager->SetAction(DemoGameplayTags::State_General);
+    }
 }
 
 void ABaseCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode)
@@ -340,8 +393,7 @@ bool ABaseCharacter::IsInAction(FGameplayTag Action) const
 
 bool ABaseCharacter::CanReceiveDamageFrom(const AActor* Attacker) const
 {
-    // @TODO - iFrames
-    return Attacker && !StateManager->IsInAction(DemoGameplayTags::State_Dead);
+    return Attacker && !IsDead() && !bIFrameEnabled;
 }
 
 float ABaseCharacter::CalculateDamage(EAttackCollisionType InType) const
@@ -412,7 +464,7 @@ FRotator ABaseCharacter::GetDesiredInputRotation() const
 
 float ABaseCharacter::PerformAction(FGameplayTag InAction, bool bIgnoreCurrentState, int32 MontageIndex, bool bUseRandomIndex)
 {
-    const FActionInfo* ActionInfo = CanPerformAction(InAction, bIgnoreCurrentState, MontageIndex, bUseRandomIndex);
+    const FActionInfo* ActionInfo = PerformAction_Validate(InAction, bIgnoreCurrentState, MontageIndex, bUseRandomIndex);
     if (!ActionInfo)
     {
         return 0.f;
@@ -439,7 +491,7 @@ float ABaseCharacter::PerformAction(FGameplayTag InAction, bool bIgnoreCurrentSt
     return Duration;
 }
 
-const FActionInfo* ABaseCharacter::CanPerformAction(FGameplayTag InAction, bool bIgnoreCurrentState, int32 MontageIndex, bool bUseRandomIndex) const
+const FActionInfo* ABaseCharacter::PerformAction_Validate(FGameplayTag InAction, bool bIgnoreCurrentState, int32 MontageIndex, bool bUseRandomIndex) const
 {
     USkeletalMeshComponent* CharacterMesh = GetMesh();
     if (!CharacterMesh || !CharacterMesh->GetAnimInstance())

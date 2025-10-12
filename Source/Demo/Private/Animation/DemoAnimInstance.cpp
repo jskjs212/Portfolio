@@ -50,6 +50,16 @@ void UDemoAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
     UpdateStrafeOffset(DeltaSeconds);
 }
 
+void UDemoAnimInstance::NativeBeginPlay()
+{
+    Super::NativeBeginPlay();
+
+    if (BaseCharacter)
+    {
+        BaseCharacter->OnBlockingStateChanged.BindUObject(this, &ThisClass::HandleBlockingStateChanged);
+    }
+}
+
 void UDemoAnimInstance::UpdateCharacterStateOnGameThread()
 {
     check(IsInGameThread());

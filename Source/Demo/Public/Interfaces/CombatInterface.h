@@ -28,6 +28,8 @@ public:
     // @return Duration of the action's AnimMontage, or 0.f if failed to perform action.
     virtual float PerformAction(FGameplayTag InAction, bool bIgnoreCurrentState, int32 MontageIndex, bool bUseRandomIndex = false) = 0;
 
+    virtual void EnableIFrame(bool bEnable) = 0;
+
     /* Get & set */
 
     virtual bool IsInAction(FGameplayTag InAction) const = 0;
