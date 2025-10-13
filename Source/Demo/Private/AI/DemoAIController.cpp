@@ -4,9 +4,11 @@
 #include "AI/DemoAIController.h"
 #include "Character/AICharacter.h"
 #include "Components/DemoStateTreeAIComponent.h"
+#include "Components/StateManagerComponent.h"
 #include "DemoTypes/DemoTypes.h"
 #include "DemoTypes/LogCategories.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Navigation/PathFollowingComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AIPerceptionTypes.h"
 #include "Perception/AISenseConfig_Damage.h"
@@ -46,6 +48,27 @@ void ADemoAIController::OnPossess(APawn* InPawn)
     Super::OnPossess(InPawn);
 
     OverrideStateTree(InPawn);
+}
+
+FPathFollowingRequestResult ADemoAIController::MoveTo(const FAIMoveRequest& MoveRequest, FNavPathSharedPtr* OutPath)
+{
+    if (APawn* MyPawn = GetPawn())
+    {
+        if (const UStateManagerComponent* StateManager = MyPawn->FindComponentByClass<UStateManagerComponent>())
+        {
+            if (!StateManager->CanMoveInCurrentState())
+            {
+                FPathFollowingRequestResult Result;
+                Result.Code = EPathFollowingRequestResult::Failed;
+                if (GetPathFollowingComponent())
+                {
+                    Result.MoveId = GetPathFollowingComponent()->RequestMoveWithImmediateFinish(EPathFollowingResult::Invalid);
+                }
+                return Result;
+            }
+        }
+    }
+    return Super::MoveTo(MoveRequest, OutPath);
 }
 
 void ADemoAIController::SetControlRotationToTarget()

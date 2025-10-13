@@ -79,6 +79,20 @@ float AAICharacter::InternalTakePointDamage(float Damage, FPointDamageEvent cons
     return Damage;
 }
 
+float AAICharacter::PerformAction(FGameplayTag InAction, bool bIgnoreCurrentState, int32 MontageIndex, bool bUseRandomIndex)
+{
+    const float Duration = Super::PerformAction(InAction, bIgnoreCurrentState, MontageIndex, bUseRandomIndex);
+
+    if (!StateManager->CanMoveInCurrentState())
+    {
+        if (ADemoAIController* DemoAIController = GetController<ADemoAIController>())
+        {
+            DemoAIController->StopMovement();
+        }
+    }
+    return Duration;
+}
+
 bool AAICharacter::CanReceiveDamageFrom(const AActor* Attacker) const
 {
     if (!Super::CanReceiveDamageFrom(Attacker))

@@ -7,7 +7,7 @@
 #include "GameplayTagContainer.h"
 #include "DemoAIController.generated.h"
 
-struct FActorPerceptionUpdateInfo;
+//struct FActorPerceptionUpdateInfo;
 struct FStateTreeReference;
 class UAIPerceptionComponent;
 class UAISenseConfig_Damage;
@@ -52,6 +52,8 @@ protected:
     virtual void OnPossess(APawn* InPawn) override;
 
 public:
+    virtual FPathFollowingRequestResult MoveTo(const FAIMoveRequest& MoveRequest, FNavPathSharedPtr* OutPath = nullptr) override;
+
     void SetControlRotationToTarget();
 
 protected:

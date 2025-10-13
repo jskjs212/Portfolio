@@ -45,6 +45,8 @@ protected:
     //        Combat interface
     ////////////////////////////////////////////////////////
 public:
+    virtual float PerformAction(FGameplayTag InAction, bool bIgnoreCurrentState, int32 MontageIndex, bool bUseRandomIndex = false) override;
+
     virtual bool CanReceiveDamageFrom(const AActor* Attacker) const override;
 
     // Sets control rotation to face the target actor.
