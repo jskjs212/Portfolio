@@ -4,8 +4,8 @@
 #include "Animation/AnimationDataSubsystem.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimLayerInterface.h"
+#include "Components/AttackCollisionComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "Components/CollisionComponent.h"
 #include "Components/CombatComponent.h"
 #include "Components/EquipmentComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -34,7 +34,7 @@ ABaseCharacter::ABaseCharacter()
     MovementComp->GravityScale = 1.75f;
     MovementComp->MaxAcceleration = 1500.f;
 
-    CollisionComponent = CreateDefaultSubobject<UCollisionComponent>(TEXT("CollisionComponent"));
+    AttackCollisionComponent = CreateDefaultSubobject<UAttackCollisionComponent>(TEXT("AttackCollisionComponent"));
 
     CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 
@@ -574,6 +574,6 @@ void ABaseCharacter::SetMovementSpeedMode(FGameplayTag NewSpeedMode)
 
 void ABaseCharacter::SetOrientRotationToMovement(bool bOrient)
 {
-    bUseControllerRotationYaw = !bOrient;
+    GetCharacterMovement()->bUseControllerDesiredRotation = !bOrient;
     GetCharacterMovement()->bOrientRotationToMovement = bOrient;
 }

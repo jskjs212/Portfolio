@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Components/CollisionComponent.h"
+#include "Components/AttackCollisionComponent.h"
 #include "Components/EquipmentComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "DemoTypes/LogCategories.h"
@@ -11,12 +11,12 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 
-UCollisionComponent::UCollisionComponent()
+UAttackCollisionComponent::UAttackCollisionComponent()
 {
     PrimaryComponentTick.bCanEverTick = true;
 }
 
-void UCollisionComponent::BeginPlay()
+void UAttackCollisionComponent::BeginPlay()
 {
     Super::BeginPlay();
 
@@ -42,7 +42,7 @@ void UCollisionComponent::BeginPlay()
     }
 }
 
-void UCollisionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UAttackCollisionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
@@ -52,7 +52,7 @@ void UCollisionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
     }
 }
 
-void UCollisionComponent::AddAttackCollisionDefinition(const FAttackCollisionDefinition& InDefinition)
+void UAttackCollisionComponent::AddAttackCollisionDefinition(const FAttackCollisionDefinition& InDefinition)
 {
     if (InDefinition.CollisionType == EAttackCollisionType::None)
     {
@@ -73,7 +73,7 @@ void UCollisionComponent::AddAttackCollisionDefinition(const FAttackCollisionDef
     AttackCollisionDefinitions.Add(InDefinition);
 }
 
-void UCollisionComponent::RemoveAttackCollisionDefinition(EAttackCollisionType InType)
+void UAttackCollisionComponent::RemoveAttackCollisionDefinition(EAttackCollisionType InType)
 {
     for (int32 Index = 0; Index < AttackCollisionDefinitions.Num(); ++Index)
     {
@@ -86,7 +86,7 @@ void UCollisionComponent::RemoveAttackCollisionDefinition(EAttackCollisionType I
     }
 }
 
-void UCollisionComponent::ActivateCollisionDefinition(EAttackCollisionType InType, int32 HitGroup, bool bClearHitActorsOnBegin)
+void UAttackCollisionComponent::ActivateCollisionDefinition(EAttackCollisionType InType, int32 HitGroup, bool bClearHitActorsOnBegin)
 {
     checkf(HitGroup >= 0, TEXT("Owner: %s, Type: %s"), *GetNameSafe(GetOwner()), *UEnum::GetValueAsString(InType)); // unlikely
 
@@ -113,7 +113,6 @@ void UCollisionComponent::ActivateCollisionDefinition(EAttackCollisionType InTyp
         if (bClearHitActorsOnBegin)
         {
             HitActorGroups[HitGroup].Empty();
-            CachedMainWeapon = nullptr;
         }
     }
 
@@ -121,7 +120,7 @@ void UCollisionComponent::ActivateCollisionDefinition(EAttackCollisionType InTyp
     UE_LOG(LogCombat, Verbose, TEXT("Enabled collision - Type: %s, HitGroup: %d"), *UEnum::GetValueAsString(InType), HitGroup);
 }
 
-void UCollisionComponent::DeactivateCollisionDefinition(EAttackCollisionType InType, int32 HitGroup)
+void UAttackCollisionComponent::DeactivateCollisionDefinition(EAttackCollisionType InType, int32 HitGroup)
 {
     for (int32 Index = 0; Index < ActiveDefinitions.Num(); ++Index)
     {
@@ -135,7 +134,7 @@ void UCollisionComponent::DeactivateCollisionDefinition(EAttackCollisionType InT
     }
 }
 
-void UCollisionComponent::DeactivateCollisionDefinition(EAttackCollisionType InType)
+void UAttackCollisionComponent::DeactivateCollisionDefinition(EAttackCollisionType InType)
 {
     for (int32 Index = ActiveDefinitions.Num() - 1; Index >= 0; --Index)
     {
@@ -146,10 +145,15 @@ void UCollisionComponent::DeactivateCollisionDefinition(EAttackCollisionType InT
     }
 }
 
-void UCollisionComponent::ProcessCollisionDefinition(const FActiveAttackCollisionDefinition& ActiveDefinition)
+void UAttackCollisionComponent::ProcessCollisionDefinition(const FActiveAttackCollisionDefinition& ActiveDefinition)
 {
     // Trace each segment.
     const FAttackCollisionDefinition* Definition = ActiveDefinition.Definition;
+    if (Definition->CollisionType == EAttackCollisionType::MainWeapon && !GetMainWeapon())
+    {
+        return;
+    }
+
     for (const FAttackCollisionSegment& Segment : Definition->Segments)
     {
         const FVector StartLocation = GetSocketLocation(Definition->CollisionType, Segment.StartSocketName);
@@ -185,7 +189,7 @@ void UCollisionComponent::ProcessCollisionDefinition(const FActiveAttackCollisio
     }
 }
 
-void UCollisionComponent::ProcessHit(const FHitResult& HitResult, EAttackCollisionType InType, TSubclassOf<UDamageType> InDamageType)
+void UAttackCollisionComponent::ProcessHit(const FHitResult& HitResult, EAttackCollisionType InType, TSubclassOf<UDamageType> InDamageType)
 {
     AActor* OwnerActor = GetOwner();
     ICombatInterface* OwnerCombatInterface = Cast<ICombatInterface>(OwnerActor);
@@ -222,10 +226,13 @@ void UCollisionComponent::ProcessHit(const FHitResult& HitResult, EAttackCollisi
     );
 }
 
-void UCollisionComponent::HandleWeaponChanged(const FWeaponData* WeaponData)
+void UAttackCollisionComponent::HandleWeaponChanged(const FWeaponData* WeaponData)
 {
+    CachedMainWeapon = nullptr;
+
     if (WeaponData) // Equipped
     {
+        GetMainWeapon(); // Update CachedMainWeapon
         AddAttackCollisionDefinition(WeaponData->AttackCollisionDefinition);
     }
     else // Unequipped
@@ -234,7 +241,7 @@ void UCollisionComponent::HandleWeaponChanged(const FWeaponData* WeaponData)
     }
 }
 
-const FAttackCollisionDefinition* UCollisionComponent::GetAttackCollisionDefinition(EAttackCollisionType InType) const
+const FAttackCollisionDefinition* UAttackCollisionComponent::GetAttackCollisionDefinition(EAttackCollisionType InType) const
 {
     for (const FAttackCollisionDefinition& Definition : AttackCollisionDefinitions)
     {
@@ -246,7 +253,7 @@ const FAttackCollisionDefinition* UCollisionComponent::GetAttackCollisionDefinit
     return nullptr;
 }
 
-FVector UCollisionComponent::GetSocketLocation(EAttackCollisionType InType, FName InSocketName)
+FVector UAttackCollisionComponent::GetSocketLocation(EAttackCollisionType InType, FName InSocketName)
 {
     if (InType == EAttackCollisionType::MainWeapon)
     {
@@ -273,7 +280,7 @@ FVector UCollisionComponent::GetSocketLocation(EAttackCollisionType InType, FNam
     return FVector::ZeroVector;
 }
 
-const UEquipmentComponent* UCollisionComponent::GetEquipmentComponent()
+const UEquipmentComponent* UAttackCollisionComponent::GetEquipmentComponent()
 {
     if (!CachedEquipmentComponent.IsValid())
     {
@@ -285,7 +292,7 @@ const UEquipmentComponent* UCollisionComponent::GetEquipmentComponent()
     return CachedEquipmentComponent.Get();
 }
 
-AItem* UCollisionComponent::GetMainWeapon()
+AItem* UAttackCollisionComponent::GetMainWeapon()
 {
     if (!CachedMainWeapon.IsValid())
     {

@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "DemoTypes/AttackTypes.h"
-#include "CollisionComponent.generated.h"
+#include "AttackCollisionComponent.generated.h"
 
 namespace EDrawDebugTrace { enum Type : int; }
 struct FWeaponData;
@@ -24,20 +24,18 @@ struct FActiveAttackCollisionDefinition
 };
 
 /**
- * Collision component that handles attack collisions.
+ * Component that handles attack collisions.
  * Non-weapon AttackCollisionDefinitions should be configured in the component.
  * Activate or deactivate with SetAttackCollisionEnabled().
  * Process active collisions in TickComponent().
  * Trace only for pawns for now.
  * !!! HitActors are not cleared on deactivation.
  * !!! Assume that bClearHitActorsOnBegin is true at least once for each AnimMontage.
- *     Assume that weapons are not changed during an AnimMontage.
- *     So HitActors and CachedMainWeapon are cleared when bClearHitActorsOnBegin is true.
  *
  * @Dependency - Some AttackCollisionTypes need EquipmentComponent.
  */
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class DEMO_API UCollisionComponent : public UActorComponent
+class DEMO_API UAttackCollisionComponent : public UActorComponent
 {
     GENERATED_BODY()
 
@@ -45,7 +43,7 @@ class DEMO_API UCollisionComponent : public UActorComponent
     //        Fundamentals
     ////////////////////////////////////////////////////////
 public:
-    UCollisionComponent();
+    UAttackCollisionComponent();
 
 protected:
     virtual void BeginPlay() override;

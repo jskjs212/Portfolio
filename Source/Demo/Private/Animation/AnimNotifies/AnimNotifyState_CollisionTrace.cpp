@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Animation/AnimNotifies/AnimNotifyState_CollisionTrace.h"
-#include "Components/CollisionComponent.h"
+#include "Components/AttackCollisionComponent.h"
 #include "DemoTypes/LogCategories.h"
 
 UAnimNotifyState_CollisionTrace::UAnimNotifyState_CollisionTrace(const FObjectInitializer& ObjectInitializer)
@@ -18,13 +18,13 @@ void UAnimNotifyState_CollisionTrace::NotifyBegin(USkeletalMeshComponent* MeshCo
 
     if (AActor* OwnerActor = MeshComp->GetOwner())
     {
-        if (UCollisionComponent* CollisionComponent = OwnerActor->FindComponentByClass<UCollisionComponent>())
+        if (UAttackCollisionComponent* AttackCollisionComponent = OwnerActor->FindComponentByClass<UAttackCollisionComponent>())
         {
-            CollisionComponent->ActivateCollisionDefinition(AttackCollisionType, HitGroup, bClearHitActorsOnBegin);
+            AttackCollisionComponent->ActivateCollisionDefinition(AttackCollisionType, HitGroup, bClearHitActorsOnBegin);
         }
         else
         {
-            DemoLOG_CF(LogAnimation, Error, TEXT("%s has no CollisionComponent."), *OwnerActor->GetName());
+            DemoLOG_CF(LogAnimation, Error, TEXT("%s has no AttackCollisionComponent."), *OwnerActor->GetName());
         }
     }
 }
@@ -35,9 +35,9 @@ void UAnimNotifyState_CollisionTrace::NotifyEnd(USkeletalMeshComponent* MeshComp
 
     if (AActor* OwnerActor = MeshComp->GetOwner())
     {
-        if (UCollisionComponent* CollisionComponent = OwnerActor->FindComponentByClass<UCollisionComponent>())
+        if (UAttackCollisionComponent* AttackCollisionComponent = OwnerActor->FindComponentByClass<UAttackCollisionComponent>())
         {
-            CollisionComponent->DeactivateCollisionDefinition(AttackCollisionType, HitGroup);
+            AttackCollisionComponent->DeactivateCollisionDefinition(AttackCollisionType, HitGroup);
         }
     }
 }

@@ -14,7 +14,7 @@ struct FActionInfo;
 struct FWeaponData;
 class UActionInfoConfig;
 class UAnimMontage;
-class UCollisionComponent;
+class UAttackCollisionComponent;
 class UCombatComponent;
 class UEquipmentComponent;
 class UParticleSystem;
@@ -37,7 +37,7 @@ class DEMO_API ABaseCharacter : public ACharacter, public ICombatInterface
     ////////////////////////////////////////////////////////
 protected:
     UPROPERTY(VisibleAnywhere)
-    TObjectPtr<UCollisionComponent> CollisionComponent;
+    TObjectPtr<UAttackCollisionComponent> AttackCollisionComponent;
 
     UPROPERTY(VisibleAnywhere)
     TObjectPtr<UCombatComponent> CombatComponent;
