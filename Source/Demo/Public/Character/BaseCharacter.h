@@ -16,6 +16,7 @@ class UActionInfoConfig;
 class UAnimMontage;
 class UAttackCollisionComponent;
 class UCombatComponent;
+class UDemoPawnData;
 class UEquipmentComponent;
 class UParticleSystem;
 class USoundBase;
@@ -153,19 +154,17 @@ public:
     //        Variables - Core
     ////////////////////////////////////////////////////////
 protected:
-    /* Stats */
-    // @TODO - Use data table or config file
-    UPROPERTY(EditAnywhere, Category = "Initialization|Stats", meta = (Categories = "Stat"))
-    TMap<FGameplayTag, FResourceStat> ResourceStats;
+    UPROPERTY(EditAnywhere, Category = "Initialization|Character")
+    TObjectPtr<const UDemoPawnData> PawnData;
 
     /* Animation */
-    UPROPERTY(EditAnywhere, Category = "Initialization|Character", meta = (Categories = "Character"))
+    UPROPERTY(VisibleAnywhere)
     FGameplayTag CharacterTag;
 
     UPROPERTY(VisibleAnywhere, Transient, Category = "Combat")
     TObjectPtr<const UActionInfoConfig> CurrentActionInfo;
 
-    // @TEST - Temporary logic for determining damage without weapon.
+    // @check - Temporary logic for determining damage without weapon.
     UPROPERTY(EditAnywhere, Category = "Initialization|Collision", meta = (Categories = "State"))
     TMap<FGameplayTag, float> ActionToDamageMap;
 

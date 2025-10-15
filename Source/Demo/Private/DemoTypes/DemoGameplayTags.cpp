@@ -4,6 +4,22 @@
 
 namespace DemoGameplayTags
 {
+// Input.*
+UE_DEFINE_GAMEPLAY_TAG(Input_Look, "Input.Look");
+UE_DEFINE_GAMEPLAY_TAG(Input_Move, "Input.Move");
+UE_DEFINE_GAMEPLAY_TAG(Input_Jump, "Input.Jump");
+UE_DEFINE_GAMEPLAY_TAG(Input_Walk, "Input.Walk");
+UE_DEFINE_GAMEPLAY_TAG(Input_Sprint, "Input.Sprint");
+UE_DEFINE_GAMEPLAY_TAG(Input_Interact, "Input.Interact");
+UE_DEFINE_GAMEPLAY_TAG(Input_LightAttack, "Input.LightAttack");
+UE_DEFINE_GAMEPLAY_TAG(Input_Block, "Input.Block");
+UE_DEFINE_GAMEPLAY_TAG(Input_Dodge, "Input.Dodge");
+UE_DEFINE_GAMEPLAY_TAG(Input_ToggleLockOn, "Input.ToggleLockOn");
+UE_DEFINE_GAMEPLAY_TAG(Input_ShowPlayerMenu, "Input.ShowPlayerMenu");
+UE_DEFINE_GAMEPLAY_TAG(Input_ToggleHelpText, "Input.ToggleHelpText");
+UE_DEFINE_GAMEPLAY_TAG(Input_Test1, "Input.Test1");
+UE_DEFINE_GAMEPLAY_TAG(Input_Test2, "Input.Test2");
+
 // Item.Weapon.*
 UE_DEFINE_GAMEPLAY_TAG(Item_Weapon, "Item.Weapon");
 UE_DEFINE_GAMEPLAY_TAG_COMMENT(Item_Weapon_NoWeapon, "Item.Weapon.NoWeapon", "NoWeapon tag is for ActionInfoConfig without weapons.")

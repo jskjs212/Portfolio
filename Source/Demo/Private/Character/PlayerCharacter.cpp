@@ -2,6 +2,7 @@
 
 #include "Character/PlayerCharacter.h"
 #include "Camera/CameraComponent.h"
+#include "Character/DemoPawnData.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/CombatComponent.h"
 #include "Components/EquipmentComponent.h"
@@ -17,6 +18,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Input/DemoInputConfig.h"
 #include "InputActionValue.h"
 #include "Interfaces/Interactable.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -233,39 +235,51 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
         }
     }
 
+
     // Bind input actions
     if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
     {
-        EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ThisClass::Look);
+        // Helper lambda
+        auto BindAction = [this, EnhancedInputComponent](FGameplayTag InputTag, ETriggerEvent TriggerEvent, void(ThisClass::* Func)())
+            {
+                if (const UInputAction* InputAction = PawnData->InputConfig->FindInputActionForTag(InputTag))
+                {
+                    EnhancedInputComponent->BindAction(InputAction, TriggerEvent, this, Func);
+                }
+                else
+                {
+                    DemoLOG_CF(LogDemoGame, Error, TEXT("InputAction not found for tag %s"), *InputTag.ToString());
+                }
+            };
 
+        if (!PawnData || !PawnData->InputConfig)
+        {
+            DemoLOG_CF(LogCharacter, Error, TEXT("PlayerCharacter has no PawnData or InputConfig"));
+            return;
+        }
+
+        const UInputAction* LookAction = PawnData->InputConfig->FindInputActionForTag(DemoGameplayTags::Input_Look);
+        const UInputAction* MoveAction = PawnData->InputConfig->FindInputActionForTag(DemoGameplayTags::Input_Move);
+
+        EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ThisClass::Look);
         EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ThisClass::Move);
         EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &ThisClass::MoveComplete);
 
-        EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ThisClass::Jump);
-
-        EnhancedInputComponent->BindAction(WalkAction, ETriggerEvent::Started, this, &ThisClass::StartWalking);
-        EnhancedInputComponent->BindAction(WalkAction, ETriggerEvent::Completed, this, &ThisClass::StopWalking);
-
-        EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &ThisClass::StartSprinting);
-        EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ThisClass::StopSprinting);
-
-        EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ThisClass::Interact);
-
-        EnhancedInputComponent->BindAction(ShowPlayerMenuAction, ETriggerEvent::Started, this, &ThisClass::ShowPlayerMenu);
-
-        EnhancedInputComponent->BindAction(LightAttackAction, ETriggerEvent::Started, this, &ThisClass::LightAttack);
-
-        EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Started, this, &ThisClass::StartBlocking);
-        EnhancedInputComponent->BindAction(BlockAction, ETriggerEvent::Completed, this, &ThisClass::StopBlocking);
-
-        EnhancedInputComponent->BindAction(DodgeAction, ETriggerEvent::Started, this, &ThisClass::Dodge);
-
-        EnhancedInputComponent->BindAction(ToggleLockOnAction, ETriggerEvent::Started, this, &ThisClass::ToggleLockOn);
-
-        EnhancedInputComponent->BindAction(ToggleHelpTextAction, ETriggerEvent::Started, this, &ThisClass::ToggleHelpText);
-
-        EnhancedInputComponent->BindAction(Test1Action, ETriggerEvent::Started, this, &ThisClass::Test1);
-        EnhancedInputComponent->BindAction(Test2Action, ETriggerEvent::Started, this, &ThisClass::Test2);
+        BindAction(DemoGameplayTags::Input_Jump, ETriggerEvent::Started, &ThisClass::Jump);
+        BindAction(DemoGameplayTags::Input_Walk, ETriggerEvent::Started, &ThisClass::StartWalking);
+        BindAction(DemoGameplayTags::Input_Walk, ETriggerEvent::Completed, &ThisClass::StopWalking);
+        BindAction(DemoGameplayTags::Input_Sprint, ETriggerEvent::Started, &ThisClass::StartSprinting);
+        BindAction(DemoGameplayTags::Input_Sprint, ETriggerEvent::Completed, &ThisClass::StopSprinting);
+        BindAction(DemoGameplayTags::Input_Interact, ETriggerEvent::Started, &ThisClass::Interact);
+        BindAction(DemoGameplayTags::Input_LightAttack, ETriggerEvent::Started, &ThisClass::LightAttack);
+        BindAction(DemoGameplayTags::Input_Block, ETriggerEvent::Started, &ThisClass::StartBlocking);
+        BindAction(DemoGameplayTags::Input_Block, ETriggerEvent::Completed, &ThisClass::StopBlocking);
+        BindAction(DemoGameplayTags::Input_Dodge, ETriggerEvent::Started, &ThisClass::Dodge);
+        BindAction(DemoGameplayTags::Input_ToggleLockOn, ETriggerEvent::Started, &ThisClass::ToggleLockOn);
+        BindAction(DemoGameplayTags::Input_ShowPlayerMenu, ETriggerEvent::Started, &ThisClass::ShowPlayerMenu);
+        BindAction(DemoGameplayTags::Input_ToggleHelpText, ETriggerEvent::Started, &ThisClass::ToggleHelpText);
+        BindAction(DemoGameplayTags::Input_Test1, ETriggerEvent::Started, &ThisClass::Test1);
+        BindAction(DemoGameplayTags::Input_Test2, ETriggerEvent::Started, &ThisClass::Test2);
     }
 }
 
@@ -296,7 +310,7 @@ void APlayerCharacter::Move(const FInputActionValue& Value)
     AddMovementInput(RightDirection, MoveAxisVector.Y);
 }
 
-void APlayerCharacter::MoveComplete(const FInputActionValue& Value)
+void APlayerCharacter::MoveComplete()
 {
     CachedMoveInputAxis = FVector2D::ZeroVector;
 }
@@ -412,14 +426,6 @@ void APlayerCharacter::Interact()
     }
 }
 
-void APlayerCharacter::ShowPlayerMenu()
-{
-    if (ADemoPlayerController* DemoPlayerController = GetController<ADemoPlayerController>())
-    {
-        DemoPlayerController->ShowPlayerMenu(true);
-    }
-}
-
 void APlayerCharacter::LightAttack()
 {
     CombatComponent->Attack(DemoGameplayTags::State_Attack_Light);
@@ -433,6 +439,14 @@ void APlayerCharacter::Dodge()
 void APlayerCharacter::ToggleLockOn()
 {
     TargetingComponent->ToggleTargetLock();
+}
+
+void APlayerCharacter::ShowPlayerMenu()
+{
+    if (ADemoPlayerController* DemoPlayerController = GetController<ADemoPlayerController>())
+    {
+        DemoPlayerController->ShowPlayerMenu(true);
+    }
 }
 
 void APlayerCharacter::ToggleHelpText()

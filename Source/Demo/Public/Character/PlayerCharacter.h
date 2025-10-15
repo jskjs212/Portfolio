@@ -101,7 +101,7 @@ protected:
     void Look(const FInputActionValue& Value);
 
     void Move(const FInputActionValue& Value);
-    void MoveComplete(const FInputActionValue& Value);
+    void MoveComplete();
 
     virtual void Jump() override;
     virtual void Landed(const FHitResult& Hit) override;
@@ -114,14 +114,14 @@ protected:
 
     void Interact();
 
-    void ShowPlayerMenu();
-
     /* Combat */
     void LightAttack();
 
     void Dodge();
 
     void ToggleLockOn();
+
+    void ShowPlayerMenu();
 
     void ToggleHelpText();
 
@@ -147,49 +147,6 @@ public:
 protected:
     UPROPERTY(EditAnywhere, Category = "Input")
     TObjectPtr<UInputMappingContext> DefaultMappingContext;
-
-    UPROPERTY(EditAnywhere, Category = "Input")
-    TObjectPtr<UInputAction> LookAction;
-
-    UPROPERTY(EditAnywhere, Category = "Input")
-    TObjectPtr<UInputAction> MoveAction;
-
-    UPROPERTY(EditAnywhere, Category = "Input")
-    TObjectPtr<UInputAction> JumpAction;
-
-    UPROPERTY(EditAnywhere, Category = "Input")
-    TObjectPtr<UInputAction> WalkAction;
-
-    UPROPERTY(EditAnywhere, Category = "Input")
-    TObjectPtr<UInputAction> SprintAction;
-
-    UPROPERTY(EditAnywhere, Category = "Input")
-    TObjectPtr<UInputAction> InteractAction;
-
-    UPROPERTY(EditAnywhere, Category = "Input")
-    TObjectPtr<UInputAction> ShowPlayerMenuAction;
-
-    UPROPERTY(EditAnywhere, Category = "Input")
-    TObjectPtr<UInputAction> LightAttackAction;
-
-    UPROPERTY(EditAnywhere, Category = "Input")
-    TObjectPtr<UInputAction> BlockAction;
-
-    UPROPERTY(EditAnywhere, Category = "Input")
-    TObjectPtr<UInputAction> DodgeAction;
-
-    UPROPERTY(EditAnywhere, Category = "Input")
-    TObjectPtr<UInputAction> ToggleLockOnAction;
-
-    UPROPERTY(EditAnywhere, Category = "Input")
-    TObjectPtr<UInputAction> ToggleHelpTextAction;
-
-    // @TEST
-    UPROPERTY(EditAnywhere, Category = "Input")
-    TObjectPtr<UInputAction> Test1Action;
-
-    UPROPERTY(EditAnywhere, Category = "Input")
-    TObjectPtr<UInputAction> Test2Action;
 
     ////////////////////////////////////////////////////////
     //        Variables

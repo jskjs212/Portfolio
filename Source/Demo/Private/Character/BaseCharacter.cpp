@@ -4,6 +4,7 @@
 #include "Animation/AnimationDataSubsystem.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimLayerInterface.h"
+#include "Character/DemoPawnData.h"
 #include "Components/AttackCollisionComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/CombatComponent.h"
@@ -49,15 +50,25 @@ void ABaseCharacter::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (!CharacterTag.IsValid())
+    // Validations
+    if (!PawnData)
     {
-        DemoLOG_CF(LogCharacter, Error, TEXT("CharacterTag is not set for %s."), *GetName());
+        DemoLOG_CF(LogCharacter, Error, TEXT("PawnData is not set for %s."), *GetName());
+        return;
     }
     if (!HitReactFrontMontage || !HitReactBackMontage || !HitSound || !HitParticle)
     {
         DemoLOG_CF(LogCharacter, Warning, TEXT("HitReact assets are not set for %s."), *GetName());
     }
 
+    // Set CharacterTag
+    CharacterTag = PawnData->CharacterTag;
+    if (!CharacterTag.IsValid())
+    {
+        DemoLOG_CF(LogCharacter, Error, TEXT("CharacterTag is not set for %s."), *GetName());
+    }
+
+    // Init EquipmentComponent
     EquipmentComponent->OnWeaponChanged.AddUObject(this, &ThisClass::HandleWeaponChanged);
     for (const FItemSlot& Slot : StartingItems)
     {
@@ -69,9 +80,11 @@ void ABaseCharacter::BeginPlay()
         UpdateAnimationData(DemoGameplayTags::Item_Weapon_NoWeapon);
     }
 
+    // Init StateManager
     StateManager->OnStateBegan.AddUObject(this, &ThisClass::HandleStateBegan);
 
-    for (const auto& [StatTag, ResourceStat] : ResourceStats)
+    // Init StatsComponent
+    for (const auto& [StatTag, ResourceStat] : PawnData->DefaultResourceStats)
     {
         StatsComponent->AddResourceStat(StatTag, ResourceStat);
     }
