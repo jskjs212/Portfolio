@@ -5,6 +5,7 @@
 #include "Interfaces/Interactable.h"
 #include "Items/Item.h"
 #include "UI/ActionKeyWidget.h"
+#include "UI/HUDHelpWidget.h"
 #include "UI/InteractPromptWidget.h"
 #include "UI/ItemInfoWidget.h"
 #include "UI/StatBarWidget.h"
@@ -14,7 +15,7 @@ void UDemoHUDWidget::NativeOnInitialized()
     Super::NativeOnInitialized();
 
     checkf(ItemInfoWidget && InteractPromptWidget
-        && HealthBarWidget && StaminaBarWidget /*&& LockOnMarker*/,
+        && HealthBarWidget && StaminaBarWidget && HelpWidget,
         TEXT("Failed to bind widgets."));
 
     // Hide interact widgets
@@ -51,4 +52,9 @@ void UDemoHUDWidget::UpdateInteractWidgets(IInteractable* Interactable)
         ItemInfoWidget->SetVisibility(ESlateVisibility::Collapsed);
         InteractPromptWidget->SetVisibility(ESlateVisibility::Collapsed);
     }
+}
+
+void UDemoHUDWidget::ToggleHelpText()
+{
+    HelpWidget->ToggleHelpText();
 }

@@ -7,6 +7,7 @@
 #include "DemoHUDWidget.generated.h"
 
 class IInteractable;
+class UHUDHelpWidget;
 class UInteractPromptWidget;
 class UItemInfoWidget;
 class UStatBarWidget;
@@ -32,6 +33,8 @@ public:
     // Update interact widgets.
     void UpdateInteractWidgets(IInteractable* Interactable);
 
+    void ToggleHelpText();
+
     ////////////////////////////////////////////////////////
     //        Widgets
     ////////////////////////////////////////////////////////
@@ -49,4 +52,8 @@ public:
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UStatBarWidget> StaminaBarWidget;
+
+    /* Else */
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UHUDHelpWidget> HelpWidget;
 };

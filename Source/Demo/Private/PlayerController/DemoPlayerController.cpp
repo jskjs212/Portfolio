@@ -82,6 +82,17 @@ void ADemoPlayerController::ShowPlayerMenu(bool bShow)
     }
 }
 
+void ADemoPlayerController::ToggleHelpText()
+{
+    if (ADemoHUD* DemoHUD = GetHUD<ADemoHUD>())
+    {
+        if (DemoHUD->DemoHUDWidget)
+        {
+            DemoHUD->DemoHUDWidget->ToggleHelpText();
+        }
+    }
+}
+
 void ADemoPlayerController::InitDemoHUD()
 {
     APawn* OwnerPawn = GetPawn();

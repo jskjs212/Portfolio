@@ -262,6 +262,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
         EnhancedInputComponent->BindAction(ToggleLockOnAction, ETriggerEvent::Started, this, &ThisClass::ToggleLockOn);
 
+        EnhancedInputComponent->BindAction(ToggleHelpTextAction, ETriggerEvent::Started, this, &ThisClass::ToggleHelpText);
+
         EnhancedInputComponent->BindAction(Test1Action, ETriggerEvent::Started, this, &ThisClass::Test1);
         EnhancedInputComponent->BindAction(Test2Action, ETriggerEvent::Started, this, &ThisClass::Test2);
     }
@@ -431,6 +433,14 @@ void APlayerCharacter::Dodge()
 void APlayerCharacter::ToggleLockOn()
 {
     TargetingComponent->ToggleTargetLock();
+}
+
+void APlayerCharacter::ToggleHelpText()
+{
+    if (ADemoPlayerController* DemoPlayerController = GetController<ADemoPlayerController>())
+    {
+        DemoPlayerController->ToggleHelpText();
+    }
 }
 
 void APlayerCharacter::SetMovementSpeedMode(FGameplayTag NewSpeedMode)

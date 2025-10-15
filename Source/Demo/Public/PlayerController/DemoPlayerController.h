@@ -42,6 +42,8 @@ public:
 
     void ShowPlayerMenu(bool bShow);
 
+    void ToggleHelpText();
+
 private:
     void InitDemoHUD();
 

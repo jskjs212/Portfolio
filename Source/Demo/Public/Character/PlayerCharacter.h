@@ -123,6 +123,8 @@ protected:
 
     void ToggleLockOn();
 
+    void ToggleHelpText();
+
     // @TEST
     UFUNCTION(BlueprintNativeEvent)
     void Test1();
@@ -178,6 +180,9 @@ protected:
 
     UPROPERTY(EditAnywhere, Category = "Input")
     TObjectPtr<UInputAction> ToggleLockOnAction;
+
+    UPROPERTY(EditAnywhere, Category = "Input")
+    TObjectPtr<UInputAction> ToggleHelpTextAction;
 
     // @TEST
     UPROPERTY(EditAnywhere, Category = "Input")
