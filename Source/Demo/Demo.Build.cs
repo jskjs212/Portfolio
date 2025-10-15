@@ -32,7 +32,8 @@ public class Demo : ModuleRules
                 "GameplayTags",
                 "PropertyBindingUtils",
                 "StateTreeModule",
-                "GameplayStateTreeModule"
+                "GameplayStateTreeModule",
+                "NavigationSystem"
             }
         );
 
