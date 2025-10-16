@@ -11,6 +11,7 @@
 #include "UI/ItemActionDispatcher.h"
 #include "UI/ItemSlotDragDropOp.h"
 #include "UI/StatsPageWidget.h"
+#include "UI/SystemMenuPageWidget.h"
 
 void UPlayerMenuWidget::NativeOnInitialized()
 {
@@ -19,6 +20,7 @@ void UPlayerMenuWidget::NativeOnInitialized()
     checkf(StatsTabButton && StatsPageWidget
         && InventoryTabButton && InventoryPageWidget
         && EquipmentTabButton && EquipmentPageWidget
+        && SystemMenuTabButton && SystemMenuPageWidget
         && CloseButton,
         TEXT("Failed to bind widgets."));
 
@@ -26,6 +28,7 @@ void UPlayerMenuWidget::NativeOnInitialized()
     TabEntries.Emplace(DemoGameplayTags::UI_PlayerMenu_Stats, StatsTabButton, nullptr, StatsPageWidget);
     TabEntries.Emplace(DemoGameplayTags::UI_PlayerMenu_Inventory, InventoryTabButton, nullptr, InventoryPageWidget);
     TabEntries.Emplace(DemoGameplayTags::UI_PlayerMenu_Equipment, EquipmentTabButton, nullptr, EquipmentPageWidget);
+    TabEntries.Emplace(DemoGameplayTags::UI_PlayerMenu_SystemMenu, SystemMenuTabButton, nullptr, SystemMenuPageWidget);
 
     InitTabMenu();
 

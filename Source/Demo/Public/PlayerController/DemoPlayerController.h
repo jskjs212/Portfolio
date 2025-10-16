@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "DemoTypes/ItemTypes.h"
+#include "GameplayTagContainer.h"
 #include "UI/ItemActionDispatcher.h"
 #include "DemoPlayerController.generated.h"
 
@@ -40,7 +41,9 @@ public:
         InitPlayerMenu();
     }
 
-    void ShowPlayerMenu(bool bShow);
+    // Show or hide player menu.
+    // @param TabTag: If valid, switch to the tab with the tag.
+    void ShowPlayerMenu(bool bShow, FGameplayTag TabTag = FGameplayTag::EmptyTag);
 
     void ToggleHelpText();
 

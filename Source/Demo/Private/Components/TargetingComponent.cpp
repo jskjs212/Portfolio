@@ -35,13 +35,13 @@ void UTargetingComponent::LockTarget()
             FindResult.TargetInterface->OnTargeted(true);
             SetTargetStatus(true, FindResult.Target);
 
-#if WITH_EDITOR
+#if WITH_EDITORONLY_DATA
             if (bDrawDebugInfo)
             {
                 // Draw a sphere at the target
                 UKismetSystemLibrary::DrawDebugSphere(this, FindResult.Target->GetActorLocation(), 50.f, 12, FLinearColor::Red, DrawDebugDuration);
             }
-#endif // WITH_EDITOR
+#endif // WITH_EDITORONLY_DATA
         }
     }
 }
@@ -92,7 +92,7 @@ TArray<FHitResult> UTargetingComponent::GetSweepResults(const AActor* OwnerActor
         true /* bIgnoreSelf */
     );
 
-#if WITH_EDITOR
+#if WITH_EDITORONLY_DATA
     if (bDrawDebugInfo)
     {
         // Draw spheres and some edges of cones
@@ -104,7 +104,7 @@ TArray<FHitResult> UTargetingComponent::GetSweepResults(const AActor* OwnerActor
         UKismetSystemLibrary::DrawDebugLine(this, StartLocation, StartLocation + DirectionTotal.RotateAngleAxis(SecondTargetingConeAngle, FVector::UpVector), FLinearColor::Yellow, DrawDebugDuration);
         UKismetSystemLibrary::DrawDebugLine(this, StartLocation, StartLocation + DirectionTotal.RotateAngleAxis(-SecondTargetingConeAngle, FVector::UpVector), FLinearColor::Yellow, DrawDebugDuration);
     }
-#endif // WITH_EDITOR
+#endif // WITH_EDITORONLY_DATA
 
     return HitResults;
 }

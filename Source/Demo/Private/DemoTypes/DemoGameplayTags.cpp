@@ -19,6 +19,7 @@ UE_DEFINE_GAMEPLAY_TAG(Input_ShowPlayerMenu, "Input.ShowPlayerMenu");
 UE_DEFINE_GAMEPLAY_TAG(Input_ToggleHelpText, "Input.ToggleHelpText");
 UE_DEFINE_GAMEPLAY_TAG(Input_Test1, "Input.Test1");
 UE_DEFINE_GAMEPLAY_TAG(Input_Test2, "Input.Test2");
+UE_DEFINE_GAMEPLAY_TAG(Input_Escape, "Input.Escape");
 
 // Item.Weapon.*
 UE_DEFINE_GAMEPLAY_TAG(Item_Weapon, "Item.Weapon");
@@ -66,6 +67,7 @@ UE_DEFINE_GAMEPLAY_TAG(StateTree_Event_TargetSensed, "StateTree.Event.TargetSens
 UE_DEFINE_GAMEPLAY_TAG(UI_PlayerMenu_Stats, "UI.PlayerMenu.Stats");
 UE_DEFINE_GAMEPLAY_TAG(UI_PlayerMenu_Inventory, "UI.PlayerMenu.Inventory");
 UE_DEFINE_GAMEPLAY_TAG(UI_PlayerMenu_Equipment, "UI.PlayerMenu.Equipment");
+UE_DEFINE_GAMEPLAY_TAG(UI_PlayerMenu_SystemMenu, "UI.PlayerMenu.SystemMenu");
 
 // UI.Action.Item.*
 UE_DEFINE_GAMEPLAY_TAG(UI_Action_Item_Use, "UI.Action.Item.Use");

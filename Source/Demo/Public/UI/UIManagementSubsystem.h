@@ -6,10 +6,10 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "UIManagementSubsystem.generated.h"
 
+class UMainMenuWidget;
+
 /**
  * UI Management Subsystem.
- * Need to call Init() to initialize (not in constructor).
- * @misc - Z order for AddToViewport
  */
 UCLASS()
 class DEMO_API UUIManagementSubsystem : public UGameInstanceSubsystem
@@ -20,5 +20,19 @@ class DEMO_API UUIManagementSubsystem : public UGameInstanceSubsystem
     //        UI setup
     ////////////////////////////////////////////////////////
 public:
-    UUIManagementSubsystem() {}
+    UUIManagementSubsystem();
+
+    void ShowMainMenu(APlayerController* InPlayerController);
+
+private:
+    void InitMainMenu();
+
+    ////////////////////////////////////////////////////////
+    //        Widgets
+    ////////////////////////////////////////////////////////
+private:
+    TSubclassOf<UMainMenuWidget> MainMenuWidgetClass;
+
+    UPROPERTY()
+    TObjectPtr<UMainMenuWidget> MainMenuWidget;
 };

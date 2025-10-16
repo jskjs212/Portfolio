@@ -280,6 +280,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
         BindAction(DemoGameplayTags::Input_ToggleHelpText, ETriggerEvent::Started, &ThisClass::ToggleHelpText);
         BindAction(DemoGameplayTags::Input_Test1, ETriggerEvent::Started, &ThisClass::Test1);
         BindAction(DemoGameplayTags::Input_Test2, ETriggerEvent::Started, &ThisClass::Test2);
+        BindAction(DemoGameplayTags::Input_Escape, ETriggerEvent::Started, &ThisClass::EscapeActionStarted);
     }
 }
 
@@ -454,6 +455,14 @@ void APlayerCharacter::ToggleHelpText()
     if (ADemoPlayerController* DemoPlayerController = GetController<ADemoPlayerController>())
     {
         DemoPlayerController->ToggleHelpText();
+    }
+}
+
+void APlayerCharacter::EscapeActionStarted()
+{
+    if (ADemoPlayerController* DemoPlayerController = GetController<ADemoPlayerController>())
+    {
+        DemoPlayerController->ShowPlayerMenu(true, DemoGameplayTags::UI_PlayerMenu_SystemMenu);
     }
 }
 

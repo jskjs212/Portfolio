@@ -29,11 +29,13 @@ public class Demo : ModuleRules
                 "UMG",
                 "Slate",
                 "SlateCore",
+                "MoviePlayer",
                 "GameplayTags",
                 "PropertyBindingUtils",
+                "AIModule",
+                "NavigationSystem",
                 "StateTreeModule",
-                "GameplayStateTreeModule",
-                "NavigationSystem"
+                "GameplayStateTreeModule"
             }
         );
 

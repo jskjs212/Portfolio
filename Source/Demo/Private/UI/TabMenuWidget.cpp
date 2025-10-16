@@ -30,33 +30,6 @@ void UTabMenuWidget::SetVisibilityAndFocus(bool bShow)
     }
 }
 
-void UTabMenuWidget::InitTabMenu()
-{
-    if (TabEntries.Num() == 0)
-    {
-        DemoLOG_CF(LogUI, Warning, TEXT("No tab entries."));
-        return;
-    }
-
-    // Bind tab button events
-    for (FTabEntry& TabEntry : TabEntries)
-    {
-        TabEntry.TabButton->OnTabButtonClicked.BindUObject(this, &ThisClass::HandleTabButtonClicked);
-        TabEntry.TabButton->OnTabButtonHovered.BindUObject(this, &ThisClass::HandleTabButtonHovered);
-        TabEntry.TabButton->OnTabButtonUnhovered.BindUObject(this, &ThisClass::HandleTabButtonUnhovered);
-    }
-
-    ActiveTabTag = TabEntries[0].Tag;
-
-    // SelectTab() should avoid selecting already selected tab.
-    // Initial index is already 0, so update tab button colors manually.
-    for (int32 Index = 0; FTabEntry& TabEntry : TabEntries)
-    {
-        UpdateTabButtonColor(TabEntry, Index == 0, false);
-        Index++;
-    }
-}
-
 void UTabMenuWidget::SelectTab(const int32 InIndex)
 {
     // Out of range
@@ -119,6 +92,33 @@ void UTabMenuWidget::SelectTab(const FGameplayTag InTag)
             //SetDesiredFocusWidget(TabEntry.Widget);
         }
         UpdateTabButtonColor(TabEntry, bIsTargetTab, false);
+        Index++;
+    }
+}
+
+void UTabMenuWidget::InitTabMenu()
+{
+    if (TabEntries.Num() == 0)
+    {
+        DemoLOG_CF(LogUI, Warning, TEXT("No tab entries."));
+        return;
+    }
+
+    // Bind tab button events
+    for (FTabEntry& TabEntry : TabEntries)
+    {
+        TabEntry.TabButton->OnTabButtonClicked.BindUObject(this, &ThisClass::HandleTabButtonClicked);
+        TabEntry.TabButton->OnTabButtonHovered.BindUObject(this, &ThisClass::HandleTabButtonHovered);
+        TabEntry.TabButton->OnTabButtonUnhovered.BindUObject(this, &ThisClass::HandleTabButtonUnhovered);
+    }
+
+    ActiveTabTag = TabEntries[0].Tag;
+
+    // SelectTab() should avoid selecting already selected tab.
+    // Initial index is already 0, so update tab button colors manually.
+    for (int32 Index = 0; FTabEntry& TabEntry : TabEntries)
+    {
+        UpdateTabButtonColor(TabEntry, Index == 0, false);
         Index++;
     }
 }

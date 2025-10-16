@@ -25,7 +25,7 @@ ADemoPlayerController::ADemoPlayerController()
     ItemActionDispatcher = CreateDefaultSubobject<UItemActionDispatcher>(TEXT("ItemActionDispatcher"));
 }
 
-void ADemoPlayerController::ShowPlayerMenu(bool bShow)
+void ADemoPlayerController::ShowPlayerMenu(bool bShow, FGameplayTag TabTag)
 {
     if (bShow)
     {
@@ -46,6 +46,10 @@ void ADemoPlayerController::ShowPlayerMenu(bool bShow)
         SetShowMouseCursor(true);
 
         PlayerMenuWidget->SetVisibilityAndFocus(true);
+        if (TabTag.IsValid())
+        {
+            PlayerMenuWidget->SelectTab(TabTag);
+        }
 
         if (ADemoHUD* DemoHUD = GetHUD<ADemoHUD>())
         {

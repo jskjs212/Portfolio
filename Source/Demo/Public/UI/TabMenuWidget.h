@@ -54,14 +54,14 @@ public:
     // Set visibility and focus to the active tab.
     void SetVisibilityAndFocus(bool bShow);
 
+    void SelectTab(int32 PageIndex);
+
+    void SelectTab(FGameplayTag InTag);
+
 protected:
     // Called after setting up TabEntries in child class.
     // Bind tab button events and select the first tab.
     void InitTabMenu();
-
-    void SelectTab(int32 PageIndex);
-
-    void SelectTab(FGameplayTag InTag);
 
     virtual void SetFocusToWidget(UWidget* InWidget);
 
