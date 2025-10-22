@@ -7,7 +7,6 @@
 #include "GameplayTagContainer.h"
 #include "CombatComponent.generated.h"
 
-
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class DEMO_API UCombatComponent : public UActorComponent
 {

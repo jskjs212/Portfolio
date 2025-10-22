@@ -28,7 +28,7 @@ struct FEquipmentValidationResult
     TObjectPtr<AItem>* EquippedItemPtr{nullptr};
 };
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnEquipmentChanged, FGameplayTag /* EquipmentType */);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnEquipmentChanged, FGameplayTag /* EquipmentType */, const FItemSlot& /* InSlot */);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnWeaponChanged, const FWeaponData* /* WeaponData */);
 
 /**
@@ -49,7 +49,12 @@ class DEMO_API UEquipmentComponent : public UActorComponent
     ////////////////////////////////////////////////////////
 public:
     // @param Tag is the EquipmentType.
-    FOnEquipmentChanged OnEquipmentChanged;
+    // @param InSlot is the equipped item slot.
+    FOnEquipmentChanged OnEquipped;
+
+    // @param Tag is the EquipmentType.
+    // @param InSlot is the unequipped item slot.
+    FOnEquipmentChanged OnUnequipped;
 
     // @param nullptr if unequipped.
     FOnWeaponChanged OnWeaponChanged;
@@ -104,7 +109,7 @@ private:
 
     bool UnequipItem_AddToInventory(const FItemSlot& InSlot);
 
-    void UnequipItem_PostProcess(FGameplayTag EquipmentType);
+    void UnequipItem_PostProcess(FGameplayTag EquipmentType, const FItemSlot& UnequippedSlot);
 
     ////////////////////////////////////////////////////////
     //        Get & set

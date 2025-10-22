@@ -57,7 +57,7 @@ bool UEquipmentComponent::EquipItem(const FItemSlot& InSlot)
         return false;
     }
 
-    *(ValidationResult.EquippedItemPtr) = SpawnedItem;
+    *ValidationResult.EquippedItemPtr = SpawnedItem;
 
     EquipItem_PostProcess(ValidationResult);
 
@@ -83,7 +83,8 @@ bool UEquipmentComponent::UnequipItem(const FGameplayTag EquipmentType)
     }
 
     // Add to inventory if possible
-    if (!UnequipItem_AddToInventory(EquippedItem->GetItemSlot()))
+    const FItemSlot UnequippedSlot = EquippedItem->GetItemSlot();
+    if (!UnequipItem_AddToInventory(UnequippedSlot))
     {
         return false; // Log in UnequipItem_AddToInventory()
     }
@@ -98,7 +99,7 @@ bool UEquipmentComponent::UnequipItem(const FGameplayTag EquipmentType)
 
     EquippedItems[EquipmentType] = nullptr;
 
-    UnequipItem_PostProcess(EquipmentType);
+    UnequipItem_PostProcess(EquipmentType, UnequippedSlot);
 
     UE_LOG(LogEquipment, Verbose, TEXT("Unequipped - %s"), *EquipmentType.ToString());
     return true;
@@ -122,6 +123,7 @@ bool UEquipmentComponent::UnequipAndDropItem(const FGameplayTag EquipmentType)
     }
 
     // Detach
+    const FItemSlot UnequippedSlot = EquippedItem->GetItemSlot();
     EquippedItem->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 
     // Drop
@@ -135,7 +137,7 @@ bool UEquipmentComponent::UnequipAndDropItem(const FGameplayTag EquipmentType)
 
     EquippedItems[EquipmentType] = nullptr;
 
-    UnequipItem_PostProcess(EquipmentType);
+    UnequipItem_PostProcess(EquipmentType, UnequippedSlot);
 
     UE_LOG(LogEquipment, Verbose, TEXT("Unequipped - %s"), *EquipmentType.ToString());
     return true;
@@ -352,7 +354,7 @@ void UEquipmentComponent::EquipItem_PostProcess(const FEquipmentValidationResult
     }
 
     // OnEquipped: Update UI, stats, etc.
-    OnEquipmentChanged.Broadcast(ValidationResult.EquipmentType);
+    OnEquipped.Broadcast(ValidationResult.EquipmentType, (*ValidationResult.EquippedItemPtr)->GetItemSlot());
 
     if (EquipSound)
     {
@@ -385,7 +387,7 @@ bool UEquipmentComponent::UnequipItem_AddToInventory(const FItemSlot& InSlot)
     return true;
 }
 
-void UEquipmentComponent::UnequipItem_PostProcess(FGameplayTag EquipmentType)
+void UEquipmentComponent::UnequipItem_PostProcess(FGameplayTag EquipmentType, const FItemSlot& UnequippedSlot)
 {
     if (EquipmentType == DemoGameplayTags::Item_Weapon)
     {
@@ -394,7 +396,7 @@ void UEquipmentComponent::UnequipItem_PostProcess(FGameplayTag EquipmentType)
     }
 
     // OnUnequipped: Update UI, stats, etc.
-    OnEquipmentChanged.Broadcast(EquipmentType);
+    OnUnequipped.Broadcast(EquipmentType, UnequippedSlot);
 
     if (EquipSound)
     {

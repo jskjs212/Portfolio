@@ -30,7 +30,35 @@ void UEquipmentPageWidget::NativeOnInitialized()
     BindToEquipmentUpdates();
 }
 
-void UEquipmentPageWidget::UpdateEquipmentSlotsUI(FGameplayTag EquipmentType)
+void UEquipmentPageWidget::UpdateEquippedItemSlotUI(FGameplayTag EquipmentType, const FItemSlot& EquippedSlot)
+{
+    for (const FEquipmentSlotData& SlotData : EquipmentSlots)
+    {
+        if (SlotData.EquipmentType == EquipmentType)
+        {
+            SlotData.SlotWidget->SetItemSlot(EquippedSlot);
+            SlotData.SlotWidget->UpdateVisuals();
+            return;
+        }
+    }
+    DemoLOG_CF(LogUI, Error, TEXT("No slot for EquipmentType %s."), *EquipmentType.ToString());
+}
+
+void UEquipmentPageWidget::UpdateUnequippedItemSlotUI(FGameplayTag EquipmentType, const FItemSlot& /* UnequippedSlot */)
+{
+    for (const FEquipmentSlotData& SlotData : EquipmentSlots)
+    {
+        if (SlotData.EquipmentType == EquipmentType)
+        {
+            SlotData.SlotWidget->SetItemSlot(FItemSlot{});
+            SlotData.SlotWidget->UpdateVisuals();
+            return;
+        }
+    }
+    DemoLOG_CF(LogUI, Error, TEXT("No slot for EquipmentType %s."), *EquipmentType.ToString());
+}
+
+void UEquipmentPageWidget::UpdateAllEquipmentSlotsUI()
 {
     if (!IsVisible())
     {
@@ -53,29 +81,18 @@ void UEquipmentPageWidget::UpdateEquipmentSlotsUI(FGameplayTag EquipmentType)
 
     const TMap<FGameplayTag, TObjectPtr<AItem>>& EquippedItems = EquipmentComponent->GetAllEquippedItems();
 
-    for (FEquipmentSlotData& SlotData : EquipmentSlots)
-    {
-        if (SlotData.EquipmentType == EquipmentType)
-        {
-            const TObjectPtr<AItem> EquippedItem = EquippedItems[SlotData.EquipmentType];
-            if (EquippedItem)
-            {
-                SlotData.SlotWidget->SetItemSlot(EquippedItem->GetItemSlot());
-            }
-            else
-            {
-                SlotData.SlotWidget->SetItemSlot(FItemSlot{});
-            }
-            SlotData.SlotWidget->UpdateVisuals();
-        }
-    }
-}
-
-void UEquipmentPageWidget::UpdateAllEquipmentSlotsUI()
-{
     for (const FEquipmentSlotData& SlotData : EquipmentSlots)
     {
-        UpdateEquipmentSlotsUI(SlotData.EquipmentType);
+        const TObjectPtr<AItem> EquippedItem = EquippedItems[SlotData.EquipmentType];
+        if (EquippedItem)
+        {
+            SlotData.SlotWidget->SetItemSlot(EquippedItem->GetItemSlot());
+        }
+        else // Unequipped
+        {
+            SlotData.SlotWidget->SetItemSlot(FItemSlot{});
+        }
+        SlotData.SlotWidget->UpdateVisuals();
     }
 }
 
@@ -125,7 +142,8 @@ void UEquipmentPageWidget::BindToEquipmentUpdates()
     {
         if (UEquipmentComponent* EquipmentComponent = OwningPawn->FindComponentByClass<UEquipmentComponent>())
         {
-            EquipmentComponent->OnEquipmentChanged.AddUObject(this, &ThisClass::UpdateEquipmentSlotsUI);
+            EquipmentComponent->OnEquipped.AddUObject(this, &ThisClass::UpdateEquippedItemSlotUI);
+            EquipmentComponent->OnUnequipped.AddUObject(this, &ThisClass::UpdateUnequippedItemSlotUI);
         }
     }
 }

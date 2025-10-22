@@ -3,6 +3,7 @@
 #include "Components/StatsComponent.h"
 #include "Components/EquipmentComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
+#include "DemoTypes/ItemTypes.h"
 #include "DemoTypes/LogCategories.h"
 #include "DemoTypes/TableRowBases.h"
 #include "Items/Item.h"
@@ -40,7 +41,8 @@ void UStatsComponent::InitStatsComponent()
 
     if (UEquipmentComponent* EquipmentComponent = GetOwner()->FindComponentByClass<UEquipmentComponent>())
     {
-        EquipmentComponent->OnEquipmentChanged.AddUObject(this, &ThisClass::HandleEquipmentChanged);
+        EquipmentComponent->OnEquipped.AddUObject(this, &ThisClass::HandleItemEquipped);
+        EquipmentComponent->OnUnequipped.AddUObject(this, &ThisClass::HandleItemUnequipped);
     }
 }
 
@@ -249,6 +251,7 @@ bool UStatsComponent::RemoveModifierFromDerivedStat(FGameplayTag StatTag, const 
 
 void UStatsComponent::RecalculateDerivedStat(FGameplayTag InPrimaryStatTag)
 {
+    // @hardcoded - Formula is hardcoded for now.
     // @TODO - DataTable
     // Attack = STR * 0.5 + DEX * 0.1
     // Defense = STR * 0.1 + DEX * 0.3 + INT * 0.1
@@ -350,44 +353,53 @@ void UStatsComponent::StopAllRegen()
     }
 }
 
-void UStatsComponent::HandleEquipmentChanged(FGameplayTag EquipmentType)
+void UStatsComponent::HandleItemEquipped(FGameplayTag EquipmentType, const FItemSlot& EquippedSlot)
 {
-    UEquipmentComponent* EquipmentComponent = GetOwner()->FindComponentByClass<UEquipmentComponent>();
-    AItem* EquippedWeapon = EquipmentComponent->GetEquippedItem(EquipmentType);
-
     if (EquipmentType == DemoGameplayTags::Item_Weapon)
     {
-        // @TODO @TODO @TODO - Remove ALL modifiers from previous weapon. (And add FEquipmentData row base?)
-        FStatModifier WeaponAttackModifier = FStatModifier{EStatModOp::Add, 0.f, DemoGameplayTags::Item_Weapon};
-        RemoveModifierFromStat(AttackTag, WeaponAttackModifier);
-
         // Add all modifiers from new weapon.
-        if (EquippedWeapon)
+        if (const FWeaponData* WeaponData = EquippedSlot.RowHandle.GetRow<FWeaponData>(TEXT("UStatsComponent::HandleItemEquipped")))
         {
-            if (const FWeaponData* WeaponData = EquippedWeapon->GetItemSlot().RowHandle.GetRow<FWeaponData>(TEXT("UStatsComponent::HandleEquipmentChanged")))
+            for (const auto& [StatTag, StatModifier] : WeaponData->StatModifiers)
             {
-                for (const auto& [StatTag, StatModifier] : WeaponData->StatModifiers)
-                {
-                    AddModifierToStat(StatTag, StatModifier);
-                }
+                AddModifierToStat(StatTag, StatModifier);
             }
         }
     }
     else if (EquipmentType.MatchesTag(DemoGameplayTags::Item_Armor))
     {
-        // @TODO @TODO @TODO - Remove ALL modifiers from previous armor.
-        FStatModifier ArmorDefenseModifier = FStatModifier{EStatModOp::Add, 0.f, DemoGameplayTags::Item_Armor_Shield};
-        RemoveModifierFromStat(DefenseTag, ArmorDefenseModifier);
-
         // Add all modifiers from new armor.
-        if (EquippedWeapon)
+        if (const FArmorData* ArmorData = EquippedSlot.RowHandle.GetRow<FArmorData>(TEXT("UStatsComponent::HandleItemEquipped")))
         {
-            if (const FArmorData* ArmorData = EquippedWeapon->GetItemSlot().RowHandle.GetRow<FArmorData>(TEXT("UStatsComponent::HandleEquipmentChanged")))
+            for (const auto& [StatTag, StatModifier] : ArmorData->StatModifiers)
             {
-                for (const auto& [StatTag, StatModifier] : ArmorData->StatModifiers)
-                {
-                    AddModifierToStat(StatTag, StatModifier);
-                }
+                AddModifierToStat(StatTag, StatModifier);
+            }
+        }
+    }
+}
+
+void UStatsComponent::HandleItemUnequipped(FGameplayTag EquipmentType, const FItemSlot& UnequippedSlot)
+{
+    if (EquipmentType == DemoGameplayTags::Item_Weapon)
+    {
+        // Remove all modifiers from previous weapon.
+        if (const FWeaponData* WeaponData = UnequippedSlot.RowHandle.GetRow<FWeaponData>(TEXT("UStatsComponent::HandleItemUnequipped")))
+        {
+            for (const auto& [StatTag, StatModifier] : WeaponData->StatModifiers)
+            {
+                RemoveModifierFromStat(StatTag, StatModifier);
+            }
+        }
+    }
+    else if (EquipmentType.MatchesTag(DemoGameplayTags::Item_Armor))
+    {
+        // Remove all modifiers from previous armor.
+        if (const FArmorData* ArmorData = UnequippedSlot.RowHandle.GetRow<FArmorData>(TEXT("UStatsComponent::HandleItemUnequipped")))
+        {
+            for (const auto& [StatTag, StatModifier] : ArmorData->StatModifiers)
+            {
+                RemoveModifierFromStat(StatTag, StatModifier);
             }
         }
     }

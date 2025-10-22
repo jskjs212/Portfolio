@@ -8,6 +8,8 @@
 #include "GameplayTagContainer.h"
 #include "StatsComponent.generated.h"
 
+struct FItemSlot;
+
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnStatChanged, FGameplayTag /* StatTag */, float /* OldValue */, float /* NewValue */);
 
 /**
@@ -76,7 +78,6 @@ public:
     bool RemoveModifierFromDerivedStat(FGameplayTag StatTag, const FStatModifier& Modifier);
 
     // Should be called after modifying primary stats!
-    // @hardcoded - Formula is hardcoded for now.
     void RecalculateDerivedStat(FGameplayTag InPrimaryStatTag);
 
     void StartRegenChecked(FGameplayTag StatTag);
@@ -86,7 +87,8 @@ public:
     void StopAllRegen();
 
 private:
-    void HandleEquipmentChanged(FGameplayTag EquipmentType);
+    void HandleItemEquipped(FGameplayTag EquipmentType, const FItemSlot& EquippedSlot);
+    void HandleItemUnequipped(FGameplayTag EquipmentType, const FItemSlot& UnequippedSlot);
 
     ////////////////////////////////////////////////////////
     //        Wrapper functions

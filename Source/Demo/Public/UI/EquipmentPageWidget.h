@@ -20,14 +20,6 @@ struct FEquipmentSlotData
     TObjectPtr<UItemSlotWidget> SlotWidget;
 };
 
-/**
- * @TODO
- * 0) WBP design
- * 1) Link with EquipmentComponent.
- * 2) Handle clicks
- * 3) Context menu
- * 4) Show item info on hover
- */
 UCLASS()
 class DEMO_API UEquipmentPageWidget : public UUserWidget
 {
@@ -43,8 +35,8 @@ protected:
     //        UI functions
     ////////////////////////////////////////////////////////
 public:
-    // Update UI of equipment item slots from owner pawn's EquipmentComponent
-    void UpdateEquipmentSlotsUI(FGameplayTag EquipmentType);
+    void UpdateEquippedItemSlotUI(FGameplayTag EquipmentType, const FItemSlot& EquippedSlot);
+    void UpdateUnequippedItemSlotUI(FGameplayTag EquipmentType, const FItemSlot& /* UnequippedSlot */);
 
     void UpdateAllEquipmentSlotsUI();
 
