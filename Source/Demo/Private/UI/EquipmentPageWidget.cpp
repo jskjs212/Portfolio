@@ -126,7 +126,6 @@ void UEquipmentPageWidget::BindToEquipmentUpdates()
         if (UEquipmentComponent* EquipmentComponent = OwningPawn->FindComponentByClass<UEquipmentComponent>())
         {
             EquipmentComponent->OnEquipmentChanged.AddUObject(this, &ThisClass::UpdateEquipmentSlotsUI);
-            //UpdateEquipmentSlotsUI();
         }
     }
 }

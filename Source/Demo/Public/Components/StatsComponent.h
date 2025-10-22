@@ -8,13 +8,14 @@
 #include "GameplayTagContainer.h"
 #include "StatsComponent.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnCurrentStatChanged, FGameplayTag /* StatTag */, float /* OldValue */, float /* NewValue */);
+DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnStatChanged, FGameplayTag /* StatTag */, float /* OldValue */, float /* NewValue */);
 
 /**
  * Checked functions with invalid StatTags cause a crash!
  * If you want to handle the case of invalid stat type, use HasStatType() first.
  * i.e. When you don't know if hit actor has Mana stat or not.
  * Current values are not allowed to exceed max values.
+ * Call InitStatsComponent() after adding all stats.
  */
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class DEMO_API UStatsComponent : public UActorComponent
@@ -27,12 +28,19 @@ class DEMO_API UStatsComponent : public UActorComponent
 public:
     static const FGameplayTag HealthTag;
     static const FGameplayTag StaminaTag;
+    static const FGameplayTag STRTag;
+    static const FGameplayTag DEXTag;
+    static const FGameplayTag INTTag;
+    static const FGameplayTag AttackTag;
+    static const FGameplayTag DefenseTag;
 
     ////////////////////////////////////////////////////////
     //        Delegates
     ////////////////////////////////////////////////////////
 public:
-    FOnCurrentStatChanged OnCurrentResourceStatChanged;
+    FOnStatChanged OnCurrentResourceStatChanged;
+    FOnStatChanged OnPrimaryStatChanged;
+    FOnStatChanged OnDerivedStatChanged;
 
     ////////////////////////////////////////////////////////
     //        Fundamentals
@@ -40,30 +48,45 @@ public:
 public:
     UStatsComponent();
 
-protected:
-    virtual void BeginPlay() override;
-
     ////////////////////////////////////////////////////////
     //        Stats
     ////////////////////////////////////////////////////////
 public:
+    void InitStatsComponent();
+
     // Set all current values to max values.
     void ResetAllResourceStats();
 
     // Not considered to be called after BeginPlay.
     void AddResourceStat(FGameplayTag StatTag, const FResourceStat& ResourceStat);
     void RemoveResourceStat(FGameplayTag StatTag);
+    void AddPrimaryStat(FGameplayTag StatTag, const FPrimaryStat& PrimaryStat);
+    void AddDerivedStat(FGameplayTag StatTag, const FDerivedStat& DerivedStat);
 
     // Current += Delta.
     // Don't handle with specific cases like Health <= 0.
     // @return The actual amount by which the value was modified.
     float ModifyCurrentResourceStatChecked(FGameplayTag StatTag, float Delta, bool bShouldRegenerate = false, float MinValue = 0.f);
 
+    bool AddModifierToStat(FGameplayTag StatTag, const FStatModifier& Modifier);
+    bool RemoveModifierFromStat(FGameplayTag StatTag, const FStatModifier& Modifier);
+    bool AddModifierToPrimaryStat(FGameplayTag StatTag, const FStatModifier& Modifier);
+    bool RemoveModifierFromPrimaryStat(FGameplayTag StatTag, const FStatModifier& Modifier);
+    bool AddModifierToDerivedStat(FGameplayTag StatTag, const FStatModifier& Modifier);
+    bool RemoveModifierFromDerivedStat(FGameplayTag StatTag, const FStatModifier& Modifier);
+
+    // Should be called after modifying primary stats!
+    // @hardcoded - Formula is hardcoded for now.
+    void RecalculateDerivedStat(FGameplayTag InPrimaryStatTag);
+
     void StartRegenChecked(FGameplayTag StatTag);
 
     void RegenChecked(FGameplayTag StatTag);
 
     void StopAllRegen();
+
+private:
+    void HandleEquipmentChanged(FGameplayTag EquipmentType);
 
     ////////////////////////////////////////////////////////
     //        Wrapper functions
@@ -90,16 +113,19 @@ public:
     //        Get & set (all stat types)
     ////////////////////////////////////////////////////////
 public:
-    FORCEINLINE bool HasStatType(FGameplayTag StatTag) const { return ResourceStats.Contains(StatTag); }
-
-    // If the actor has no StatTag, return true (no restriction).
-    // Otherwise, return Current >= Value.
-    bool HasEnoughOrNoRestriction(FGameplayTag StatTag, float Value) const;
+    FORCEINLINE bool HasStatType(FGameplayTag StatTag) const
+    {
+        return ResourceStats.Contains(StatTag) || PrimaryStats.Contains(StatTag) || DerivedStats.Contains(StatTag);
+    }
 
     ////////////////////////////////////////////////////////
     //        Get & set
     ////////////////////////////////////////////////////////
 public:
+    // If the actor has no StatTag, return true (no restriction).
+    // Otherwise, return Current >= Value.
+    bool HasEnoughOrNoRestriction(FGameplayTag StatTag, float Value) const;
+
     FORCEINLINE float GetCurrentResourceStatChecked(FGameplayTag StatTag) const
     {
         return GetResourceStatChecked(StatTag).CurrentValue;
@@ -108,6 +134,16 @@ public:
     FORCEINLINE float GetMaxResourceStatChecked(FGameplayTag StatTag) const
     {
         return GetResourceStatChecked(StatTag).MaxValue;
+    }
+
+    FORCEINLINE float GetPrimaryStatFinalValueChecked(FGameplayTag StatTag) const
+    {
+        return GetPrimaryStatChecked(StatTag).GetFinalValue();
+    }
+
+    FORCEINLINE float GetDerivedStatFinalValueChecked(FGameplayTag StatTag) const
+    {
+        return GetDerivedStatChecked(StatTag).GetFinalValue();
     }
 
     // Don't handle with specific cases like Health <= 0.
@@ -134,10 +170,22 @@ private:
         return const_cast<FResourceStat&>(const_cast<const UStatsComponent*>(this)->GetResourceStatChecked(StatTag));
     }
 
+    FORCEINLINE const FPrimaryStat& GetPrimaryStatChecked(FGameplayTag StatTag) const { return PrimaryStats[StatTag]; }
+    FORCEINLINE FPrimaryStat& GetPrimaryStatChecked(FGameplayTag StatTag) { return PrimaryStats[StatTag]; }
+    FORCEINLINE const FDerivedStat& GetDerivedStatChecked(FGameplayTag StatTag) const { return DerivedStats[StatTag]; }
+    FORCEINLINE FDerivedStat& GetDerivedStatChecked(FGameplayTag StatTag) { return DerivedStats[StatTag]; }
+
     ////////////////////////////////////////////////////////
     //        Variables
     ////////////////////////////////////////////////////////
 private:
-    UPROPERTY(EditAnywhere, Category = "Stats", meta = (Categories = "Stats"))
+    UPROPERTY(VisibleAnywhere, Category = "Stats")
     TMap<FGameplayTag, FResourceStat> ResourceStats;
+
+    UPROPERTY(VisibleAnywhere, Category = "Stats")
+    TMap<FGameplayTag, FPrimaryStat> PrimaryStats;
+
+    // Base value is modified only via RecalculateDerivedStat() by PrimaryStats.
+    UPROPERTY(VisibleAnywhere, Category = "Stats")
+    TMap<FGameplayTag, FDerivedStat> DerivedStats;
 };

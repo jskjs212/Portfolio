@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "DemoTypes/AttackTypes.h"
 #include "DemoTypes/DemoGameplayTags.h"
+#include "DemoTypes/StatsTypes.h"
 #include "Engine/DataTable.h"
 #include "GameplayTagContainer.h"
 #include "Misc/DataValidation.h"
@@ -87,8 +88,11 @@ struct FWeaponData : public FItemDataBase
 {
     GENERATED_BODY()
 
+    // {StatTag, StatModifier}
     UPROPERTY(EditAnywhere)
-    float Damage{10.f};
+    TMap<FGameplayTag, FStatModifier> StatModifiers{
+        {FGameplayTag::RequestGameplayTag("Stat.Derived.Attack"), FStatModifier{EStatModOp::Add, 10.f, DemoGameplayTags::Item_Weapon}}
+    };
 
     UPROPERTY(EditAnywhere)
     FAttackCollisionDefinition AttackCollisionDefinition{.CollisionType = EAttackCollisionType::MainWeapon};
@@ -143,8 +147,12 @@ USTRUCT(BlueprintType)
 struct FArmorData : public FItemDataBase
 {
     GENERATED_BODY()
+
+    // {StatTag, StatModifier}
     UPROPERTY(EditAnywhere)
-    float Armor{10.f};
+    TMap<FGameplayTag, FStatModifier> StatModifiers{
+        {FGameplayTag::RequestGameplayTag("Stat.Derived.Defense"), FStatModifier{EStatModOp::Add, 5.f, FGameplayTag::EmptyTag}}
+    };
 
 #if WITH_EDITOR
     virtual EDataValidationResult IsDataValid(FDataValidationContext& Context) const override

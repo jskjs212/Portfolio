@@ -493,13 +493,12 @@ void APlayerCharacter::Test1_Implementation()
 {
     DemoLOG_CF(LogCharacter, Warning, TEXT("called!"));
 
-    EquipmentComponent->EquipItem(TestItemSlot);
+    StatsComponent->AddModifierToStat(UStatsComponent::STRTag, FStatModifier{EStatModOp::Add, 3.f, DemoGameplayTags::Input_Test1});
 }
 
 void APlayerCharacter::Test2_Implementation()
 {
     DemoLOG_CF(LogCharacter, Warning, TEXT("called!"));
 
-    EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Weapon);
-    EquipmentComponent->UnequipItem(DemoGameplayTags::Item_Armor_Shield);
+    StatsComponent->RemoveModifierFromStat(UStatsComponent::STRTag, FStatModifier{EStatModOp::Add, 0.f, DemoGameplayTags::Input_Test1});
 }

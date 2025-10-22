@@ -1,24 +1,46 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Components/StatsComponent.h"
+#include "Components/EquipmentComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "DemoTypes/LogCategories.h"
+#include "DemoTypes/TableRowBases.h"
+#include "Items/Item.h"
 
-const FGameplayTag UStatsComponent::HealthTag = FGameplayTag::RequestGameplayTag("Stat.Health");
-const FGameplayTag UStatsComponent::StaminaTag = FGameplayTag::RequestGameplayTag("Stat.Stamina");
+const FGameplayTag UStatsComponent::HealthTag = FGameplayTag::RequestGameplayTag("Stat.Resource.Health");
+const FGameplayTag UStatsComponent::StaminaTag = FGameplayTag::RequestGameplayTag("Stat.Resource.Stamina");
+const FGameplayTag UStatsComponent::STRTag = FGameplayTag::RequestGameplayTag("Stat.Primary.STR");
+const FGameplayTag UStatsComponent::DEXTag = FGameplayTag::RequestGameplayTag("Stat.Primary.DEX");
+const FGameplayTag UStatsComponent::INTTag = FGameplayTag::RequestGameplayTag("Stat.Primary.INT");
+const FGameplayTag UStatsComponent::AttackTag = FGameplayTag::RequestGameplayTag("Stat.Derived.Attack");
+const FGameplayTag UStatsComponent::DefenseTag = FGameplayTag::RequestGameplayTag("Stat.Derived.Defense");
 
 UStatsComponent::UStatsComponent()
 {
     PrimaryComponentTick.bCanEverTick = false;
 }
 
-void UStatsComponent::BeginPlay()
+void UStatsComponent::InitStatsComponent()
 {
-    Super::BeginPlay();
+    static const FGameplayTagContainer MustHaveStatType = FGameplayTagContainer::CreateFromArray(TArray<FGameplayTag>{
+        STRTag, DEXTag, INTTag, AttackTag, DefenseTag
+    });
+    for (FGameplayTag StatTag : MustHaveStatType)
+    {
+        if (!HasStatType(StatTag))
+        {
+            DemoLOG_F(LogAttributes, Error, TEXT("Stat %s is missing from %s."), *StatTag.GetTagName().ToString(), *GetNameSafe(GetOwner()));
+        }
+    }
 
     for (auto& [StatTag, ResourceStat] : ResourceStats)
     {
         ResourceStat.TimerDelegate.BindUObject(this, &ThisClass::RegenChecked, StatTag);
+    }
+
+    if (UEquipmentComponent* EquipmentComponent = GetOwner()->FindComponentByClass<UEquipmentComponent>())
+    {
+        EquipmentComponent->OnEquipmentChanged.AddUObject(this, &ThisClass::HandleEquipmentChanged);
     }
 }
 
@@ -33,8 +55,7 @@ void UStatsComponent::ResetAllResourceStats()
 void UStatsComponent::AddResourceStat(const FGameplayTag StatTag, const FResourceStat& ResourceStat)
 {
     static const FGameplayTagContainer AllowedResouceStatTags = FGameplayTagContainer::CreateFromArray(TArray<FGameplayTag>{
-        HealthTag,
-            StaminaTag
+        HealthTag, StaminaTag
     });
 
     if (!StatTag.MatchesAnyExact(AllowedResouceStatTags))
@@ -73,6 +94,26 @@ void UStatsComponent::RemoveResourceStat(FGameplayTag StatTag)
     ResourceStats.Remove(StatTag);
 }
 
+void UStatsComponent::AddPrimaryStat(FGameplayTag StatTag, const FPrimaryStat& PrimaryStat)
+{
+    if (PrimaryStats.Contains(StatTag))
+    {
+        DemoLOG_F(LogAttributes, Warning, TEXT("Stat %s already exists."), *StatTag.GetTagName().ToString());
+        return;
+    }
+    PrimaryStats.Add(StatTag, PrimaryStat);
+}
+
+void UStatsComponent::AddDerivedStat(FGameplayTag StatTag, const FDerivedStat& DerivedStat)
+{
+    if (DerivedStats.Contains(StatTag))
+    {
+        DemoLOG_F(LogAttributes, Warning, TEXT("Stat %s already exists."), *StatTag.GetTagName().ToString());
+        return;
+    }
+    DerivedStats.Add(StatTag, DerivedStat);
+}
+
 float UStatsComponent::ModifyCurrentResourceStatChecked(const FGameplayTag StatTag, const float Delta, const bool bShouldRegenerate, const float MinValue)
 {
     if (Delta == 0.f)
@@ -90,6 +131,166 @@ float UStatsComponent::ModifyCurrentResourceStatChecked(const FGameplayTag StatT
     const float NewValue = SetCurrentResourceStatChecked(StatTag, OldValue + Delta, MinValue);
 
     return NewValue - OldValue;
+}
+
+bool UStatsComponent::AddModifierToStat(FGameplayTag StatTag, const FStatModifier& Modifier)
+{
+    if (PrimaryStats.Contains(StatTag))
+    {
+        return AddModifierToPrimaryStat(StatTag, Modifier);
+    }
+    if (DerivedStats.Contains(StatTag))
+    {
+        return AddModifierToDerivedStat(StatTag, Modifier);
+    }
+    DemoLOG_CF(LogAttributes, Error, TEXT("Stat %s doesn't exist."), *StatTag.GetTagName().ToString());
+    return false;
+}
+
+bool UStatsComponent::RemoveModifierFromStat(FGameplayTag StatTag, const FStatModifier& Modifier)
+{
+    if (PrimaryStats.Contains(StatTag))
+    {
+        return RemoveModifierFromPrimaryStat(StatTag, Modifier);
+    }
+    if (DerivedStats.Contains(StatTag))
+    {
+        return RemoveModifierFromDerivedStat(StatTag, Modifier);
+    }
+    DemoLOG_CF(LogAttributes, Error, TEXT("Stat %s doesn't exist."), *StatTag.GetTagName().ToString());
+    return false;
+}
+
+bool UStatsComponent::AddModifierToPrimaryStat(FGameplayTag StatTag, const FStatModifier& Modifier)
+{
+    FPrimaryStat* PrimaryStat = PrimaryStats.Find(StatTag);
+    if (!PrimaryStat)
+    {
+        DemoLOG_F(LogAttributes, Warning, TEXT("Stat %s doesn't exist."), *StatTag.GetTagName().ToString());
+        return false;
+    }
+
+    const float OldValue = PrimaryStat->GetFinalValue();
+    const bool bAdded = PrimaryStat->AddModifier(Modifier);
+    if (bAdded)
+    {
+        const float NewValue = PrimaryStat->GetFinalValue();
+        DemoLOG_CF(LogAttributes, Warning, TEXT("Stat: %s, NewValue: %.2f"), *StatTag.GetTagName().ToString(), NewValue); // @debug
+        OnPrimaryStatChanged.Broadcast(StatTag, OldValue, NewValue);
+        RecalculateDerivedStat(StatTag);
+        return true;
+    }
+    return false;
+}
+
+bool UStatsComponent::RemoveModifierFromPrimaryStat(FGameplayTag StatTag, const FStatModifier& Modifier)
+{
+    FPrimaryStat* PrimaryStat = PrimaryStats.Find(StatTag);
+    if (!PrimaryStat)
+    {
+        DemoLOG_F(LogAttributes, Warning, TEXT("Stat %s doesn't exist."), *StatTag.GetTagName().ToString());
+        return false;
+    }
+
+    const float OldValue = PrimaryStat->GetFinalValue();
+    const bool bRemoved = PrimaryStat->RemoveModifier(Modifier);
+    if (bRemoved)
+    {
+        const float NewValue = PrimaryStat->GetFinalValue();
+        DemoLOG_CF(LogAttributes, Warning, TEXT("Stat: %s, NewValue: %.2f"), *StatTag.GetTagName().ToString(), NewValue); // @debug
+        OnPrimaryStatChanged.Broadcast(StatTag, OldValue, NewValue);
+        RecalculateDerivedStat(StatTag);
+        return true;
+    }
+    return false;
+}
+
+bool UStatsComponent::AddModifierToDerivedStat(FGameplayTag StatTag, const FStatModifier& Modifier)
+{
+    FDerivedStat* DerivedStat = DerivedStats.Find(StatTag);
+    if (!DerivedStat)
+    {
+        DemoLOG_F(LogAttributes, Warning, TEXT("Stat %s doesn't exist."), *StatTag.GetTagName().ToString());
+        return false;
+    }
+
+    const float OldValue = DerivedStat->GetFinalValue();
+    const bool bAdded = DerivedStat->AddModifier(Modifier);
+    if (bAdded)
+    {
+        const float NewValue = DerivedStat->GetFinalValue();
+        DemoLOG_CF(LogAttributes, Warning, TEXT("Stat: %s, NewValue: %.2f"), *StatTag.GetTagName().ToString(), NewValue); // @debug
+        OnDerivedStatChanged.Broadcast(StatTag, OldValue, NewValue);
+        return true;
+    }
+    return false;
+}
+
+bool UStatsComponent::RemoveModifierFromDerivedStat(FGameplayTag StatTag, const FStatModifier& Modifier)
+{
+    FDerivedStat* DerivedStat = DerivedStats.Find(StatTag);
+    if (!DerivedStat)
+    {
+        DemoLOG_F(LogAttributes, Warning, TEXT("Stat %s doesn't exist."), *StatTag.GetTagName().ToString());
+        return false;
+    }
+
+    const float OldValue = DerivedStat->GetFinalValue();
+    const bool bRemoved = DerivedStat->RemoveModifier(Modifier);
+    if (bRemoved)
+    {
+        const float NewValue = DerivedStat->GetFinalValue();
+        DemoLOG_CF(LogAttributes, Warning, TEXT("Stat: %s, NewValue: %.2f"), *StatTag.GetTagName().ToString(), NewValue); // @debug
+        OnDerivedStatChanged.Broadcast(StatTag, OldValue, NewValue);
+        return true;
+    }
+    return false;
+}
+
+void UStatsComponent::RecalculateDerivedStat(FGameplayTag InPrimaryStatTag)
+{
+    // @TODO - DataTable
+    // Attack = STR * 0.5 + DEX * 0.1
+    // Defense = STR * 0.1 + DEX * 0.3 + INT * 0.1
+    // {DerivedStat, Array{PrimaryStat, Weight}}
+    static const TMap<FGameplayTag, TArray<TPair<FGameplayTag, float>>> DerivedStatDependencies = {
+        {AttackTag, {{STRTag, 0.5f}, {DEXTag, 0.1f}}},
+        {DefenseTag, {{STRTag, 0.1f}, {DEXTag, 0.3f}, {INTTag, 0.1f}}}
+    };
+
+    // For each derived stat
+    for (const auto& [DerivedStatTag, DependencyPairs] : DerivedStatDependencies)
+    {
+        bool bShouldRecalculate = false;
+        for (const auto& [PrimaryStatTag, Weight] : DependencyPairs)
+        {
+            if (InPrimaryStatTag == PrimaryStatTag)
+            {
+                // Related
+                bShouldRecalculate = true;
+                break;
+            }
+        }
+        if (!bShouldRecalculate)
+        {
+            // Not related
+            continue;
+        }
+
+        FDerivedStat& DerivedStat = GetDerivedStatChecked(DerivedStatTag);
+        const float OldDerivedValue = DerivedStat.GetFinalValue();
+
+        float NewDerivedBaseValue = 0.f;
+        for (const auto& [PrimaryStatTag, Weight] : DependencyPairs)
+        {
+            NewDerivedBaseValue += GetPrimaryStatChecked(PrimaryStatTag).GetFinalValue() * Weight;
+        }
+
+        DerivedStat.BaseValue = NewDerivedBaseValue;
+        const float NewDerivedValue = DerivedStat.GetFinalValue();
+        DemoLOG_CF(LogAttributes, Warning, TEXT("Stat: %s, NewValue: %.2f"), *DerivedStatTag.GetTagName().ToString(), NewDerivedValue); // @debug
+        OnDerivedStatChanged.Broadcast(DerivedStatTag, OldDerivedValue, NewDerivedValue);
+    }
 }
 
 void UStatsComponent::StartRegenChecked(const FGameplayTag StatTag)
@@ -145,6 +346,49 @@ void UStatsComponent::StopAllRegen()
         {
             FResourceStat& ResourceStat = Pair.Value;
             TimerManager.ClearTimer(ResourceStat.TimerHandle);
+        }
+    }
+}
+
+void UStatsComponent::HandleEquipmentChanged(FGameplayTag EquipmentType)
+{
+    UEquipmentComponent* EquipmentComponent = GetOwner()->FindComponentByClass<UEquipmentComponent>();
+    AItem* EquippedWeapon = EquipmentComponent->GetEquippedItem(EquipmentType);
+
+    if (EquipmentType == DemoGameplayTags::Item_Weapon)
+    {
+        // @TODO @TODO @TODO - Remove ALL modifiers from previous weapon. (And add FEquipmentData row base?)
+        FStatModifier WeaponAttackModifier = FStatModifier{EStatModOp::Add, 0.f, DemoGameplayTags::Item_Weapon};
+        RemoveModifierFromStat(AttackTag, WeaponAttackModifier);
+
+        // Add all modifiers from new weapon.
+        if (EquippedWeapon)
+        {
+            if (const FWeaponData* WeaponData = EquippedWeapon->GetItemSlot().RowHandle.GetRow<FWeaponData>(TEXT("UStatsComponent::HandleEquipmentChanged")))
+            {
+                for (const auto& [StatTag, StatModifier] : WeaponData->StatModifiers)
+                {
+                    AddModifierToStat(StatTag, StatModifier);
+                }
+            }
+        }
+    }
+    else if (EquipmentType.MatchesTag(DemoGameplayTags::Item_Armor))
+    {
+        // @TODO @TODO @TODO - Remove ALL modifiers from previous armor.
+        FStatModifier ArmorDefenseModifier = FStatModifier{EStatModOp::Add, 0.f, DemoGameplayTags::Item_Armor_Shield};
+        RemoveModifierFromStat(DefenseTag, ArmorDefenseModifier);
+
+        // Add all modifiers from new armor.
+        if (EquippedWeapon)
+        {
+            if (const FArmorData* ArmorData = EquippedWeapon->GetItemSlot().RowHandle.GetRow<FArmorData>(TEXT("UStatsComponent::HandleEquipmentChanged")))
+            {
+                for (const auto& [StatTag, StatModifier] : ArmorData->StatModifiers)
+                {
+                    AddModifierToStat(StatTag, StatModifier);
+                }
+            }
         }
     }
 }

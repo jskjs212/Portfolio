@@ -40,8 +40,6 @@ void AAICharacter::BeginPlay()
     // Attach lock-on marker widget to socket
     if (GetMesh()->DoesSocketExist(LockOnSocketName))
     {
-        // @TEST
-        DemoLOG_CF(LogCharacter, Log, TEXT("Attaching LockOnMarkerWidget to socket '%s' of '%s'."), *LockOnSocketName.ToString(), *GetName());
         LockOnMarkerWidgetComponent->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, LockOnSocketName);
     }
     else

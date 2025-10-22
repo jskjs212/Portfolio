@@ -20,14 +20,21 @@ class DEMO_API UDemoPawnData : public UDataAsset
 
 public:
     // Identity of the character, used for animation selection.
-    UPROPERTY(EditDefaultsOnly, meta = (Categories = "Character"))
+    UPROPERTY(EditDefaultsOnly, Category = "Character", meta = (Categories = "Character"))
     FGameplayTag CharacterTag;
 
     // Default Health, Stamina, etc.
-    UPROPERTY(EditDefaultsOnly, meta = (Categories = "Stat"))
+    UPROPERTY(EditDefaultsOnly, Category = "Stats", meta = (Categories = "Stat"))
     TMap<FGameplayTag, FResourceStat> DefaultResourceStats;
 
+    // Default STR, DEX, INT, etc.
+    UPROPERTY(EditDefaultsOnly, Category = "Stats", meta = (Categories = "Stat"))
+    TMap<FGameplayTag, FPrimaryStat> DefaultPrimaryStats;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Stats", meta = (Categories = "Stat"))
+    TMap<FGameplayTag, FDerivedStat> DefaultDerivedStats;
+
     // Input configuration for PlayerCharacter.
-    UPROPERTY(EditDefaultsOnly)
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
     TObjectPtr<UDemoInputConfig> InputConfig;
 };

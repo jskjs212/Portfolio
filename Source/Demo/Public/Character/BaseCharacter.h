@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "DemoTypes/ItemTypes.h"
-#include "DemoTypes/StatsTypes.h"
 #include "GameplayTagContainer.h"
 #include "Interfaces/CombatInterface.h"
 #include "BaseCharacter.generated.h"
@@ -73,6 +72,9 @@ protected:
     //        Character functions
     ////////////////////////////////////////////////////////
 protected:
+    /* Init */
+    void InitComponents();
+
     /* Movement */
     bool CanPerformJump() const;
 
@@ -163,10 +165,6 @@ protected:
 
     UPROPERTY(VisibleAnywhere, Transient, Category = "Combat")
     TObjectPtr<const UActionInfoConfig> CurrentActionInfo;
-
-    // @check - Temporary logic for determining damage without weapon.
-    UPROPERTY(EditAnywhere, Category = "Initialization|Collision", meta = (Categories = "State"))
-    TMap<FGameplayTag, float> ActionToDamageMap;
 
     ////////////////////////////////////////////////////////
     //        Variables - Hit

@@ -68,39 +68,22 @@ void ABaseCharacter::BeginPlay()
         DemoLOG_CF(LogCharacter, Error, TEXT("CharacterTag is not set for %s."), *GetName());
     }
 
-    // Init EquipmentComponent
-    EquipmentComponent->OnWeaponChanged.AddUObject(this, &ThisClass::HandleWeaponChanged);
-    for (const FItemSlot& Slot : StartingItems)
-    {
-        EquipmentComponent->EquipItem(Slot);
-    }
-    const AItem* StartingWeapon = EquipmentComponent->GetEquippedItem(DemoGameplayTags::Item_Weapon);
-    if (!StartingWeapon)
-    {
-        UpdateAnimationData(DemoGameplayTags::Item_Weapon_NoWeapon);
-    }
-
-    // Init StateManager
-    StateManager->OnStateBegan.AddUObject(this, &ThisClass::HandleStateBegan);
-
-    // Init StatsComponent
-    for (const auto& [StatTag, ResourceStat] : PawnData->DefaultResourceStats)
-    {
-        StatsComponent->AddResourceStat(StatTag, ResourceStat);
-    }
-    StatsComponent->ResetAllResourceStats();
-    StatsComponent->OnCurrentResourceStatChanged.AddUObject(this, &ThisClass::HandleCurrentResourceStatChanged);
+    InitComponents();
 }
 
 float ABaseCharacter::InternalTakePointDamage(float Damage, FPointDamageEvent const& PointDamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
     Damage = Super::InternalTakePointDamage(Damage, PointDamageEvent, EventInstigator, DamageCauser);
 
+    // Defense
+    const float Defense = StatsComponent->GetDerivedStatFinalValueChecked(UStatsComponent::DefenseTag);
+    Damage = Damage * (100.f / (100.f + Defense)); // Simple formula
+
     // @TODO
     // Deal with damage types
 
     // Block
-    // @TODO - function
+    // @TODO - Wrap into a function?
     constexpr float BlockDamageMultiplier = 0.3f;
     constexpr float AllowBlockDegree = 45.f;
     if (bIsBlocking)
@@ -118,11 +101,53 @@ float ABaseCharacter::InternalTakePointDamage(float Damage, FPointDamageEvent co
         }
     }
 
+    // Apply damage
     Damage = StatsComponent->TakeDamage(Damage);
 
+    // Play hit effects
     PlayPointHitEffects(PointDamageEvent, EventInstigator);
 
     return Damage;
+}
+
+void ABaseCharacter::InitComponents()
+{
+    // Init StateManager
+    StateManager->OnStateBegan.AddUObject(this, &ThisClass::HandleStateBegan);
+
+    // Init StatsComponent
+    for (const auto& [StatTag, ResourceStat] : PawnData->DefaultResourceStats)
+    {
+        StatsComponent->AddResourceStat(StatTag, ResourceStat);
+    }
+    for (const auto& [StatTag, PrimaryStat] : PawnData->DefaultPrimaryStats)
+    {
+        StatsComponent->AddPrimaryStat(StatTag, PrimaryStat);
+    }
+    for (const auto& [StatTag, DerivedStat] : PawnData->DefaultDerivedStats)
+    {
+        StatsComponent->AddDerivedStat(StatTag, DerivedStat);
+    }
+    for (const auto& [StatTag, PrimaryStat] : PawnData->DefaultPrimaryStats)
+    {
+        // @misc - Inefficient, but simple. Consider optimizing later.
+        StatsComponent->RecalculateDerivedStat(StatTag);
+    }
+    StatsComponent->InitStatsComponent();
+    StatsComponent->ResetAllResourceStats();
+    StatsComponent->OnCurrentResourceStatChanged.AddUObject(this, &ThisClass::HandleCurrentResourceStatChanged);
+
+    // Init EquipmentComponent
+    EquipmentComponent->OnWeaponChanged.AddUObject(this, &ThisClass::HandleWeaponChanged);
+    for (const FItemSlot& Slot : StartingItems)
+    {
+        EquipmentComponent->EquipItem(Slot);
+    }
+    const AItem* StartingWeapon = EquipmentComponent->GetEquippedItem(DemoGameplayTags::Item_Weapon);
+    if (!StartingWeapon)
+    {
+        UpdateAnimationData(DemoGameplayTags::Item_Weapon_NoWeapon);
+    }
 }
 
 bool ABaseCharacter::CanPerformJump() const
@@ -414,25 +439,7 @@ float ABaseCharacter::CalculateDamage(EAttackCollisionType InType) const
     float Damage = 0.f;
 
     // Get base damage
-    if (InType == EAttackCollisionType::MainWeapon)
-    {
-        if (AItem* MainWeapon = EquipmentComponent->GetEquippedItem(DemoGameplayTags::Item_Weapon))
-        {
-            if (const FWeaponData* WeaponData = MainWeapon->GetItemSlot().RowHandle.GetRow<FWeaponData>(TEXT("ABaseCharacter::CalculateDamage")))
-            {
-                Damage = WeaponData->Damage;
-            }
-        }
-    }
-    // @TODO - unarmed damage
-    else if (const float* DamagePtr = ActionToDamageMap.Find(StateManager->GetCurrentAction()))
-    {
-        Damage = *DamagePtr;
-    }
-    else
-    {
-        DemoLOG_CF(LogCharacter, Error, TEXT("No damage found for action %s."), *StateManager->GetCurrentAction().ToString());
-    }
+    Damage = StatsComponent->GetDerivedStatFinalValueChecked(UStatsComponent::AttackTag);
 
     // Damage multiplier from action
     const FGameplayTag CurrentAction = StateManager->GetCurrentAction();
