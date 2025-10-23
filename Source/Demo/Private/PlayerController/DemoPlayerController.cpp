@@ -123,6 +123,7 @@ void ADemoPlayerController::InitPlayerMenu()
     PlayerMenuWidget = CreateWidget<UPlayerMenuWidget>(this, PlayerMenuWidgetClass);
     if (PlayerMenuWidget)
     {
+        PlayerMenuWidget->InitPlayerMenu();
         PlayerMenuWidget->SetVisibility(ESlateVisibility::Collapsed);
         PlayerMenuWidget->AddToViewport(1);
     }

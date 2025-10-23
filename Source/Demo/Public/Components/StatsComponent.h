@@ -148,6 +148,10 @@ public:
         return GetDerivedStatChecked(StatTag).GetFinalValue();
     }
 
+    // Get current resource stat or primary/derived stat final value.
+    // @return {bFound, Value}
+    TPair<bool, float> GetStatFinalValue(FGameplayTag StatTag) const;
+
     // Don't handle with specific cases like Health <= 0.
     // @return The new value of the stat.
     float SetCurrentResourceStatChecked(FGameplayTag StatTag, float InValue, float MinValue = 0.f);

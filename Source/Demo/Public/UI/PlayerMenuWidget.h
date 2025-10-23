@@ -16,7 +16,7 @@ class UTabButton;
 class UTextBlock;
 
 /**
- *
+ * Call InitPlayerMenu() after creating this widget.
  */
 UCLASS()
 class DEMO_API UPlayerMenuWidget : public UTabMenuWidget
@@ -43,6 +43,8 @@ protected:
     //        UI functions
     ////////////////////////////////////////////////////////
 public:
+    void InitPlayerMenu();
+
     UFUNCTION()
     void HideMenu();
 

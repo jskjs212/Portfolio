@@ -168,7 +168,7 @@ bool UStatsComponent::AddModifierToPrimaryStat(FGameplayTag StatTag, const FStat
     FPrimaryStat* PrimaryStat = PrimaryStats.Find(StatTag);
     if (!PrimaryStat)
     {
-        DemoLOG_F(LogAttributes, Warning, TEXT("Stat %s doesn't exist."), *StatTag.GetTagName().ToString());
+        DemoLOG_F(LogAttributes, Display, TEXT("Stat %s doesn't exist."), *StatTag.GetTagName().ToString());
         return false;
     }
 
@@ -177,7 +177,7 @@ bool UStatsComponent::AddModifierToPrimaryStat(FGameplayTag StatTag, const FStat
     if (bAdded)
     {
         const float NewValue = PrimaryStat->GetFinalValue();
-        DemoLOG_CF(LogAttributes, Warning, TEXT("Stat: %s, NewValue: %.2f"), *StatTag.GetTagName().ToString(), NewValue); // @debug
+        DemoLOG_CF(LogAttributes, Display, TEXT("Stat: %s, NewValue: %.2f"), *StatTag.GetTagName().ToString(), NewValue); // @debug
         OnPrimaryStatChanged.Broadcast(StatTag, OldValue, NewValue);
         RecalculateDerivedStat(StatTag);
         return true;
@@ -199,7 +199,7 @@ bool UStatsComponent::RemoveModifierFromPrimaryStat(FGameplayTag StatTag, const 
     if (bRemoved)
     {
         const float NewValue = PrimaryStat->GetFinalValue();
-        DemoLOG_CF(LogAttributes, Warning, TEXT("Stat: %s, NewValue: %.2f"), *StatTag.GetTagName().ToString(), NewValue); // @debug
+        DemoLOG_CF(LogAttributes, Display, TEXT("Stat: %s, NewValue: %.2f"), *StatTag.GetTagName().ToString(), NewValue); // @debug
         OnPrimaryStatChanged.Broadcast(StatTag, OldValue, NewValue);
         RecalculateDerivedStat(StatTag);
         return true;
@@ -221,7 +221,7 @@ bool UStatsComponent::AddModifierToDerivedStat(FGameplayTag StatTag, const FStat
     if (bAdded)
     {
         const float NewValue = DerivedStat->GetFinalValue();
-        DemoLOG_CF(LogAttributes, Warning, TEXT("Stat: %s, NewValue: %.2f"), *StatTag.GetTagName().ToString(), NewValue); // @debug
+        DemoLOG_CF(LogAttributes, Display, TEXT("Stat: %s, NewValue: %.2f"), *StatTag.GetTagName().ToString(), NewValue); // @debug
         OnDerivedStatChanged.Broadcast(StatTag, OldValue, NewValue);
         return true;
     }
@@ -242,7 +242,7 @@ bool UStatsComponent::RemoveModifierFromDerivedStat(FGameplayTag StatTag, const 
     if (bRemoved)
     {
         const float NewValue = DerivedStat->GetFinalValue();
-        DemoLOG_CF(LogAttributes, Warning, TEXT("Stat: %s, NewValue: %.2f"), *StatTag.GetTagName().ToString(), NewValue); // @debug
+        DemoLOG_CF(LogAttributes, Display, TEXT("Stat: %s, NewValue: %.2f"), *StatTag.GetTagName().ToString(), NewValue); // @debug
         OnDerivedStatChanged.Broadcast(StatTag, OldValue, NewValue);
         return true;
     }
@@ -291,7 +291,7 @@ void UStatsComponent::RecalculateDerivedStat(FGameplayTag InPrimaryStatTag)
 
         DerivedStat.BaseValue = NewDerivedBaseValue;
         const float NewDerivedValue = DerivedStat.GetFinalValue();
-        DemoLOG_CF(LogAttributes, Warning, TEXT("Stat: %s, NewValue: %.2f"), *DerivedStatTag.GetTagName().ToString(), NewDerivedValue); // @debug
+        DemoLOG_CF(LogAttributes, Display, TEXT("Stat: %s, NewValue: %.2f"), *DerivedStatTag.GetTagName().ToString(), NewDerivedValue); // @debug
         OnDerivedStatChanged.Broadcast(DerivedStatTag, OldDerivedValue, NewDerivedValue);
     }
 }
@@ -437,6 +437,23 @@ bool UStatsComponent::HasEnoughOrNoRestriction(FGameplayTag StatTag, float Value
         return ResourceStat->CurrentValue >= Value;
     }
     return true;
+}
+
+TPair<bool, float> UStatsComponent::GetStatFinalValue(FGameplayTag StatTag) const
+{
+    if (const FResourceStat* ResourceStat = ResourceStats.Find(StatTag))
+    {
+        return {true, ResourceStat->CurrentValue};
+    }
+    else if (const FPrimaryStat* PrimaryStat = PrimaryStats.Find(StatTag))
+    {
+        return {true, PrimaryStat->GetFinalValue()};
+    }
+    else if (const FDerivedStat* DerivedStat = DerivedStats.Find(StatTag))
+    {
+        return {true, DerivedStat->GetFinalValue()};
+    }
+    return {false, 0.f};
 }
 
 float UStatsComponent::SetCurrentResourceStatChecked(const FGameplayTag StatTag, const float InValue, const float MinValue)

@@ -108,6 +108,11 @@ bool UPlayerMenuWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDro
     return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
 }
 
+void UPlayerMenuWidget::InitPlayerMenu()
+{
+    StatsPageWidget->UpdateAllStats();
+}
+
 void UPlayerMenuWidget::HideMenu()
 {
     if (ADemoPlayerController* DemoPlayerController = GetOwningPlayer<ADemoPlayerController>())
