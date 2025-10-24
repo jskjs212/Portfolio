@@ -152,7 +152,7 @@ void UTabMenuWidget::UpdateTabButtonColor(FTabEntry& InTabEntry, bool bActive, b
     }
     else
     {
-        InTabEntry.TabButton->SetColorAndOpacity(NewColor);
+        InTabEntry.TabButton->SetBackgroundColor(NewColor);
     }
 }
 
