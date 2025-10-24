@@ -110,8 +110,8 @@ void UEquipmentPageWidget::InitEquipmentSlots()
         SlotWidget->SetSourceTag(DemoGameplayTags::UI_PlayerMenu_Equipment);
         SlotWidget->OnRightClicked.BindUObject(this, &ThisClass::HandleItemSlotRightClicked);
         SlotWidget->OnLeftDoubleClicked.BindUObject(this, &ThisClass::HandleItemSlotLeftDoubleClicked);
-        SlotWidget->OnHovered.BindUObject(this, &ThisClass::ShowItemInfo);
-        SlotWidget->OnUnhovered.BindUObject(this, &ThisClass::HideItemInfo);
+        SlotWidget->OnHovered.BindUObject(this, &ThisClass::HandleItemSlotHovered);
+        SlotWidget->OnUnhovered.BindUObject(this, &ThisClass::HandleItemSlotUnhovered);
     }
 }
 
@@ -148,9 +148,32 @@ void UEquipmentPageWidget::BindToEquipmentUpdates()
     }
 }
 
-UItemActionDispatcher* UEquipmentPageWidget::GetItemActionDispatcher() const
+void UEquipmentPageWidget::ShowItemInfo(const FItemSlot& InSlot)
 {
-    if (const ADemoPlayerController* DemoPlayerController = GetOwningPlayer<ADemoPlayerController>())
+    const FItemDataBase* ItemData = ItemInfoWidget->UpdateItemInfo(InSlot);
+    if (ItemData)
+    {
+        ItemInfoWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
+    }
+}
+
+void UEquipmentPageWidget::HideItemInfo()
+{
+    ItemInfoWidget->SetVisibility(ESlateVisibility::Collapsed);
+}
+
+ADemoPlayerController* UEquipmentPageWidget::GetDemoPlayerController()
+{
+    if (!CachedDemoPlayerController.IsValid())
+    {
+        CachedDemoPlayerController = GetOwningPlayer<ADemoPlayerController>();
+    }
+    return CachedDemoPlayerController.Get();
+}
+
+UItemActionDispatcher* UEquipmentPageWidget::GetItemActionDispatcher()
+{
+    if (const ADemoPlayerController* DemoPlayerController = GetDemoPlayerController())
     {
         return DemoPlayerController->GetItemActionDispatcher();
     }
@@ -208,16 +231,25 @@ void UEquipmentPageWidget::HandleItemSlotLeftDoubleClicked(const FItemSlot& InSl
     }
 }
 
-void UEquipmentPageWidget::ShowItemInfo(const FItemSlot& InSlot)
+void UEquipmentPageWidget::HandleItemSlotHovered(const FItemSlot& InSlot)
 {
-    const FItemDataBase* ItemData = ItemInfoWidget->UpdateItemInfo(InSlot);
-    if (ItemData)
+    if (InSlot.IsValid())
     {
-        ItemInfoWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
+        ShowItemInfo(InSlot);
+
+        if (ADemoPlayerController* DemoPlayerController = GetDemoPlayerController())
+        {
+            DemoPlayerController->SetCursorState(ECursorState::Hovering);
+        }
     }
 }
 
-void UEquipmentPageWidget::HideItemInfo()
+void UEquipmentPageWidget::HandleItemSlotUnhovered()
 {
-    ItemInfoWidget->SetVisibility(ESlateVisibility::Collapsed);
+    HideItemInfo();
+
+    if (ADemoPlayerController* DemoPlayerController = GetDemoPlayerController())
+    {
+        DemoPlayerController->SetCursorState(ECursorState::Default);
+    }
 }

@@ -7,6 +7,7 @@
 #include "DemoTypes/ItemTypes.h"
 #include "InventoryPageWidget.generated.h"
 
+class ADemoPlayerController;
 class UBorder;
 class UContextMenuWidget;
 class UImage;
@@ -46,7 +47,9 @@ private:
 
     void BindToInventoryUpdates();
 
-    UItemActionDispatcher* GetItemActionDispatcher() const;
+    ADemoPlayerController* GetDemoPlayerController();
+
+    UItemActionDispatcher* GetItemActionDispatcher();
 
     FORCEINLINE void SetContextMenuData(const FItemSlot& InSlot, int32 DesignatedIndex)
     {
@@ -64,6 +67,10 @@ private:
     void HandleItemSlotRightClicked(const FItemSlot& InSlot, int32 InIndex);
 
     void HandleItemSlotLeftDoubleClicked(const FItemSlot& InSlot, int32 InIndex);
+
+    void HandleItemSlotHovered(const FItemSlot& InSlot);
+
+    void HandleItemSlotUnhovered();
 
     void HandleItemSlotDropped(const FItemSlot& SrcSlot, int32 SrcIndex, const FItemSlot& DstSlot, int32 DstIndex);
 
@@ -131,4 +138,6 @@ private:
     bool bPendingUpdateSlotsUI{true};
 
     FItemActionRequest ContextMenuItemActionRequest;
+
+    TWeakObjectPtr<ADemoPlayerController> CachedDemoPlayerController;
 };

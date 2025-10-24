@@ -305,10 +305,6 @@ void ABaseCharacter::EnableRagdoll()
     {
         CharacterMesh->SetCollisionProfileName(TEXT("Ragdoll"));
         CharacterMesh->SetAllBodiesSimulatePhysics(true);
-        // @TEST
-        //CharacterMesh->SetSimulatePhysics(true);
-        //CharacterMesh->WakeAllRigidBodies();
-        //CharacterMesh->bBlendPhysics = true;
     }
 }
 

@@ -14,6 +14,16 @@ const FGenericTeamId Enemy{2};
 const FGenericTeamId Neutral{3};
 } // namespace DemoTeamID
 
+// Consider adding: Droppable, Blocked, Using, Disabled, etc.
+UENUM()
+enum class ECursorState : uint8
+{
+    Default UMETA(DisplayName = "Default"),
+    Hovering UMETA(DisplayName = "Hovering"),
+    Dragging UMETA(DisplayName = "Dragging"),
+    MAX UMETA(Hidden)
+};
+
 USTRUCT()
 struct FCharacterWeaponKey
 {

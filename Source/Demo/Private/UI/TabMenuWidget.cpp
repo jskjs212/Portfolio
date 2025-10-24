@@ -6,6 +6,7 @@
 #include "Components/WidgetSwitcher.h"
 #include "DemoTypes/LogCategories.h"
 #include "Kismet/GameplayStatics.h"
+#include "PlayerController/DemoPlayerController.h"
 #include "UI/TabButton.h"
 
 void UTabMenuWidget::NativeOnInitialized()
@@ -136,11 +137,18 @@ void UTabMenuWidget::SetFocusToWidget(UWidget* InWidget)
 
 void UTabMenuWidget::UpdateTabButtonColor(FTabEntry& InTabEntry, bool bActive, bool bHovered)
 {
-    const FLinearColor& NewColor = bHovered ? TabButtonHoveredColor : (bActive ? TabButtonActiveColor : TabButtonInactiveColor);
+    const FLinearColor& NewColor = bActive ? TabButtonActiveColor : (bHovered ? TabButtonHoveredColor : TabButtonInactiveColor);
 
-    if (bUseTabButtonImages && InTabEntry.Image)
+    if (bUseTabButtonImages)
     {
-        InTabEntry.Image->SetColorAndOpacity(NewColor);
+        if (InTabEntry.Image)
+        {
+            InTabEntry.Image->SetColorAndOpacity(NewColor);
+        }
+        else
+        {
+            DemoLOG_CF(LogUI, Warning, TEXT("TabEntry.Image is not set."));
+        }
     }
     else
     {
@@ -153,6 +161,30 @@ void UTabMenuWidget::CancelDragDrop()
     if (UWidgetBlueprintLibrary::IsDragDropping())
     {
         UWidgetBlueprintLibrary::CancelDragDrop();
+
+        if (ADemoPlayerController* DemoPlayerController = GetDemoPlayerController())
+        {
+            DemoPlayerController->SetCursorState(ECursorState::Default);
+        }
+    }
+}
+
+ADemoPlayerController* UTabMenuWidget::GetDemoPlayerController()
+{
+    if (!CachedDemoPlayerController.IsValid())
+    {
+        CachedDemoPlayerController = GetOwningPlayer<ADemoPlayerController>();
+    }
+    return CachedDemoPlayerController.Get();
+}
+
+void UTabMenuWidget::HandleTabButtonClicked(FGameplayTag InTag)
+{
+    SelectTab(InTag);
+
+    if (ADemoPlayerController* DemoPlayerController = GetDemoPlayerController())
+    {
+        DemoPlayerController->SetCursorState(ECursorState::Default);
     }
 }
 
@@ -176,6 +208,11 @@ void UTabMenuWidget::HandleTabButtonHovered(const FGameplayTag InTag)
             break;
         }
     }
+
+    if (ADemoPlayerController* DemoPlayerController = GetDemoPlayerController())
+    {
+        DemoPlayerController->SetCursorState(ECursorState::Hovering);
+    }
 }
 
 void UTabMenuWidget::HandleTabButtonUnhovered(const FGameplayTag InTag)
@@ -192,5 +229,10 @@ void UTabMenuWidget::HandleTabButtonUnhovered(const FGameplayTag InTag)
             UpdateTabButtonColor(TabEntry, TabEntry.Tag == ActiveTabTag, false);
             break;
         }
+    }
+
+    if (ADemoPlayerController* DemoPlayerController = GetDemoPlayerController())
+    {
+        DemoPlayerController->SetCursorState(ECursorState::Default);
     }
 }

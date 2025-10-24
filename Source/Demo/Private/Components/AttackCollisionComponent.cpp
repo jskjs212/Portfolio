@@ -116,7 +116,7 @@ void UAttackCollisionComponent::ActivateCollisionDefinition(EAttackCollisionType
         }
     }
 
-    // @TEST
+    // @debug
     UE_LOG(LogCombat, Verbose, TEXT("Enabled collision - Type: %s, HitGroup: %d"), *UEnum::GetValueAsString(InType), HitGroup);
 }
 
@@ -127,7 +127,7 @@ void UAttackCollisionComponent::DeactivateCollisionDefinition(EAttackCollisionTy
         if (ActiveDefinitions[Index].HitGroup == HitGroup && ActiveDefinitions[Index].Definition->CollisionType == InType)
         {
             ActiveDefinitions.RemoveAt(Index);
-            // @TEST
+            // @debug
             UE_LOG(LogCombat, Verbose, TEXT("Disabled collision - Type: %s, HitGroup: %d"), *UEnum::GetValueAsString(InType), HitGroup);
             return;
         }

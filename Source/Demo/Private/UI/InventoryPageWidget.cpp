@@ -122,13 +122,13 @@ void UInventoryPageWidget::UpdateInventorySlotsUI()
             // Add a new slot if needed
             if (Index >= ExistingNum && Index < ItemNum)
             {
-                SlotWidget = CreateWidget<UItemSlotWidget>(this, ItemSlotWidgetClass);
+                SlotWidget = CreateWidget<UItemSlotWidget>(GetDemoPlayerController(), ItemSlotWidgetClass);
                 SlotWidget->SetIndex(Index);
                 SlotWidget->SetSourceTag(DemoGameplayTags::UI_PlayerMenu_Inventory);
                 SlotWidget->OnRightClicked.BindUObject(this, &ThisClass::HandleItemSlotRightClicked);
                 SlotWidget->OnLeftDoubleClicked.BindUObject(this, &ThisClass::HandleItemSlotLeftDoubleClicked);
-                SlotWidget->OnHovered.BindUObject(this, &ThisClass::ShowItemInfo);
-                SlotWidget->OnUnhovered.BindUObject(this, &ThisClass::HideItemInfo);
+                SlotWidget->OnHovered.BindUObject(this, &ThisClass::HandleItemSlotHovered);
+                SlotWidget->OnUnhovered.BindUObject(this, &ThisClass::HandleItemSlotUnhovered);
                 SlotWidget->OnDropped.BindUObject(this, &ThisClass::HandleItemSlotDropped);
                 WrapBox->AddChildToWrapBox(SlotWidget);
                 // ExistingNum += 1, but don't need to update.
@@ -190,9 +190,18 @@ void UInventoryPageWidget::BindToInventoryUpdates()
     }
 }
 
-UItemActionDispatcher* UInventoryPageWidget::GetItemActionDispatcher() const
+ADemoPlayerController* UInventoryPageWidget::GetDemoPlayerController()
 {
-    if (const ADemoPlayerController* DemoPlayerController = GetOwningPlayer<ADemoPlayerController>())
+    if (!CachedDemoPlayerController.IsValid())
+    {
+        CachedDemoPlayerController = GetOwningPlayer<ADemoPlayerController>();
+    }
+    return CachedDemoPlayerController.Get();
+}
+
+UItemActionDispatcher* UInventoryPageWidget::GetItemActionDispatcher()
+{
+    if (const ADemoPlayerController* DemoPlayerController = GetDemoPlayerController())
     {
         return DemoPlayerController->GetItemActionDispatcher();
     }
@@ -256,6 +265,29 @@ void UInventoryPageWidget::HandleItemSlotLeftDoubleClicked(const FItemSlot& InSl
     if (Used > 0)
     {
         HideItemInfo();
+    }
+}
+
+void UInventoryPageWidget::HandleItemSlotHovered(const FItemSlot& InSlot)
+{
+    if (InSlot.IsValid())
+    {
+        ShowItemInfo(InSlot);
+
+        if (ADemoPlayerController* DemoPlayerController = GetDemoPlayerController())
+        {
+            DemoPlayerController->SetCursorState(ECursorState::Hovering);
+        }
+    }
+}
+
+void UInventoryPageWidget::HandleItemSlotUnhovered()
+{
+    HideItemInfo();
+
+    if (ADemoPlayerController* DemoPlayerController = GetDemoPlayerController())
+    {
+        DemoPlayerController->SetCursorState(ECursorState::Default);
     }
 }
 

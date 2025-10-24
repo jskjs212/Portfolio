@@ -8,6 +8,7 @@
 #include "Engine/DataTable.h"
 #include "ItemSlotWidget.generated.h"
 
+class ADemoPlayerController;
 class UBorder;
 class UDraggedItemSlotWidget;
 class UImage;
@@ -87,6 +88,8 @@ private:
 
     FORCEINLINE bool CanDragDrop() const { return ItemSlot.IsValid() && !ItemSlot.bIsLocked; }
 
+    ADemoPlayerController* GetDemoPlayerController();
+
     ////////////////////////////////////////////////////////
     //        Widgets
     ////////////////////////////////////////////////////////
@@ -144,4 +147,6 @@ private:
     // @TODO - Audio
     UPROPERTY(EditAnywhere, Category = "Initialization")
     TObjectPtr<USoundBase> HoveredSound;
+
+    TWeakObjectPtr<ADemoPlayerController> CachedDemoPlayerController;
 };

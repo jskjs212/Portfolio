@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "DemoTypes/DemoTypes.h"
 #include "DemoTypes/ItemTypes.h"
 #include "GameplayTagContainer.h"
 #include "UI/ItemActionDispatcher.h"
@@ -11,6 +12,7 @@
 
 class IInteractable;
 class UContextMenuWidget;
+class UCursorWidget;
 class UPlayerMenuWidget;
 class USoundBase;
 
@@ -39,6 +41,7 @@ public:
     {
         InitDemoHUD();
         InitPlayerMenu();
+        InitCursor();
     }
 
     // Show or hide player menu.
@@ -47,10 +50,14 @@ public:
 
     void ToggleHelpText();
 
+    void SetCursorState(ECursorState NewCursorState);
+
 private:
     void InitDemoHUD();
 
     void InitPlayerMenu();
+
+    void InitCursor();
 
     // Show or hide interact widget.
     // HUD widget will decide what to show based on actual type (open, pickup, etc.).
@@ -71,10 +78,21 @@ private:
     UPROPERTY()
     TObjectPtr<UPlayerMenuWidget> PlayerMenuWidget;
 
+    TSubclassOf<UCursorWidget> CursorWidgetClass;
+
+    UPROPERTY()
+    TObjectPtr<UCursorWidget> CursorWidget;
+
     // @TODO - Audio
     UPROPERTY(EditDefaultsOnly, Category = "Initialization")
     TObjectPtr<USoundBase> PlayerMenuOpenSound;
 
     UPROPERTY(EditDefaultsOnly, Category = "Initialization")
     TObjectPtr<USoundBase> PlayerMenuCloseSound;
+
+    ////////////////////////////////////////////////////////
+    //        Variables
+    ////////////////////////////////////////////////////////
+private:
+    ECursorState CursorState{ECursorState::Default};
 };

@@ -24,6 +24,8 @@ void UPlayerMenuWidget::NativeOnInitialized()
         && CloseButton,
         TEXT("Failed to bind widgets."));
 
+    bUseTabButtonImages = false;
+
     // Setup tab entries
     TabEntries.Emplace(DemoGameplayTags::UI_PlayerMenu_Stats, StatsTabButton, nullptr, StatsPageWidget);
     TabEntries.Emplace(DemoGameplayTags::UI_PlayerMenu_Inventory, InventoryTabButton, nullptr, InventoryPageWidget);
@@ -91,6 +93,11 @@ FReply UPlayerMenuWidget::NativeOnPreviewMouseButtonDown(const FGeometry& InGeom
 
 bool UPlayerMenuWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
+    if (ADemoPlayerController* DemoPlayerController = GetDemoPlayerController())
+    {
+        DemoPlayerController->SetCursorState(ECursorState::Default);
+    }
+
     // @check - Dragged from other page i.e. unequip, buy, move from stash, etc.
     const UItemSlotDragDropOp* DragDropOp = Cast<UItemSlotDragDropOp>(InOperation);
     if (DragDropOp)
@@ -115,7 +122,7 @@ void UPlayerMenuWidget::InitPlayerMenu()
 
 void UPlayerMenuWidget::HideMenu()
 {
-    if (ADemoPlayerController* DemoPlayerController = GetOwningPlayer<ADemoPlayerController>())
+    if (ADemoPlayerController* DemoPlayerController = GetDemoPlayerController())
     {
         CancelDragDrop();
         DemoPlayerController->ShowPlayerMenu(false);
@@ -124,7 +131,7 @@ void UPlayerMenuWidget::HideMenu()
 
 bool UPlayerMenuWidget::DropInventoryItem(const UItemSlotDragDropOp* InDragDropOp)
 {
-    if (ADemoPlayerController* DemoPlayerController = GetOwningPlayer<ADemoPlayerController>())
+    if (ADemoPlayerController* DemoPlayerController = GetDemoPlayerController())
     {
         if (UItemActionDispatcher* ItemActionDispatcher = DemoPlayerController->GetItemActionDispatcher())
         {
@@ -141,7 +148,7 @@ bool UPlayerMenuWidget::DropInventoryItem(const UItemSlotDragDropOp* InDragDropO
 
 bool UPlayerMenuWidget::DropEquipmentItem(const UItemSlotDragDropOp* InDragDropOp)
 {
-    if (ADemoPlayerController* DemoPlayerController = GetOwningPlayer<ADemoPlayerController>())
+    if (ADemoPlayerController* DemoPlayerController = GetDemoPlayerController())
     {
         if (UItemActionDispatcher* ItemActionDispatcher = DemoPlayerController->GetItemActionDispatcher())
         {

@@ -7,6 +7,7 @@
 #include "GameplayTagContainer.h"
 #include "TabMenuWidget.generated.h"
 
+class ADemoPlayerController;
 class UImage;
 class USoundBase;
 class UTabButton;
@@ -69,8 +70,13 @@ protected:
 
     void CancelDragDrop();
 
-    /* Tab button event handlers */
-    FORCEINLINE void HandleTabButtonClicked(FGameplayTag InTag) { SelectTab(InTag); }
+    ADemoPlayerController* GetDemoPlayerController();
+
+    ////////////////////////////////////////////////////////
+    //        Handlers
+    ////////////////////////////////////////////////////////
+protected:
+    void HandleTabButtonClicked(FGameplayTag InTag);
 
     void HandleTabButtonHovered(FGameplayTag InTag);
 
@@ -109,4 +115,6 @@ protected:
 
 private:
     FGameplayTag ActiveTabTag;
+
+    TWeakObjectPtr<ADemoPlayerController> CachedDemoPlayerController;
 };

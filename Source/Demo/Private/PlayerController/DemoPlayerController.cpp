@@ -1,9 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "PlayerController/DemoPlayerController.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Character/PlayerCharacter.h"
 #include "DemoTypes/LogCategories.h"
 #include "Kismet/GameplayStatics.h"
+#include "UI/CursorWidget.h"
 #include "UI/DemoHUD.h"
 #include "UI/DemoHUDWidget.h"
 #include "UI/PlayerMenuWidget.h"
@@ -20,6 +22,17 @@ ADemoPlayerController::ADemoPlayerController()
     {
         DemoLOG_CF(LogUI, Error, TEXT("PlayerMenuWidget BP is not found."));
         PlayerMenuWidgetClass = UPlayerMenuWidget::StaticClass();
+    }
+
+    static ConstructorHelpers::FClassFinder<UCursorWidget> CursorWidgetBPClass(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprints/UI/Cursors/WBP_Cursor.WBP_Cursor_C'"));
+    if (CursorWidgetBPClass.Succeeded())
+    {
+        CursorWidgetClass = CursorWidgetBPClass.Class;
+    }
+    else
+    {
+        DemoLOG_CF(LogUI, Error, TEXT("CursorWidget BP is not found."));
+        CursorWidgetClass = UCursorWidget::StaticClass();
     }
 
     ItemActionDispatcher = CreateDefaultSubobject<UItemActionDispatcher>(TEXT("ItemActionDispatcher"));
@@ -97,6 +110,22 @@ void ADemoPlayerController::ToggleHelpText()
     }
 }
 
+void ADemoPlayerController::SetCursorState(ECursorState NewCursorState)
+{
+    if (NewCursorState != CursorState)
+    {
+        // @hardcoded - Only one exception for now.
+        if (UWidgetBlueprintLibrary::IsDragDropping() && NewCursorState != ECursorState::Dragging)
+        {
+            // Can't change to other state while dragging.
+            return;
+        }
+
+        CursorState = NewCursorState;
+        CursorWidget->UpdateCursorVisuals(CursorState);
+    }
+}
+
 void ADemoPlayerController::InitDemoHUD()
 {
     APawn* OwnerPawn = GetPawn();
@@ -115,17 +144,27 @@ void ADemoPlayerController::InitDemoHUD()
 
 void ADemoPlayerController::InitPlayerMenu()
 {
-    if (!PlayerMenuWidgetClass)
+    if (PlayerMenuWidgetClass)
     {
-        return;
+        PlayerMenuWidget = CreateWidget<UPlayerMenuWidget>(this, PlayerMenuWidgetClass);
+        if (PlayerMenuWidget)
+        {
+            PlayerMenuWidget->InitPlayerMenu();
+            PlayerMenuWidget->SetVisibility(ESlateVisibility::Collapsed);
+            PlayerMenuWidget->AddToViewport(1);
+        }
     }
+}
 
-    PlayerMenuWidget = CreateWidget<UPlayerMenuWidget>(this, PlayerMenuWidgetClass);
-    if (PlayerMenuWidget)
+void ADemoPlayerController::InitCursor()
+{
+    if (CursorWidgetClass)
     {
-        PlayerMenuWidget->InitPlayerMenu();
-        PlayerMenuWidget->SetVisibility(ESlateVisibility::Collapsed);
-        PlayerMenuWidget->AddToViewport(1);
+        CursorWidget = CreateWidget<UCursorWidget>(this, CursorWidgetClass);
+        if (CursorWidget)
+        {
+            SetMouseCursorWidget(EMouseCursor::Default, CursorWidget);
+        }
     }
 }
 

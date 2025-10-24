@@ -8,6 +8,7 @@
 #include "GameplayTagContainer.h"
 #include "EquipmentPageWidget.generated.h"
 
+class ADemoPlayerController;
 class UContextMenuWidget;
 class UItemActionDispatcher;
 class UItemInfoWidget;
@@ -54,7 +55,13 @@ private:
 
     void BindToEquipmentUpdates();
 
-    UItemActionDispatcher* GetItemActionDispatcher() const;
+    void ShowItemInfo(const FItemSlot& InSlot);
+
+    void HideItemInfo();
+
+    ADemoPlayerController* GetDemoPlayerController();
+
+    UItemActionDispatcher* GetItemActionDispatcher();
 
     // Only for RMB context menu = valid index.
     FORCEINLINE void SetContextMenuData(int32 InIndex)
@@ -72,9 +79,9 @@ private:
 
     void HandleItemSlotLeftDoubleClicked(const FItemSlot& InSlot, int32 InIndex);
 
-    void ShowItemInfo(const FItemSlot& InSlot);
+    void HandleItemSlotHovered(const FItemSlot& InSlot);
 
-    void HideItemInfo();
+    void HandleItemSlotUnhovered();
 
     ////////////////////////////////////////////////////////
     //        Widgets
@@ -106,4 +113,6 @@ private:
     FGameplayTag ContextMenuEquipmentType;
 
     TArray<FEquipmentSlotData> EquipmentSlots;
+
+    TWeakObjectPtr<ADemoPlayerController> CachedDemoPlayerController;
 };

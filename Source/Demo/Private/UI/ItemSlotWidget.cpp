@@ -6,10 +6,12 @@
 #include "Components/Image.h"
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
+#include "DemoTypes/DemoTypes.h"
 #include "DemoTypes/ItemTypes.h"
 #include "DemoTypes/LogCategories.h"
 #include "DemoTypes/TableRowBases.h"
 #include "Kismet/GameplayStatics.h"
+#include "PlayerController/DemoPlayerController.h"
 #include "Styling/SlateBrush.h"
 #include "UI/DraggedItemSlotWidget.h"
 #include "UI/ItemSlotDragDropOp.h"
@@ -40,7 +42,7 @@ FReply UItemSlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, con
         {
             if (CanDragDrop())
             {
-                return FReply::Unhandled().DetectDrag(TakeWidget(), EKeys::LeftMouseButton);
+                return FReply::Handled().DetectDrag(TakeWidget(), EKeys::LeftMouseButton);
             }
         }
 
@@ -111,6 +113,11 @@ void UItemSlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, const FP
             DragDropOp->DefaultDragVisual = DraggedItemSlotWidget;
             DragDropOp->SetItemSlotData(Index, SourceTag, ItemSlot);
             OutOperation = DragDropOp;
+
+            if (ADemoPlayerController* DemoPlayerController = GetDemoPlayerController())
+            {
+                DemoPlayerController->SetCursorState(ECursorState::Dragging);
+            }
         }
         else
         {
@@ -126,6 +133,11 @@ void UItemSlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, const FP
 
 bool UItemSlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
+    if (ADemoPlayerController* DemoPlayerController = GetDemoPlayerController())
+    {
+        DemoPlayerController->SetCursorState(ECursorState::Default);
+    }
+
     const UItemSlotDragDropOp* DragDropOp = Cast<UItemSlotDragDropOp>(InOperation);
     if (DragDropOp)
     {
@@ -159,6 +171,11 @@ void UItemSlotWidget::NativeOnDragCancelled(const FDragDropEvent& InDragDropEven
 {
     // Don't have to remove (GC)
     Super::NativeOnDragCancelled(InDragDropEvent, InOperation);
+
+    if (ADemoPlayerController* DemoPlayerController = GetDemoPlayerController())
+    {
+        DemoPlayerController->SetCursorState(ECursorState::Default);
+    }
 }
 
 void UItemSlotWidget::UpdateVisuals()
@@ -194,11 +211,7 @@ void UItemSlotWidget::HandleHovered()
         UGameplayStatics::PlaySound2D(this, HoveredSound, 0.3f);
     }
 
-    if (ItemSlot.IsValid())
-    {
-        OnHovered.ExecuteIfBound(ItemSlot);
-    }
-
+    OnHovered.ExecuteIfBound(ItemSlot);
     ItemBorder->SetBrushColor(HoveredBorderColor);
     ItemBorder->SetBrushFromTexture(HoveredBorderImage);
     HoveredBorderTriangleImage->SetVisibility(ESlateVisibility::HitTestInvisible);
@@ -210,4 +223,13 @@ void UItemSlotWidget::HandleUnhovered()
     ItemBorder->SetBrushColor(NormalBorderColor);
     ItemBorder->SetBrushFromTexture(NormalBorderImage);
     HoveredBorderTriangleImage->SetVisibility(ESlateVisibility::Collapsed);
+}
+
+ADemoPlayerController* UItemSlotWidget::GetDemoPlayerController()
+{
+    if (!CachedDemoPlayerController.IsValid())
+    {
+        CachedDemoPlayerController = GetOwningPlayer<ADemoPlayerController>();
+    }
+    return CachedDemoPlayerController.Get();
 }
