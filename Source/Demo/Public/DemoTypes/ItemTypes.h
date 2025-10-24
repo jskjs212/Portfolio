@@ -12,6 +12,7 @@
 // ItemCategory: Item.Weapon, Item.Armor, Item.Consumable
 // ItemType: Item.Weapon.Melee.OneHanded, Item.Consumable.Food, etc.
 // EquipmentType: Item.Armor.Shield, etc.
+// @check - Refactor from TArray to FGameplayTagContainer if needed.
 namespace DemoItemTypes
 {
 // Inventory TMap's keys.

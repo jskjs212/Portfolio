@@ -1,10 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UI/ItemInfoWidget.h"
+#include "Components/DynamicEntryBox.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "DemoTypes/LogCategories.h"
 #include "DemoTypes/TableRowBases.h"
+#include "UI/StatModifierWidget.h"
 
 UItemInfoWidget::UItemInfoWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -19,7 +21,10 @@ void UItemInfoWidget::NativeOnInitialized()
 {
     Super::NativeOnInitialized();
 
-    checkf(CategoryImage && NameText && DescriptionText, TEXT("Failed to bind widgets."));
+    checkf(CategoryImage && NameText && StatModifierEntryBox && DescriptionText,
+        TEXT("Failed to bind widgets."));
+    checkf(StatModifierEntryBox->GetEntryWidgetClass()->IsChildOf(UStatModifierWidget::StaticClass()),
+        TEXT("Invalid EntryWidgetClass for StatModifierEntryBox."));
 
     if (CategoryImages.Num() != DemoItemTypes::GetItemCategories().Num())
     {
@@ -43,11 +48,38 @@ const FItemDataBase* UItemInfoWidget::UpdateItemInfo(const FItemSlot& InSlot)
         return nullptr;
     }
 
+    if (CachedItemRowHandle == InSlot.RowHandle)
+    {
+        // No change
+        return ItemData;
+    }
+    CachedItemRowHandle = InSlot.RowHandle;
+
     // Update
     FGameplayTag ItemCategory = DemoItemTypes::GetItemCategory(ItemData->ItemType);
     CategoryImage->SetBrushFromTexture(CategoryImages[ItemCategory]);
+    StatModifierEntryBox->Reset();
     NameText->SetText(FText::FromName(ItemData->Name));
     DescriptionText->SetText(ItemData->Description);
 
+    // Stat modifier entries
+    bool bIsEquipment = DemoItemTypes::GetEquipmentType(ItemData->ItemType).IsValid();
+    if (bIsEquipment)
+    {
+        if (const FEquipmentData* EquipmentData = InSlot.RowHandle.GetRow<FEquipmentData>(TEXT("UItemInfoWidget::UpdateItemInfo()")))
+        {
+            for (const auto& [StatTag, StatModifier] : EquipmentData->StatModifiers)
+            {
+                if (UStatModifierWidget* StatModifierWidget = StatModifierEntryBox->CreateEntry<UStatModifierWidget>())
+                {
+                    StatModifierWidget->Update(StatTag, StatModifier);
+                }
+                else
+                {
+                    DemoLOG_CF(LogUI, Error, TEXT("Failed to create StatModifierWidget entry."));
+                }
+            }
+        }
+    }
     return ItemData;
 }

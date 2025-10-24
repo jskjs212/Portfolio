@@ -28,16 +28,6 @@ void UStatsPageWidget::NativeOnInitialized()
     BindToStatsComponent();
 }
 
-//void UStatsPageWidget::ProcessPendingUpdates()
-//{
-//    if (APawn* OwningPawn = GetOwningPlayerPawn())
-//    {
-//        if (UStatsComponent* StatsComponent = OwningPawn->FindComponentByClass<UStatsComponent>())
-//        {
-//        }
-//    }
-//}
-
 void UStatsPageWidget::UpdateAllStats()
 {
     if (APawn* OwningPawn = GetOwningPlayerPawn())
@@ -68,12 +58,6 @@ void UStatsPageWidget::BindToStatsComponent()
 
 void UStatsPageWidget::UpdateStatText(FGameplayTag StatTag, float OldValue, float NewValue)
 {
-    //if (!IsVisible())
-    //{
-    //    PendingUpdateStatTags.AddUnique(StatTag);
-    //    return;
-    //}
-
     TObjectPtr<UTextBlock>* TextBlockPtr = StatTagToTextMap.Find(StatTag);
     if (TextBlockPtr)
     {

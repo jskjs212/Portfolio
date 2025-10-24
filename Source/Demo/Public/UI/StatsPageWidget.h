@@ -27,8 +27,6 @@ protected:
     //        UI functions
     ////////////////////////////////////////////////////////
 public:
-    //void ProcessPendingUpdates();
-
     void UpdateAllStats();
 
 private:

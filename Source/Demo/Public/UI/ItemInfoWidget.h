@@ -5,9 +5,12 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "DemoTypes/ItemTypes.h"
+#include "Engine/DataTable.h"
+#include "GameplayTagContainer.h"
 #include "ItemInfoWidget.generated.h"
 
 struct FItemDataBase;
+class UDynamicEntryBox;
 class UImage;
 class UTextBlock;
 class UTexture2D;
@@ -44,12 +47,17 @@ public:
     TObjectPtr<UTextBlock> NameText;
 
     UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UDynamicEntryBox> StatModifierEntryBox;
+
+    UPROPERTY(meta = (BindWidget))
     TObjectPtr<UTextBlock> DescriptionText;
 
     ////////////////////////////////////////////////////////
     //        Variables
     ////////////////////////////////////////////////////////
 private:
+    FDataTableRowHandle CachedItemRowHandle;
+
     UPROPERTY(EditDefaultsOnly, Category = "Initialization")
     TMap<FGameplayTag, TObjectPtr<UTexture2D>> CategoryImages;
 };

@@ -252,7 +252,11 @@ void UInventoryPageWidget::HandleItemSlotLeftDoubleClicked(const FItemSlot& InSl
     Request.DesignatedIndex = InIndex;
     Request.Quantity = 1;
 
-    ItemActionDispatcher->RequestUseItem(Request);
+    const int32 Used = ItemActionDispatcher->RequestUseItem(Request);
+    if (Used > 0)
+    {
+        HideItemInfo();
+    }
 }
 
 void UInventoryPageWidget::HandleItemSlotDropped(const FItemSlot& SrcSlot, const int32 SrcIndex, const FItemSlot& DstSlot, const int32 DstIndex)

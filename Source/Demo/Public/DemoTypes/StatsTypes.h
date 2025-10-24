@@ -6,40 +6,6 @@
 #include "GameplayTagContainer.h"
 #include "StatsTypes.generated.h"
 
-/**
- * Stat format for Health, Mana, Stamina, etc.
- * @TODO - Add StatModifiers -> Add parent struct for all stats.
- */
-USTRUCT()
-struct DEMO_API FResourceStat
-{
-    GENERATED_BODY()
-
-    UPROPERTY(EditAnywhere, Category = "Stats")
-    float CurrentValue{0.f};
-
-    UPROPERTY(EditAnywhere, Category = "Stats")
-    float MaxValue{100.f};
-
-    UPROPERTY(EditAnywhere, Category = "Stats")
-    bool bCanRegen{false};
-
-    // Per second!!!
-    UPROPERTY(EditAnywhere, Category = "Stats")
-    float RegenRate{5.f};
-
-    // Seconds
-    UPROPERTY(EditAnywhere, Category = "Stats")
-    float RegenInterval{0.1f};
-
-    // Seconds
-    UPROPERTY(EditAnywhere, Category = "Stats")
-    float RegenDelay{1.f};
-
-    FTimerHandle TimerHandle;
-    FTimerDelegate TimerDelegate;
-};
-
 UENUM()
 enum class EStatModOp : uint8
 {
@@ -98,6 +64,40 @@ inline float Aggregate(float BaseLikeValue, const TArray<FStatModifier>& Modifie
     return (BaseLikeValue + ToAdd) * ToMultiply;
 }
 } // namespace StatModOpHelper
+
+/**
+ * Stat format for Health, Mana, Stamina, etc.
+ * @TODO - Add StatModifiers -> Add parent struct for all stats.
+ */
+USTRUCT()
+struct DEMO_API FResourceStat
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, Category = "Stats")
+    float CurrentValue{0.f};
+
+    UPROPERTY(EditAnywhere, Category = "Stats")
+    float MaxValue{100.f};
+
+    UPROPERTY(EditAnywhere, Category = "Stats")
+    bool bCanRegen{false};
+
+    // Per second!!!
+    UPROPERTY(EditAnywhere, Category = "Stats")
+    float RegenRate{5.f};
+
+    // Seconds
+    UPROPERTY(EditAnywhere, Category = "Stats")
+    float RegenInterval{0.1f};
+
+    // Seconds
+    UPROPERTY(EditAnywhere, Category = "Stats")
+    float RegenDelay{1.f};
+
+    FTimerHandle TimerHandle;
+    FTimerDelegate TimerDelegate;
+};
 
 /**
  * Stat format for STR, DEX, INT, etc.

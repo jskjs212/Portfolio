@@ -35,7 +35,7 @@ void UDemoHUDWidget::NativeConstruct()
 
 void UDemoHUDWidget::UpdateInteractWidgets(IInteractable* Interactable)
 {
-    AItem* Item = Cast<AItem>(Interactable);
+    const AItem* Item = Cast<AItem>(Interactable);
 
     if (Item && Item->GetItemSlot().IsValid())
     {

@@ -19,7 +19,7 @@ class UTexture2D;
 // Price (Buy/Sell), Weight, Rarity, MaxDurability, bCanDrop
 // bIsQuestItem, ItemSubType, Sound, Particle, Animation
 // Requirements
-USTRUCT(BlueprintType)
+USTRUCT()
 struct FItemDataBase : public FTableRowBase
 {
     GENERATED_BODY()
@@ -81,21 +81,33 @@ struct FItemDataBase : public FTableRowBase
 #endif // WITH_EDITOR
 };
 
-// Category: Item.Weapon
-// Consider adding: AttackSpeed, DamageType, Range, StatBonus
-USTRUCT(BlueprintType)
-struct FWeaponData : public FItemDataBase
+USTRUCT()
+struct FEquipmentData : public FItemDataBase
 {
     GENERATED_BODY()
 
     // {StatTag, StatModifier}
+    // Recommended StatModifier::SourceTag = EquipmentTypes like Item.Armor.Shield.
     UPROPERTY(EditAnywhere)
-    TMap<FGameplayTag, FStatModifier> StatModifiers{
-        {FGameplayTag::RequestGameplayTag("Stat.Derived.Attack"), FStatModifier{EStatModOp::Add, 10.f, DemoGameplayTags::Item_Weapon}}
-    };
+    TMap<FGameplayTag, FStatModifier> StatModifiers;
+};
+
+// Category: Item.Weapon
+// Consider adding: AttachSocketName, AttackSpeed, DamageType, Range, StatBonus
+USTRUCT()
+struct FWeaponData : public FEquipmentData
+{
+    GENERATED_BODY()
 
     UPROPERTY(EditAnywhere)
     FAttackCollisionDefinition AttackCollisionDefinition{.CollisionType = EAttackCollisionType::MainWeapon};
+
+    FWeaponData()
+    {
+        StatModifiers = TMap<FGameplayTag, FStatModifier>{
+            {FGameplayTag::RequestGameplayTag("Stat.Derived.Attack"), FStatModifier{EStatModOp::Add, 10.f, DemoGameplayTags::Item_Weapon}}
+        };
+    }
 
 #if WITH_EDITOR
     virtual EDataValidationResult IsDataValid(FDataValidationContext& Context) const override
@@ -142,17 +154,18 @@ struct FWeaponData : public FItemDataBase
 };
 
 // Category: Item.Armor
-// Consider adding: StatBonus (MaxHealth), Resistance,
-USTRUCT(BlueprintType)
-struct FArmorData : public FItemDataBase
+// Consider adding: AttachSocketName, StatBonus (MaxHealth), Resistance,
+USTRUCT()
+struct FArmorData : public FEquipmentData
 {
     GENERATED_BODY()
 
-    // {StatTag, StatModifier}
-    UPROPERTY(EditAnywhere)
-    TMap<FGameplayTag, FStatModifier> StatModifiers{
-        {FGameplayTag::RequestGameplayTag("Stat.Derived.Defense"), FStatModifier{EStatModOp::Add, 5.f, FGameplayTag::EmptyTag}}
-    };
+    FArmorData()
+    {
+        StatModifiers = TMap<FGameplayTag, FStatModifier>{
+            {FGameplayTag::RequestGameplayTag("Stat.Derived.Defense"), FStatModifier{EStatModOp::Add, 5.f, FGameplayTag::EmptyTag}}
+        };
+    }
 
 #if WITH_EDITOR
     virtual EDataValidationResult IsDataValid(FDataValidationContext& Context) const override
@@ -171,7 +184,7 @@ struct FArmorData : public FItemDataBase
 
 // Category: Item.Consumable
 // Consider adding: Buff, Debuff, Cooldown, Duration
-USTRUCT(BlueprintType)
+USTRUCT()
 struct FConsumableData : public FItemDataBase
 {
     GENERATED_BODY()

@@ -201,7 +201,11 @@ void UEquipmentPageWidget::HandleItemSlotLeftDoubleClicked(const FItemSlot& InSl
     }
 
     const FGameplayTag EquipmentType = EquipmentSlots[InIndex].EquipmentType;
-    ItemActionDispatcher->RequestUnequipItem(EquipmentType);
+    bool bUnequipped = ItemActionDispatcher->RequestUnequipItem(EquipmentType);
+    if (bUnequipped)
+    {
+        HideItemInfo();
+    }
 }
 
 void UEquipmentPageWidget::ShowItemInfo(const FItemSlot& InSlot)
