@@ -39,6 +39,7 @@ APlayerCharacter::APlayerCharacter() :
     USkeletalMeshComponent* MeshComp = GetMesh();
     MeshComp->SetRelativeLocation(FVector{0.f, 0.f, -96.f});
     MeshComp->SetRelativeRotation(FRotator{0.f, -90.f, 0.f});
+    MeshComp->SetGenerateOverlapEvents(true);
 
     UCharacterMovementComponent* MovementComp = GetCharacterMovement();
     MovementComp->bUseControllerDesiredRotation = false;

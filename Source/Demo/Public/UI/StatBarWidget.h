@@ -12,7 +12,8 @@ class UStatsComponent;
 class UTexture2D;
 
 /**
- * Should call InitStatBar() after created.
+ * Should call BindToStatsComponent() after created.
+ * Only Stat.Resource type is supported for now.
  */
 UCLASS()
 class DEMO_API UStatBarWidget : public UUserWidget
@@ -28,13 +29,14 @@ protected:
     virtual void NativePreConstruct() override;
 
 public:
-    void InitStatBar(AActor* OwnerActor, FGameplayTag InStatTag);
+    // Unbind from previous StatsComponent if already bound.
+    void BindToStatsComponent(AActor* InActor, FGameplayTag InStatTag);
 
     void UpdateStatBar();
 
 private:
     UFUNCTION()
-    void OnStatChanged(FGameplayTag InStatTag, float OldValue, float NewValue)
+    void HandleCurrentStatChanged(FGameplayTag InStatTag, float OldValue, float NewValue)
     {
         if (StatTag == InStatTag)
         {
@@ -64,6 +66,7 @@ private:
     UPROPERTY(EditAnywhere, Category = "Initialization")
     TObjectPtr<UTexture2D> StatBarBackgroundImage;
 
-    // Reference to the character's stats component.
-    TObjectPtr<UStatsComponent> StatsComponent;
+    // References
+    FDelegateHandle StatChangedDelegateHandle;
+    TWeakObjectPtr<UStatsComponent> CachedStatsComponent;
 };

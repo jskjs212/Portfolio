@@ -21,7 +21,7 @@ protected:
     virtual void NativeOnInitialized() override;
 
 public:
-    void InitAIStatus(AActor* InOwnerActor);
+    void BindToActor(AActor* InActor);
 
 protected:
     UPROPERTY(meta = (BindWidget))
@@ -29,7 +29,4 @@ protected:
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UTextBlock> NameText;
-
-private:
-    TObjectPtr<AActor> OwnerActor;
 };

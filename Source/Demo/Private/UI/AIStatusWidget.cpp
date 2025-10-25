@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UI/AIStatusWidget.h"
+#include "Character/BaseCharacter.h"
 #include "Components/StatsComponent.h"
 #include "Components/TextBlock.h"
 #include "Components/WidgetComponent.h"
@@ -15,15 +16,17 @@ void UAIStatusWidget::NativeOnInitialized()
     checkf(HealthBar && NameText, TEXT("Failed to bind widgets."));
 }
 
-void UAIStatusWidget::InitAIStatus(AActor* InOwnerActor)
+void UAIStatusWidget::BindToActor(AActor* InActor)
 {
-    if (!InOwnerActor)
+    if (!InActor)
     {
-        DemoLOG_CF(LogUI, Warning, TEXT("InOwnerActor is null."));
+        DemoLOG_CF(LogUI, Warning, TEXT("InActor is null."));
         return;
     }
 
-    OwnerActor = InOwnerActor;
-    HealthBar->InitStatBar(OwnerActor, UStatsComponent::HealthTag);
-    NameText->SetText(FText::FromString(OwnerActor->GetName()));
+    HealthBar->BindToStatsComponent(InActor, UStatsComponent::HealthTag);
+
+    const ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(InActor);
+    FText DisplayName = BaseCharacter ? BaseCharacter->GetCharacterDisplayName() : FText::FromString(InActor->GetName());
+    NameText->SetText(DisplayName);
 }

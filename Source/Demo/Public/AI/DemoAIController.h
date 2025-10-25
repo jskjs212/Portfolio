@@ -56,6 +56,8 @@ public:
 
     void SetControlRotationToTarget();
 
+    void SetIsBoss(bool bInIsBoss) { bIsBoss = bInIsBoss; }
+
 protected:
     void OverrideStateTree(FStateTreeReference InStateTreeRef);
 
@@ -65,11 +67,17 @@ protected:
     void HandleTargetPerceptionInfoUpdated(const FActorPerceptionUpdateInfo& UpdateInfo);
 
     ////////////////////////////////////////////////////////
-    //        StateTree (like Blackboard keys)
+    //        Get & set
     ////////////////////////////////////////////////////////
 public:
     FORCEINLINE AActor* GetTargetActor() const { return TargetActor; }
 
+    // Ignores perception system, directly sets the target actor.
+    void SetTargetActor(AActor* InTargetActor);
+
+    ////////////////////////////////////////////////////////
+    //        StateTree variables (like Blackboard keys)
+    ////////////////////////////////////////////////////////
 protected:
     // Target actor that AI is attacking or moving to.
     TObjectPtr<AActor> TargetActor;
@@ -78,6 +86,8 @@ protected:
     //        Variables
     ////////////////////////////////////////////////////////
 protected:
+    bool bIsBoss{false};
+
     UPROPERTY(EditAnywhere, Category = "Initialization|AI|StateTree")
     FGameplayTag StateTreeTag;
 };

@@ -7,14 +7,16 @@
 #include "DemoHUDWidget.generated.h"
 
 class IInteractable;
+class UAIStatusWidget;
 class UHUDHelpWidget;
 class UInteractPromptWidget;
 class UItemInfoWidget;
 class UStatBarWidget;
+class UTextBlock;
 
 /**
  * Demo HUD Widget
- * ResourceBar (Health, Stamina), Interact (ItemInfo, Prompt), Crosshair
+ * ResourceBar (Health, Stamina, BossAIStatus), Interact (ItemInfo, Prompt), Crosshair
  */
 UCLASS()
 class DEMO_API UDemoHUDWidget : public UUserWidget
@@ -32,6 +34,9 @@ protected:
 public:
     // Update interact widgets.
     void UpdateInteractWidgets(IInteractable* Interactable);
+
+    // Hide boss AI status if BossActor is nullptr.
+    void ShowBossAIStatus(AActor* BossActor);
 
     void ToggleHelpText();
 
@@ -52,6 +57,9 @@ public:
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UStatBarWidget> StaminaBarWidget;
+
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UAIStatusWidget> BossAIStatusWidget;
 
     /* Else */
     UPROPERTY(meta = (BindWidget))

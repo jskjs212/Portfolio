@@ -2,6 +2,7 @@
 
 #include "Character/AICharacter.h"
 #include "AI/DemoAIController.h"
+#include "Character/DemoPawnData.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -37,6 +38,16 @@ void AAICharacter::BeginPlay()
 {
     Super::BeginPlay();
 
+    if (PawnData)
+    {
+        bIsBoss = PawnData->bIsBoss;
+
+        if (ADemoAIController* DemoAIController = GetController<ADemoAIController>())
+        {
+            DemoAIController->SetIsBoss(bIsBoss);
+        }
+    }
+
     // Attach lock-on marker widget to socket
     if (GetMesh()->DoesSocketExist(LockOnSocketName))
     {
@@ -47,14 +58,17 @@ void AAICharacter::BeginPlay()
         DemoLOG_CF(LogCharacter, Warning, TEXT("LockOnSocketName '%s' does not exist in '%s'. Using actor location instead."), *LockOnSocketName.ToString(), *GetName());
     }
 
-    // Init AI status widget
-    if (UAIStatusWidget* AIStatusWidget = Cast<UAIStatusWidget>(AIStatusWidgetComponent->GetWidget()))
+    if (!bIsBoss)
     {
-        AIStatusWidget->InitAIStatus(this);
-    }
-    else
-    {
-        DemoLOG_CF(LogCharacter, Warning, TEXT("AIStatusWidget is not valid for %s."), *GetName());
+        // Init AI status widget
+        if (UAIStatusWidget* AIStatusWidget = Cast<UAIStatusWidget>(AIStatusWidgetComponent->GetWidget()))
+        {
+            AIStatusWidget->BindToActor(this);
+        }
+        else
+        {
+            DemoLOG_CF(LogCharacter, Warning, TEXT("AIStatusWidget is not valid for %s."), *GetName());
+        }
     }
 }
 
@@ -117,7 +131,10 @@ FRotator AAICharacter::GetDesiredControlRotation() const
 
 void AAICharacter::OnTargeted(bool bIsTargeted)
 {
-    AIStatusWidgetComponent->SetVisibility(bIsTargeted);
+    if (!bIsBoss)
+    {
+        AIStatusWidgetComponent->SetVisibility(bIsTargeted);
+    }
     LockOnMarkerWidgetComponent->SetVisibility(bIsTargeted);
 }
 

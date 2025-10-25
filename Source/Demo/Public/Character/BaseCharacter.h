@@ -73,7 +73,7 @@ protected:
     ////////////////////////////////////////////////////////
 protected:
     /* Init */
-    void InitComponents();
+    void InitCharacter();
 
     /* Movement */
     bool CanPerformJump() const;
@@ -147,6 +147,8 @@ private:
 public:
     bool IsBlocking() const { return bIsBlocking; }
 
+    FORCEINLINE FText GetCharacterDisplayName() const { return CharacterDisplayName; }
+
     UFUNCTION(BlueprintCallable, Category = "Movement", meta = (Categories = "Movement.SpeedMode"))
     virtual void SetMovementSpeedMode(FGameplayTag NewSpeedMode);
 
@@ -159,9 +161,11 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Initialization|Character")
     TObjectPtr<const UDemoPawnData> PawnData;
 
-    /* Animation */
     UPROPERTY(VisibleAnywhere)
     FGameplayTag CharacterTag;
+
+    UPROPERTY(VisibleAnywhere)
+    FText CharacterDisplayName;
 
     UPROPERTY(VisibleAnywhere, Transient, Category = "Combat")
     TObjectPtr<const UActionInfoConfig> CurrentActionInfo;

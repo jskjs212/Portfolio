@@ -48,6 +48,9 @@ public:
     // @param TabTag: If valid, switch to the tab with the tag.
     void ShowPlayerMenu(bool bShow, FGameplayTag TabTag = FGameplayTag::EmptyTag);
 
+    // Hide boss AI status if BossActor is nullptr.
+    void ShowBossAIStatus(AActor* BossActor);
+
     void ToggleHelpText();
 
     void SetCursorState(ECursorState NewCursorState);

@@ -115,26 +115,69 @@ void ADemoAIController::OverrideStateTree(const APawn* InPawn)
 
 void ADemoAIController::HandleTargetPerceptionInfoUpdated(const FActorPerceptionUpdateInfo& UpdateInfo)
 {
+    if (bIsBoss)
+    {
+        // Boss AI ignores perception updates.
+        // @TODO - Make BossAIController, override StateTree, or use different perception settings.
+        return;
+    }
+
+    // Target sensed
     if (UpdateInfo.Stimulus.WasSuccessfullySensed())
     {
         TargetActor = UpdateInfo.Target.Get();
 
         if (DemoStateTreeAIComponent->IsRunning())
         {
-            FStateTreeEvent Event{DemoGameplayTags::StateTree_Event_TargetSensed};
-            Event.Origin = TEXT("DemoAIController::HandleTargetPerceptionInfoUpdated");
+            FStateTreeEvent Event;
+            Event.Tag = DemoGameplayTags::StateTree_Event_TargetSensed;
+            Event.Origin = TEXT("ADemoAIController::HandleTargetPerceptionInfoUpdated");
+
             DemoStateTreeAIComponent->SendStateTreeEvent(Event);
         }
     }
+    // Target lost
     else if (TargetActor == UpdateInfo.Target.Get())
     {
         TargetActor = nullptr;
 
         if (DemoStateTreeAIComponent->IsRunning())
         {
-            FStateTreeEvent Event{DemoGameplayTags::StateTree_Event_TargetLost};
-            Event.Origin = TEXT("DemoAIController::HandleTargetPerceptionInfoUpdated");
+            FStateTreeEvent Event;
+            Event.Tag = DemoGameplayTags::StateTree_Event_TargetLost;
+            Event.Origin = TEXT("ADemoAIController::HandleTargetPerceptionInfoUpdated");
+
             DemoStateTreeAIComponent->SendStateTreeEvent(Event);
         }
+    }
+}
+
+void ADemoAIController::SetTargetActor(AActor* InTargetActor)
+{
+    if (!bIsBoss)
+    {
+        DemoLOG_CF(LogAI, Error, TEXT("Called on non-boss AI (%s)."), *GetNameSafe(GetPawn()));
+    }
+
+    if (TargetActor == InTargetActor)
+    {
+        return;
+    }
+    TargetActor = InTargetActor;
+
+    if (DemoStateTreeAIComponent->IsRunning())
+    {
+        FStateTreeEvent Event;
+        if (TargetActor)
+        {
+            Event.Tag = DemoGameplayTags::StateTree_Event_TargetSensed;
+            Event.Origin = TEXT("ADemoAIController::SetTargetActor");
+        }
+        else
+        {
+            Event.Tag = DemoGameplayTags::StateTree_Event_TargetLost;
+            Event.Origin = TEXT("ADemoAIController::SetTargetActor");
+        }
+        DemoStateTreeAIComponent->SendStateTreeEvent(Event);
     }
 }

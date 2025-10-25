@@ -50,25 +50,13 @@ void ABaseCharacter::BeginPlay()
 {
     Super::BeginPlay();
 
-    // Validations
-    if (!PawnData)
-    {
-        DemoLOG_CF(LogCharacter, Error, TEXT("PawnData is not set for %s."), *GetName());
-        return;
-    }
+    // Validate
     if (!HitReactFrontMontage || !HitReactBackMontage || !HitSound || !HitParticle)
     {
         DemoLOG_CF(LogCharacter, Warning, TEXT("HitReact assets are not set for %s."), *GetName());
     }
 
-    // Set CharacterTag
-    CharacterTag = PawnData->CharacterTag;
-    if (!CharacterTag.IsValid())
-    {
-        DemoLOG_CF(LogCharacter, Error, TEXT("CharacterTag is not set for %s."), *GetName());
-    }
-
-    InitComponents();
+    InitCharacter();
 }
 
 float ABaseCharacter::InternalTakePointDamage(float Damage, FPointDamageEvent const& PointDamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -110,8 +98,27 @@ float ABaseCharacter::InternalTakePointDamage(float Damage, FPointDamageEvent co
     return Damage;
 }
 
-void ABaseCharacter::InitComponents()
+void ABaseCharacter::InitCharacter()
 {
+    if (!PawnData)
+    {
+        DemoLOG_CF(LogCharacter, Error, TEXT("PawnData is not set for %s."), *GetName());
+        return;
+    }
+
+    // Init character identity
+    CharacterTag = PawnData->CharacterTag;
+    if (!CharacterTag.IsValid())
+    {
+        DemoLOG_CF(LogCharacter, Error, TEXT("CharacterTag is not set for %s."), *GetName());
+    }
+    CharacterDisplayName = PawnData->CharacterDisplayName;
+    if (CharacterDisplayName.IsEmpty())
+    {
+        DemoLOG_CF(LogCharacter, Warning, TEXT("CharacterDisplayName is not set for %s."), *GetName());
+        CharacterDisplayName = FText::FromString(GetName());
+    }
+
     // Init StateManager
     StateManager->OnStateBegan.AddUObject(this, &ThisClass::HandleStateBegan);
 

@@ -1,11 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UI/StatBarWidget.h"
-#include "Blueprint/WidgetTree.h"
+//#include "Blueprint/WidgetTree.h"
 #include "Components/ProgressBar.h"
 #include "Components/StatsComponent.h"
 #include "DemoTypes/LogCategories.h"
-#include "GameFramework/Pawn.h"
+#include "Styling/SlateTypes.h"
 
 void UStatBarWidget::NativeOnInitialized()
 {
@@ -39,41 +39,59 @@ void UStatBarWidget::NativePreConstruct()
     }
 }
 
-void UStatBarWidget::InitStatBar(AActor* OwnerActor, FGameplayTag InStatTag)
+void UStatBarWidget::BindToStatsComponent(AActor* InActor, FGameplayTag InStatTag)
 {
-    if (OwnerActor)
+    if (!InActor)
     {
-        StatTag = InStatTag;
-        StatsComponent = OwnerActor->FindComponentByClass<UStatsComponent>();
-
-        if (!StatsComponent)
-        {
-            DemoLOG_CF(LogUI, Error, TEXT("Failed to find StatsComponent from %s."), *OwnerActor->GetName());
-            return;
-        }
-        if (!StatsComponent->HasStatType(StatTag))
-        {
-            DemoLOG_CF(LogUI, Error, TEXT("StatsComponent doesn't have stat type: %s, owner: %s"), *StatTag.ToString(), *OwnerActor->GetName());
-            return;
-        }
-
-        // Bind
-        StatsComponent->OnCurrentResourceStatChanged.AddUObject(this, &ThisClass::OnStatChanged);
-
-        UpdateStatBar();
+        DemoLOG_CF(LogUI, Error, TEXT("InActor is null."));
+        return;
     }
+
+    UStatsComponent* StatsComponent = InActor->FindComponentByClass<UStatsComponent>();
+    if (!StatsComponent)
+    {
+        DemoLOG_CF(LogUI, Error, TEXT("Failed to find StatsComponent from %s."), *InActor->GetName());
+        return;
+    }
+
+    if (!StatsComponent->HasStatType(InStatTag))
+    {
+        DemoLOG_CF(LogUI, Error, TEXT("StatsComponent doesn't have stat type: %s, owner: %s"), *InStatTag.ToString(), *InActor->GetName());
+        return;
+    }
+
+    if (CachedStatsComponent.IsValid())
+    {
+        if (CachedStatsComponent.Get() == StatsComponent && StatTag == InStatTag)
+        {
+            // Already bound
+            return;
+        }
+
+        // Unbind previous
+        CachedStatsComponent->OnCurrentResourceStatChanged.Remove(StatChangedDelegateHandle);
+
+        StatChangedDelegateHandle.Reset();
+        CachedStatsComponent = nullptr;
+    }
+
+    StatTag = InStatTag;
+    CachedStatsComponent = StatsComponent;
+
+    // Bind
+    StatChangedDelegateHandle = StatsComponent->OnCurrentResourceStatChanged.AddUObject(this, &ThisClass::HandleCurrentStatChanged);
+
+    UpdateStatBar();
 }
 
 void UStatBarWidget::UpdateStatBar()
 {
-    if (!StatsComponent)
+    if (CachedStatsComponent.IsValid())
     {
-        return;
+        const float Current = CachedStatsComponent->GetCurrentResourceStatChecked(StatTag);
+        const float Max = CachedStatsComponent->GetMaxResourceStatChecked(StatTag);
+        const float Percent = (Max != 0.f) ? (Current / Max) : 0.f;
+
+        StatBar->SetPercent(Percent);
     }
-
-    const float Current = StatsComponent->GetCurrentResourceStatChecked(StatTag);
-    const float Max = StatsComponent->GetMaxResourceStatChecked(StatTag);
-    const float Percent = (Max != 0.f) ? (Current / Max) : 0.f;
-
-    StatBar->SetPercent(Percent);
 }

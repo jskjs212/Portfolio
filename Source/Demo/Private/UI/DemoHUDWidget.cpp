@@ -2,9 +2,11 @@
 
 #include "UI/DemoHUDWidget.h"
 #include "Components/StatsComponent.h"
+#include "Components/TextBlock.h"
 #include "Interfaces/Interactable.h"
 #include "Items/Item.h"
 #include "UI/ActionKeyWidget.h"
+#include "UI/AIStatusWidget.h"
 #include "UI/HUDHelpWidget.h"
 #include "UI/InteractPromptWidget.h"
 #include "UI/ItemInfoWidget.h"
@@ -15,12 +17,14 @@ void UDemoHUDWidget::NativeOnInitialized()
     Super::NativeOnInitialized();
 
     checkf(ItemInfoWidget && InteractPromptWidget
-        && HealthBarWidget && StaminaBarWidget && HelpWidget,
+        && HealthBarWidget && StaminaBarWidget
+        && BossAIStatusWidget && HelpWidget,
         TEXT("Failed to bind widgets."));
 
     // Hide interact widgets
     ItemInfoWidget->SetVisibility(ESlateVisibility::Collapsed);
     InteractPromptWidget->SetVisibility(ESlateVisibility::Collapsed);
+    BossAIStatusWidget->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void UDemoHUDWidget::NativeConstruct()
@@ -29,8 +33,8 @@ void UDemoHUDWidget::NativeConstruct()
 
     // Init stat bars
     APawn* OwnerPawn = GetOwningPlayerPawn();
-    HealthBarWidget->InitStatBar(OwnerPawn, UStatsComponent::HealthTag);
-    StaminaBarWidget->InitStatBar(OwnerPawn, UStatsComponent::StaminaTag);
+    HealthBarWidget->BindToStatsComponent(OwnerPawn, UStatsComponent::HealthTag);
+    StaminaBarWidget->BindToStatsComponent(OwnerPawn, UStatsComponent::StaminaTag);
 }
 
 void UDemoHUDWidget::UpdateInteractWidgets(IInteractable* Interactable)
@@ -51,6 +55,19 @@ void UDemoHUDWidget::UpdateInteractWidgets(IInteractable* Interactable)
     {
         ItemInfoWidget->SetVisibility(ESlateVisibility::Collapsed);
         InteractPromptWidget->SetVisibility(ESlateVisibility::Collapsed);
+    }
+}
+
+void UDemoHUDWidget::ShowBossAIStatus(AActor* BossActor)
+{
+    if (BossActor)
+    {
+        BossAIStatusWidget->BindToActor(BossActor);
+        BossAIStatusWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
+    }
+    else
+    {
+        BossAIStatusWidget->SetVisibility(ESlateVisibility::Collapsed);
     }
 }
 

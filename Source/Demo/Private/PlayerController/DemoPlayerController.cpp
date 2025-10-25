@@ -99,6 +99,17 @@ void ADemoPlayerController::ShowPlayerMenu(bool bShow, FGameplayTag TabTag)
     }
 }
 
+void ADemoPlayerController::ShowBossAIStatus(AActor* BossActor)
+{
+    if (ADemoHUD* DemoHUD = GetHUD<ADemoHUD>())
+    {
+        if (DemoHUD->DemoHUDWidget)
+        {
+            DemoHUD->DemoHUDWidget->ShowBossAIStatus(BossActor);
+        }
+    }
+}
+
 void ADemoPlayerController::ToggleHelpText()
 {
     if (ADemoHUD* DemoHUD = GetHUD<ADemoHUD>())
