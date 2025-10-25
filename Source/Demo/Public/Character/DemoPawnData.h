@@ -29,7 +29,7 @@ public:
     FText CharacterDisplayName;
 
     // Boss has special behaviors and UI.
-    UPROPERTY(EditDefaultsOnly, Category = "Character")
+    UPROPERTY(EditDefaultsOnly, Category = "AI")
     bool bIsBoss{false};
 
     // Default Health, Stamina, etc.

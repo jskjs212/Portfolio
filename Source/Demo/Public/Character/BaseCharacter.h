@@ -71,6 +71,9 @@ protected:
     ////////////////////////////////////////////////////////
     //        Character functions
     ////////////////////////////////////////////////////////
+public:
+    bool IsDead() const;
+
 protected:
     /* Init */
     void InitCharacter();
@@ -99,8 +102,6 @@ protected:
     void PlayPointHitEffects(const FPointDamageEvent& PointDamageEvent, const AController* EventInstigator);
 
     /* Death */
-    bool IsDead() const;
-
     void DestroyCharacter();
 
     void EnableRagdoll();

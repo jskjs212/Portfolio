@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "AI/DemoAIController.h"
 #include "Character/AICharacter.h"
 #include "Components/DemoStateTreeAIComponent.h"
@@ -122,8 +121,8 @@ void ADemoAIController::HandleTargetPerceptionInfoUpdated(const FActorPerception
         return;
     }
 
-    // Target sensed
-    if (UpdateInfo.Stimulus.WasSuccessfullySensed())
+    // Set TargetActor, and send StateTree event.
+    if (UpdateInfo.Stimulus.WasSuccessfullySensed()) // Target sensed
     {
         TargetActor = UpdateInfo.Target.Get();
 
@@ -136,8 +135,7 @@ void ADemoAIController::HandleTargetPerceptionInfoUpdated(const FActorPerception
             DemoStateTreeAIComponent->SendStateTreeEvent(Event);
         }
     }
-    // Target lost
-    else if (TargetActor == UpdateInfo.Target.Get())
+    else if (TargetActor == UpdateInfo.Target.Get()) // Target lost
     {
         TargetActor = nullptr;
 
@@ -156,7 +154,8 @@ void ADemoAIController::SetTargetActor(AActor* InTargetActor)
 {
     if (!bIsBoss)
     {
-        DemoLOG_CF(LogAI, Error, TEXT("Called on non-boss AI (%s)."), *GetNameSafe(GetPawn()));
+        // AI perception will interfere.
+        DemoLOG_CF(LogAI, Warning, TEXT("Called on non-boss AI (%s)."), *GetNameSafe(GetPawn()));
     }
 
     if (TargetActor == InTargetActor)
@@ -165,6 +164,7 @@ void ADemoAIController::SetTargetActor(AActor* InTargetActor)
     }
     TargetActor = InTargetActor;
 
+    // Send StateTree event
     if (DemoStateTreeAIComponent->IsRunning())
     {
         FStateTreeEvent Event;

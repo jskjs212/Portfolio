@@ -42,12 +42,6 @@ protected:
     virtual float InternalTakePointDamage(float Damage, struct FPointDamageEvent const& PointDamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
     ////////////////////////////////////////////////////////
-    //        AICharacter functions
-    ////////////////////////////////////////////////////////
-public:
-    FORCEINLINE bool IsBoss() const { return bIsBoss; }
-
-    ////////////////////////////////////////////////////////
     //        Combat interface
     ////////////////////////////////////////////////////////
 public:

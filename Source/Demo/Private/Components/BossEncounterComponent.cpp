@@ -11,17 +11,19 @@ UBossEncounterComponent::UBossEncounterComponent()
     PrimaryComponentTick.bCanEverTick = false;
 }
 
-void UBossEncounterComponent::BeginPlay()
-{
-    Super::BeginPlay();
-}
-
 void UBossEncounterComponent::SetupBossPawn(APawn* InBossPawn)
 {
-    if (InBossPawn)
+    if (BossPawn.IsValid())
+    {
+        // Unbind previous
+        BossPawn->OnDestroyed.RemoveDynamic(this, &ThisClass::HandleBossDestroyed);
+    }
+
+    if (IsValid(InBossPawn))
     {
         BossPawn = InBossPawn;
         BossPawn->OnDestroyed.AddDynamic(this, &ThisClass::HandleBossDestroyed);
+        CurrentState = EBossEncounterState::Dormant; // @misc - What if player is already in encounter condition?
     }
     else
     {
@@ -32,15 +34,14 @@ void UBossEncounterComponent::SetupBossPawn(APawn* InBossPawn)
 
 void UBossEncounterComponent::StartEncounter(APawn* Instigator)
 {
-    if (!Instigator || !BossPawn)
+    if (CurrentState != EBossEncounterState::Dormant)
     {
-        DemoLOG_CF(LogCombat, Warning, TEXT("Instigator or BossPawn is null."));
         return;
     }
 
-    if (CurrentState != EBossEncounterState::Idle)
+    if (!Instigator || !BossPawn.IsValid())
     {
-        DemoLOG_CF(LogCombat, Verbose, TEXT("CurrentState is not Idle."));
+        DemoLOG_CF(LogCombat, Warning, TEXT("Instigator or BossPawn is null."));
         return;
     }
 
@@ -60,10 +61,10 @@ void UBossEncounterComponent::StartEncounter(APawn* Instigator)
 
     EncounterInstigator = Instigator;
     SetEncounterState(EBossEncounterState::Active);
-    //OnBossEncounterStarted.Broadcast(BossPawn, Instigator);
+    //OnBossEncounterStarted.Broadcast if needed
 
     // (UI) Show boss AI status
-    DemoPlayerController->ShowBossAIStatus(BossPawn);
+    DemoPlayerController->ShowBossAIStatus(BossPawn.Get());
 
     // Activate boss AI
     BossAIController->SetTargetActor(Instigator);
@@ -73,16 +74,22 @@ void UBossEncounterComponent::StartEncounter(APawn* Instigator)
 
 void UBossEncounterComponent::EndEncounter(EBossEncounterEndReason Reason)
 {
-    if (CurrentState != EBossEncounterState::Active)
+    if (CurrentState == EBossEncounterState::Completed)
     {
-        DemoLOG_CF(LogCombat, Verbose, TEXT("Can't end encounter. CurrentState is not Active."));
         return;
     }
 
-    const EBossEncounterState NewState = (Reason == EBossEncounterEndReason::BossDefeated)
-        ? EBossEncounterState::Completed : EBossEncounterState::Idle;
-    SetEncounterState(NewState);
-    //OnBossEncounterEnded.Broadcast(BossPawn, Reason);
+    if (Reason == EBossEncounterEndReason::BossDefeated)
+    {
+        // @misc - If boss is still alive (!BaseCharacter->IsDead()), what to do? Disable further interactions?
+        SetEncounterState(EBossEncounterState::Completed);
+    }
+    else
+    {
+        SetEncounterState(EBossEncounterState::Dormant);
+    }
+
+    //OnBossEncounterEnded.Broadcast if needed
 
     // (UI) Hide boss AI status
     if (EncounterInstigator.IsValid())
@@ -95,9 +102,12 @@ void UBossEncounterComponent::EndEncounter(EBossEncounterEndReason Reason)
     }
 
     // Deactivate boss AI
-    if (ADemoAIController* BossAIController = BossPawn->GetController<ADemoAIController>())
+    if (BossPawn.IsValid())
     {
-        BossAIController->SetTargetActor(nullptr);
+        if (ADemoAIController* BossAIController = BossPawn->GetController<ADemoAIController>())
+        {
+            BossAIController->SetTargetActor(nullptr);
+        }
     }
 
     // @TODO - stop music, unlock doors, sequence, reward, etc.

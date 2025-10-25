@@ -9,7 +9,7 @@
 UENUM()
 enum class EBossEncounterState : uint8
 {
-    Idle UMETA(DisplayName = "Idle"),
+    Dormant UMETA(DisplayName = "Dormant"),
     Active UMETA(DisplayName = "Active"),
     Completed UMETA(DisplayName = "Completed")
 };
@@ -21,25 +21,17 @@ enum class EBossEncounterEndReason : uint8
     PlayerRetreated UMETA(DisplayName = "PlayerRetreated")
 };
 
-//DECLARE_MULTICAST_DELEGATE_TwoParams(FOnBossEncounterStarted, APawn* /* BossPawn */, APawn* /* Instigator */);
-//DECLARE_MULTICAST_DELEGATE_TwoParams(FOnBossEncounterEnded, APawn* /* BossPawn */, EBossEncounterEndReason /* Reason */);
-
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class DEMO_API UBossEncounterComponent : public UActorComponent
 {
     GENERATED_BODY()
 
-//public:
-//    FOnBossEncounterStarted OnBossEncounterStarted;
-//    FOnBossEncounterEnded OnBossEncounterEnded;
-
+    ////////////////////////////////////////////////////////
+    //        Functions
+    ////////////////////////////////////////////////////////
 public:
     UBossEncounterComponent();
 
-protected:
-    virtual void BeginPlay() override;
-
-public:
     void SetupBossPawn(APawn* InBossPawn);
 
     void StartEncounter(APawn* Instigator);
@@ -52,11 +44,14 @@ private:
     UFUNCTION()
     void HandleBossDestroyed(AActor* DestroyedActor);
 
+    ////////////////////////////////////////////////////////
+    //        Variables
+    ////////////////////////////////////////////////////////
 private:
     UPROPERTY(VisibleAnywhere, Category = "Boss Encounter")
-    EBossEncounterState CurrentState{EBossEncounterState::Idle};
+    EBossEncounterState CurrentState{EBossEncounterState::Dormant};
 
-    TObjectPtr<APawn> BossPawn;
+    TWeakObjectPtr<APawn> BossPawn;
 
     TWeakObjectPtr<APawn> EncounterInstigator;
 };

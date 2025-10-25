@@ -98,6 +98,11 @@ float ABaseCharacter::InternalTakePointDamage(float Damage, FPointDamageEvent co
     return Damage;
 }
 
+bool ABaseCharacter::IsDead() const
+{
+    return StateManager->IsInState(DemoGameplayTags::State_Dead);
+}
+
 void ABaseCharacter::InitCharacter()
 {
     if (!PawnData)
@@ -293,11 +298,6 @@ void ABaseCharacter::PlayPointHitEffects(const FPointDamageEvent& PointDamageEve
             }
         }
     }
-}
-
-bool ABaseCharacter::IsDead() const
-{
-    return StateManager->IsInState(DemoGameplayTags::State_Dead);
 }
 
 void ABaseCharacter::DestroyCharacter()

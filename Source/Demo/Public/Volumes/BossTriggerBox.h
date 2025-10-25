@@ -16,16 +16,25 @@ class DEMO_API ABossTriggerBox : public ATriggerBox
 {
     GENERATED_BODY()
 
+    ////////////////////////////////////////////////////////
+    //        Subobjects
+    ////////////////////////////////////////////////////////
 private:
     UPROPERTY(VisibleAnywhere)
     TObjectPtr<UBossEncounterComponent> BossEncounterComponent;
 
+    ////////////////////////////////////////////////////////
+    //        Fundamentals
+    ////////////////////////////////////////////////////////
 public:
     ABossTriggerBox();
 
 protected:
     virtual void BeginPlay() override;
 
+    ////////////////////////////////////////////////////////
+    //        Handlers
+    ////////////////////////////////////////////////////////
 private:
     UFUNCTION()
     void HandleBeginOverlap(class AActor* OverlappedActor, class AActor* OtherActor);
@@ -33,7 +42,10 @@ private:
     UFUNCTION()
     void HandleEndOverlap(class AActor* OverlappedActor, class AActor* OtherActor);
 
+    ////////////////////////////////////////////////////////
+    //        Variables
+    ////////////////////////////////////////////////////////
 private:
     UPROPERTY(EditAnywhere, Category = "Initialization")
-    TObjectPtr<APawn> BossPawn;
+    TWeakObjectPtr<APawn> BossPawn;
 };

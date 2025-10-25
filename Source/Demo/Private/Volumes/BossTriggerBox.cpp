@@ -16,9 +16,9 @@ void ABossTriggerBox::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (BossPawn)
+    if (BossPawn.IsValid())
     {
-        BossEncounterComponent->SetupBossPawn(BossPawn);
+        BossEncounterComponent->SetupBossPawn(BossPawn.Get());
     }
     else
     {

@@ -38,14 +38,15 @@ void AAICharacter::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (PawnData)
+    if (!PawnData)
     {
-        bIsBoss = PawnData->bIsBoss;
+        return;
+    }
 
-        if (ADemoAIController* DemoAIController = GetController<ADemoAIController>())
-        {
-            DemoAIController->SetIsBoss(bIsBoss);
-        }
+    bIsBoss = PawnData->bIsBoss;
+    if (ADemoAIController* DemoAIController = GetController<ADemoAIController>())
+    {
+        DemoAIController->SetIsBoss(bIsBoss);
     }
 
     // Attach lock-on marker widget to socket
