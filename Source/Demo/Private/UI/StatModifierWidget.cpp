@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UI/StatModifierWidget.h"
-#include "Components/StatsComponent.h"
 #include "Components/TextBlock.h"
+#include "DemoTypes/DemoGameplayTags.h"
 #include "DemoTypes/LogCategories.h"
 #include "DemoTypes/StatsTypes.h"
 
@@ -17,11 +17,11 @@ void UStatModifierWidget::Update(FGameplayTag StatTag, const FStatModifier& InSt
 {
     // @hardcoded - DataTable
     static const TMap<FGameplayTag, FText> StatTagToNameMap = TMap<FGameplayTag, FText>{
-        {UStatsComponent::STRTag, FText::FromString("STR")},
-        {UStatsComponent::DEXTag, FText::FromString("DEX")},
-        {UStatsComponent::INTTag, FText::FromString("INT")},
-        {UStatsComponent::AttackTag, FText::FromString("Atk")},
-        {UStatsComponent::DefenseTag, FText::FromString("Def")}
+        {DemoGameplayTags::Stat_Primary_STR, FText::FromString("STR")},
+        {DemoGameplayTags::Stat_Primary_DEX, FText::FromString("DEX")},
+        {DemoGameplayTags::Stat_Primary_INT, FText::FromString("INT")},
+        {DemoGameplayTags::Stat_Derived_Attack, FText::FromString("Atk")},
+        {DemoGameplayTags::Stat_Derived_Defense, FText::FromString("Def")}
     };
 
     const FText* StatName = StatTagToNameMap.Find(StatTag);

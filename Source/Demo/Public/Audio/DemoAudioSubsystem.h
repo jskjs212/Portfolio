@@ -8,6 +8,7 @@
 #include "DemoAudioSubsystem.generated.h"
 
 class USoundBase;
+class USoundCollection;
 
 USTRUCT()
 struct FAudioCategoryData
@@ -42,31 +43,38 @@ class DEMO_API UDemoAudioSubsystem : public UGameInstanceSubsystem
 public:
     virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
-    void PlaySound2D(const UObject* WorldContextObject, FGameplayTag SoundTag, float VolumeMultiplier = 1.f) const;
+    void PlaySound2D(const UObject* WorldContextObject, FGameplayTag SoundTag, float VolumeMultiplier = 1.f);
 
     // @param Location: World position to play sound at
     // @param Rotation: World rotation to play sound at
-    void PlaySoundAtLocation(const UObject* WorldContextObject, FGameplayTag SoundTag, FVector Location, FRotator Rotation, float VolumeMultiplier = 1.f) const;
+    void PlaySoundAtLocation(const UObject* WorldContextObject, FGameplayTag SoundTag, FVector Location, FRotator Rotation, float VolumeMultiplier = 1.f);
 
-    void PlaySoundAtLocation(const UObject* WorldContextObject, FGameplayTag SoundTag, FVector Location, float VolumeMultiplier = 1.f) const
+    void PlaySoundAtLocation(const UObject* WorldContextObject, FGameplayTag SoundTag, FVector Location, float VolumeMultiplier = 1.f)
     {
         PlaySoundAtLocation(WorldContextObject, SoundTag, Location, FRotator::ZeroRotator, VolumeMultiplier);
     }
+
     // @TODO - Handle BGM according to game state.
-    void PlayDefaultBGM(const UObject* WorldContextObject) const;
+    void PlayDefaultBGM(const UObject* WorldContextObject);
 
     // @TODO - SpawnSoundAttached
 
 private:
+    void InitAudioMap();
+
     // @return {Sound, CategoryVolume}
-    TPair<USoundBase*, float> GetSoundByTag(FGameplayTag SoundTag) const;
+    TPair<USoundBase*, float> GetSoundByTag(FGameplayTag SoundTag);
 
     ////////////////////////////////////////////////////////
-    //        Variables - Core
+    //        Variables
     ////////////////////////////////////////////////////////
 private:
     float MasterVolume{1.f};
 
     // {AudioCategory, AudioCategoryData}
     TMap<FGameplayTag, FAudioCategoryData> AudioMap;
+
+    // Keep the loaded DataAsset alive.
+    UPROPERTY(Transient)
+    TObjectPtr<const USoundCollection> SoundCollection;
 };

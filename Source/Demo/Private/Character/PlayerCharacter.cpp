@@ -123,7 +123,7 @@ void APlayerCharacter::ConsumeSprintStamina()
         {
             const float DeltaStamina = SprintStaminaCostPerSecond * SprintStaminaInterval;
 
-            if (!StatsComponent->HasEnoughOrNoRestriction(UStatsComponent::StaminaTag, DeltaStamina))
+            if (!StatsComponent->HasEnoughOrNoRestriction(DemoGameplayTags::Stat_Resource_Stamina, DeltaStamina))
             {
                 // Not enough stamina
                 SetMovementSpeedMode(DemoGameplayTags::Movement_SpeedMode_Jog);
@@ -131,7 +131,7 @@ void APlayerCharacter::ConsumeSprintStamina()
             else
             {
                 // Consume stamina. Refresh Regen timer every time.
-                StatsComponent->ModifyCurrentResourceStatChecked(UStatsComponent::StaminaTag, -DeltaStamina, true);
+                StatsComponent->ModifyCurrentResourceStatChecked(DemoGameplayTags::Stat_Resource_Stamina, -DeltaStamina, true);
             }
         }
         else // Not fast enough
@@ -507,13 +507,9 @@ void APlayerCharacter::SetMovementSpeedMode(FGameplayTag NewSpeedMode)
 void APlayerCharacter::Test1_Implementation()
 {
     DemoLOG_CF(LogCharacter, Warning, TEXT("called!"));
-
-    StatsComponent->AddModifierToStat(UStatsComponent::STRTag, FStatModifier{EStatModOp::Add, 3.f, DemoGameplayTags::Input_Test1});
 }
 
 void APlayerCharacter::Test2_Implementation()
 {
     DemoLOG_CF(LogCharacter, Warning, TEXT("called!"));
-
-    StatsComponent->RemoveModifierFromStat(UStatsComponent::STRTag, FStatModifier{EStatModOp::Add, 0.f, DemoGameplayTags::Input_Test1});
 }

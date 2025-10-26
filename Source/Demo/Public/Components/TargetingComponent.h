@@ -125,7 +125,7 @@ private:
 
     static constexpr float CameraRotationInterpSpeed{5.f};
 
-    static inline const TArray<TEnumAsByte<EObjectTypeQuery>> TargetObjectTypes{UEngineTypes::ConvertToObjectType(ECC_Pawn)};
+    static const TArray<TEnumAsByte<EObjectTypeQuery>> TargetObjectTypes;
 
     static inline const TArray<AActor*> EmptyIgnoredActors;
 

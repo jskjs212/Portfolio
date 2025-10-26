@@ -104,7 +104,7 @@ private:
     //        Variables
     ////////////////////////////////////////////////////////
 private:
-    static inline const TArray<TEnumAsByte<EObjectTypeQuery>> TraceObjectTypes{UEngineTypes::ConvertToObjectType(ECC_Pawn)};
+    static const TArray<TEnumAsByte<EObjectTypeQuery>> TraceObjectTypes;
 
     UPROPERTY(EditAnywhere, Category = "Initialization|Collision")
     float DrawDebugDuration{3.f};

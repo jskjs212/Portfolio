@@ -33,15 +33,15 @@ public:
     bool bIsBoss{false};
 
     // Default Health, Stamina, etc.
-    UPROPERTY(EditDefaultsOnly, Category = "Stats", meta = (Categories = "Stat"))
+    UPROPERTY(EditDefaultsOnly, Category = "Stats", meta = (Categories = "Stat.Resource"))
     TMap<FGameplayTag, FResourceStat> DefaultResourceStats;
 
     // Default STR, DEX, INT, etc.
-    UPROPERTY(EditDefaultsOnly, Category = "Stats", meta = (Categories = "Stat"))
+    UPROPERTY(EditDefaultsOnly, Category = "Stats", meta = (Categories = "Stat.Primary"))
     TMap<FGameplayTag, FPrimaryStat> DefaultPrimaryStats;
 
     // Default Attack, Defense, etc.
-    UPROPERTY(EditDefaultsOnly, Category = "Stats", meta = (Categories = "Stat"))
+    UPROPERTY(EditDefaultsOnly, Category = "Stats", meta = (Categories = "Stat.Derived"))
     TMap<FGameplayTag, FDerivedStat> DefaultDerivedStats;
 
     // Input configuration for PlayerCharacter.

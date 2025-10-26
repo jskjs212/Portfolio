@@ -11,41 +11,16 @@ void UDemoAudioSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
     Super::Initialize(Collection);
 
-    // Get DemoProjectSettings
-    const UDemoProjectSettings* DemoProjectSettings = GetDefault<UDemoProjectSettings>();
-    if (!DemoProjectSettings)
-    {
-        DemoLOG_CF(LogDemoGame, Error, TEXT("Failed to get UDemoProjectSettings."));
-        return;
-    }
-
-    // Load SoundCollection
-    const USoundCollection* SoundCollection = DemoProjectSettings->SoundCollection.LoadSynchronous();
-    if (!SoundCollection)
-    {
-        DemoLOG_CF(LogDemoGame, Error, TEXT("Failed to load SoundCollection from DemoProjectSettings."));
-        return;
-    }
-
-    // Initialize AudioMap
-    // @TODO - Load volume settings from user settings.
-    MasterVolume = 0.5f;
-    AudioMap.Emplace(DemoSoundTags::Music, FAudioCategoryData{1.f, &SoundCollection->MusicMap});
-    AudioMap.Emplace(DemoSoundTags::SFX, FAudioCategoryData{1.f, &SoundCollection->SFXMap});
-    AudioMap.Emplace(DemoSoundTags::UI, FAudioCategoryData{1.f, &SoundCollection->UIMap});
-    AudioMap.Emplace(DemoSoundTags::Voice, FAudioCategoryData{1.f, &SoundCollection->VoiceMap});
-
-    // Validate AudioMap
-    for (const auto& [CategoryTag, CategoryData] : AudioMap)
-    {
-        checkf(CategoryData.Map, TEXT("Audio category (%s) has no sound map."), *CategoryTag.ToString());
-        DemoLOG_CF(LogDemoGame, Warning,
-            TEXT("@TEST - Loaded audio category (%s) with %d sounds."), *CategoryTag.ToString(), CategoryData.Map->Num());
-    }
+    InitAudioMap();
 }
 
-void UDemoAudioSubsystem::PlaySound2D(const UObject* WorldContextObject, FGameplayTag SoundTag, float VolumeMultiplier) const
+void UDemoAudioSubsystem::PlaySound2D(const UObject* WorldContextObject, FGameplayTag SoundTag, float VolumeMultiplier)
 {
+    if (!WorldContextObject)
+    {
+        return;
+    }
+
     auto [Sound, CategoryVolume] = GetSoundByTag(SoundTag);
     if (!Sound)
     {
@@ -56,8 +31,13 @@ void UDemoAudioSubsystem::PlaySound2D(const UObject* WorldContextObject, FGamepl
     UGameplayStatics::PlaySound2D(WorldContextObject, Sound, FinalVolume);
 }
 
-void UDemoAudioSubsystem::PlaySoundAtLocation(const UObject* WorldContextObject, FGameplayTag SoundTag, FVector Location, FRotator Rotation, float VolumeMultiplier) const
+void UDemoAudioSubsystem::PlaySoundAtLocation(const UObject* WorldContextObject, FGameplayTag SoundTag, FVector Location, FRotator Rotation, float VolumeMultiplier)
 {
+    if (!WorldContextObject)
+    {
+        return;
+    }
+
     auto [Sound, CategoryVolume] = GetSoundByTag(SoundTag);
     if (!Sound)
     {
@@ -68,32 +48,74 @@ void UDemoAudioSubsystem::PlaySoundAtLocation(const UObject* WorldContextObject,
     UGameplayStatics::PlaySoundAtLocation(WorldContextObject, Sound, Location, Rotation, FinalVolume);
 }
 
-void UDemoAudioSubsystem::PlayDefaultBGM(const UObject* WorldContextObject) const
+void UDemoAudioSubsystem::PlayDefaultBGM(const UObject* WorldContextObject)
 {
     const FGameplayTag DefaultBGMTag = DemoSoundTags::Music_Exploration;
     PlaySound2D(WorldContextObject, DefaultBGMTag);
 }
 
-TPair<USoundBase*, float> UDemoAudioSubsystem::GetSoundByTag(FGameplayTag SoundTag) const
+void UDemoAudioSubsystem::InitAudioMap()
 {
-    const FAudioCategoryData* CategoryData = AudioMap.Find(DemoSoundTags::GetCategory(SoundTag));
-    if (!CategoryData)
+    // Get DemoProjectSettings
+    const UDemoProjectSettings* DemoProjectSettings = GetDefault<UDemoProjectSettings>();
+    if (!DemoProjectSettings)
     {
-        DemoLOG_CF(LogAudio, Error, TEXT("Sound tag (%s) is not valid."), *SoundTag.ToString());
+        DemoLOG_CF(LogDemoGame, Error, TEXT("Failed to get UDemoProjectSettings."));
+        return;
+    }
+
+    // Load SoundCollection
+    const USoundCollection* LoadedSoundCollection = DemoProjectSettings->SoundCollection.LoadSynchronous();
+    if (!LoadedSoundCollection)
+    {
+        DemoLOG_CF(LogDemoGame, Error, TEXT("Failed to load SoundCollection from DemoProjectSettings."));
+        return;
+    }
+    SoundCollection = LoadedSoundCollection;
+
+    // Initialize AudioMap
+    // @TODO - Load volume settings from user settings.
+    MasterVolume = 0.5f;
+    AudioMap.Emplace(DemoSoundTags::Music, FAudioCategoryData{1.f, &SoundCollection->MusicMap});
+    AudioMap.Emplace(DemoSoundTags::SFX, FAudioCategoryData{1.f, &SoundCollection->SFXMap});
+    AudioMap.Emplace(DemoSoundTags::UI, FAudioCategoryData{1.f, &SoundCollection->UIMap});
+    AudioMap.Emplace(DemoSoundTags::Voice, FAudioCategoryData{1.f, &SoundCollection->VoiceMap});
+
+    // @TEST - Validate AudioMap
+    for (const auto& [CategoryTag, CategoryData] : AudioMap)
+    {
+        checkf(CategoryData.Map, TEXT("No sound map for category: %s"), *CategoryTag.ToString());
+        for (const auto& [SoundTag, SoundPtr] : *(CategoryData.Map))
+        {
+            checkf(!SoundPtr.IsNull(), TEXT("Null sound for tag: %s"), *SoundTag.ToString());
+        }
+    }
+}
+
+TPair<USoundBase*, float> UDemoAudioSubsystem::GetSoundByTag(FGameplayTag SoundTag)
+{
+    const FGameplayTag Category = DemoSoundTags::GetCategory(SoundTag);
+    if (!Category.IsValid())
+    {
+        DemoLOG_CF(LogAudio, Error, TEXT("Invalid category for sound tag: %s"), *SoundTag.ToString());
         return {nullptr, 0.f};
     }
 
+    const FAudioCategoryData* CategoryData = AudioMap.Find(Category);
+    checkf(CategoryData, TEXT("No map for category: %s"), *Category.ToString());
+
+    // @check - Access to the map pointer cause a crash if the SoundCollection has been GCed.
     const TSoftObjectPtr<USoundBase>* SoundPtr = CategoryData->Map->Find(SoundTag);
     if (!SoundPtr)
     {
-        DemoLOG_CF(LogAudio, Error, TEXT("Sound tag (%s) not found from sound collection."), *SoundTag.ToString());
+        DemoLOG_CF(LogAudio, Error, TEXT("SoundCollection has no sound for tag: %s"), *SoundTag.ToString());
         return {nullptr, 0.f};
     }
 
     USoundBase* Sound = SoundPtr->LoadSynchronous();
     if (!Sound)
     {
-        DemoLOG_CF(LogAudio, Error, TEXT("Failed to load sound for tag (%s)."), *SoundTag.ToString());
+        DemoLOG_CF(LogAudio, Error, TEXT("Failed to load sound for tag: %s"), *SoundTag.ToString());
         return {nullptr, 0.f};
     }
 

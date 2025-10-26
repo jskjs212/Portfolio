@@ -10,6 +10,7 @@
 
 struct FWeaponData;
 class AItem;
+class UDemoAudioSubsystem;
 class UInventoryComponent;
 class UStateManagerComponent;
 
@@ -139,4 +140,5 @@ private:
 
     TWeakObjectPtr<UInventoryComponent> CachedInventoryComponent;
     TWeakObjectPtr<const UStateManagerComponent> CachedStateManager;
+    TObjectPtr<UDemoAudioSubsystem> AudioSubsystem;
 };

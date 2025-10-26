@@ -7,6 +7,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 
+const TArray<TEnumAsByte<EObjectTypeQuery>> UTargetingComponent::TargetObjectTypes = TArray<TEnumAsByte<EObjectTypeQuery>>{UEngineTypes::ConvertToObjectType(ECC_Pawn)};
 
 UTargetingComponent::UTargetingComponent()
 {

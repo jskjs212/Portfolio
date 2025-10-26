@@ -169,6 +169,15 @@ void UEquipmentComponent::InitEquipmentComponent()
     // @TODO - Config file or data table?
     EquipDefaultSocketNames.Add(DemoGameplayTags::Item_Weapon, TEXT("MeleeHandSocket"));
     EquipDefaultSocketNames.Add(DemoGameplayTags::Item_Armor_Shield, TEXT("ShieldHandSocket"));
+
+    // Get reference to AudioSubsystem if owner is player.
+    if (const APawn* OwnerPawn = GetOwner<APawn>())
+    {
+        if (OwnerPawn->IsPlayerControlled())
+        {
+            AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(OwnerPawn->GetGameInstance());
+        }
+    }
 }
 
 void UEquipmentComponent::BindToItemActionDispatcher()
@@ -357,9 +366,7 @@ void UEquipmentComponent::EquipItem_PostProcess(const FEquipmentValidationResult
     // OnEquipped: Update UI, stats, etc.
     OnEquipped.Broadcast(ValidationResult.EquipmentType, (*ValidationResult.EquippedItemPtr)->GetItemSlot());
 
-    //const UGameInstance* GameInstance = GetWorld() ? GetWorld()->GetGameInstance() : nullptr;
-    const UGameInstance* GameInstance = GetOwner() ? GetOwner()->GetGameInstance() : nullptr;
-    if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GameInstance))
+    if (AudioSubsystem)
     {
         AudioSubsystem->PlaySound2D(this, DemoSoundTags::SFX_Item_Equip, 0.8f);
     }
@@ -401,10 +408,9 @@ void UEquipmentComponent::UnequipItem_PostProcess(FGameplayTag EquipmentType, co
     // OnUnequipped: Update UI, stats, etc.
     OnUnequipped.Broadcast(EquipmentType, UnequippedSlot);
 
-    const UGameInstance* GameInstance = GetOwner() ? GetOwner()->GetGameInstance() : nullptr;
-    if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GameInstance))
+    if (AudioSubsystem)
     {
-        AudioSubsystem->PlaySound2D(this, DemoSoundTags::SFX_Item_Unequip, 0.5f);
+        AudioSubsystem->PlaySound2D(this, DemoSoundTags::SFX_Item_Unequip, 0.8f);
     }
 
     // Unregister active skills

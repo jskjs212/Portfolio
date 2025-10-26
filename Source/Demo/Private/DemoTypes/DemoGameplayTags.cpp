@@ -40,6 +40,16 @@ UE_DEFINE_GAMEPLAY_TAG(Movement_SpeedMode_Walk, "Movement.SpeedMode.Walk");
 UE_DEFINE_GAMEPLAY_TAG(Movement_SpeedMode_Jog, "Movement.SpeedMode.Jog");
 UE_DEFINE_GAMEPLAY_TAG(Movement_SpeedMode_Sprint, "Movement.SpeedMode.Sprint");
 
+// Stat.*
+UE_DEFINE_GAMEPLAY_TAG(Stat_Resource_Health, "Stat.Resource.Health");
+UE_DEFINE_GAMEPLAY_TAG(Stat_Resource_Stamina, "Stat.Resource.Stamina");
+UE_DEFINE_GAMEPLAY_TAG(Stat_Resource_Mana, "Stat.Resource.Mana");
+UE_DEFINE_GAMEPLAY_TAG(Stat_Primary_STR, "Stat.Primary.STR");
+UE_DEFINE_GAMEPLAY_TAG(Stat_Primary_DEX, "Stat.Primary.DEX");
+UE_DEFINE_GAMEPLAY_TAG(Stat_Primary_INT, "Stat.Primary.INT");
+UE_DEFINE_GAMEPLAY_TAG(Stat_Derived_Attack, "Stat.Derived.Attack");
+UE_DEFINE_GAMEPLAY_TAG(Stat_Derived_Defense, "Stat.Derived.Defense");
+
 // Character states: State.[state]
 UE_DEFINE_GAMEPLAY_TAG(State, "State");
 UE_DEFINE_GAMEPLAY_TAG(State_General, "State.General");

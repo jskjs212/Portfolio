@@ -2,19 +2,18 @@
 
 #include "Components/StatsComponent.h"
 #include "Components/EquipmentComponent.h"
-#include "DemoTypes/DemoGameplayTags.h"
 #include "DemoTypes/ItemTypes.h"
 #include "DemoTypes/LogCategories.h"
 #include "DemoTypes/TableRowBases.h"
 #include "Items/Item.h"
 
-const FGameplayTag UStatsComponent::HealthTag = FGameplayTag::RequestGameplayTag("Stat.Resource.Health");
-const FGameplayTag UStatsComponent::StaminaTag = FGameplayTag::RequestGameplayTag("Stat.Resource.Stamina");
-const FGameplayTag UStatsComponent::STRTag = FGameplayTag::RequestGameplayTag("Stat.Primary.STR");
-const FGameplayTag UStatsComponent::DEXTag = FGameplayTag::RequestGameplayTag("Stat.Primary.DEX");
-const FGameplayTag UStatsComponent::INTTag = FGameplayTag::RequestGameplayTag("Stat.Primary.INT");
-const FGameplayTag UStatsComponent::AttackTag = FGameplayTag::RequestGameplayTag("Stat.Derived.Attack");
-const FGameplayTag UStatsComponent::DefenseTag = FGameplayTag::RequestGameplayTag("Stat.Derived.Defense");
+//const FGameplayTag UStatsComponent::HealthTag = FGameplayTag::RequestGameplayTag("Stat.Resource.Health");
+//const FGameplayTag UStatsComponent::StaminaTag = FGameplayTag::RequestGameplayTag("Stat.Resource.Stamina");
+//const FGameplayTag UStatsComponent::STRTag = FGameplayTag::RequestGameplayTag("Stat.Primary.STR");
+//const FGameplayTag UStatsComponent::DEXTag = FGameplayTag::RequestGameplayTag("Stat.Primary.DEX");
+//const FGameplayTag UStatsComponent::INTTag = FGameplayTag::RequestGameplayTag("Stat.Primary.INT");
+//const FGameplayTag UStatsComponent::AttackTag = FGameplayTag::RequestGameplayTag("Stat.Derived.Attack");
+//const FGameplayTag UStatsComponent::DefenseTag = FGameplayTag::RequestGameplayTag("Stat.Derived.Defense");
 
 UStatsComponent::UStatsComponent()
 {
@@ -24,7 +23,12 @@ UStatsComponent::UStatsComponent()
 void UStatsComponent::InitStatsComponent()
 {
     static const FGameplayTagContainer MustHaveStatType = FGameplayTagContainer::CreateFromArray(TArray<FGameplayTag>{
-        STRTag, DEXTag, INTTag, AttackTag, DefenseTag
+        //STRTag, DEXTag, INTTag, AttackTag, DefenseTag
+        DemoGameplayTags::Stat_Primary_STR,
+            DemoGameplayTags::Stat_Primary_DEX,
+            DemoGameplayTags::Stat_Primary_INT,
+            DemoGameplayTags::Stat_Derived_Attack,
+            DemoGameplayTags::Stat_Derived_Defense
     });
     for (FGameplayTag StatTag : MustHaveStatType)
     {
@@ -56,15 +60,15 @@ void UStatsComponent::ResetAllResourceStats()
 
 void UStatsComponent::AddResourceStat(const FGameplayTag StatTag, const FResourceStat& ResourceStat)
 {
-    static const FGameplayTagContainer AllowedResouceStatTags = FGameplayTagContainer::CreateFromArray(TArray<FGameplayTag>{
-        HealthTag, StaminaTag
-    });
+    //static const FGameplayTagContainer AllowedResouceStatTags = FGameplayTagContainer::CreateFromArray(TArray<FGameplayTag>{
+    //    HealthTag, StaminaTag
+    //});
 
-    if (!StatTag.MatchesAnyExact(AllowedResouceStatTags))
-    {
-        DemoLOG_F(LogAttributes, Error, TEXT("Stat %s is not allowed."), *StatTag.GetTagName().ToString());
-        return;
-    }
+    //if (!StatTag.MatchesAnyExact(AllowedResouceStatTags))
+    //{
+    //    DemoLOG_F(LogAttributes, Error, TEXT("Stat %s is not allowed."), *StatTag.GetTagName().ToString());
+    //    return;
+    //}
 
     if (ResourceStats.Contains(StatTag))
     {
@@ -257,8 +261,10 @@ void UStatsComponent::RecalculateDerivedStat(FGameplayTag InPrimaryStatTag)
     // Defense = STR * 0.1 + DEX * 0.3 + INT * 0.1
     // {DerivedStat, Array{PrimaryStat, Weight}}
     static const TMap<FGameplayTag, TArray<TPair<FGameplayTag, float>>> DerivedStatDependencies = {
-        {AttackTag, {{STRTag, 0.5f}, {DEXTag, 0.1f}}},
-        {DefenseTag, {{STRTag, 0.1f}, {DEXTag, 0.3f}, {INTTag, 0.1f}}}
+        //{AttackTag, {{STRTag, 0.5f}, {DEXTag, 0.1f}}},
+        //{DefenseTag, {{STRTag, 0.1f}, {DEXTag, 0.3f}, {INTTag, 0.1f}}}
+        {DemoGameplayTags::Stat_Derived_Attack, {{DemoGameplayTags::Stat_Primary_STR, 0.5f}, {DemoGameplayTags::Stat_Primary_DEX, 0.1f}}},
+                {DemoGameplayTags::Stat_Derived_Defense, {{DemoGameplayTags::Stat_Primary_STR, 0.1f}, {DemoGameplayTags::Stat_Primary_DEX, 0.3f}, {DemoGameplayTags::Stat_Primary_INT, 0.1f}}}
     };
 
     // For each derived stat
@@ -387,7 +393,7 @@ float UStatsComponent::TakeDamage(const float InDamage)
     constexpr float MaxDamage = 1e10f; // @misc - Set max damage
     Damage = FMath::Clamp(Damage, MinDamage, MaxDamage);
 
-    Damage = ModifyCurrentResourceStatChecked(HealthTag, -Damage, true) * -1.f;
+    Damage = ModifyCurrentResourceStatChecked(DemoGameplayTags::Stat_Resource_Health, -Damage, true) * -1.f;
 
     // @debug
     DemoLOG_F(LogAttributes, Display, TEXT("%.2f"), Damage);
@@ -396,9 +402,9 @@ float UStatsComponent::TakeDamage(const float InDamage)
 
 void UStatsComponent::ConsumeStamina(float StaminaCost)
 {
-    if (HasStatType(StaminaTag))
+    if (HasStatType(DemoGameplayTags::Stat_Resource_Stamina))
     {
-        ModifyCurrentResourceStatChecked(StaminaTag, -StaminaCost, true);
+        ModifyCurrentResourceStatChecked(DemoGameplayTags::Stat_Resource_Stamina, -StaminaCost, true);
     }
 }
 

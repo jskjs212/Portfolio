@@ -1,8 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UI/DemoHUDWidget.h"
-#include "Components/StatsComponent.h"
-#include "Components/TextBlock.h"
+#include "DemoTypes/DemoGameplayTags.h"
 #include "Interfaces/Interactable.h"
 #include "Items/Item.h"
 #include "UI/ActionKeyWidget.h"
@@ -33,14 +32,13 @@ void UDemoHUDWidget::NativeConstruct()
 
     // Init stat bars
     APawn* OwnerPawn = GetOwningPlayerPawn();
-    HealthBarWidget->BindToStatsComponent(OwnerPawn, UStatsComponent::HealthTag);
-    StaminaBarWidget->BindToStatsComponent(OwnerPawn, UStatsComponent::StaminaTag);
+    HealthBarWidget->BindToStatsComponent(OwnerPawn, DemoGameplayTags::Stat_Resource_Health);
+    StaminaBarWidget->BindToStatsComponent(OwnerPawn, DemoGameplayTags::Stat_Resource_Stamina);
 }
 
 void UDemoHUDWidget::UpdateInteractWidgets(IInteractable* Interactable)
 {
     const AItem* Item = Cast<AItem>(Interactable);
-
     if (Item && Item->GetItemSlot().IsValid())
     {
         ItemInfoWidget->UpdateItemInfo(Item->GetItemSlot());

@@ -2,11 +2,9 @@
 
 #include "UI/AIStatusWidget.h"
 #include "Character/BaseCharacter.h"
-#include "Components/StatsComponent.h"
 #include "Components/TextBlock.h"
-#include "Components/WidgetComponent.h"
+#include "DemoTypes/DemoGameplayTags.h"
 #include "DemoTypes/LogCategories.h"
-#include "GameplayTagContainer.h"
 #include "UI/StatBarWidget.h"
 
 void UAIStatusWidget::NativeOnInitialized()
@@ -24,7 +22,7 @@ void UAIStatusWidget::BindToActor(AActor* InActor)
         return;
     }
 
-    HealthBar->BindToStatsComponent(InActor, UStatsComponent::HealthTag);
+    HealthBar->BindToStatsComponent(InActor, DemoGameplayTags::Stat_Resource_Health);
 
     const ABaseCharacter* BaseCharacter = Cast<ABaseCharacter>(InActor);
     FText DisplayName = BaseCharacter ? BaseCharacter->GetCharacterDisplayName() : FText::FromString(InActor->GetName());

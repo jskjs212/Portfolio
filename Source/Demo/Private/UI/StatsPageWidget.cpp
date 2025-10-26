@@ -3,6 +3,7 @@
 #include "UI/StatsPageWidget.h"
 #include "Components/StatsComponent.h"
 #include "Components/TextBlock.h"
+#include "DemoTypes/DemoGameplayTags.h"
 #include "GameFramework/Pawn.h"
 
 void UStatsPageWidget::NativeOnInitialized()
@@ -16,13 +17,13 @@ void UStatsPageWidget::NativeOnInitialized()
 
     // @hardcoded - DataTable or UMyTagText that contains tag.
     StatTagToTextMap = TMap<FGameplayTag, TObjectPtr<UTextBlock>>{
-        {UStatsComponent::HealthTag, CurrentHealthText},
-        {UStatsComponent::StaminaTag, CurrentStaminaText},
-        {UStatsComponent::STRTag, STRText},
-        {UStatsComponent::DEXTag, DEXText},
-        {UStatsComponent::INTTag, INTText},
-        {UStatsComponent::AttackTag, AttackText},
-        {UStatsComponent::DefenseTag, DefenseText}
+        {DemoGameplayTags::Stat_Resource_Health, CurrentHealthText},
+        {DemoGameplayTags::Stat_Resource_Stamina, CurrentStaminaText},
+        {DemoGameplayTags::Stat_Primary_STR, STRText},
+        {DemoGameplayTags::Stat_Primary_DEX, DEXText},
+        {DemoGameplayTags::Stat_Primary_INT, INTText},
+        {DemoGameplayTags::Stat_Derived_Attack, AttackText},
+        {DemoGameplayTags::Stat_Derived_Defense, DefenseText}
     };
 
     BindToStatsComponent();

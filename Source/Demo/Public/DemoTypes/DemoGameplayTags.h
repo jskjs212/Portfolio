@@ -45,6 +45,16 @@ DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Movement_SpeedMode_Walk);
 DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Movement_SpeedMode_Jog);
 DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Movement_SpeedMode_Sprint);
 
+// Stat.*
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Stat_Resource_Health);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Stat_Resource_Stamina);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Stat_Resource_Mana);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Stat_Primary_STR);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Stat_Primary_DEX);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Stat_Primary_INT);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Stat_Derived_Attack);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Stat_Derived_Defense);
+
 // Character states: State.[state]
 // These can also be used as action tags.
 // MUST sync with UStateManagerComponent::UStateManagerComponent() - std::call_once - AllStates

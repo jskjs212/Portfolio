@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "DemoTypes/DemoGameplayTags.h"
 #include "DemoTypes/StatsTypes.h"
 #include "GameplayTagContainer.h"
 #include "StatsComponent.generated.h"
@@ -28,13 +29,13 @@ class DEMO_API UStatsComponent : public UActorComponent
     //        Statics
     ////////////////////////////////////////////////////////
 public:
-    static const FGameplayTag HealthTag;
-    static const FGameplayTag StaminaTag;
-    static const FGameplayTag STRTag;
-    static const FGameplayTag DEXTag;
-    static const FGameplayTag INTTag;
-    static const FGameplayTag AttackTag;
-    static const FGameplayTag DefenseTag;
+    //static const FGameplayTag HealthTag;
+    //static const FGameplayTag StaminaTag;
+    //static const FGameplayTag STRTag;
+    //static const FGameplayTag DEXTag;
+    //static const FGameplayTag INTTag;
+    //static const FGameplayTag AttackTag;
+    //static const FGameplayTag DefenseTag;
 
     ////////////////////////////////////////////////////////
     //        Delegates
@@ -95,13 +96,13 @@ private:
     ////////////////////////////////////////////////////////
 public:
     // Health tag needed.
-    FORCEINLINE float GetCurrentHealth() const { return GetCurrentResourceStatChecked(HealthTag); }
+    FORCEINLINE float GetCurrentHealth() const { return GetCurrentResourceStatChecked(DemoGameplayTags::Stat_Resource_Health); }
 
     // Health tag needed.
-    FORCEINLINE float GetMaxHealth() const { return GetMaxResourceStatChecked(HealthTag); }
+    FORCEINLINE float GetMaxHealth() const { return GetMaxResourceStatChecked(DemoGameplayTags::Stat_Resource_Health); }
 
     // Health tag needed.
-    FORCEINLINE float Heal(float HealAmount) { return ModifyCurrentResourceStatChecked(HealthTag, HealAmount, false); }
+    FORCEINLINE float Heal(float HealAmount) { return ModifyCurrentResourceStatChecked(DemoGameplayTags::Stat_Resource_Health, HealAmount, false); }
 
     // Health tag needed.
     // @return The actual amount by which the damage was taken.

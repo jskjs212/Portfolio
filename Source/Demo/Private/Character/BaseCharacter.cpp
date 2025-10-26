@@ -67,7 +67,7 @@ float ABaseCharacter::InternalTakePointDamage(float Damage, FPointDamageEvent co
     Damage = Super::InternalTakePointDamage(Damage, PointDamageEvent, EventInstigator, DamageCauser);
 
     // Defense
-    const float Defense = StatsComponent->GetDerivedStatFinalValueChecked(UStatsComponent::DefenseTag);
+    const float Defense = StatsComponent->GetDerivedStatFinalValueChecked(DemoGameplayTags::Stat_Derived_Defense);
     Damage = Damage * (100.f / (100.f + Defense)); // Simple formula
 
     // @TODO
@@ -172,7 +172,7 @@ bool ABaseCharacter::CanPerformJump() const
         return false;
     }
 
-    if (!StatsComponent->HasEnoughOrNoRestriction(UStatsComponent::StaminaTag, JumpStaminaCost))
+    if (!StatsComponent->HasEnoughOrNoRestriction(DemoGameplayTags::Stat_Resource_Stamina, JumpStaminaCost))
     {
         return false;
     }
@@ -371,7 +371,7 @@ void ABaseCharacter::HandleDeath()
 
 void ABaseCharacter::HandleCurrentResourceStatChanged(FGameplayTag StatTag, float OldValue, float NewValue)
 {
-    if (StatTag == UStatsComponent::HealthTag)
+    if (StatTag == DemoGameplayTags::Stat_Resource_Health)
     {
         if (NewValue <= 0.f)
         {
@@ -444,7 +444,7 @@ float ABaseCharacter::CalculateDamage(EAttackCollisionType InType) const
     float Damage = 0.f;
 
     // Get base damage
-    Damage = StatsComponent->GetDerivedStatFinalValueChecked(UStatsComponent::AttackTag);
+    Damage = StatsComponent->GetDerivedStatFinalValueChecked(DemoGameplayTags::Stat_Derived_Attack);
 
     // Damage multiplier from action
     const FGameplayTag CurrentAction = StateManager->GetCurrentAction();
@@ -557,7 +557,7 @@ const FActionInfo* ABaseCharacter::PerformAction_Validate(FGameplayTag InAction,
 
     // Check stamina
     const FActionInfo& ActionInfo = (*ActionInfoArray)[MontageIndex];
-    if (!StatsComponent->HasEnoughOrNoRestriction(UStatsComponent::StaminaTag, ActionInfo.StaminaCost))
+    if (!StatsComponent->HasEnoughOrNoRestriction(DemoGameplayTags::Stat_Resource_Stamina, ActionInfo.StaminaCost))
     {
         return nullptr;
     }
