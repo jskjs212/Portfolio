@@ -1,10 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "PlayerController/DemoPlayerController.h"
+#include "Audio/DemoAudioSubsystem.h"
+#include "Audio/DemoSoundTags.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Character/PlayerCharacter.h"
 #include "DemoTypes/LogCategories.h"
-#include "Kismet/GameplayStatics.h"
 #include "UI/CursorWidget.h"
 #include "UI/DemoHUD.h"
 #include "UI/DemoHUDWidget.h"
@@ -36,6 +37,16 @@ ADemoPlayerController::ADemoPlayerController()
     }
 
     ItemActionDispatcher = CreateDefaultSubobject<UItemActionDispatcher>(TEXT("ItemActionDispatcher"));
+}
+
+void ADemoPlayerController::BeginPlay()
+{
+    Super::BeginPlay();
+
+    if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GetGameInstance()))
+    {
+        AudioSubsystem->PlayDefaultBGM(this);
+    }
 }
 
 void ADemoPlayerController::ShowPlayerMenu(bool bShow, FGameplayTag TabTag)
@@ -72,7 +83,10 @@ void ADemoPlayerController::ShowPlayerMenu(bool bShow, FGameplayTag TabTag)
             }
         }
 
-        UGameplayStatics::PlaySound2D(this, PlayerMenuOpenSound, 0.5f);
+        if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GetGameInstance()))
+        {
+            AudioSubsystem->PlaySound2D(this, DemoSoundTags::UI_PlayerMenu_Open);
+        }
     }
     else // hide
     {
@@ -95,7 +109,10 @@ void ADemoPlayerController::ShowPlayerMenu(bool bShow, FGameplayTag TabTag)
             }
         }
 
-        UGameplayStatics::PlaySound2D(this, PlayerMenuCloseSound, 0.5f);
+        if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GetGameInstance()))
+        {
+            AudioSubsystem->PlaySound2D(this, DemoSoundTags::UI_PlayerMenu_Close);
+        }
     }
 }
 

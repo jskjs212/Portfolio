@@ -89,6 +89,6 @@ public:
 
 private:
     // Map of { ActionTag, Array of ActionInfo }
-    UPROPERTY(EditAnywhere, meta = (Categories = "State"))
+    UPROPERTY(EditDefaultsOnly, meta = (Categories = "State"))
     TMap<FGameplayTag, FActionInfos> ActionInfoMap;
 };

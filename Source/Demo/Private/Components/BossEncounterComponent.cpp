@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Components/BossEncounterComponent.h"
+#include "Audio/DemoAudioSubsystem.h"
 #include "AI/DemoAIController.h"
 #include "DemoTypes/LogCategories.h"
 #include "GameFramework/Pawn.h"
@@ -11,7 +12,7 @@ UBossEncounterComponent::UBossEncounterComponent()
     PrimaryComponentTick.bCanEverTick = false;
 }
 
-void UBossEncounterComponent::SetupBossPawn(APawn* InBossPawn)
+void UBossEncounterComponent::SetupBossInfo(APawn* InBossPawn, FGameplayTag InBossMusicTag)
 {
     if (BossPawn.IsValid())
     {
@@ -30,6 +31,8 @@ void UBossEncounterComponent::SetupBossPawn(APawn* InBossPawn)
         DemoLOG_CF(LogDemoGame, Error, TEXT("InBossPawn is null."));
         return;
     }
+
+    BossMusicTag = InBossMusicTag;
 }
 
 void UBossEncounterComponent::StartEncounter(APawn* Instigator)
@@ -69,7 +72,14 @@ void UBossEncounterComponent::StartEncounter(APawn* Instigator)
     // Activate boss AI
     BossAIController->SetTargetActor(Instigator);
 
-    // @TODO - start music, lock doors, sequence, etc.
+    // Start music
+    const UGameInstance* GameInstance = GetOwner() ? GetOwner()->GetGameInstance() : nullptr;
+    if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GameInstance))
+    {
+        AudioSubsystem->PlaySound2D(this, BossMusicTag);
+    }
+
+    // @TODO - lock doors, sequence, etc.
 }
 
 void UBossEncounterComponent::EndEncounter(EBossEncounterEndReason Reason)
@@ -110,7 +120,14 @@ void UBossEncounterComponent::EndEncounter(EBossEncounterEndReason Reason)
         }
     }
 
-    // @TODO - stop music, unlock doors, sequence, reward, etc.
+    // Stop music
+    const UGameInstance* GameInstance = GetOwner() ? GetOwner()->GetGameInstance() : nullptr;
+    if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GameInstance))
+    {
+        AudioSubsystem->PlayDefaultBGM(this);
+    }
+
+    // @TODO - unlock doors, sequence, reward, etc.
     // @WARNING - Boss defeated -> Player retreated -> Boss destroyed -> EndEncounter may miss some logics.
 }
 

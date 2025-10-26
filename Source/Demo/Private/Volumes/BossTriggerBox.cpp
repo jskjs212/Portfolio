@@ -16,14 +16,18 @@ void ABossTriggerBox::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (BossPawn.IsValid())
-    {
-        BossEncounterComponent->SetupBossPawn(BossPawn.Get());
-    }
-    else
+    if (!BossPawn.IsValid())
     {
         DemoLOG_CF(LogDemoGame, Error, TEXT("No BossPawn assigned for %s."), *GetName());
+        return; // @check - Set boss pawn at runtime?
     }
+    if (!BossMusicTag.IsValid())
+    {
+        DemoLOG_CF(LogDemoGame, Warning, TEXT("No BossMusicTag assigned for %s."), *GetName());
+        // Continue
+    }
+
+    BossEncounterComponent->SetupBossInfo(BossPawn.Get(), BossMusicTag);
 
     OnActorBeginOverlap.AddDynamic(this, &ThisClass::HandleBeginOverlap);
     OnActorEndOverlap.AddDynamic(this, &ThisClass::HandleEndOverlap);

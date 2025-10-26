@@ -9,7 +9,6 @@
 
 class ADemoPlayerController;
 class UImage;
-class USoundBase;
 class UTabButton;
 class UWidgetSwitcher;
 
@@ -105,13 +104,6 @@ protected:
 
     UPROPERTY(EditAnywhere, Category = "Initialization")
     FLinearColor TabButtonHoveredColor;
-
-    // @TODO - Audio
-    UPROPERTY(EditAnywhere, Category = "Initialization")
-    TObjectPtr<USoundBase> TabButtonHoveredSound;
-
-    UPROPERTY(EditAnywhere, Category = "Initialization")
-    TObjectPtr<USoundBase> TabButtonClickSound;
 
 private:
     FGameplayTag ActiveTabTag;

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "GameplayTagContainer.h"
 #include "BossEncounterComponent.generated.h"
 
 UENUM()
@@ -32,7 +33,7 @@ class DEMO_API UBossEncounterComponent : public UActorComponent
 public:
     UBossEncounterComponent();
 
-    void SetupBossPawn(APawn* InBossPawn);
+    void SetupBossInfo(APawn* InBossPawn, FGameplayTag InBossMusicTag);
 
     void StartEncounter(APawn* Instigator);
 
@@ -52,6 +53,8 @@ private:
     EBossEncounterState CurrentState{EBossEncounterState::Dormant};
 
     TWeakObjectPtr<APawn> BossPawn;
+
+    FGameplayTag BossMusicTag;
 
     TWeakObjectPtr<APawn> EncounterInstigator;
 };

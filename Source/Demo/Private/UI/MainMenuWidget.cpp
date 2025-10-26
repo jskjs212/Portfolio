@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UI/MainMenuWidget.h"
+#include "Audio/DemoAudioSubsystem.h"
+#include "Audio/DemoSoundTags.h"
 #include "Components/Button.h"
 #include "DemoTypes/LogCategories.h"
 #include "Kismet/GameplayStatics.h"
@@ -24,6 +26,11 @@ void UMainMenuWidget::NativeOnInitialized()
 
     NewGameButton->OnClicked.AddDynamic(this, &UMainMenuWidget::HandleNewGameButtonClicked);
     QuitButton->OnClicked.AddDynamic(this, &UMainMenuWidget::HandleQuitButtonClicked);
+
+    if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GetGameInstance()))
+    {
+        AudioSubsystem->PlaySound2D(this, DemoSoundTags::Music_MainMenu);
+    }
 }
 
 void UMainMenuWidget::HandleNewGameButtonClicked()

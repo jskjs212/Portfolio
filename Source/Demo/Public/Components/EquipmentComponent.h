@@ -11,7 +11,6 @@
 struct FWeaponData;
 class AItem;
 class UInventoryComponent;
-class USoundBase;
 class UStateManagerComponent;
 
 /**
@@ -127,11 +126,6 @@ private:
     ////////////////////////////////////////////////////////
     //        Variables
     ////////////////////////////////////////////////////////
-public:
-    // @TODO - Audio
-    UPROPERTY(EditDefaultsOnly, Category = "Sound")
-    TObjectPtr<USoundBase> EquipSound;
-
 private:
     // nullptr = not equipped
     UPROPERTY(VisibleAnywhere, Category = "Item", meta = (Categories = "Item"))

@@ -4,6 +4,8 @@
 #include "Animation/AnimationDataSubsystem.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimLayerInterface.h"
+#include "Audio/DemoAudioSubsystem.h"
+#include "Audio/DemoSoundTags.h"
 #include "Character/DemoPawnData.h"
 #include "Components/AttackCollisionComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -25,6 +27,7 @@
 ABaseCharacter::ABaseCharacter()
 {
     PrimaryActorTick.bCanEverTick = false;
+    HitSoundTag = DemoSoundTags::SFX_Game_Hit_Default;
     MovementSpeedMode = DemoGameplayTags::Movement_SpeedMode_Jog;
 
     // @check - temporary values
@@ -51,7 +54,7 @@ void ABaseCharacter::BeginPlay()
     Super::BeginPlay();
 
     // Validate
-    if (!HitReactFrontMontage || !HitReactBackMontage || !HitSound || !HitParticle)
+    if (!HitReactFrontMontage || !HitReactBackMontage || !HitParticle)
     {
         DemoLOG_CF(LogCharacter, Warning, TEXT("HitReact assets are not set for %s."), *GetName());
     }
@@ -258,7 +261,10 @@ void ABaseCharacter::PlayPointHitEffects(const FPointDamageEvent& PointDamageEve
     const FVector HitLocation = PointDamageEvent.HitInfo.ImpactPoint;
 
     // Sound
-    UGameplayStatics::PlaySoundAtLocation(this, HitSound, HitLocation);
+    if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GetGameInstance()))
+    {
+        AudioSubsystem->PlaySoundAtLocation(this, HitSoundTag, HitLocation);
+    }
 
     // Particle
     FTransform ParticleTransform;

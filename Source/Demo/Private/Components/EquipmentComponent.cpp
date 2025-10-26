@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Components/EquipmentComponent.h"
+#include "Audio/DemoAudioSubsystem.h"
+#include "Audio/DemoSoundTags.h"
 #include "Components/InventoryComponent.h"
 #include "Components/StateManagerComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
@@ -10,7 +12,6 @@
 #include "GameFramework/Character.h"
 #include "Items/Item.h"
 #include "PlayerController/DemoPlayerController.h"
-#include "Kismet/GameplayStatics.h"
 #include "UI/ItemActionDispatcher.h"
 
 UEquipmentComponent::UEquipmentComponent()
@@ -356,9 +357,11 @@ void UEquipmentComponent::EquipItem_PostProcess(const FEquipmentValidationResult
     // OnEquipped: Update UI, stats, etc.
     OnEquipped.Broadcast(ValidationResult.EquipmentType, (*ValidationResult.EquippedItemPtr)->GetItemSlot());
 
-    if (EquipSound)
+    //const UGameInstance* GameInstance = GetWorld() ? GetWorld()->GetGameInstance() : nullptr;
+    const UGameInstance* GameInstance = GetOwner() ? GetOwner()->GetGameInstance() : nullptr;
+    if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GameInstance))
     {
-        UGameplayStatics::PlaySound2D(this, EquipSound);
+        AudioSubsystem->PlaySound2D(this, DemoSoundTags::SFX_Item_Equip, 0.8f);
     }
 
     // Register active skills
@@ -398,9 +401,10 @@ void UEquipmentComponent::UnequipItem_PostProcess(FGameplayTag EquipmentType, co
     // OnUnequipped: Update UI, stats, etc.
     OnUnequipped.Broadcast(EquipmentType, UnequippedSlot);
 
-    if (EquipSound)
+    const UGameInstance* GameInstance = GetOwner() ? GetOwner()->GetGameInstance() : nullptr;
+    if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GameInstance))
     {
-        UGameplayStatics::PlaySound2D(this, EquipSound);
+        AudioSubsystem->PlaySound2D(this, DemoSoundTags::SFX_Item_Unequip, 0.5f);
     }
 
     // Unregister active skills

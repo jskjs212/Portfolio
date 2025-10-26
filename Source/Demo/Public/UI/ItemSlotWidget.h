@@ -13,7 +13,6 @@ class UBorder;
 class UDraggedItemSlotWidget;
 class UImage;
 class USizeBox;
-class USoundBase;
 class UTextBlock;
 class UTexture2D;
 
@@ -143,10 +142,6 @@ private:
 
     UPROPERTY(EditAnywhere, Category = "Initialization")
     TSubclassOf<UDraggedItemSlotWidget> DraggedItemSlotWidgetBPClass;
-
-    // @TODO - Audio
-    UPROPERTY(EditAnywhere, Category = "Initialization")
-    TObjectPtr<USoundBase> HoveredSound;
 
     TWeakObjectPtr<ADemoPlayerController> CachedDemoPlayerController;
 };

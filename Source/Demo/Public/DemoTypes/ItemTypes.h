@@ -43,7 +43,7 @@ FORCEINLINE const TArray<const FGameplayTag>& GetEquipmentTypes()
 }
 
 // Find item category from item type.
-// ex) Item.Weapon.Melee.OneHanded -> Item.Weapon
+// e.g. Item.Weapon.Melee.OneHanded -> Item.Weapon
 // @return EmptyTag if not found.
 FORCEINLINE FGameplayTag GetItemCategory(const FGameplayTag ItemType)
 {

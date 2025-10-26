@@ -193,8 +193,8 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Initialization|Animation")
     float DeathDestroyDelay{5.f};
 
-    UPROPERTY(EditAnywhere, Category = "Initialization|Hit")
-    TObjectPtr<USoundBase> HitSound;
+    UPROPERTY(EditAnywhere, Category = "Initialization|Hit", meta = (Categories = "Sound"))
+    FGameplayTag HitSoundTag;
 
     UPROPERTY(EditAnywhere, Category = "Initialization|Hit")
     TObjectPtr<UParticleSystem> HitParticle;

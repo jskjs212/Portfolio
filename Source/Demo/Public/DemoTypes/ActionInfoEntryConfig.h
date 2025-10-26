@@ -32,6 +32,6 @@ class DEMO_API UActionInfoEntryConfig : public UDataAsset
 
 public:
     // Each ActionInfoConfig should be associated with a unique {CharacterTag, WeaponTag} pair.
-    UPROPERTY(EditAnywhere, Category = "Action Info")
+    UPROPERTY(EditDefaultsOnly, Category = "Action Info")
     TArray<FActionInfoEntry> ActionInfoEntries;
 };

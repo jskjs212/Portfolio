@@ -43,7 +43,7 @@ protected:
     TObjectPtr<UAISenseConfig_Sight> SenseSightConfig;
 
     ////////////////////////////////////////////////////////
-    //        AIController
+    //        AIController functions
     ////////////////////////////////////////////////////////
 public:
     ADemoAIController();

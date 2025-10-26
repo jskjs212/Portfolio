@@ -1,7 +1,13 @@
-# Memo for docs for later
+Memo for docs for later
+=======================
 ## Common
+Init vs Setup
 - Init: One-time, internal setup only
 - Setup: Might be repeated and involve external dependencies
+
+Audio vs Sound
+- Audio: System-level, global management (e.g., AudioSubsystem)
+- Sound: Object-level, sound assets (e.g., SoundCues, SoundWaves)
 
 ## Character
 BaseCharacter <- PlayerCharacter, AICharacter\

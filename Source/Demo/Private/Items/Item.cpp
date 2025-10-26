@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Items/Item.h"
+#include "Audio/DemoAudioSubsystem.h"
+#include "Audio/DemoSoundTags.h"
 #include "Components/BoxComponent.h"
 #include "Components/InventoryComponent.h"
 #include "Components/MeshComponent.h"
@@ -10,8 +12,6 @@
 #include "DemoTypes/TableRowBases.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
-// @TEST - sound
-#include "Character/PlayerCharacter.h"
 
 AItem* AItem::SpawnItem(
     UWorld* World,
@@ -284,10 +284,9 @@ void AItem::Interact(APawn* InstigatorPawn)
 
             if (Added > 0)
             {
-                // @TODO - Audio
-                if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(InstigatorPawn))
+                if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GetGameInstance()))
                 {
-                    UGameplayStatics::PlaySound2D(this, PlayerCharacter->PickupSound);
+                    AudioSubsystem->PlaySound2D(this, DemoSoundTags::SFX_Item_PickUp);
                 }
             }
 

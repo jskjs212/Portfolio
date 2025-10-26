@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/TriggerBox.h"
+#include "GameplayTagContainer.h"
 #include "BossTriggerBox.generated.h"
 
 class UBossEncounterComponent;
@@ -48,4 +49,7 @@ private:
 private:
     UPROPERTY(EditAnywhere, Category = "Initialization")
     TWeakObjectPtr<APawn> BossPawn;
+
+    UPROPERTY(EditAnywhere, Category = "Initialization", meta = (Categories = "Sound.Music"))
+    FGameplayTag BossMusicTag;
 };

@@ -20,6 +20,6 @@ class DEMO_API UItemAnimLayerConfig : public UDataAsset
 
 public:
     // Each ItemAnimLayerClass should be associated with a unique {CharacterTag, WeaponTag} pair.
-    UPROPERTY(EditAnywhere, meta = (Categories = "Item.Weapon"))
+    UPROPERTY(EditDefaultsOnly, meta = (Categories = "Item.Weapon"))
     TMap<FCharacterWeaponKey, TSubclassOf<UAnimInstance>> ItemAnimLayerMap;
 };

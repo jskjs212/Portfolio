@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UI/ItemSlotWidget.h"
+#include "Audio/DemoAudioSubsystem.h"
+#include "Audio/DemoSoundTags.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Components/Border.h"
 #include "Components/Image.h"
@@ -10,7 +12,6 @@
 #include "DemoTypes/ItemTypes.h"
 #include "DemoTypes/LogCategories.h"
 #include "DemoTypes/TableRowBases.h"
-#include "Kismet/GameplayStatics.h"
 #include "PlayerController/DemoPlayerController.h"
 #include "Styling/SlateBrush.h"
 #include "UI/DraggedItemSlotWidget.h"
@@ -206,9 +207,9 @@ void UItemSlotWidget::UpdateVisuals()
 
 void UItemSlotWidget::HandleHovered()
 {
-    if (HoveredSound)
+    if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GetGameInstance()))
     {
-        UGameplayStatics::PlaySound2D(this, HoveredSound, 0.3f);
+        AudioSubsystem->PlaySound2D(this, DemoSoundTags::UI_ItemSlot_Hover);
     }
 
     OnHovered.ExecuteIfBound(ItemSlot);

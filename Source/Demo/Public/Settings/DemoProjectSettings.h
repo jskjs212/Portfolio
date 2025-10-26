@@ -4,10 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DeveloperSettings.h"
-#include "DemoTypes/ActionInfoEntryConfig.h"
-#include "DemoTypes/ItemAnimLayerConfig.h"
 #include "Widgets/Layout/SScaleBox.h"
 #include "DemoProjectSettings.generated.h"
+
+class UActionInfoEntryConfig;
+class UItemAnimLayerConfig;
+class USoundCollection;
 
 /**
  *
@@ -18,20 +20,23 @@ class DEMO_API UDemoProjectSettings : public UDeveloperSettings
     GENERATED_BODY()
 
 public:
-    UPROPERTY(Config, EditAnywhere, Category = "Action Info")
+    UPROPERTY(Config, EditDefaultsOnly, Category = "Action Info")
     TSoftObjectPtr<UActionInfoEntryConfig> ActionInfoEntryConfig;
 
-    UPROPERTY(Config, EditAnywhere, Category = "Animation")
+    UPROPERTY(Config, EditDefaultsOnly, Category = "Animation")
     TSoftObjectPtr<UItemAnimLayerConfig> ItemAnimLayerConfig;
 
     // Use images if MoviePath is empty.
     // Path == "Logo" means /Content/Movies/Logo.mp4
-    UPROPERTY(Config, EditAnywhere, Category = "Loading Screen")
+    UPROPERTY(Config, EditDefaultsOnly, Category = "Loading Screen")
     FString MoviePath;
 
-    UPROPERTY(Config, EditAnywhere, Category = "Loading Screen", meta = (AllowedClasses = "/Script/Engine.Texture2D"))
+    UPROPERTY(Config, EditDefaultsOnly, Category = "Loading Screen", meta = (AllowedClasses = "/Script/Engine.Texture2D"))
     TArray<FSoftObjectPath> LoadingScreenImages;
 
-    UPROPERTY(Config, EditAnywhere, Category = "Loading Screen")
+    UPROPERTY(Config, EditDefaultsOnly, Category = "Loading Screen")
     TEnumAsByte<EStretch::Type> LoadingScreenImageStretch{EStretch::ScaleToFit};
+
+    UPROPERTY(Config, EditDefaultsOnly, Category = "Audio")
+    TSoftObjectPtr<USoundCollection> SoundCollection;
 };

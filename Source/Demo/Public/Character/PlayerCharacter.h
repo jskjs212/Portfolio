@@ -16,7 +16,6 @@ class UInputAction;
 class UInputMappingContext;
 class UInventoryComponent;
 class USpringArmComponent;
-class USoundBase;
 class UTargetingComponent;
 
 DECLARE_DELEGATE_OneParam(FOnInteractableFocused, IInteractable* /* NewFocusedInteractable */);
@@ -159,11 +158,6 @@ private:
     ////////////////////////////////////////////////////////
     //        Variables
     ////////////////////////////////////////////////////////
-public:
-    // @TODO - Audio
-    UPROPERTY(EditDefaultsOnly, Category = "Initialization")
-    TObjectPtr<USoundBase> PickupSound;
-
 private:
     FGenericTeamId TeamID{DemoTeamID::Player};
 

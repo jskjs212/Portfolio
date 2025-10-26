@@ -3,6 +3,7 @@
 #include "Animation/AnimationDataSubsystem.h"
 #include "DemoTypes/ActionInfoConfig.h"
 #include "DemoTypes/ActionInfoEntryConfig.h"
+#include "DemoTypes/ItemAnimLayerConfig.h"
 #include "DemoTypes/LogCategories.h"
 #include "Settings/DemoProjectSettings.h"
 

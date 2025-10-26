@@ -14,7 +14,6 @@ class IInteractable;
 class UContextMenuWidget;
 class UCursorWidget;
 class UPlayerMenuWidget;
-class USoundBase;
 
 /**
  *
@@ -32,11 +31,18 @@ private:
     TObjectPtr<UItemActionDispatcher> ItemActionDispatcher;
 
     ////////////////////////////////////////////////////////
-    //        UI functions
+    //        Fundamentals
     ////////////////////////////////////////////////////////
 public:
     ADemoPlayerController();
 
+protected:
+    virtual void BeginPlay() override;
+
+    ////////////////////////////////////////////////////////
+    //        PlayerController functions
+    ////////////////////////////////////////////////////////
+public:
     void InitUI()
     {
         InitDemoHUD();
@@ -85,13 +91,6 @@ private:
 
     UPROPERTY()
     TObjectPtr<UCursorWidget> CursorWidget;
-
-    // @TODO - Audio
-    UPROPERTY(EditDefaultsOnly, Category = "Initialization")
-    TObjectPtr<USoundBase> PlayerMenuOpenSound;
-
-    UPROPERTY(EditDefaultsOnly, Category = "Initialization")
-    TObjectPtr<USoundBase> PlayerMenuCloseSound;
 
     ////////////////////////////////////////////////////////
     //        Variables

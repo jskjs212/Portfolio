@@ -1,11 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UI/TabMenuWidget.h"
+#include "Audio/DemoAudioSubsystem.h"
+#include "Audio/DemoSoundTags.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Components/Image.h"
 #include "Components/WidgetSwitcher.h"
 #include "DemoTypes/LogCategories.h"
-#include "Kismet/GameplayStatics.h"
 #include "PlayerController/DemoPlayerController.h"
 #include "UI/TabButton.h"
 
@@ -39,9 +40,9 @@ void UTabMenuWidget::SelectTab(const int32 InIndex)
         return;
     }
 
-    if (TabButtonClickSound)
+    if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GetGameInstance()))
     {
-        UGameplayStatics::PlaySound2D(this, TabButtonClickSound);
+        AudioSubsystem->PlaySound2D(this, DemoSoundTags::UI_TabButton_Click);
     }
 
     // Already selected
@@ -70,9 +71,9 @@ void UTabMenuWidget::SelectTab(const int32 InIndex)
 
 void UTabMenuWidget::SelectTab(const FGameplayTag InTag)
 {
-    if (TabButtonClickSound)
+    if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GetGameInstance()))
     {
-        UGameplayStatics::PlaySound2D(this, TabButtonClickSound);
+        AudioSubsystem->PlaySound2D(this, DemoSoundTags::UI_TabButton_Click);
     }
 
     if (ActiveTabTag == InTag)
@@ -190,9 +191,9 @@ void UTabMenuWidget::HandleTabButtonClicked(FGameplayTag InTag)
 
 void UTabMenuWidget::HandleTabButtonHovered(const FGameplayTag InTag)
 {
-    if (TabButtonHoveredSound)
+    if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GetGameInstance()))
     {
-        UGameplayStatics::PlaySound2D(this, TabButtonHoveredSound, 0.6f);
+        AudioSubsystem->PlaySound2D(this, DemoSoundTags::UI_TabButton_Hover, 0.7f);
     }
 
     if (ActiveTabTag == InTag)
