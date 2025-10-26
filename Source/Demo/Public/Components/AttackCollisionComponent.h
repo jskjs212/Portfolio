@@ -56,11 +56,11 @@ public:
     ////////////////////////////////////////////////////////
 public:
     // Add a new definition at runtime. Overwrite if the same type already exists.
-    // i.e. equip weapon, enter new phase, etc.
+    // e.g. equip weapon, enter new phase, etc.
     void AddAttackCollisionDefinition(const FAttackCollisionDefinition& InDefinition);
 
     // Remove a definition at runtime.
-    // i.e. unequip weapon, lose body part, etc.
+    // e.g. unequip weapon, lose body part, etc.
     void RemoveAttackCollisionDefinition(EAttackCollisionType InType);
 
     void ActivateCollisionDefinition(EAttackCollisionType InType, int32 HitGroup, bool bClearHitActorsOnBegin);

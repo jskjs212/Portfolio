@@ -42,6 +42,12 @@ protected:
     virtual float InternalTakePointDamage(float Damage, struct FPointDamageEvent const& PointDamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
     ////////////////////////////////////////////////////////
+    //        Character functions
+    ////////////////////////////////////////////////////////
+protected:
+    virtual void HandleDeath() override;
+
+    ////////////////////////////////////////////////////////
     //        Combat interface
     ////////////////////////////////////////////////////////
 public:

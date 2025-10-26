@@ -15,7 +15,7 @@ DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnStatChanged, FGameplayTag /* StatTag *
 /**
  * Checked functions with invalid StatTags cause a crash!
  * If you want to handle the case of invalid stat type, use HasStatType() first.
- * i.e. When you don't know if hit actor has Mana stat or not.
+ * e.g. When you don't know if hit actor has Mana stat or not.
  * Current values are not allowed to exceed max values.
  * Call InitStatsComponent() after adding all stats.
  */

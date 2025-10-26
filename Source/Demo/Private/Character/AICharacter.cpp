@@ -92,6 +92,16 @@ float AAICharacter::InternalTakePointDamage(float Damage, FPointDamageEvent cons
     return Damage;
 }
 
+void AAICharacter::HandleDeath()
+{
+    Super::HandleDeath();
+
+    if (ADemoAIController* DemoAIController = GetController<ADemoAIController>())
+    {
+        DemoAIController->SendStateTreeEvent(DemoGameplayTags::StateTree_Event_Death, TEXT("AAICharacter::HandleDeath"));
+    }
+}
+
 float AAICharacter::PerformAction(FGameplayTag InAction, bool bIgnoreCurrentState, int32 MontageIndex, bool bUseRandomIndex)
 {
     const float Duration = Super::PerformAction(InAction, bIgnoreCurrentState, MontageIndex, bUseRandomIndex);

@@ -98,7 +98,6 @@ bool UPlayerMenuWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDro
         DemoPlayerController->SetCursorState(ECursorState::Default);
     }
 
-    // @check - Dragged from other page i.e. unequip, buy, move from stash, etc.
     const UItemSlotDragDropOp* DragDropOp = Cast<UItemSlotDragDropOp>(InOperation);
     if (DragDropOp)
     {
@@ -109,6 +108,11 @@ bool UPlayerMenuWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDro
         else if (DragDropOp->GetSourceTag() == DemoGameplayTags::UI_PlayerMenu_Equipment)
         {
             return DropEquipmentItem(DragDropOp);
+        }
+        else
+        {
+            // Should handle other source tags if any. (e.g. Stash, Vendor, etc.)
+            checkNoEntry();
         }
     }
 

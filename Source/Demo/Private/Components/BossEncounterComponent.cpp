@@ -111,6 +111,7 @@ void UBossEncounterComponent::EndEncounter(EBossEncounterEndReason Reason)
     }
 
     // @TODO - stop music, unlock doors, sequence, reward, etc.
+    // @WARNING - Boss defeated -> Player retreated -> Boss destroyed -> EndEncounter may miss some logics.
 }
 
 void UBossEncounterComponent::SetEncounterState(EBossEncounterState NewState)

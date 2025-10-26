@@ -62,6 +62,7 @@ UE_DEFINE_GAMEPLAY_TAG(State_Attack_Charged, "State.Attack.Charged");
 UE_DEFINE_GAMEPLAY_TAG(StateTree_Tree_Main, "StateTree.Tree.Main");
 UE_DEFINE_GAMEPLAY_TAG(StateTree_Event_TargetLost, "StateTree.Event.TargetLost");
 UE_DEFINE_GAMEPLAY_TAG(StateTree_Event_TargetSensed, "StateTree.Event.TargetSensed");
+UE_DEFINE_GAMEPLAY_TAG(StateTree_Event_Death, "StateTree.Event.Death");
 
 // UI.PlayerMenu.*
 UE_DEFINE_GAMEPLAY_TAG(UI_PlayerMenu_Stats, "UI.PlayerMenu.Stats");

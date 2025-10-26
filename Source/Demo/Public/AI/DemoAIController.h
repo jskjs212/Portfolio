@@ -7,7 +7,7 @@
 #include "GameplayTagContainer.h"
 #include "DemoAIController.generated.h"
 
-//struct FActorPerceptionUpdateInfo;
+struct FActorPerceptionUpdateInfo;
 struct FStateTreeReference;
 class UAIPerceptionComponent;
 class UAISenseConfig_Damage;
@@ -54,9 +54,7 @@ protected:
 public:
     virtual FPathFollowingRequestResult MoveTo(const FAIMoveRequest& MoveRequest, FNavPathSharedPtr* OutPath = nullptr) override;
 
-    void SetControlRotationToTarget();
-
-    void SetIsBoss(bool bInIsBoss) { bIsBoss = bInIsBoss; }
+    void SendStateTreeEvent(FGameplayTag InTag, FName InOrigin);
 
 protected:
     void OverrideStateTree(FStateTreeReference InStateTreeRef);
@@ -72,8 +70,12 @@ protected:
 public:
     FORCEINLINE AActor* GetTargetActor() const { return TargetActor; }
 
+    void SetIsBoss(bool bInIsBoss) { bIsBoss = bInIsBoss; }
+
     // Ignores perception system, directly sets the target actor.
     void SetTargetActor(AActor* InTargetActor);
+
+    void SetControlRotationToTarget();
 
     ////////////////////////////////////////////////////////
     //        StateTree variables (like Blackboard keys)

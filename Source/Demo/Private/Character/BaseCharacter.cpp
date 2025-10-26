@@ -98,11 +98,6 @@ float ABaseCharacter::InternalTakePointDamage(float Damage, FPointDamageEvent co
     return Damage;
 }
 
-bool ABaseCharacter::IsDead() const
-{
-    return StateManager->IsInState(DemoGameplayTags::State_Dead);
-}
-
 void ABaseCharacter::InitCharacter()
 {
     if (!PawnData)
@@ -319,7 +314,8 @@ void ABaseCharacter::HandleDeath()
 {
     DemoLOG_F(LogCharacter, Display, TEXT("%s has died."), *GetName());
 
-    // @TODO
+    bIsDead = true;
+
     // Stop animations to prevent notifies
     UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
     if (AnimInstance)

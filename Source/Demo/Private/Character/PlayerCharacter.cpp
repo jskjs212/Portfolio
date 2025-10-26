@@ -87,6 +87,31 @@ void APlayerCharacter::BeginPlay()
     }
 }
 
+void APlayerCharacter::HandleDeath()
+{
+    Super::HandleDeath();
+
+    // Hide player menu
+    if (ADemoPlayerController* DemoPlayerController = GetController<ADemoPlayerController>())
+    {
+        DemoPlayerController->ShowPlayerMenu(false);
+    }
+}
+
+void APlayerCharacter::HandleWeaponChanged(const FWeaponData* WeaponData)
+{
+    Super::HandleWeaponChanged(WeaponData);
+
+    if (!WeaponData) // Unequipped
+    {
+        SetOrientRotationToMovement(true);
+    }
+    else if (TargetingComponent->IsTargetLocked()) // Equipped and target locked
+    {
+        SetOrientRotationToMovement(false);
+    }
+}
+
 void APlayerCharacter::ConsumeSprintStamina()
 {
     const bool bIsSprinting =
@@ -138,20 +163,6 @@ IInteractable* APlayerCharacter::TraceForInteractables()
     const bool bHit = World->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility);
 
     return bHit ? Cast<IInteractable>(HitResult.GetActor()) : nullptr;
-}
-
-void APlayerCharacter::HandleWeaponChanged(const FWeaponData* WeaponData)
-{
-    Super::HandleWeaponChanged(WeaponData);
-
-    if (!WeaponData) // Unequipped
-    {
-        SetOrientRotationToMovement(true);
-    }
-    else if (TargetingComponent->IsTargetLocked()) // Equipped and target locked
-    {
-        SetOrientRotationToMovement(false);
-    }
 }
 
 void APlayerCharacter::HandleInteractable()
@@ -445,9 +456,12 @@ void APlayerCharacter::ToggleLockOn()
 
 void APlayerCharacter::ShowPlayerMenu()
 {
-    if (ADemoPlayerController* DemoPlayerController = GetController<ADemoPlayerController>())
+    if (!bIsDead)
     {
-        DemoPlayerController->ShowPlayerMenu(true);
+        if (ADemoPlayerController* DemoPlayerController = GetController<ADemoPlayerController>())
+        {
+            DemoPlayerController->ShowPlayerMenu(true);
+        }
     }
 }
 

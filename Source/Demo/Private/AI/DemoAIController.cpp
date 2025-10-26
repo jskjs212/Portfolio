@@ -12,6 +12,7 @@
 #include "Perception/AIPerceptionTypes.h"
 #include "Perception/AISenseConfig_Damage.h"
 #include "Perception/AISenseConfig_Sight.h"
+#include "StateTreeEvents.h"
 #include "StateTreeReference.h"
 
 ADemoAIController::ADemoAIController()
@@ -70,14 +71,15 @@ FPathFollowingRequestResult ADemoAIController::MoveTo(const FAIMoveRequest& Move
     return Super::MoveTo(MoveRequest, OutPath);
 }
 
-void ADemoAIController::SetControlRotationToTarget()
+void ADemoAIController::SendStateTreeEvent(FGameplayTag InTag, FName InOrigin)
 {
-    const APawn* MyPawn = GetPawn();
-    if (MyPawn && TargetActor)
+    if (DemoStateTreeAIComponent->IsRunning())
     {
-        const FVector Direction = TargetActor->GetActorLocation() - MyPawn->GetActorLocation();
-        const FRotator DesiredRotation = UKismetMathLibrary::MakeRotFromX(Direction);
-        SetControlRotation(DesiredRotation);
+        FStateTreeEvent Event;
+        Event.Tag = InTag;
+        Event.Origin = InOrigin;
+
+        DemoStateTreeAIComponent->SendStateTreeEvent(Event);
     }
 }
 
@@ -96,7 +98,7 @@ void ADemoAIController::OverrideStateTree(FStateTreeReference InStateTreeRef)
     }
     else
     {
-        DemoLOG_CF(LogAI, Verbose, TEXT("%s has no valid StateTreeRefOverride. Stop logic."), *GetNameSafe(GetPawn()));
+        DemoLOG_CF(LogAI, Display, TEXT("%s has no valid StateTreeRefOverride. Stop logic."), *GetNameSafe(GetPawn()));
     }
 }
 
@@ -125,28 +127,12 @@ void ADemoAIController::HandleTargetPerceptionInfoUpdated(const FActorPerception
     if (UpdateInfo.Stimulus.WasSuccessfullySensed()) // Target sensed
     {
         TargetActor = UpdateInfo.Target.Get();
-
-        if (DemoStateTreeAIComponent->IsRunning())
-        {
-            FStateTreeEvent Event;
-            Event.Tag = DemoGameplayTags::StateTree_Event_TargetSensed;
-            Event.Origin = TEXT("ADemoAIController::HandleTargetPerceptionInfoUpdated");
-
-            DemoStateTreeAIComponent->SendStateTreeEvent(Event);
-        }
+        SendStateTreeEvent(DemoGameplayTags::StateTree_Event_TargetSensed, TEXT("ADemoAIController::HandleTargetPerceptionInfoUpdated"));
     }
     else if (TargetActor == UpdateInfo.Target.Get()) // Target lost
     {
         TargetActor = nullptr;
-
-        if (DemoStateTreeAIComponent->IsRunning())
-        {
-            FStateTreeEvent Event;
-            Event.Tag = DemoGameplayTags::StateTree_Event_TargetLost;
-            Event.Origin = TEXT("ADemoAIController::HandleTargetPerceptionInfoUpdated");
-
-            DemoStateTreeAIComponent->SendStateTreeEvent(Event);
-        }
+        SendStateTreeEvent(DemoGameplayTags::StateTree_Event_TargetLost, TEXT("ADemoAIController::HandleTargetPerceptionInfoUpdated"));
     }
 }
 
@@ -165,19 +151,17 @@ void ADemoAIController::SetTargetActor(AActor* InTargetActor)
     TargetActor = InTargetActor;
 
     // Send StateTree event
-    if (DemoStateTreeAIComponent->IsRunning())
+    const FGameplayTag EventTag = TargetActor ? DemoGameplayTags::StateTree_Event_TargetSensed : DemoGameplayTags::StateTree_Event_TargetLost;
+    SendStateTreeEvent(EventTag, TEXT("ADemoAIController::SetTargetActor"));
+}
+
+void ADemoAIController::SetControlRotationToTarget()
+{
+    const APawn* MyPawn = GetPawn();
+    if (MyPawn && TargetActor)
     {
-        FStateTreeEvent Event;
-        if (TargetActor)
-        {
-            Event.Tag = DemoGameplayTags::StateTree_Event_TargetSensed;
-            Event.Origin = TEXT("ADemoAIController::SetTargetActor");
-        }
-        else
-        {
-            Event.Tag = DemoGameplayTags::StateTree_Event_TargetLost;
-            Event.Origin = TEXT("ADemoAIController::SetTargetActor");
-        }
-        DemoStateTreeAIComponent->SendStateTreeEvent(Event);
+        const FVector Direction = TargetActor->GetActorLocation() - MyPawn->GetActorLocation();
+        const FRotator DesiredRotation = UKismetMathLibrary::MakeRotFromX(Direction);
+        SetControlRotation(DesiredRotation);
     }
 }

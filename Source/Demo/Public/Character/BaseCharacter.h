@@ -72,7 +72,7 @@ protected:
     //        Character functions
     ////////////////////////////////////////////////////////
 public:
-    bool IsDead() const;
+    FORCEINLINE bool IsDead() const { return bIsDead; }
 
 protected:
     /* Init */
@@ -106,7 +106,7 @@ protected:
 
     void EnableRagdoll();
 
-    void HandleDeath();
+    virtual void HandleDeath();
 
     /* Event handlers */
     void HandleCurrentResourceStatChanged(FGameplayTag StatTag, float OldValue, float NewValue);
@@ -225,9 +225,11 @@ protected:
     FGameplayTag MovementSpeedMode;
 
     /* Combat */
+    bool bIsDead{false};
+
     // Blocking with a shield.
     bool bIsBlocking{false};
 
-    // Invincibile
+    // Invincible
     bool bIFrameEnabled{false};
 };

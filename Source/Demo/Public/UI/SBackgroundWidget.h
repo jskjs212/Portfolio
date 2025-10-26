@@ -15,7 +15,6 @@ class DEMO_API SBackgroundWidget : public SCompoundWidget
 {
 public:
     SLATE_BEGIN_ARGS(SBackgroundWidget) {}
-
     SLATE_END_ARGS()
 
     void Construct(const FArguments& InArgs);

@@ -43,7 +43,8 @@ protected:
 public:
     // Set action tag and state tag.
     // State tag will be set to 'State.[state]'.
-    // Always overwrite current state and action.
+    // Always overwrite current state and action, even if the transition is not allowed.
+    // e.g. CanPerformAction() from Disabled state returns always false, but can restore to General state using SetAction().
     // @param NewAction should be 'State.[state]' or 'State.[state].[action]'
     void SetAction(FGameplayTag NewAction);
 

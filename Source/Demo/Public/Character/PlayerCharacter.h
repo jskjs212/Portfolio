@@ -32,7 +32,7 @@ class DEMO_API APlayerCharacter : public ABaseCharacter, public IGenericTeamAgen
     ////////////////////////////////////////////////////////
     //        Subobjects
     ////////////////////////////////////////////////////////
-protected:
+private:
     UPROPERTY(VisibleAnywhere)
     TObjectPtr<USpringArmComponent> CameraBoom;
 
@@ -61,16 +61,22 @@ protected:
     virtual void BeginPlay() override;
 
     ////////////////////////////////////////////////////////
+    //        Character functions
+    ////////////////////////////////////////////////////////
+protected:
+    virtual void HandleDeath() override;
+
+    /* Event handlers */
+    virtual void HandleWeaponChanged(const FWeaponData* WeaponData) override;
+
+    ////////////////////////////////////////////////////////
     //        PlayerCharacter functions
     ////////////////////////////////////////////////////////
-private:
+protected:
     void ConsumeSprintStamina();
 
     // Trace first visible interactable from camera.
     IInteractable* TraceForInteractables();
-
-    /* Event handlers */
-    virtual void HandleWeaponChanged(const FWeaponData* WeaponData) override;
 
     // Trace and broadcast if focused interactable changed.
     void HandleInteractable();
@@ -146,7 +152,7 @@ public:
     ////////////////////////////////////////////////////////
     //        Input variables
     ////////////////////////////////////////////////////////
-protected:
+private:
     UPROPERTY(EditAnywhere, Category = "Input")
     TObjectPtr<UInputMappingContext> DefaultMappingContext;
 
