@@ -7,12 +7,12 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 
-const TArray<TEnumAsByte<EObjectTypeQuery>> UTargetingComponent::TargetObjectTypes = TArray<TEnumAsByte<EObjectTypeQuery>>{UEngineTypes::ConvertToObjectType(ECC_Pawn)};
+// Static variable initialization
+const TArray<TEnumAsByte<EObjectTypeQuery>> UTargetingComponent::TargetObjectTypes{UEngineTypes::ConvertToObjectType(ECC_Pawn)};
 
 UTargetingComponent::UTargetingComponent()
 {
     PrimaryComponentTick.bCanEverTick = true;
-
     VisibilityQueryParams.AddIgnoredActor(GetOwner());
 }
 

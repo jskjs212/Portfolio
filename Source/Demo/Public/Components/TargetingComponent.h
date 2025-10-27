@@ -127,7 +127,7 @@ private:
 
     static const TArray<TEnumAsByte<EObjectTypeQuery>> TargetObjectTypes;
 
-    static inline const TArray<AActor*> EmptyIgnoredActors;
+    static inline const TArray<AActor*> EmptyIgnoredActors{};
 
     FCollisionQueryParams VisibilityQueryParams;
 };

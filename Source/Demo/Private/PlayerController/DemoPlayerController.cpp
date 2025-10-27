@@ -45,7 +45,7 @@ void ADemoPlayerController::BeginPlay()
 
     if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GetGameInstance()))
     {
-        AudioSubsystem->PlayDefaultBGM(this);
+        AudioSubsystem->PlayDefaultMusic(this);
     }
 }
 

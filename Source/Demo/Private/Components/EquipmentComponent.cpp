@@ -368,7 +368,7 @@ void UEquipmentComponent::EquipItem_PostProcess(const FEquipmentValidationResult
 
     if (AudioSubsystem)
     {
-        AudioSubsystem->PlaySound2D(this, DemoSoundTags::SFX_Item_Equip, 0.8f);
+        AudioSubsystem->PlaySound2D(this, DemoSoundTags::SFX_Item_Equip);
     }
 
     // Register active skills
@@ -410,7 +410,7 @@ void UEquipmentComponent::UnequipItem_PostProcess(FGameplayTag EquipmentType, co
 
     if (AudioSubsystem)
     {
-        AudioSubsystem->PlaySound2D(this, DemoSoundTags::SFX_Item_Unequip, 0.8f);
+        AudioSubsystem->PlaySound2D(this, DemoSoundTags::SFX_Item_Unequip);
     }
 
     // Unregister active skills

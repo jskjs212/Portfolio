@@ -5,15 +5,6 @@
 #include "DemoTypes/ItemTypes.h"
 #include "DemoTypes/LogCategories.h"
 #include "DemoTypes/TableRowBases.h"
-#include "Items/Item.h"
-
-//const FGameplayTag UStatsComponent::HealthTag = FGameplayTag::RequestGameplayTag("Stat.Resource.Health");
-//const FGameplayTag UStatsComponent::StaminaTag = FGameplayTag::RequestGameplayTag("Stat.Resource.Stamina");
-//const FGameplayTag UStatsComponent::STRTag = FGameplayTag::RequestGameplayTag("Stat.Primary.STR");
-//const FGameplayTag UStatsComponent::DEXTag = FGameplayTag::RequestGameplayTag("Stat.Primary.DEX");
-//const FGameplayTag UStatsComponent::INTTag = FGameplayTag::RequestGameplayTag("Stat.Primary.INT");
-//const FGameplayTag UStatsComponent::AttackTag = FGameplayTag::RequestGameplayTag("Stat.Derived.Attack");
-//const FGameplayTag UStatsComponent::DefenseTag = FGameplayTag::RequestGameplayTag("Stat.Derived.Defense");
 
 UStatsComponent::UStatsComponent()
 {

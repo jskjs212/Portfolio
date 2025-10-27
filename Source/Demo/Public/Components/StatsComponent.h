@@ -26,18 +26,6 @@ class DEMO_API UStatsComponent : public UActorComponent
     GENERATED_BODY()
 
     ////////////////////////////////////////////////////////
-    //        Statics
-    ////////////////////////////////////////////////////////
-public:
-    //static const FGameplayTag HealthTag;
-    //static const FGameplayTag StaminaTag;
-    //static const FGameplayTag STRTag;
-    //static const FGameplayTag DEXTag;
-    //static const FGameplayTag INTTag;
-    //static const FGameplayTag AttackTag;
-    //static const FGameplayTag DefenseTag;
-
-    ////////////////////////////////////////////////////////
     //        Delegates
     ////////////////////////////////////////////////////////
 public:

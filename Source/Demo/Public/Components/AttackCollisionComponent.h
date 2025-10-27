@@ -110,7 +110,7 @@ private:
     float DrawDebugDuration{3.f};
 
     UPROPERTY(EditAnywhere, Category = "Initialization|Collision")
-    TEnumAsByte<EDrawDebugTrace::Type> DrawDebugType{};
+    TEnumAsByte<EDrawDebugTrace::Type> DrawDebugType;
 
     TArray<AActor*> ActorsToIgnore;
 

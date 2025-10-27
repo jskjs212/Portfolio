@@ -73,13 +73,18 @@ void UBossEncounterComponent::StartEncounter(APawn* Instigator)
     BossAIController->SetTargetActor(Instigator);
 
     // Start music
-    const UGameInstance* GameInstance = GetOwner() ? GetOwner()->GetGameInstance() : nullptr;
-    if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GameInstance))
+    if (BossMusicTag.IsValid())
     {
-        AudioSubsystem->PlaySound2D(this, BossMusicTag);
+        const UGameInstance* GameInstance = GetOwner() ? GetOwner()->GetGameInstance() : nullptr;
+        if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GameInstance))
+        {
+            AudioSubsystem->PlayMusic(this, BossMusicTag);
+        }
     }
 
-    // @TODO - lock doors, sequence, etc.
+    // @TODO - Lock doors
+
+    // @TODO - Start sequence
 }
 
 void UBossEncounterComponent::EndEncounter(EBossEncounterEndReason Reason)
@@ -124,7 +129,7 @@ void UBossEncounterComponent::EndEncounter(EBossEncounterEndReason Reason)
     const UGameInstance* GameInstance = GetOwner() ? GetOwner()->GetGameInstance() : nullptr;
     if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GameInstance))
     {
-        AudioSubsystem->PlayDefaultBGM(this);
+        AudioSubsystem->PlayDefaultMusic(this);
     }
 
     // @TODO - unlock doors, sequence, reward, etc.

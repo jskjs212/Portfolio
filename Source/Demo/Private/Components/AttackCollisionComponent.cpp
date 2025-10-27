@@ -11,11 +11,13 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 
-const TArray<TEnumAsByte<EObjectTypeQuery>> UAttackCollisionComponent::TraceObjectTypes = TArray<TEnumAsByte<EObjectTypeQuery>>{UEngineTypes::ConvertToObjectType(ECC_Pawn)};
+// Static variable initialization
+const TArray<TEnumAsByte<EObjectTypeQuery>> UAttackCollisionComponent::TraceObjectTypes{UEngineTypes::ConvertToObjectType(ECC_Pawn)};
 
 UAttackCollisionComponent::UAttackCollisionComponent()
 {
     PrimaryComponentTick.bCanEverTick = true;
+    DrawDebugType = EDrawDebugTrace::None;
 }
 
 void UAttackCollisionComponent::BeginPlay()

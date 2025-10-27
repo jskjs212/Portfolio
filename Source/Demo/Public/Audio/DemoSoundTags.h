@@ -12,6 +12,7 @@
 namespace DemoSoundTags
 {
 // Sound.Music.*
+// Background music
 DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Music);
 DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Music_Boss_Default);
 DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Music_Exploration);

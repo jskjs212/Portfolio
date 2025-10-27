@@ -193,7 +193,7 @@ void UTabMenuWidget::HandleTabButtonHovered(const FGameplayTag InTag)
 {
     if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GetGameInstance()))
     {
-        AudioSubsystem->PlaySound2D(this, DemoSoundTags::UI_TabButton_Hover, 0.7f);
+        AudioSubsystem->PlaySound2D(this, DemoSoundTags::UI_TabButton_Hover);
     }
 
     if (ActiveTabTag == InTag)

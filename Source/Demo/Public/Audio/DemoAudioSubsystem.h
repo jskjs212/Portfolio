@@ -7,30 +7,38 @@
 #include "GameplayTagContainer.h"
 #include "DemoAudioSubsystem.generated.h"
 
+class UAudioComponent;
 class USoundBase;
 class USoundCollection;
 
-USTRUCT()
 struct FAudioCategoryData
 {
-    GENERATED_BODY()
-
     float Volume{1.f};
 
     const TMap<FGameplayTag, TSoftObjectPtr<USoundBase>>* Map;
 };
 
+struct FSoundQueryResult
+{
+    USoundBase* Sound{nullptr};
+
+    FGameplayTag Category;
+
+    float CategoryVolume{1.f};
+};
+
 /**
  * Categories: Music, SFX, UI, Voice
- * Music: Background musics
+ * Music: Background music
  * SFX: Sound Effects
  * UI: UI sounds, notifications
- * Voice: Character voices, dialogues
+ * Voice: Character voices
  *
- * Limited interface parameters for now. Expand if needed.
- * e.g. StartTime, Concurrency, Attenuation, bIsUISound, FadeIn, FadeOut, etc.
- *
- * Consider adding: Array of {MusicTag, Priority} for handling current background music.
+ * Consider adding:
+ * - Parameters: StartTime, FadeIn, FadeOut, Concurrency, Attenuation, etc.
+ * - Array of {MusicTag, Priority} for handling current background music.
+ * - Attached sounds
+ * - Dialogue system
  */
 UCLASS()
 class DEMO_API UDemoAudioSubsystem : public UGameInstanceSubsystem
@@ -38,38 +46,61 @@ class DEMO_API UDemoAudioSubsystem : public UGameInstanceSubsystem
     GENERATED_BODY()
 
     ////////////////////////////////////////////////////////
+    //        Subobjects
+    ////////////////////////////////////////////////////////
+private:
+    UPROPERTY()
+    TObjectPtr<UAudioComponent> MusicAudioComponent;
+
+    ////////////////////////////////////////////////////////
     //        Functions
     ////////////////////////////////////////////////////////
 public:
+    UDemoAudioSubsystem();
+
     virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
-    void PlaySound2D(const UObject* WorldContextObject, FGameplayTag SoundTag, float VolumeMultiplier = 1.f);
+    virtual void Deinitialize() override;
+
+    void PlaySound2D(const UObject* WorldContextObject, FGameplayTag SoundTag);
 
     // @param Location: World position to play sound at
     // @param Rotation: World rotation to play sound at
-    void PlaySoundAtLocation(const UObject* WorldContextObject, FGameplayTag SoundTag, FVector Location, FRotator Rotation, float VolumeMultiplier = 1.f);
+    void PlaySoundAtLocation(const UObject* WorldContextObject, FGameplayTag SoundTag, FVector Location, FRotator Rotation);
 
-    void PlaySoundAtLocation(const UObject* WorldContextObject, FGameplayTag SoundTag, FVector Location, float VolumeMultiplier = 1.f)
+    void PlaySoundAtLocation(const UObject* WorldContextObject, FGameplayTag SoundTag, FVector Location)
     {
-        PlaySoundAtLocation(WorldContextObject, SoundTag, Location, FRotator::ZeroRotator, VolumeMultiplier);
+        PlaySoundAtLocation(WorldContextObject, SoundTag, Location, FRotator::ZeroRotator);
     }
 
-    // @TODO - Handle BGM according to game state.
-    void PlayDefaultBGM(const UObject* WorldContextObject);
+    // Play music (BGM)
+    void PlayMusic(const UObject* WorldContextObject, FGameplayTag MusicTag);
 
-    // @TODO - SpawnSoundAttached
+    // Play default music (BGM)
+    void PlayDefaultMusic(const UObject* WorldContextObject)
+    {
+        PlayMusic(WorldContextObject, DefaultMusicTag);
+    }
 
 private:
     void InitAudioMap();
 
-    // @return {Sound, CategoryVolume}
-    TPair<USoundBase*, float> GetSoundByTag(FGameplayTag SoundTag);
+    void ClearAudioComponent();
+
+    void HandleWorldCleanup(UWorld* World, bool bSessionEnded, bool bCleanupResources);
+
+    // @return Data is not valid if Sound is nullptr.
+    FSoundQueryResult GetSoundByTag(FGameplayTag SoundTag);
 
     ////////////////////////////////////////////////////////
     //        Variables
     ////////////////////////////////////////////////////////
 private:
     float MasterVolume{1.f};
+
+    FGameplayTag DefaultMusicTag;
+
+    FDelegateHandle WorldCleanupHandle;
 
     // {AudioCategory, AudioCategoryData}
     TMap<FGameplayTag, FAudioCategoryData> AudioMap;

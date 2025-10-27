@@ -33,7 +33,7 @@ void ABossTriggerBox::BeginPlay()
     OnActorEndOverlap.AddDynamic(this, &ThisClass::HandleEndOverlap);
 }
 
-void ABossTriggerBox::HandleBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
+void ABossTriggerBox::HandleBeginOverlap(AActor* /*OverlappedActor*/, AActor* OtherActor)
 {
     // Start the encounter only if the actor is APlayerCharacter.
     if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OtherActor))
@@ -42,7 +42,7 @@ void ABossTriggerBox::HandleBeginOverlap(AActor* OverlappedActor, AActor* OtherA
     }
 }
 
-void ABossTriggerBox::HandleEndOverlap(AActor* OverlappedActor, AActor* OtherActor)
+void ABossTriggerBox::HandleEndOverlap(AActor* /*OverlappedActor*/, AActor* OtherActor)
 {
     if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OtherActor))
     {

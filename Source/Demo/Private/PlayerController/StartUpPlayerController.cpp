@@ -16,6 +16,6 @@ void AStartUpPlayerController::BeginPlay()
 
     if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GetGameInstance()))
     {
-        AudioSubsystem->PlaySound2D(this, DemoSoundTags::Music_MainMenu);
+        AudioSubsystem->PlayMusic(this, DemoSoundTags::Music_MainMenu);
     }
 }
