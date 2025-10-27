@@ -68,7 +68,7 @@ protected:
     //        Get & set
     ////////////////////////////////////////////////////////
 public:
-    FORCEINLINE AActor* GetTargetActor() const { return TargetActor; }
+    FORCEINLINE AActor* GetTargetActor() const { return TargetActor.Get(); }
 
     void SetIsBoss(bool bInIsBoss) { bIsBoss = bInIsBoss; }
 
@@ -82,7 +82,7 @@ public:
     ////////////////////////////////////////////////////////
 protected:
     // Target actor that AI is attacking or moving to.
-    TObjectPtr<AActor> TargetActor;
+    TWeakObjectPtr<AActor> TargetActor;
 
     ////////////////////////////////////////////////////////
     //        Variables

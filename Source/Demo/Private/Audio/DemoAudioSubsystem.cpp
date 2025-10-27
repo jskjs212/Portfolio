@@ -166,7 +166,7 @@ void UDemoAudioSubsystem::InitAudioMap()
 
     // Initialize AudioMap
     // @TODO - Load volume settings from user settings.
-    MasterVolume = 0.5f;
+    MasterVolume = 0.8f;
     AudioMap.Emplace(DemoSoundTags::Music, FAudioCategoryData{1.f, &SoundCollection->MusicMap});
     AudioMap.Emplace(DemoSoundTags::SFX, FAudioCategoryData{1.f, &SoundCollection->SFXMap});
     AudioMap.Emplace(DemoSoundTags::UI, FAudioCategoryData{1.f, &SoundCollection->UIMap});

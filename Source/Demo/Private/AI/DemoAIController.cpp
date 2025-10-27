@@ -151,14 +151,14 @@ void ADemoAIController::SetTargetActor(AActor* InTargetActor)
     TargetActor = InTargetActor;
 
     // Send StateTree event
-    const FGameplayTag EventTag = TargetActor ? DemoGameplayTags::StateTree_Event_TargetSensed : DemoGameplayTags::StateTree_Event_TargetLost;
+    const FGameplayTag EventTag = InTargetActor ? DemoGameplayTags::StateTree_Event_TargetSensed : DemoGameplayTags::StateTree_Event_TargetLost;
     SendStateTreeEvent(EventTag, TEXT("ADemoAIController::SetTargetActor"));
 }
 
 void ADemoAIController::SetControlRotationToTarget()
 {
     const APawn* MyPawn = GetPawn();
-    if (MyPawn && TargetActor)
+    if (MyPawn && TargetActor.IsValid())
     {
         const FVector Direction = TargetActor->GetActorLocation() - MyPawn->GetActorLocation();
         const FRotator DesiredRotation = UKismetMathLibrary::MakeRotFromX(Direction);

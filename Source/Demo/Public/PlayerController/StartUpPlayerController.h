@@ -6,14 +6,36 @@
 #include "GameFramework/PlayerController.h"
 #include "StartUpPlayerController.generated.h"
 
+class UMainMenuWidget;
+
 /**
- * 
+ *
  */
 UCLASS()
 class DEMO_API AStartUpPlayerController : public APlayerController
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
+
+    ////////////////////////////////////////////////////////
+    //        Functions
+    ////////////////////////////////////////////////////////
+public:
+    AStartUpPlayerController();
 
 protected:
-	virtual void BeginPlay() override;
+    virtual void BeginPlay() override;
+
+private:
+    void ShowMainMenu();
+
+    void InitMainMenu();
+
+    ////////////////////////////////////////////////////////
+    //        Widgets
+    ////////////////////////////////////////////////////////
+private:
+    TSubclassOf<UMainMenuWidget> MainMenuWidgetClass;
+
+    UPROPERTY()
+    TObjectPtr<UMainMenuWidget> MainMenuWidget;
 };

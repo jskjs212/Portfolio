@@ -353,6 +353,15 @@ void ABaseCharacter::HandleDeath()
         EnableRagdoll();
     }
 
+    // Death sound
+    if (DeathSoundTag.IsValid())
+    {
+        if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GetGameInstance()))
+        {
+            AudioSubsystem->PlaySoundAtLocation(this, DeathSoundTag, GetActorLocation());
+        }
+    }
+
     // Drop weapon if any
     AItem* Weapon = EquipmentComponent->GetEquippedItem(DemoGameplayTags::Item_Weapon);
     if (Weapon)

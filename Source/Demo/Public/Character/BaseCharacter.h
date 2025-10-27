@@ -175,23 +175,26 @@ protected:
     //        Variables - Hit
     ////////////////////////////////////////////////////////
 protected:
-    UPROPERTY(EditAnywhere, Category = "Initialization|Animation")
+    UPROPERTY(EditAnywhere, Category = "Initialization|Hit")
     TObjectPtr<UAnimMontage> HitReactFrontMontage;
 
-    UPROPERTY(EditAnywhere, Category = "Initialization|Animation")
+    UPROPERTY(EditAnywhere, Category = "Initialization|Hit")
     TObjectPtr<UAnimMontage> HitReactBackMontage;
 
-    UPROPERTY(EditAnywhere, Category = "Initialization|Animation")
+    UPROPERTY(EditAnywhere, Category = "Initialization|Hit")
     TObjectPtr<UAnimMontage> HitReactLeftMontage;
 
-    UPROPERTY(EditAnywhere, Category = "Initialization|Animation")
+    UPROPERTY(EditAnywhere, Category = "Initialization|Hit")
     TObjectPtr<UAnimMontage> HitReactRightMontage;
 
-    UPROPERTY(EditAnywhere, Category = "Initialization|Animation")
-    TObjectPtr<UAnimMontage> DeathMontage;
-
-    UPROPERTY(EditAnywhere, Category = "Initialization|Animation")
+    UPROPERTY(EditAnywhere, Category = "Initialization|Death")
     float DeathDestroyDelay{5.f};
+
+    UPROPERTY(EditAnywhere, Category = "Initialization|Death", meta = (Categories = "Sound"))
+    FGameplayTag DeathSoundTag;
+
+    UPROPERTY(EditAnywhere, Category = "Initialization|Death")
+    TObjectPtr<UAnimMontage> DeathMontage;
 
     UPROPERTY(EditAnywhere, Category = "Initialization|Hit", meta = (Categories = "Sound"))
     FGameplayTag HitSoundTag;
