@@ -35,34 +35,29 @@ public:
     {
         Super::SynchronizeProperties();
 
-        if (!TabTag.IsValid())
-        {
-            DemoLOG_CF(LogUI, Error, TEXT("TabTag is not set in %s"), *GetName());
-        }
-
         OnClicked.AddDynamic(this, &ThisClass::HandleOnClicked);
         OnHovered.AddDynamic(this, &ThisClass::HandleOnHovered);
         OnUnhovered.AddDynamic(this, &ThisClass::HandleOnUnhovered);
     }
 
-    FORCEINLINE FGameplayTag GetTabTag() const { return TabTag; }
+    FORCEINLINE FGameplayTag GetTypeTag() const { return TypeTag; }
 
-    FORCEINLINE void SetTabTag(FGameplayTag InTag) { TabTag = InTag; }
+    FORCEINLINE void SetTypeTag(FGameplayTag InTag) { TypeTag = InTag; }
 
 private:
     UFUNCTION()
-    void HandleOnClicked() { OnTabButtonClicked.ExecuteIfBound(TabTag); }
+    void HandleOnClicked() { OnTabButtonClicked.ExecuteIfBound(TypeTag); }
 
     UFUNCTION()
-    void HandleOnHovered() { OnTabButtonHovered.ExecuteIfBound(TabTag); }
+    void HandleOnHovered() { OnTabButtonHovered.ExecuteIfBound(TypeTag); }
 
     UFUNCTION()
-    void HandleOnUnhovered() { OnTabButtonUnhovered.ExecuteIfBound(TabTag); }
+    void HandleOnUnhovered() { OnTabButtonUnhovered.ExecuteIfBound(TypeTag); }
 
     ////////////////////////////////////////////////////////
     //        Variables
     ////////////////////////////////////////////////////////
 private:
     UPROPERTY(EditAnywhere, Category = "Initialization")
-    FGameplayTag TabTag;
+    FGameplayTag TypeTag;
 };

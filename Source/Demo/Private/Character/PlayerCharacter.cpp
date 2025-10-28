@@ -23,6 +23,7 @@
 #include "Interfaces/Interactable.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "PlayerController/DemoPlayerController.h"
+#include "Settings/DemoUserSettings.h" // @TEST
 
 APlayerCharacter::APlayerCharacter() :
     SprintStaminaTimerDelegate{FTimerDelegate::CreateUObject(this, &ThisClass::ConsumeSprintStamina)}
@@ -507,9 +508,21 @@ void APlayerCharacter::SetMovementSpeedMode(FGameplayTag NewSpeedMode)
 void APlayerCharacter::Test1_Implementation()
 {
     DemoLOG_CF(LogCharacter, Warning, TEXT("called!"));
+
+    if (UGameUserSettings* UserSettings = GEngine->GetGameUserSettings())
+    {
+        UserSettings->SetFullscreenMode(EWindowMode::Windowed);
+        UserSettings->ApplySettings(false);
+    }
 }
 
 void APlayerCharacter::Test2_Implementation()
 {
     DemoLOG_CF(LogCharacter, Warning, TEXT("called!"));
+
+    if (UGameUserSettings* UserSettings = GEngine->GetGameUserSettings())
+    {
+        UserSettings->SetFullscreenMode(EWindowMode::Fullscreen);
+        UserSettings->ApplySettings(false);
+    }
 }

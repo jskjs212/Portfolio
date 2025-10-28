@@ -10,6 +10,7 @@ class UButton;
 class UEquipmentPageWidget;
 class UInventoryPageWidget;
 class UItemSlotDragDropOp;
+class USettingsPageWidget;
 class UStatsPageWidget;
 class USystemMenuPageWidget;
 class UTabButton;
@@ -79,6 +80,13 @@ private:
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UEquipmentPageWidget> EquipmentPageWidget;
+
+    /* Settings */
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UTabButton> SettingsTabButton;
+
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<USettingsPageWidget> SettingsPageWidget;
 
     /* System */
     UPROPERTY(meta = (BindWidget))

@@ -13,6 +13,8 @@ class USoundCollection;
 
 struct FAudioCategoryData
 {
+    FGameplayTag Category;
+
     float Volume{1.f};
 
     const TMap<FGameplayTag, TSoftObjectPtr<USoundBase>>* Map;
@@ -83,11 +85,13 @@ public:
     }
 
 private:
-    void InitAudioMap();
+    void InitAudioData();
 
     void ClearAudioComponent();
 
     void HandleWorldCleanup(UWorld* World, bool bSessionEnded, bool bCleanupResources);
+
+    void HandleVolumeSettingChanged(FGameplayTag InCategory, float InVolume);
 
     // @return Data is not valid if Sound is nullptr.
     FSoundQueryResult GetSoundByTag(FGameplayTag SoundTag);
@@ -102,8 +106,8 @@ private:
 
     FDelegateHandle WorldCleanupHandle;
 
-    // {AudioCategory, AudioCategoryData}
-    TMap<FGameplayTag, FAudioCategoryData> AudioMap;
+    // {Category, Volume, MapPtr}
+    TArray<FAudioCategoryData> CategoryDataArray;
 
     // Keep the loaded DataAsset alive.
     UPROPERTY(Transient)

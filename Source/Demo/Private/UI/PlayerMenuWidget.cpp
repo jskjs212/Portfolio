@@ -10,6 +10,7 @@
 #include "UI/InventoryPageWidget.h"
 #include "UI/ItemActionDispatcher.h"
 #include "UI/ItemSlotDragDropOp.h"
+#include "UI/SettingsPageWidget.h"
 #include "UI/StatsPageWidget.h"
 #include "UI/SystemMenuPageWidget.h"
 
@@ -20,6 +21,7 @@ void UPlayerMenuWidget::NativeOnInitialized()
     checkf(StatsTabButton && StatsPageWidget
         && InventoryTabButton && InventoryPageWidget
         && EquipmentTabButton && EquipmentPageWidget
+        && SettingsTabButton && SettingsPageWidget
         && SystemMenuTabButton && SystemMenuPageWidget
         && CloseButton,
         TEXT("Failed to bind widgets."));
@@ -30,8 +32,8 @@ void UPlayerMenuWidget::NativeOnInitialized()
     TabEntries.Emplace(DemoGameplayTags::UI_PlayerMenu_Stats, StatsTabButton, nullptr, StatsPageWidget);
     TabEntries.Emplace(DemoGameplayTags::UI_PlayerMenu_Inventory, InventoryTabButton, nullptr, InventoryPageWidget);
     TabEntries.Emplace(DemoGameplayTags::UI_PlayerMenu_Equipment, EquipmentTabButton, nullptr, EquipmentPageWidget);
+    TabEntries.Emplace(DemoGameplayTags::UI_PlayerMenu_Settings, SettingsTabButton, nullptr, SettingsPageWidget);
     TabEntries.Emplace(DemoGameplayTags::UI_PlayerMenu_SystemMenu, SystemMenuTabButton, nullptr, SystemMenuPageWidget);
-
     InitTabMenu();
 
     CloseButton->OnClicked.AddDynamic(this, &UPlayerMenuWidget::HideMenu);
@@ -122,6 +124,7 @@ bool UPlayerMenuWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDro
 void UPlayerMenuWidget::InitPlayerMenu()
 {
     StatsPageWidget->UpdateAllStats();
+    SettingsPageWidget->SyncUIWithUserSettings();
 }
 
 void UPlayerMenuWidget::HideMenu()

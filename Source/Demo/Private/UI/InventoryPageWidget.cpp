@@ -41,8 +41,8 @@ void UInventoryPageWidget::NativeOnInitialized()
     TabEntries.Emplace(DemoGameplayTags::Item_Weapon, WeaponTabButton, WeaponTabImage, WeaponWrapBox);
     TabEntries.Emplace(DemoGameplayTags::Item_Armor, ArmorTabButton, ArmorTabImage, ArmorWrapBox);
     TabEntries.Emplace(DemoGameplayTags::Item_Consumable, ConsumableTabButton, ConsumableTabImage, ConsumableWrapBox);
-
     InitTabMenu();
+
     SetupContextMenu();
     HideItemInfo();
     BindToInventoryUpdates();

@@ -75,7 +75,7 @@ void UContextMenuWidget::InitActions(const TArray<FContextAction>& InActions)
                 continue;
             }
 
-            NewButton->SetTabTag(InActions[Index].ActionTag);
+            NewButton->SetTypeTag(InActions[Index].ActionTag);
             NewButton->OnTabButtonHovered.BindUObject(this, &ThisClass::HandleButtonHovered);
             NewButton->OnTabButtonUnhovered.BindUObject(this, &ThisClass::HandleButtonUnhovered);
             NewButton->SetVisibility(ESlateVisibility::Visible);
@@ -140,7 +140,7 @@ void UContextMenuWidget::HandleButtonHovered(FGameplayTag InTag)
 {
     for (int32 Index = 0; Index < ActionButtons.Num(); ++Index)
     {
-        if (ActionButtons[Index]->GetTabTag() == InTag)
+        if (ActionButtons[Index]->GetTypeTag() == InTag)
         {
             HoveredBorders[Index]->SetBrushColor(FLinearColor::White);
             return;
@@ -152,7 +152,7 @@ void UContextMenuWidget::HandleButtonUnhovered(FGameplayTag InTag)
 {
     for (int32 Index = 0; Index < ActionButtons.Num(); ++Index)
     {
-        if (ActionButtons[Index]->GetTabTag() == InTag)
+        if (ActionButtons[Index]->GetTypeTag() == InTag)
         {
             HoveredBorders[Index]->SetBrushColor(FLinearColor{1.f, 1.f, 1.f, 0.f});
             return;

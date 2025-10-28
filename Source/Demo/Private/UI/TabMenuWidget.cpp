@@ -65,7 +65,7 @@ void UTabMenuWidget::SelectTab(const int32 InIndex)
             //SetDesiredFocusWidget(TabEntry.Widget);
         }
         UpdateTabButtonColor(TabEntry, bIsTargetTab, false);
-        Index++;
+        ++Index;
     }
 }
 
@@ -94,7 +94,7 @@ void UTabMenuWidget::SelectTab(const FGameplayTag InTag)
             //SetDesiredFocusWidget(TabEntry.Widget);
         }
         UpdateTabButtonColor(TabEntry, bIsTargetTab, false);
-        Index++;
+        ++Index;
     }
 }
 
@@ -109,6 +109,7 @@ void UTabMenuWidget::InitTabMenu()
     // Bind tab button events
     for (FTabEntry& TabEntry : TabEntries)
     {
+        TabEntry.TabButton->SetTypeTag(TabEntry.Tag);
         TabEntry.TabButton->OnTabButtonClicked.BindUObject(this, &ThisClass::HandleTabButtonClicked);
         TabEntry.TabButton->OnTabButtonHovered.BindUObject(this, &ThisClass::HandleTabButtonHovered);
         TabEntry.TabButton->OnTabButtonUnhovered.BindUObject(this, &ThisClass::HandleTabButtonUnhovered);
@@ -121,7 +122,7 @@ void UTabMenuWidget::InitTabMenu()
     for (int32 Index = 0; FTabEntry& TabEntry : TabEntries)
     {
         UpdateTabButtonColor(TabEntry, Index == 0, false);
-        Index++;
+        ++Index;
     }
 }
 

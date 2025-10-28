@@ -4,6 +4,9 @@
 
 namespace DemoSoundTags
 {
+// Sound.Master
+UE_DEFINE_GAMEPLAY_TAG(Master, "Sound.Master");
+
 // Sound.Music.*
 UE_DEFINE_GAMEPLAY_TAG(Music, "Sound.Music");
 UE_DEFINE_GAMEPLAY_TAG(Music_Boss_Default, "Sound.Music.Boss.Default");

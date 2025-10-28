@@ -7,6 +7,7 @@
 #include "DemoTypes/LogCategories.h"
 #include "Kismet/GameplayStatics.h"
 #include "Settings/DemoProjectSettings.h"
+#include "Settings/DemoUserSettings.h"
 
 UDemoAudioSubsystem::UDemoAudioSubsystem()
 {
@@ -18,7 +19,7 @@ void UDemoAudioSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
     Super::Initialize(Collection);
 
-    InitAudioMap();
+    InitAudioData();
 
     FDelegateHandle Handle = FWorldDelegates::OnWorldCleanup.AddUObject(this, &ThisClass::HandleWorldCleanup);
 }
@@ -145,7 +146,7 @@ void UDemoAudioSubsystem::PlayMusic(const UObject* WorldContextObject, FGameplay
     MusicAudioComponent->Play(0.f);
 }
 
-void UDemoAudioSubsystem::InitAudioMap()
+void UDemoAudioSubsystem::InitAudioData()
 {
     // Get DemoProjectSettings
     const UDemoProjectSettings* DemoProjectSettings = GetDefault<UDemoProjectSettings>();
@@ -164,18 +165,34 @@ void UDemoAudioSubsystem::InitAudioMap()
     }
     SoundCollection = LoadedSoundCollection;
 
-    // Initialize AudioMap
-    // @TODO - Load volume settings from user settings.
-    MasterVolume = 0.8f;
-    AudioMap.Emplace(DemoSoundTags::Music, FAudioCategoryData{1.f, &SoundCollection->MusicMap});
-    AudioMap.Emplace(DemoSoundTags::SFX, FAudioCategoryData{1.f, &SoundCollection->SFXMap});
-    AudioMap.Emplace(DemoSoundTags::UI, FAudioCategoryData{1.f, &SoundCollection->UIMap});
-    AudioMap.Emplace(DemoSoundTags::Voice, FAudioCategoryData{1.f, &SoundCollection->VoiceMap});
+    // Initialize audio data
+    MasterVolume = 1.f;
+    CategoryDataArray = {
+        {DemoSoundTags::Music,  1.f, &SoundCollection->MusicMap},
+        {DemoSoundTags::SFX,    1.f, &SoundCollection->SFXMap},
+        {DemoSoundTags::UI,     1.f, &SoundCollection->UIMap},
+        {DemoSoundTags::Voice,  1.f, &SoundCollection->VoiceMap}
+    };
 
-    // @TEST - Validate AudioMap
-    for (const auto& [CategoryTag, CategoryData] : AudioMap)
+    // Load volumes from user settings
+    if (UDemoUserSettings* UserSettings = UDemoUserSettings::GetDemoUserSettings())
     {
-        checkf(CategoryData.Map, TEXT("No sound map for category: %s"), *CategoryTag.ToString());
+        MasterVolume = UserSettings->GetVolumeSetting(DemoSoundTags::Master);
+        check(MasterVolume >= 0.f);
+        for (FAudioCategoryData& CategoryData : CategoryDataArray)
+        {
+            CategoryData.Volume = UserSettings->GetVolumeSetting(CategoryData.Category);
+            check(CategoryData.Volume >= 0.f);
+        }
+        DemoLOG_CF(LogAudio, Warning, TEXT("@TEST - Master: %f"), MasterVolume);
+
+        UserSettings->OnVolumeSettingChanged.BindUObject(this, &ThisClass::HandleVolumeSettingChanged);
+    }
+
+    // @TEST - Validate CategoryDataArray
+    for (const FAudioCategoryData& CategoryData : CategoryDataArray)
+    {
+        checkf(CategoryData.Map, TEXT("No sound map for category: %s"), *CategoryData.Category.ToString());
         for (const auto& [SoundTag, SoundPtr] : *(CategoryData.Map))
         {
             checkf(!SoundPtr.IsNull(), TEXT("Null sound for tag: %s"), *SoundTag.ToString());
@@ -201,6 +218,34 @@ void UDemoAudioSubsystem::HandleWorldCleanup(UWorld* World, bool /*bSessionEnded
     }
 }
 
+void UDemoAudioSubsystem::HandleVolumeSettingChanged(FGameplayTag InCategory, float InVolume)
+{
+    // Update internal volume
+    if (InCategory == DemoSoundTags::Master)
+    {
+        MasterVolume = InVolume;
+    }
+    else
+    {
+        for (FAudioCategoryData& CategoryData : CategoryDataArray)
+        {
+            if (CategoryData.Category == InCategory)
+            {
+                CategoryData.Volume = InVolume;
+                break;
+            }
+        }
+    }
+
+    // Update music volume immediately
+    if ((InCategory == DemoSoundTags::Master || InCategory == DemoSoundTags::Music)
+        && MusicAudioComponent && MusicAudioComponent->IsPlaying())
+    {
+        const float FinalVolume = MasterVolume * InVolume;
+        MusicAudioComponent->SetVolumeMultiplier(FinalVolume);
+    }
+}
+
 FSoundQueryResult UDemoAudioSubsystem::GetSoundByTag(FGameplayTag SoundTag)
 {
     const FGameplayTag Category = DemoSoundTags::GetCategory(SoundTag);
@@ -210,10 +255,13 @@ FSoundQueryResult UDemoAudioSubsystem::GetSoundByTag(FGameplayTag SoundTag)
         return {};
     }
 
-    const FAudioCategoryData* CategoryData = AudioMap.Find(Category);
+    const FAudioCategoryData* CategoryData = CategoryDataArray.FindByPredicate([Category](const FAudioCategoryData& Data)
+        {
+            return Data.Category == Category;
+        });
     checkf(CategoryData, TEXT("No map for category: %s"), *Category.ToString());
 
-    // @check - Access to the map pointer cause a crash if the SoundCollection has been GCed.
+    // Access to the map pointer is safe unless the SoundCollection is unloaded.
     const TSoftObjectPtr<USoundBase>* SoundPtr = CategoryData->Map->Find(SoundTag);
     if (!SoundPtr)
     {

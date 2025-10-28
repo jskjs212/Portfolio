@@ -74,15 +74,22 @@ UE_DEFINE_GAMEPLAY_TAG(StateTree_Event_TargetLost, "StateTree.Event.TargetLost")
 UE_DEFINE_GAMEPLAY_TAG(StateTree_Event_TargetSensed, "StateTree.Event.TargetSensed");
 UE_DEFINE_GAMEPLAY_TAG(StateTree_Event_Death, "StateTree.Event.Death");
 
-// UI.PlayerMenu.*
-UE_DEFINE_GAMEPLAY_TAG(UI_PlayerMenu_Stats, "UI.PlayerMenu.Stats");
-UE_DEFINE_GAMEPLAY_TAG(UI_PlayerMenu_Inventory, "UI.PlayerMenu.Inventory");
-UE_DEFINE_GAMEPLAY_TAG(UI_PlayerMenu_Equipment, "UI.PlayerMenu.Equipment");
-UE_DEFINE_GAMEPLAY_TAG(UI_PlayerMenu_SystemMenu, "UI.PlayerMenu.SystemMenu");
-
 // UI.Action.Item.*
 UE_DEFINE_GAMEPLAY_TAG(UI_Action_Item_Use, "UI.Action.Item.Use");
 UE_DEFINE_GAMEPLAY_TAG(UI_Action_Item_Drop, "UI.Action.Item.Drop");
 UE_DEFINE_GAMEPLAY_TAG(UI_Action_Item_Unequip, "UI.Action.Item.Unequip");
 UE_DEFINE_GAMEPLAY_TAG(UI_Action_Item_Cancel, "UI.Action.Item.Cancel");
+
+// UI.PlayerMenu.*
+UE_DEFINE_GAMEPLAY_TAG(UI_PlayerMenu_Stats, "UI.PlayerMenu.Stats");
+UE_DEFINE_GAMEPLAY_TAG(UI_PlayerMenu_Inventory, "UI.PlayerMenu.Inventory");
+UE_DEFINE_GAMEPLAY_TAG(UI_PlayerMenu_Equipment, "UI.PlayerMenu.Equipment");
+UE_DEFINE_GAMEPLAY_TAG(UI_PlayerMenu_Settings, "UI.PlayerMenu.Settings");
+UE_DEFINE_GAMEPLAY_TAG(UI_PlayerMenu_SystemMenu, "UI.PlayerMenu.SystemMenu");
+
+// UI.Settings.*
+UE_DEFINE_GAMEPLAY_TAG(UI_Settings_Graphics, "UI.Settings.Graphics");
+UE_DEFINE_GAMEPLAY_TAG(UI_Settings_Audio, "UI.Settings.Audio");
+UE_DEFINE_GAMEPLAY_TAG(UI_Settings_Controls, "UI.Settings.Controls");
+UE_DEFINE_GAMEPLAY_TAG(UI_Settings_System, "UI.Settings.System");
 } // namespace DemoGameplayTags

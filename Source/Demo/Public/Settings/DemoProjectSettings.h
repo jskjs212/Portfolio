@@ -12,7 +12,8 @@ class UItemAnimLayerConfig;
 class USoundCollection;
 
 /**
- *
+ * Config = "Game": Settings are saved to DefaultGame.ini
+ * defaultconfig: Save only to Default*.ini, not to platform or user-specific files.
  */
 UCLASS(Config = "Game", defaultconfig)
 class DEMO_API UDemoProjectSettings : public UDeveloperSettings
