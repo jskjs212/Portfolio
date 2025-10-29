@@ -9,7 +9,7 @@
 
 class ADemoPlayerController;
 class UImage;
-class UTabButton;
+class UTagButton;
 class UWidgetSwitcher;
 
 /**
@@ -22,7 +22,7 @@ struct FTabEntry
 
     FGameplayTag Tag;
 
-    TObjectPtr<UTabButton> TabButton;
+    TObjectPtr<UTagButton> TabButton;
 
     TObjectPtr<UImage> Image;
 

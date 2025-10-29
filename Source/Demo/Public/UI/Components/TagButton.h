@@ -6,16 +6,16 @@
 #include "Components/Button.h"
 #include "DemoTypes/LogCategories.h"
 #include "GameplayTagContainer.h"
-#include "TabButton.generated.h"
+#include "TagButton.generated.h"
 
-DECLARE_DELEGATE_OneParam(FOnTabButtonEvent, FGameplayTag /* InTag */);
+DECLARE_DELEGATE_OneParam(FOnTagButtonEvent, FGameplayTag /* InTag */);
 
 /**
- * Tab button that has a tab type.
- * When button events are triggered, the owner of this button can handle them with the tab type in generic way.
+ * Button that has a tag.
+ * When button events are triggered, the owner of this button can handle them with the tag in a generic way.
  */
 UCLASS()
-class DEMO_API UTabButton : public UButton
+class DEMO_API UTagButton : public UButton
 {
     GENERATED_BODY()
 
@@ -23,9 +23,9 @@ class DEMO_API UTabButton : public UButton
     //        Delegates
     ////////////////////////////////////////////////////////
 public:
-    FOnTabButtonEvent OnTabButtonClicked;
-    FOnTabButtonEvent OnTabButtonHovered;
-    FOnTabButtonEvent OnTabButtonUnhovered;
+    FOnTagButtonEvent OnTagButtonClicked;
+    FOnTagButtonEvent OnTagButtonHovered;
+    FOnTagButtonEvent OnTagButtonUnhovered;
 
     ////////////////////////////////////////////////////////
     //        UI functions
@@ -46,13 +46,13 @@ public:
 
 private:
     UFUNCTION()
-    void HandleOnClicked() { OnTabButtonClicked.ExecuteIfBound(TypeTag); }
+    void HandleOnClicked() { OnTagButtonClicked.ExecuteIfBound(TypeTag); }
 
     UFUNCTION()
-    void HandleOnHovered() { OnTabButtonHovered.ExecuteIfBound(TypeTag); }
+    void HandleOnHovered() { OnTagButtonHovered.ExecuteIfBound(TypeTag); }
 
     UFUNCTION()
-    void HandleOnUnhovered() { OnTabButtonUnhovered.ExecuteIfBound(TypeTag); }
+    void HandleOnUnhovered() { OnTagButtonUnhovered.ExecuteIfBound(TypeTag); }
 
     ////////////////////////////////////////////////////////
     //        Variables

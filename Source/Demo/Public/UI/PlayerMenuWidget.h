@@ -13,7 +13,7 @@ class UItemSlotDragDropOp;
 class USettingsPageWidget;
 class UStatsPageWidget;
 class USystemMenuPageWidget;
-class UTabButton;
+class UTagButton;
 class UTextBlock;
 
 /**
@@ -62,35 +62,35 @@ private:
 private:
     /* Stats */
     UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTabButton> StatsTabButton;
+    TObjectPtr<UTagButton> StatsTabButton;
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UStatsPageWidget> StatsPageWidget;
 
     /* Inventory */
     UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTabButton> InventoryTabButton;
+    TObjectPtr<UTagButton> InventoryTabButton;
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UInventoryPageWidget> InventoryPageWidget;
 
     /* Equipment */
     UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTabButton> EquipmentTabButton;
+    TObjectPtr<UTagButton> EquipmentTabButton;
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UEquipmentPageWidget> EquipmentPageWidget;
 
     /* Settings */
     UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTabButton> SettingsTabButton;
+    TObjectPtr<UTagButton> SettingsTabButton;
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<USettingsPageWidget> SettingsPageWidget;
 
     /* System */
     UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTabButton> SystemMenuTabButton;
+    TObjectPtr<UTagButton> SystemMenuTabButton;
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<USystemMenuPageWidget> SystemMenuPageWidget;

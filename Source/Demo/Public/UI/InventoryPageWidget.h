@@ -14,7 +14,7 @@ class UImage;
 class UItemActionDispatcher;
 class UItemInfoWidget;
 class UItemSlotWidget;
-class UTabButton;
+class UTagButton;
 class UWrapBox;
 
 /**
@@ -84,7 +84,7 @@ private:
 private:
     /* Weapon */
     UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTabButton> WeaponTabButton;
+    TObjectPtr<UTagButton> WeaponTabButton;
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UImage> WeaponTabImage;
@@ -94,7 +94,7 @@ private:
 
     /* Armor */
     UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTabButton> ArmorTabButton;
+    TObjectPtr<UTagButton> ArmorTabButton;
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UImage> ArmorTabImage;
@@ -104,7 +104,7 @@ private:
 
     /* Consumable */
     UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTabButton> ConsumableTabButton;
+    TObjectPtr<UTagButton> ConsumableTabButton;
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UImage> ConsumableTabImage;

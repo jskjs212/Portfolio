@@ -8,7 +8,7 @@
 
 class UDemoUserSettings;
 class USettingsSectionWidget;
-class UTabButton;
+class UTagButton;
 
 /**
  * Settings Page Widget
@@ -38,14 +38,14 @@ public:
 private:
     /* Graphics */
     UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTabButton> GraphicsTabButton;
+    TObjectPtr<UTagButton> GraphicsTabButton;
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<USettingsSectionWidget> GraphicsPageWidget;
 
     /* Audio */
     UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTabButton> AudioTabButton;
+    TObjectPtr<UTagButton> AudioTabButton;
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<USettingsSectionWidget> AudioPageWidget;

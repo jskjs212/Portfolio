@@ -10,7 +10,7 @@
 #include "UI/ItemActionDispatcher.h"
 #include "UI/ItemInfoWidget.h"
 #include "UI/ItemSlotWidget.h"
-#include "UI/TabButton.h"
+#include "UI/Components/TagButton.h"
 
 void UEquipmentPageWidget::NativeOnInitialized()
 {
@@ -129,10 +129,10 @@ void UEquipmentPageWidget::InitContextMenu()
     ContextMenuWidget->AddToViewport(3);
 
     // Bind context menu buttons
-    TArray<TObjectPtr<UTabButton>>& Buttons = ContextMenuWidget->GetActionButtons();
-    for (TObjectPtr<UTabButton>& Button : Buttons)
+    TArray<TObjectPtr<UTagButton>>& Buttons = ContextMenuWidget->GetActionButtons();
+    for (TObjectPtr<UTagButton>& Button : Buttons)
     {
-        Button->OnTabButtonClicked.BindUObject(this, &ThisClass::HandleContextMenuButtonClicked);
+        Button->OnTagButtonClicked.BindUObject(this, &ThisClass::HandleContextMenuButtonClicked);
     }
 }
 

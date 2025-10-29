@@ -8,7 +8,7 @@
 #include "Components/WidgetSwitcher.h"
 #include "DemoTypes/LogCategories.h"
 #include "PlayerController/DemoPlayerController.h"
-#include "UI/TabButton.h"
+#include "UI/Components/TagButton.h"
 
 void UTabMenuWidget::NativeOnInitialized()
 {
@@ -110,9 +110,9 @@ void UTabMenuWidget::InitTabMenu()
     for (FTabEntry& TabEntry : TabEntries)
     {
         TabEntry.TabButton->SetTypeTag(TabEntry.Tag);
-        TabEntry.TabButton->OnTabButtonClicked.BindUObject(this, &ThisClass::HandleTabButtonClicked);
-        TabEntry.TabButton->OnTabButtonHovered.BindUObject(this, &ThisClass::HandleTabButtonHovered);
-        TabEntry.TabButton->OnTabButtonUnhovered.BindUObject(this, &ThisClass::HandleTabButtonUnhovered);
+        TabEntry.TabButton->OnTagButtonClicked.BindUObject(this, &ThisClass::HandleTabButtonClicked);
+        TabEntry.TabButton->OnTagButtonHovered.BindUObject(this, &ThisClass::HandleTabButtonHovered);
+        TabEntry.TabButton->OnTagButtonUnhovered.BindUObject(this, &ThisClass::HandleTabButtonUnhovered);
     }
 
     ActiveTabTag = TabEntries[0].Tag;

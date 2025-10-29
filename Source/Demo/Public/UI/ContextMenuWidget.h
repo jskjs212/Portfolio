@@ -9,7 +9,7 @@
 #include "ContextMenuWidget.generated.h"
 
 class UBorder;
-class UTabButton;
+class UTagButton;
 class UVerticalBox;
 
 USTRUCT()
@@ -63,20 +63,20 @@ private:
     //        Get & set
     ////////////////////////////////////////////////////////
 public:
-    FORCEINLINE TArray<TObjectPtr<UTabButton>>& GetActionButtons() { return ActionButtons; }
+    FORCEINLINE TArray<TObjectPtr<UTagButton>>& GetActionButtons() { return ActionButtons; }
 
     ////////////////////////////////////////////////////////
     //        Widgets
     ////////////////////////////////////////////////////////
 protected:
     UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTabButton> FirstDesignButton;
+    TObjectPtr<UTagButton> FirstDesignButton;
 
     UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTabButton> MiddleDesignButton;
+    TObjectPtr<UTagButton> MiddleDesignButton;
 
     UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTabButton> LastDesignButton;
+    TObjectPtr<UTagButton> LastDesignButton;
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UVerticalBox> ContextVerticalBox;
@@ -86,7 +86,7 @@ protected:
     ////////////////////////////////////////////////////////
 protected:
     UPROPERTY()
-    TArray<TObjectPtr<UTabButton>> ActionButtons;
+    TArray<TObjectPtr<UTagButton>> ActionButtons;
 
     UPROPERTY()
     TArray<TObjectPtr<UBorder>> HoveredBorders;

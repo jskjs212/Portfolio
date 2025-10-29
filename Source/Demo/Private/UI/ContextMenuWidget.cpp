@@ -8,7 +8,7 @@
 #include "Components/VerticalBox.h"
 #include "DemoTypes/LogCategories.h"
 #include "Framework/Application/SlateApplication.h"
-#include "UI/TabButton.h"
+#include "UI/Components/TagButton.h"
 
 void UContextMenuWidget::NativeOnInitialized()
 {
@@ -43,7 +43,7 @@ void UContextMenuWidget::InitActions(const TArray<FContextAction>& InActions)
 
     for (int32 Index = 0; Index < NumActions; ++Index)
     {
-        UTabButton* NewButton = nullptr;
+        UTagButton* NewButton = nullptr;
 
         // Create buttons based on action
         if (Index == 0) // First
@@ -56,7 +56,7 @@ void UContextMenuWidget::InitActions(const TArray<FContextAction>& InActions)
         }
         else // Middle
         {
-            NewButton = DuplicateObject<UTabButton>(MiddleDesignButton, this);
+            NewButton = DuplicateObject<UTagButton>(MiddleDesignButton, this);
         }
 
         if (NewButton)
@@ -76,8 +76,8 @@ void UContextMenuWidget::InitActions(const TArray<FContextAction>& InActions)
             }
 
             NewButton->SetTypeTag(InActions[Index].ActionTag);
-            NewButton->OnTabButtonHovered.BindUObject(this, &ThisClass::HandleButtonHovered);
-            NewButton->OnTabButtonUnhovered.BindUObject(this, &ThisClass::HandleButtonUnhovered);
+            NewButton->OnTagButtonHovered.BindUObject(this, &ThisClass::HandleButtonHovered);
+            NewButton->OnTagButtonUnhovered.BindUObject(this, &ThisClass::HandleButtonUnhovered);
             NewButton->SetVisibility(ESlateVisibility::Visible);
 
             ContextVerticalBox->AddChild(NewButton);
