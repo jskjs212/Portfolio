@@ -7,10 +7,11 @@
 #include "GameplayTagContainer.h"
 #include "DemoUserSettings.generated.h"
 
-DECLARE_DELEGATE_TwoParams(FOnVolumeSettingChanged, FGameplayTag /* InCategory */, float /* InVolume */);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnFloatSettingChanged, FGameplayTag /* InCategory */, float /* InVolume */);
 
 /**
- *
+ * GameUserSettings subclass for Demo project.
+ * If there are too many listners to delegates,
  */
 UCLASS()
 class DEMO_API UDemoUserSettings : public UGameUserSettings
@@ -30,7 +31,7 @@ public:
     //        Delegates
     ////////////////////////////////////////////////////////
 public:
-    FOnVolumeSettingChanged OnVolumeSettingChanged;
+    FOnFloatSettingChanged OnFloatSettingChanged;
 
     ////////////////////////////////////////////////////////
     //        Functions
@@ -40,6 +41,10 @@ public:
 
     virtual void SetToDefaults() override;
 
+    ////////////////////////////////////////////////////////
+    //        Functions - Audio
+    ////////////////////////////////////////////////////////
+public:
     // 0.f to 1.f
     // @return -1.f if InCategory is not valid.
     float GetVolumeSetting(FGameplayTag InCategory) const;
@@ -47,10 +52,15 @@ public:
     // 0.f to 1.f
     void SetVolumeSetting(FGameplayTag InCategory, float InVolume);
 
+    bool GetMuteWhenUnfocused() const { return bMuteWhenUnfocused; }
+
+    void SetMuteWhenUnfocused(bool bInMuteWhenUnfocused);
+
     ////////////////////////////////////////////////////////
-    //        Variables
+    //        Variables - Audio
     ////////////////////////////////////////////////////////
 private:
+    /* Volume Settings */
     UPROPERTY(Config)
     float MasterVolume;
 
@@ -67,4 +77,8 @@ private:
     float VoiceVolume;
 
     TArray<TPair<FGameplayTag, float*>> VolumeSettings;
+
+    /* Else */
+    UPROPERTY(Config)
+    bool bMuteWhenUnfocused;
 };

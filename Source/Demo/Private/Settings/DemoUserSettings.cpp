@@ -20,11 +20,12 @@ void UDemoUserSettings::SetToDefaults()
 {
     Super::SetToDefaults();
 
-    // Initialize volume settings
+    /* Audio */
     for (auto& [Category, VolumePtr] : VolumeSettings)
     {
         *VolumePtr = 1.f;
     }
+    bMuteWhenUnfocused = true;
 }
 
 float UDemoUserSettings::GetVolumeSetting(FGameplayTag InCategory) const
@@ -46,9 +47,14 @@ void UDemoUserSettings::SetVolumeSetting(FGameplayTag InCategory, float InVolume
         if (Category == InCategory)
         {
             *VolumePtr = FMath::Clamp(InVolume, 0.f, 1.f);
-            OnVolumeSettingChanged.ExecuteIfBound(InCategory, *VolumePtr);
-            UE_LOG(LogSettings, Warning, TEXT("@TEST - Volume set. Category: %s, Volume: %f"), *InCategory.ToString(), *VolumePtr);
+            OnFloatSettingChanged.Broadcast(InCategory, *VolumePtr);
             return;
         }
     }
+}
+
+void UDemoUserSettings::SetMuteWhenUnfocused(bool bInMuteWhenUnfocused)
+{
+    bMuteWhenUnfocused = bInMuteWhenUnfocused;
+    FApp::SetUnfocusedVolumeMultiplier(bMuteWhenUnfocused ? 0.f : 1.f);
 }

@@ -20,12 +20,6 @@ void USettingsPageWidget::NativeOnInitialized()
     TabEntries.Emplace(DemoGameplayTags::UI_Settings_Graphics, GraphicsTabButton, nullptr, GraphicsPageWidget);
     TabEntries.Emplace(DemoGameplayTags::UI_Settings_Audio, AudioTabButton, nullptr, AudioPageWidget);
     InitTabMenu();
-
-    if (UDemoUserSettings* UserSettings = UDemoUserSettings::GetDemoUserSettings())
-    {
-        //UserSettings->SetFullscreenMode(EWindowMode::Fullscreen);
-        UserSettings->ApplySettings(false);
-    }
 }
 
 void USettingsPageWidget::SyncUIWithUserSettings()

@@ -2,6 +2,7 @@
 
 #include "UI/Settings/AudioSectionWidget.h"
 #include "Audio/DemoSoundTags.h"
+#include "Components/CheckBox.h"
 #include "Components/TextBlock.h"
 #include "Settings/DemoUserSettings.h"
 #include "UI/Components/TagSlider.h"
@@ -14,9 +15,11 @@ void UAudioSectionWidget::NativeOnInitialized()
         && MusicVolumeSlider && MusicVolumeText
         && SFXVolumeSlider && SFXVolumeText
         && UIVolumeSlider && UIVolumeText
-        && VoiceVolumeSlider && VoiceVolumeText,
+        && VoiceVolumeSlider && VoiceVolumeText
+        && MuteWhenUnfocusedCheckBox && MuteWhenUnfocusedStateText,
         TEXT("Failed to bind widgets."));
 
+    // Initialize entries
     VolumeSettingsEntries = {
         {DemoSoundTags::Master, MasterVolumeSlider, MasterVolumeText},
         {DemoSoundTags::Music, MusicVolumeSlider, MusicVolumeText},
@@ -25,6 +28,7 @@ void UAudioSectionWidget::NativeOnInitialized()
         {DemoSoundTags::Voice, VoiceVolumeSlider, VoiceVolumeText}
     };
 
+    // Configure widgets and bind events
     for (FVolumeSettingsEntry& Entry : VolumeSettingsEntries)
     {
         Entry.Slider->MouseUsesStep = true;
@@ -34,7 +38,9 @@ void UAudioSectionWidget::NativeOnInitialized()
         Entry.Slider->SetTypeTag(Entry.Category);
         Entry.Slider->OnTagSliderMouseCaptureEnd.BindUObject(this, &ThisClass::HandleTagSliderMouseCaptureEnd);
         Entry.Slider->OnTagSliderValueChanged.BindUObject(this, &ThisClass::HandleTagSliderValueChanged);
+        Entry.Text->SetVisibility(ESlateVisibility::HitTestInvisible);
     }
+    MuteWhenUnfocusedCheckBox->OnCheckStateChanged.AddDynamic(this, &ThisClass::HandleCheckBoxStateChanged);
 }
 
 void UAudioSectionWidget::SyncUIWithUserSettings()
@@ -52,6 +58,10 @@ void UAudioSectionWidget::SyncUIWithUserSettings()
                 Entry.Text->SetText(FText::AsNumber(FMath::RoundToInt(LoadedVolume)));
             }
         }
+
+        // Else
+        MuteWhenUnfocusedCheckBox->SetIsChecked(UserSettings->GetMuteWhenUnfocused());
+        MuteWhenUnfocusedStateText->SetText(FText::FromString(UserSettings->GetMuteWhenUnfocused() ? TEXT("ON") : TEXT("OFF")));
     }
 }
 
@@ -80,5 +90,16 @@ void UAudioSectionWidget::HandleTagSliderValueChanged(FGameplayTag InTag, float 
                 break;
             }
         }
+    }
+}
+
+void UAudioSectionWidget::HandleCheckBoxStateChanged(bool bIsChecked)
+{
+    if (UDemoUserSettings* UserSettings = UDemoUserSettings::GetDemoUserSettings())
+    {
+        const FString StateStr = bIsChecked ? TEXT("ON") : TEXT("OFF");
+        UserSettings->SetMuteWhenUnfocused(bIsChecked);
+        MuteWhenUnfocusedStateText->SetText(FText::FromString(StateStr));
+        UserSettings->ApplySettings(false);
     }
 }

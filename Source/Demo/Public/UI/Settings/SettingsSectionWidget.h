@@ -10,7 +10,8 @@
  * Base class for settings section widgets.
  * e.g. Graphics, Audio, etc.
  *
- * @TODO - ApplySettings(), ResetToDefaults(), CancelChanges()
+ * Apply settings when UI elements change for now.
+ * @TODO - ApplySettings(), ResetToDefaults(), CancelChanges(), MarkDirty(), etc.
  */
 UCLASS()
 class DEMO_API USettingsSectionWidget : public UUserWidget

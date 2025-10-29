@@ -12,7 +12,6 @@ class UTabButton;
 
 /**
  * Settings Page Widget
- *
  * Each options section is hardcoded for now.
  * In future, make it data-driven + generic handler.
  * - Entry: Key, Type (Slider, etc.), DefaultValue, UWidget
@@ -25,14 +24,11 @@ class DEMO_API USettingsPageWidget : public UTabMenuWidget
     GENERATED_BODY()
 
     ////////////////////////////////////////////////////////
-    //        UUserWidget functions
+    //        UI functions
     ////////////////////////////////////////////////////////
 protected:
     virtual void NativeOnInitialized() override;
 
-    ////////////////////////////////////////////////////////
-    //        UI functions
-    ////////////////////////////////////////////////////////
 public:
     void SyncUIWithUserSettings();
 

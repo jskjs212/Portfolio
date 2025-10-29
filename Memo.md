@@ -45,7 +45,7 @@ Term:
 - Tab: The button that switches between pages.
 - TabEntry: Tab's metadata linking to a page.
 - Page: The content shown when a tab is active.
-- Category: A second-level grouping of tabs inside a page like inventory.
+- Category: A second-level grouping of tabs inside a page like inventory (weapons, armors), and audio (music, SFX).
 
 TabMenu: TabEntries (Tag, TabButton, Page), PageSwitcher
 - PlayerMenu: StatsPage, EquipmentPage, InventoryPage (+ Skills, Quests, Map, Options, Achievements, Overall, etc.)

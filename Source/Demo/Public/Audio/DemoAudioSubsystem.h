@@ -87,6 +87,8 @@ public:
 private:
     void InitAudioData();
 
+    void LoadUserAudioSettings();
+
     void ClearAudioComponent();
 
     void HandleWorldCleanup(UWorld* World, bool bSessionEnded, bool bCleanupResources);

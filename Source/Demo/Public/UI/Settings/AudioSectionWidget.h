@@ -7,6 +7,7 @@
 #include "GameplayTagContainer.h"
 #include "AudioSectionWidget.generated.h"
 
+class UCheckBox;
 class UTagSlider;
 class UTextBlock;
 
@@ -25,6 +26,9 @@ class DEMO_API UAudioSectionWidget : public USettingsSectionWidget
 {
     GENERATED_BODY()
 
+    ////////////////////////////////////////////////////////
+    //        UI functions
+    ////////////////////////////////////////////////////////
 protected:
     virtual void NativeOnInitialized() override;
 
@@ -35,7 +39,15 @@ private:
 
     void HandleTagSliderValueChanged(FGameplayTag InTag, float InValue);
 
+    // Only MuteWhenUnfocusedCheckBox uses this.
+    UFUNCTION()
+    void HandleCheckBoxStateChanged(bool bIsChecked);
+
+    ////////////////////////////////////////////////////////
+    //        Widgets
+    ////////////////////////////////////////////////////////
 private:
+    /* Volume Settings */
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UTagSlider> MasterVolumeSlider;
 
@@ -66,10 +78,19 @@ private:
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UTextBlock> VoiceVolumeText;
 
-    //TMap<FGameplayTag, TObjectPtr<UTagSlider>> VolumeSliders;
-    TArray<FVolumeSettingsEntry> VolumeSettingsEntries;
+    /* Else */
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UCheckBox> MuteWhenUnfocusedCheckBox;
 
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UTextBlock> MuteWhenUnfocusedStateText;
+
+    ////////////////////////////////////////////////////////
+    //        Widgets
+    ////////////////////////////////////////////////////////
 private:
     static constexpr inline float VolumeMaxValue{100.f};
     static constexpr inline float VolumeStepSize{5.f};
+
+    TArray<FVolumeSettingsEntry> VolumeSettingsEntries;
 };

@@ -511,7 +511,7 @@ void APlayerCharacter::Test1_Implementation()
 
     if (UGameUserSettings* UserSettings = GEngine->GetGameUserSettings())
     {
-        UserSettings->SetFullscreenMode(EWindowMode::Windowed);
+        UserSettings->SetFullscreenMode(EWindowMode::WindowedFullscreen);
         UserSettings->ApplySettings(false);
     }
 }
@@ -522,7 +522,7 @@ void APlayerCharacter::Test2_Implementation()
 
     if (UGameUserSettings* UserSettings = GEngine->GetGameUserSettings())
     {
-        UserSettings->SetFullscreenMode(EWindowMode::Fullscreen);
+        UserSettings->SetFullscreenMode(EWindowMode::Windowed);
         UserSettings->ApplySettings(false);
     }
 }

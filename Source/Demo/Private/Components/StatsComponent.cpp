@@ -172,7 +172,7 @@ bool UStatsComponent::AddModifierToPrimaryStat(FGameplayTag StatTag, const FStat
     if (bAdded)
     {
         const float NewValue = PrimaryStat->GetFinalValue();
-        DemoLOG_CF(LogAttributes, Display, TEXT("Stat: %s, NewValue: %.2f"), *StatTag.GetTagName().ToString(), NewValue); // @debug
+        DemoLOG_CF(LogAttributes, Verbose, TEXT("Stat: %s, NewValue: %.2f"), *StatTag.GetTagName().ToString(), NewValue); // @debug
         OnPrimaryStatChanged.Broadcast(StatTag, OldValue, NewValue);
         RecalculateDerivedStat(StatTag);
         return true;
@@ -194,7 +194,7 @@ bool UStatsComponent::RemoveModifierFromPrimaryStat(FGameplayTag StatTag, const 
     if (bRemoved)
     {
         const float NewValue = PrimaryStat->GetFinalValue();
-        DemoLOG_CF(LogAttributes, Display, TEXT("Stat: %s, NewValue: %.2f"), *StatTag.GetTagName().ToString(), NewValue); // @debug
+        DemoLOG_CF(LogAttributes, Verbose, TEXT("Stat: %s, NewValue: %.2f"), *StatTag.GetTagName().ToString(), NewValue); // @debug
         OnPrimaryStatChanged.Broadcast(StatTag, OldValue, NewValue);
         RecalculateDerivedStat(StatTag);
         return true;
@@ -216,7 +216,7 @@ bool UStatsComponent::AddModifierToDerivedStat(FGameplayTag StatTag, const FStat
     if (bAdded)
     {
         const float NewValue = DerivedStat->GetFinalValue();
-        DemoLOG_CF(LogAttributes, Display, TEXT("Stat: %s, NewValue: %.2f"), *StatTag.GetTagName().ToString(), NewValue); // @debug
+        DemoLOG_CF(LogAttributes, Verbose, TEXT("Stat: %s, NewValue: %.2f"), *StatTag.GetTagName().ToString(), NewValue); // @debug
         OnDerivedStatChanged.Broadcast(StatTag, OldValue, NewValue);
         return true;
     }
@@ -237,7 +237,7 @@ bool UStatsComponent::RemoveModifierFromDerivedStat(FGameplayTag StatTag, const 
     if (bRemoved)
     {
         const float NewValue = DerivedStat->GetFinalValue();
-        DemoLOG_CF(LogAttributes, Display, TEXT("Stat: %s, NewValue: %.2f"), *StatTag.GetTagName().ToString(), NewValue); // @debug
+        DemoLOG_CF(LogAttributes, Verbose, TEXT("Stat: %s, NewValue: %.2f"), *StatTag.GetTagName().ToString(), NewValue); // @debug
         OnDerivedStatChanged.Broadcast(StatTag, OldValue, NewValue);
         return true;
     }
@@ -288,7 +288,7 @@ void UStatsComponent::RecalculateDerivedStat(FGameplayTag InPrimaryStatTag)
 
         DerivedStat.BaseValue = NewDerivedBaseValue;
         const float NewDerivedValue = DerivedStat.GetFinalValue();
-        DemoLOG_CF(LogAttributes, Display, TEXT("Stat: %s, NewValue: %.2f"), *DerivedStatTag.GetTagName().ToString(), NewDerivedValue); // @debug
+        DemoLOG_CF(LogAttributes, Verbose, TEXT("Stat: %s, NewValue: %.2f"), *DerivedStatTag.GetTagName().ToString(), NewDerivedValue); // @debug
         OnDerivedStatChanged.Broadcast(DerivedStatTag, OldDerivedValue, NewDerivedValue);
     }
 }

@@ -20,6 +20,7 @@ void UDemoAudioSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     Super::Initialize(Collection);
 
     InitAudioData();
+    LoadUserAudioSettings();
 
     FDelegateHandle Handle = FWorldDelegates::OnWorldCleanup.AddUObject(this, &ThisClass::HandleWorldCleanup);
 }
@@ -28,10 +29,15 @@ void UDemoAudioSubsystem::Deinitialize()
 {
     Super::Deinitialize();
 
+    // Unbind
     if (WorldCleanupHandle.IsValid())
     {
         FWorldDelegates::OnWorldCleanup.Remove(WorldCleanupHandle);
         WorldCleanupHandle.Reset();
+    }
+    if (UDemoUserSettings* UserSettings = UDemoUserSettings::GetDemoUserSettings())
+    {
+        UserSettings->OnFloatSettingChanged.RemoveAll(this);
     }
 
     ClearAudioComponent();
@@ -174,21 +180,6 @@ void UDemoAudioSubsystem::InitAudioData()
         {DemoSoundTags::Voice,  1.f, &SoundCollection->VoiceMap}
     };
 
-    // Load volumes from user settings
-    if (UDemoUserSettings* UserSettings = UDemoUserSettings::GetDemoUserSettings())
-    {
-        MasterVolume = UserSettings->GetVolumeSetting(DemoSoundTags::Master);
-        check(MasterVolume >= 0.f);
-        for (FAudioCategoryData& CategoryData : CategoryDataArray)
-        {
-            CategoryData.Volume = UserSettings->GetVolumeSetting(CategoryData.Category);
-            check(CategoryData.Volume >= 0.f);
-        }
-        DemoLOG_CF(LogAudio, Warning, TEXT("@TEST - Master: %f"), MasterVolume);
-
-        UserSettings->OnVolumeSettingChanged.BindUObject(this, &ThisClass::HandleVolumeSettingChanged);
-    }
-
     // @TEST - Validate CategoryDataArray
     for (const FAudioCategoryData& CategoryData : CategoryDataArray)
     {
@@ -197,6 +188,24 @@ void UDemoAudioSubsystem::InitAudioData()
         {
             checkf(!SoundPtr.IsNull(), TEXT("Null sound for tag: %s"), *SoundTag.ToString());
         }
+    }
+}
+
+void UDemoAudioSubsystem::LoadUserAudioSettings()
+{
+    if (UDemoUserSettings* UserSettings = UDemoUserSettings::GetDemoUserSettings())
+    {
+        // Load volumes from user settings
+        MasterVolume = UserSettings->GetVolumeSetting(DemoSoundTags::Master);
+        check(MasterVolume >= 0.f);
+        for (FAudioCategoryData& CategoryData : CategoryDataArray)
+        {
+            CategoryData.Volume = UserSettings->GetVolumeSetting(CategoryData.Category);
+            check(CategoryData.Volume >= 0.f);
+        }
+
+        // Bind to changes
+        UserSettings->OnFloatSettingChanged.AddUObject(this, &ThisClass::HandleVolumeSettingChanged);
     }
 }
 

@@ -10,24 +10,64 @@ namespace ESelectInfo { enum Type : int; }
 class UComboBoxString;
 
 /**
- *
+ * Consider creating UTagComboBoxString class to leave only one handler for all combo boxes.
  */
 UCLASS()
 class DEMO_API UGraphicsSectionWidget : public USettingsSectionWidget
 {
     GENERATED_BODY()
 
+    ////////////////////////////////////////////////////////
+    //        UI functions
+    ////////////////////////////////////////////////////////
 protected:
     virtual void NativeOnInitialized() override;
 
     virtual void SyncUIWithUserSettings() override;
 
     UFUNCTION()
+    void HandleDisplayModeChanged(FString SelectedItem, ESelectInfo::Type SelectionType);
+
+    UFUNCTION()
+    void HandleResolutionChanged(FString SelectedItem, ESelectInfo::Type SelectionType);
+
+    UFUNCTION()
     void HandleFPSLimitChanged(FString SelectedItem, ESelectInfo::Type SelectionType);
 
+    UFUNCTION()
+    void HandleTextureQualityChanged(FString SelectedItem, ESelectInfo::Type SelectionType);
+
+    UFUNCTION()
+    void HandleShadowQualityChanged(FString SelectedItem, ESelectInfo::Type SelectionType);
+
+    ////////////////////////////////////////////////////////
+    //        Widgets
+    ////////////////////////////////////////////////////////
 private:
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UComboBoxString> DisplayModeComboBox;
+
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UComboBoxString> ResolutionComboBox;
+
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UComboBoxString> FPSLimitComboBox;
 
-    static inline const FString UnlimitedOption{TEXT("Unlimited")};
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UComboBoxString> TextureQualityComboBox;
+
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UComboBoxString> ShadowQualityComboBox;
+
+    ////////////////////////////////////////////////////////
+    //        Variables
+    ////////////////////////////////////////////////////////
+private:
+    static const FString UnlimitedOption;
+
+    // Resolution options that this game supports.
+    // Only hardware-supported resolutions will be added to the combo box.
+    static const TArray<FIntPoint> Resolutions;
+
+    static const TArray<FString> QualityOptions;
 };
