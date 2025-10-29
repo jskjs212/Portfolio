@@ -36,7 +36,8 @@ EStateTreeRunStatus USTTask_MoveTo::EnterState(FStateTreeExecutionContext& Conte
     }
     else
     {
-        DemoLOG_CF(LogAI, Error, TEXT("Neither TargetActor nor TargetLocation is set for %s"), *GetNameSafe(Pawn));
+        // @TEST - This can happen if TargetActor is set to null by EndEncounter or similar logic.
+        DemoLOG_CF(LogAI, Warning, TEXT("Neither TargetActor nor TargetLocation is set for %s"), *GetNameSafe(Pawn));
         return EStateTreeRunStatus::Failed;
     }
 

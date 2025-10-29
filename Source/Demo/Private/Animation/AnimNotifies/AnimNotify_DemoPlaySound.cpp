@@ -3,6 +3,7 @@
 #include "Animation/AnimNotifies/AnimNotify_DemoPlaySound.h"
 #include "Audio/DemoAudioSubsystem.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "DemoTypes/LogCategories.h"
 #include "Kismet/GameplayStatics.h"
 
 void UAnimNotify_DemoPlaySound::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
@@ -10,8 +11,14 @@ void UAnimNotify_DemoPlaySound::Notify(USkeletalMeshComponent* MeshComp, UAnimSe
     Super::Notify(MeshComp, Animation, EventReference);
 
     UWorld* World = MeshComp->GetWorld();
-    if (!World || !SoundTag.IsValid())
+    if (!World)
     {
+        return;
+    }
+
+    if (!SoundTag.IsValid())
+    {
+        DemoLOG_CF(LogAnimation, Warning, TEXT("Sound tag is not set. Animation: %s"), *GetNameSafe(Animation));
         return;
     }
 
