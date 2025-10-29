@@ -25,9 +25,10 @@ public:
 protected:
     virtual void BeginPlay() override;
 
-private:
+public:
     void ShowMainMenu();
 
+private:
     void InitMainMenu();
 
     ////////////////////////////////////////////////////////

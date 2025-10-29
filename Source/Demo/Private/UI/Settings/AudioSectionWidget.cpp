@@ -45,7 +45,6 @@ void UAudioSectionWidget::NativeOnInitialized()
 
 void UAudioSectionWidget::SyncUIWithUserSettings()
 {
-    // Sync UI elements with UserSettings values
     if (UDemoUserSettings* UserSettings = UDemoUserSettings::GetDemoUserSettings())
     {
         // Volume settings

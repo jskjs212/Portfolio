@@ -32,6 +32,7 @@ class DEMO_API UAudioSectionWidget : public USettingsSectionWidget
 protected:
     virtual void NativeOnInitialized() override;
 
+    // Sync UI elements with UserSettings values
     virtual void SyncUIWithUserSettings() override;
 
 private:

@@ -3,6 +3,7 @@
 #include "UI/Settings/GraphicsSectionWidget.h"
 #include "Components/ComboBoxString.h"
 #include "DemoTypes/LogCategories.h"
+#include "Framework/Application/SlateApplication.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Settings/DemoUserSettings.h"
 
@@ -33,7 +34,6 @@ void UGraphicsSectionWidget::NativeOnInitialized()
     DisplayModeComboBox->AddOption(TEXT("Fullscreen"));
     DisplayModeComboBox->AddOption(TEXT("Windowed Fullscreen"));
     DisplayModeComboBox->AddOption(TEXT("Windowed"));
-    DisplayModeComboBox->OnSelectionChanged.AddDynamic(this, &ThisClass::HandleDisplayModeChanged);
 
     // Resolution
     TArray<FIntPoint> SupportedResolutions;
@@ -47,7 +47,6 @@ void UGraphicsSectionWidget::NativeOnInitialized()
             ResolutionComboBox->AddOption(ResolutionOption);
         }
     }
-    ResolutionComboBox->OnSelectionChanged.AddDynamic(this, &ThisClass::HandleResolutionChanged);
 
     // FPS limit
     // Set default selection to Unlimited
@@ -59,7 +58,6 @@ void UGraphicsSectionWidget::NativeOnInitialized()
     FPSLimitComboBox->AddOption(TEXT("240"));
     FPSLimitComboBox->AddOption(UnlimitedOption);
     FPSLimitComboBox->SetSelectedOption(UnlimitedOption);
-    FPSLimitComboBox->OnSelectionChanged.AddDynamic(this, &ThisClass::HandleFPSLimitChanged);
 
     // Quality settings
     for (const FString& QualityOption : QualityOptions)
@@ -67,25 +65,33 @@ void UGraphicsSectionWidget::NativeOnInitialized()
         TextureQualityComboBox->AddOption(QualityOption);
         ShadowQualityComboBox->AddOption(QualityOption);
     }
+
+    DisplayModeComboBox->OnSelectionChanged.AddDynamic(this, &ThisClass::HandleDisplayModeChanged);
+    ResolutionComboBox->OnSelectionChanged.AddDynamic(this, &ThisClass::HandleResolutionChanged);
+    FPSLimitComboBox->OnSelectionChanged.AddDynamic(this, &ThisClass::HandleFPSLimitChanged);
     TextureQualityComboBox->OnSelectionChanged.AddDynamic(this, &ThisClass::HandleTextureQualityChanged);
     ShadowQualityComboBox->OnSelectionChanged.AddDynamic(this, &ThisClass::HandleShadowQualityChanged);
+
+    // Bind to external window action
+    OnWindowActionDelegate.BindUObject(this, &ThisClass::HandleWindowAction);
+    OnWindowActionDelegateHandle = FSlateApplication::Get().RegisterOnWindowActionNotification(OnWindowActionDelegate);
+}
+
+void UGraphicsSectionWidget::NativeDestruct()
+{
+    Super::NativeDestruct();
+
+    // Unbind from external window action
+    FSlateApplication::Get().UnregisterOnWindowActionNotification(OnWindowActionDelegateHandle);
+    OnWindowActionDelegateHandle.Reset();
 }
 
 void UGraphicsSectionWidget::SyncUIWithUserSettings()
 {
-    // Sync UI elements with UserSettings values
+    SyncUIWithResolutionSettings();
+
     if (UDemoUserSettings* UserSettings = UDemoUserSettings::GetDemoUserSettings())
     {
-        // Display mode
-        const EWindowMode::Type LoadedDisplayMode = UserSettings->GetFullscreenMode();
-        const int32 DisplayModeIndex = EWindowMode::ConvertIntToWindowMode(LoadedDisplayMode);
-        DisplayModeComboBox->SetSelectedIndex(DisplayModeIndex);
-
-        // Resolution
-        const FIntPoint LoadedResolution = UserSettings->GetScreenResolution();
-        const int32 ResolutionIndex = Resolutions.Find(LoadedResolution);
-        ResolutionComboBox->SetSelectedIndex(ResolutionIndex);
-
         // FPS limit
         const int32 LoadedFPSLimit = static_cast<int32>(UserSettings->GetFrameRateLimit());
         if (LoadedFPSLimit == 0)
@@ -112,6 +118,22 @@ void UGraphicsSectionWidget::SyncUIWithUserSettings()
         // Quality settings
         TextureQualityComboBox->SetSelectedIndex(UserSettings->GetTextureQuality());
         ShadowQualityComboBox->SetSelectedIndex(UserSettings->GetShadowQuality());
+    }
+}
+
+void UGraphicsSectionWidget::SyncUIWithResolutionSettings()
+{
+    if (UDemoUserSettings* UserSettings = UDemoUserSettings::GetDemoUserSettings())
+    {
+        // Display mode
+        const EWindowMode::Type LoadedDisplayMode = UserSettings->GetFullscreenMode();
+        const int32 DisplayModeIndex = EWindowMode::ConvertIntToWindowMode(LoadedDisplayMode);
+        DisplayModeComboBox->SetSelectedIndex(DisplayModeIndex);
+
+        // Resolution
+        const FIntPoint LoadedResolution = UserSettings->GetScreenResolution();
+        const int32 ResolutionIndex = Resolutions.Find(LoadedResolution);
+        ResolutionComboBox->SetSelectedIndex(ResolutionIndex);
     }
 }
 
@@ -170,4 +192,13 @@ void UGraphicsSectionWidget::HandleShadowQualityChanged(FString SelectedItem, ES
         UserSettings->SetShadowQuality(SelectedIndex);
         UserSettings->ApplySettings(false);
     }
+}
+
+bool UGraphicsSectionWidget::HandleWindowAction(const TSharedRef<FGenericWindow>& PlatformWindow, EWindowAction::Type InWindowAction)
+{
+    if (InWindowAction == EWindowAction::Maximize || InWindowAction == EWindowAction::Restore)
+    {
+        SyncUIWithResolutionSettings();
+    }
+    return false; // Return true if the OS layer should stop processing the action.
 }

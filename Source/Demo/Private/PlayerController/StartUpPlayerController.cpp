@@ -62,5 +62,5 @@ void AStartUpPlayerController::InitMainMenu()
         return;
     }
 
-    MainMenuWidget = CreateWidget<UMainMenuWidget>(GetWorld(), MainMenuWidgetClass);
+    MainMenuWidget = CreateWidget<UMainMenuWidget>(this, MainMenuWidgetClass);
 }

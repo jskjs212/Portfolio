@@ -205,15 +205,20 @@ void UDemoAudioSubsystem::InitAudioData()
         {DemoSoundTags::Voice,  1.f, &SoundCollection->VoiceMap}
     };
 
-    // @TEST - Validate CategoryDataArray
+#if WITH_EDITOR
+    // Validate sound data
     for (const FAudioCategoryData& CategoryData : CategoryDataArray)
     {
         checkf(CategoryData.Map, TEXT("No sound map for category: %s"), *CategoryData.Category.ToString());
         for (const auto& [SoundTag, SoundPtr] : *(CategoryData.Map))
         {
-            checkf(!SoundPtr.IsNull(), TEXT("Null sound for tag: %s"), *SoundTag.ToString());
+            if (SoundPtr.IsNull())
+            {
+                DemoLOG_CF(LogAudio, Error, TEXT("Null sound for tag: %s"), *SoundTag.ToString());
+            }
         }
     }
+#endif // WITH_EDITOR
 }
 
 void UDemoAudioSubsystem::LoadUserAudioSettings()
@@ -228,6 +233,10 @@ void UDemoAudioSubsystem::LoadUserAudioSettings()
             CategoryData.Volume = UserSettings->GetVolumeSetting(CategoryData.Category);
             check(CategoryData.Volume >= 0.f);
         }
+
+        // Mute when unfocused
+        bool bMuteWhenUnfocused = UserSettings->GetMuteWhenUnfocused();
+        FApp::SetUnfocusedVolumeMultiplier(bMuteWhenUnfocused ? 0.f : 1.f);
 
         // Bind to changes
         UserSettings->OnFloatSettingChanged.AddUObject(this, &ThisClass::HandleVolumeSettingChanged);

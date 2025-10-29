@@ -19,5 +19,6 @@ class DEMO_API USettingsSectionWidget : public UUserWidget
     GENERATED_BODY()
 
 public:
+    // Sync UI elements with UserSettings values
     virtual void SyncUIWithUserSettings() {}
 };

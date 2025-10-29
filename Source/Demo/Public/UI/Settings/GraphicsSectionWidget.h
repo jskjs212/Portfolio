@@ -7,7 +7,9 @@
 #include "GraphicsSectionWidget.generated.h"
 
 namespace ESelectInfo { enum Type : int; }
+namespace EWindowAction { enum Type; }
 class UComboBoxString;
+class FGenericWindow;
 
 /**
  * Consider creating UTagComboBoxString class to leave only one handler for all combo boxes.
@@ -23,7 +25,12 @@ class DEMO_API UGraphicsSectionWidget : public USettingsSectionWidget
 protected:
     virtual void NativeOnInitialized() override;
 
+    virtual void NativeDestruct() override;
+
+    // Sync UI elements with UserSettings values
     virtual void SyncUIWithUserSettings() override;
+
+    void SyncUIWithResolutionSettings();
 
     UFUNCTION()
     void HandleDisplayModeChanged(FString SelectedItem, ESelectInfo::Type SelectionType);
@@ -39,6 +46,10 @@ protected:
 
     UFUNCTION()
     void HandleShadowQualityChanged(FString SelectedItem, ESelectInfo::Type SelectionType);
+
+    // Handle when external window action occurs
+    // e.g. maximize, restore
+    bool HandleWindowAction(const TSharedRef<FGenericWindow>& PlatformWindow, EWindowAction::Type InWindowAction);
 
     ////////////////////////////////////////////////////////
     //        Widgets
@@ -70,4 +81,8 @@ private:
     static const TArray<FIntPoint> Resolutions;
 
     static const TArray<FString> QualityOptions;
+
+    // Window action delegate
+    FOnWindowAction OnWindowActionDelegate;
+    FDelegateHandle OnWindowActionDelegateHandle;
 };
