@@ -78,7 +78,7 @@ void UGraphicsSectionWidget::SyncUIWithUserSettings()
     {
         // Display mode
         const EWindowMode::Type LoadedDisplayMode = UserSettings->GetFullscreenMode();
-        const int32 DisplayModeIndex = static_cast<int32>(LoadedDisplayMode);
+        const int32 DisplayModeIndex = EWindowMode::ConvertIntToWindowMode(LoadedDisplayMode);
         DisplayModeComboBox->SetSelectedIndex(DisplayModeIndex);
 
         // Resolution
@@ -120,7 +120,7 @@ void UGraphicsSectionWidget::HandleDisplayModeChanged(FString SelectedItem, ESel
     if (UDemoUserSettings* UserSettings = UDemoUserSettings::GetDemoUserSettings())
     {
         const int32 SelectedIndex = DisplayModeComboBox->GetSelectedIndex();
-        const EWindowMode::Type NewDisplayMode = static_cast<EWindowMode::Type>(SelectedIndex);
+        const EWindowMode::Type NewDisplayMode = EWindowMode::ConvertIntToWindowMode(SelectedIndex);
         UserSettings->SetFullscreenMode(NewDisplayMode);
         UserSettings->ConfirmVideoMode();
         UserSettings->ApplySettings(false);

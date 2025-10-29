@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Animation/AnimNotifies/AnimNotifyState_RotateActor.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Interfaces/CombatInterface.h"
 
 void UAnimNotifyState_RotateActor::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float FrameDeltaTime, const FAnimNotifyEventReference& EventReference)

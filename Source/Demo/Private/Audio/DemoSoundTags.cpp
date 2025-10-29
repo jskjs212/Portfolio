@@ -15,8 +15,8 @@ UE_DEFINE_GAMEPLAY_TAG(Music_MainMenu, "Sound.Music.MainMenu");
 
 // Sound.SFX.*
 UE_DEFINE_GAMEPLAY_TAG(SFX, "Sound.SFX");
-UE_DEFINE_GAMEPLAY_TAG(SFX_Game_Hit_Default, "Sound.SFX.Game.Hit.Default");
-UE_DEFINE_GAMEPLAY_TAG(SFX_Game_Hit_Metal, "Sound.SFX.Game.Hit.Metal");
+UE_DEFINE_GAMEPLAY_TAG(SFX_Combat_Hit_Default, "Sound.SFX.Combat.Hit.Default");
+UE_DEFINE_GAMEPLAY_TAG(SFX_Combat_Hit_Metal, "Sound.SFX.Combat.Hit.Metal");
 UE_DEFINE_GAMEPLAY_TAG(SFX_Item_PickUp, "Sound.SFX.Item.PickUp");
 UE_DEFINE_GAMEPLAY_TAG(SFX_Item_Equip, "Sound.SFX.Item.Equip");
 UE_DEFINE_GAMEPLAY_TAG(SFX_Item_Unequip, "Sound.SFX.Item.Unequip");

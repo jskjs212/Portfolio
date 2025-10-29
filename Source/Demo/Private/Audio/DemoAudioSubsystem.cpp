@@ -43,7 +43,7 @@ void UDemoAudioSubsystem::Deinitialize()
     ClearAudioComponent();
 }
 
-void UDemoAudioSubsystem::PlaySound2D(const UObject* WorldContextObject, FGameplayTag SoundTag)
+void UDemoAudioSubsystem::PlaySound2D(const UObject* WorldContextObject, FGameplayTag SoundTag, float VolumeMultiplier, float PitchMultiplier, float StartTime, USoundConcurrency* ConcurrencySettings, const AActor* OwnerActor)
 {
     if (!WorldContextObject)
     {
@@ -59,24 +59,20 @@ void UDemoAudioSubsystem::PlaySound2D(const UObject* WorldContextObject, FGamepl
     if (Result.Category == DemoSoundTags::Music)
     {
         DemoLOG_CF(LogAudio, Error, TEXT("Use PlayMusic(). Tag: %s"), *SoundTag.ToString());
+        return;
+    }
+    if (Result.Sound->IsLooping())
+    {
+        DemoLOG_CF(LogAudio, Error, TEXT("Looping sounds not allowed. Tag: %s"), *SoundTag.ToString());
         return;
     }
 
     const bool bIsUISound = Result.Category == DemoSoundTags::UI;
-    const float FinalVolume = MasterVolume * Result.CategoryVolume;
-    UGameplayStatics::PlaySound2D(
-        WorldContextObject,
-        Result.Sound,
-        FinalVolume,
-        1.f,     /* PitchMultiplier */
-        0.f,     /* StartTime */
-        nullptr, /* ConcurrencySettings */
-        nullptr, /* OwningActor */
-        bIsUISound
-    );
+    const float FinalVolume = MasterVolume * Result.CategoryVolume * VolumeMultiplier;
+    UGameplayStatics::PlaySound2D(WorldContextObject, Result.Sound, FinalVolume, PitchMultiplier, StartTime, ConcurrencySettings, OwnerActor, bIsUISound);
 }
 
-void UDemoAudioSubsystem::PlaySoundAtLocation(const UObject* WorldContextObject, FGameplayTag SoundTag, FVector Location, FRotator Rotation)
+void UDemoAudioSubsystem::PlaySoundAtLocation(const UObject* WorldContextObject, FGameplayTag SoundTag, FVector Location, FRotator Rotation, float VolumeMultiplier, float PitchMultiplier, float StartTime, USoundAttenuation* AttenuationSettings, USoundConcurrency* ConcurrencySettings, const AActor* OwningActor, const UInitialActiveSoundParams* InitialParams)
 {
     if (!WorldContextObject)
     {
@@ -94,12 +90,40 @@ void UDemoAudioSubsystem::PlaySoundAtLocation(const UObject* WorldContextObject,
         DemoLOG_CF(LogAudio, Error, TEXT("Use PlayMusic(). Tag: %s"), *SoundTag.ToString());
         return;
     }
+    if (Result.Sound->IsLooping())
+    {
+        DemoLOG_CF(LogAudio, Error, TEXT("Looping sounds not allowed. Tag: %s"), *SoundTag.ToString());
+        return;
+    }
 
-    const float FinalVolume = MasterVolume * Result.CategoryVolume;
-    UGameplayStatics::PlaySoundAtLocation(WorldContextObject, Result.Sound, Location, Rotation, FinalVolume);
+    const float FinalVolume = MasterVolume * Result.CategoryVolume * VolumeMultiplier;
+    UGameplayStatics::PlaySoundAtLocation(WorldContextObject, Result.Sound, Location, Rotation, FinalVolume, PitchMultiplier, StartTime, AttenuationSettings, ConcurrencySettings, OwningActor, InitialParams);
 }
 
-void UDemoAudioSubsystem::PlayMusic(const UObject* WorldContextObject, FGameplayTag MusicTag)
+void UDemoAudioSubsystem::PlaySoundAttached(FGameplayTag SoundTag, USceneComponent* AttachToComponent, FName AttachPointName, FVector Location, FRotator Rotation, EAttachLocation::Type LocationType, bool bStopWhenAttachedToDestroyed, float VolumeMultiplier, float PitchMultiplier, float StartTime, USoundAttenuation* AttenuationSettings, USoundConcurrency* ConcurrencySettings, bool bAutoDestroy)
+{
+    // Query sound
+    FSoundQueryResult Result = GetSoundByTag(SoundTag);
+    if (!Result.Sound)
+    {
+        return;
+    }
+    if (Result.Category == DemoSoundTags::Music)
+    {
+        DemoLOG_CF(LogAudio, Error, TEXT("Use PlayMusic(). Tag: %s"), *SoundTag.ToString());
+        return;
+    }
+    if (Result.Sound->IsLooping())
+    {
+        DemoLOG_CF(LogAudio, Error, TEXT("Looping sounds not allowed. Tag: %s"), *SoundTag.ToString());
+        return;
+    }
+
+    const float FinalVolume = MasterVolume * Result.CategoryVolume * VolumeMultiplier;
+    UGameplayStatics::SpawnSoundAttached(Result.Sound, AttachToComponent, AttachPointName, Location, Rotation, LocationType, bStopWhenAttachedToDestroyed, FinalVolume, PitchMultiplier, StartTime, AttenuationSettings, ConcurrencySettings, bAutoDestroy);
+}
+
+void UDemoAudioSubsystem::PlayMusic(const UObject* WorldContextObject, FGameplayTag MusicTag, float VolumeMultiplier, float PitchMultiplier)
 {
     UWorld* World = GEngine ? GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::ReturnNull) : nullptr;
     if (!World)
@@ -146,9 +170,10 @@ void UDemoAudioSubsystem::PlayMusic(const UObject* WorldContextObject, FGameplay
     }
 
     // Play music
-    const float FinalVolume = MasterVolume * Result.CategoryVolume;
+    const float FinalVolume = MasterVolume * Result.CategoryVolume * VolumeMultiplier;
     MusicAudioComponent->SetSound(Result.Sound);
     MusicAudioComponent->SetVolumeMultiplier(FinalVolume);
+    MusicAudioComponent->SetPitchMultiplier(PitchMultiplier);
     MusicAudioComponent->Play(0.f);
 }
 

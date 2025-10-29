@@ -2,6 +2,7 @@
 
 #include "Animation/AnimNotifies/AnimNotifyState_CollisionTrace.h"
 #include "Components/AttackCollisionComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "DemoTypes/LogCategories.h"
 
 UAnimNotifyState_CollisionTrace::UAnimNotifyState_CollisionTrace(const FObjectInitializer& ObjectInitializer)
