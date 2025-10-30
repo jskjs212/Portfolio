@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UI/Settings/AudioSectionWidget.h"
+#include "Audio/DemoAudioSubsystem.h"
 #include "Audio/DemoSoundTags.h"
 #include "Components/CheckBox.h"
 #include "Components/TextBlock.h"
@@ -22,10 +23,10 @@ void UAudioSectionWidget::NativeOnInitialized()
     // Initialize entries
     VolumeSettingsEntries = {
         {DemoSoundTags::Master, MasterVolumeSlider, MasterVolumeText},
-        {DemoSoundTags::Music, MusicVolumeSlider, MusicVolumeText},
-        {DemoSoundTags::SFX, SFXVolumeSlider, SFXVolumeText},
-        {DemoSoundTags::UI, UIVolumeSlider, UIVolumeText},
-        {DemoSoundTags::Voice, VoiceVolumeSlider, VoiceVolumeText}
+        {DemoSoundTags::Music,  MusicVolumeSlider,  MusicVolumeText},
+        {DemoSoundTags::SFX,    SFXVolumeSlider,    SFXVolumeText},
+        {DemoSoundTags::UI,     UIVolumeSlider,     UIVolumeText},
+        {DemoSoundTags::Voice,  VoiceVolumeSlider,  VoiceVolumeText}
     };
 
     // Configure widgets and bind events
@@ -70,6 +71,15 @@ void UAudioSectionWidget::HandleTagSliderMouseCaptureEnd(FGameplayTag InTag)
     {
         // Apply new volume settings
         UserSettings->ApplySettings(false);
+
+        // Play a sample sound
+        if (InTag != DemoSoundTags::Master && InTag != DemoSoundTags::Music)
+        {
+            if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GetGameInstance()))
+            {
+                AudioSubsystem->PlaySound2D(this, InTag);
+            }
+        }
     }
 }
 
@@ -84,7 +94,7 @@ void UAudioSectionWidget::HandleTagSliderValueChanged(FGameplayTag InTag, float 
                 // Update volume setting and text immediately.
                 // Not applying settings until mouse capture ends.
                 const float NewVolume = Entry.Slider->GetValue() / VolumeMaxValue;
-                UserSettings->SetVolumeSetting(InTag, NewVolume);
+                UserSettings->SetVolumeSetting(this, InTag, NewVolume);
                 Entry.Text->SetText(FText::AsNumber(FMath::RoundToInt(InValue)));
                 break;
             }

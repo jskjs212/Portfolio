@@ -17,8 +17,8 @@ void USettingsPageWidget::NativeOnInitialized()
     bUseTabButtonImages = false;
 
     // Setup tab entries
-    TabEntries.Emplace(DemoGameplayTags::UI_Settings_Graphics, GraphicsTabButton, nullptr, GraphicsPageWidget);
-    TabEntries.Emplace(DemoGameplayTags::UI_Settings_Audio, AudioTabButton, nullptr, AudioPageWidget);
+    TabEntries.Emplace(DemoGameplayTags::Settings_Graphics, GraphicsTabButton, nullptr, GraphicsPageWidget);
+    TabEntries.Emplace(DemoGameplayTags::Settings_Audio, AudioTabButton, nullptr, AudioPageWidget);
     InitTabMenu();
 }
 

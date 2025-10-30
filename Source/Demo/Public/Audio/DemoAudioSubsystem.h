@@ -11,14 +11,20 @@ class UAudioComponent;
 class UInitialActiveSoundParams;
 class USoundAttenuation;
 class USoundBase;
+class USoundClass;
+class USoundMix;
 class USoundCollection;
 class USoundConcurrency;
 
-struct FAudioCategoryData
+USTRUCT()
+struct FAudioCategorySoundData
 {
+    GENERATED_BODY()
+
     FGameplayTag Category;
 
-    float Volume{1.f};
+    UPROPERTY()
+    TObjectPtr<USoundClass> SoundClass;
 
     const TMap<FGameplayTag, TSoftObjectPtr<USoundBase>>* Map;
 };
@@ -28,11 +34,11 @@ struct FSoundQueryResult
     USoundBase* Sound{nullptr};
 
     FGameplayTag Category;
-
-    float CategoryVolume{1.f};
 };
 
 /**
+ * Demo audio subsystem that plays sounds based on GameplayTags.
+ *
  * Categories: Music, SFX, UI, Voice
  * Music: Background music
  * SFX: Sound Effects
@@ -109,7 +115,9 @@ private:
 
     void HandleWorldCleanup(UWorld* World, bool bSessionEnded, bool bCleanupResources);
 
-    void HandleVolumeSettingChanged(FGameplayTag InCategory, float InVolume);
+    void HandleBoolUserSettingChanged(FGameplayTag InTag, bool NewValue);
+
+    void HandleFloatUserSettingChanged(FGameplayTag InTag, float NewValue);
 
     // @return Data is not valid if Sound is nullptr.
     FSoundQueryResult GetSoundByTag(FGameplayTag SoundTag);
@@ -118,14 +126,16 @@ private:
     //        Variables
     ////////////////////////////////////////////////////////
 private:
-    float MasterVolume{1.f};
-
     FGameplayTag DefaultMusicTag;
 
     FDelegateHandle WorldCleanupHandle;
 
-    // {Category, Volume, MapPtr}
-    TArray<FAudioCategoryData> CategoryDataArray;
+    UPROPERTY()
+    TObjectPtr<USoundMix> GlobalSoundMix;
+
+    // {Category, SoundClass, MapPtr}
+    UPROPERTY()
+    TArray<FAudioCategorySoundData> CategoryDataArray;
 
     // Keep the loaded DataAsset alive.
     UPROPERTY(Transient)

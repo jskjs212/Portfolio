@@ -40,6 +40,13 @@ UE_DEFINE_GAMEPLAY_TAG(Movement_SpeedMode_Walk, "Movement.SpeedMode.Walk");
 UE_DEFINE_GAMEPLAY_TAG(Movement_SpeedMode_Jog, "Movement.SpeedMode.Jog");
 UE_DEFINE_GAMEPLAY_TAG(Movement_SpeedMode_Sprint, "Movement.SpeedMode.Sprint");
 
+// Settings.*
+UE_DEFINE_GAMEPLAY_TAG(Settings_Graphics, "Settings.Graphics");
+UE_DEFINE_GAMEPLAY_TAG(Settings_Audio, "Settings.Audio");
+UE_DEFINE_GAMEPLAY_TAG(Settings_Audio_MuteWhenUnfocused, "Settings.Audio.MuteWhenUnfocused");
+UE_DEFINE_GAMEPLAY_TAG(Settings_Controls, "Settings.Controls");
+UE_DEFINE_GAMEPLAY_TAG(Settings_System, "Settings.System");
+
 // Stat.*
 UE_DEFINE_GAMEPLAY_TAG(Stat_Resource_Health, "Stat.Resource.Health");
 UE_DEFINE_GAMEPLAY_TAG(Stat_Resource_Stamina, "Stat.Resource.Stamina");
@@ -86,10 +93,4 @@ UE_DEFINE_GAMEPLAY_TAG(UI_PlayerMenu_Inventory, "UI.PlayerMenu.Inventory");
 UE_DEFINE_GAMEPLAY_TAG(UI_PlayerMenu_Equipment, "UI.PlayerMenu.Equipment");
 UE_DEFINE_GAMEPLAY_TAG(UI_PlayerMenu_Settings, "UI.PlayerMenu.Settings");
 UE_DEFINE_GAMEPLAY_TAG(UI_PlayerMenu_SystemMenu, "UI.PlayerMenu.SystemMenu");
-
-// UI.Settings.*
-UE_DEFINE_GAMEPLAY_TAG(UI_Settings_Graphics, "UI.Settings.Graphics");
-UE_DEFINE_GAMEPLAY_TAG(UI_Settings_Audio, "UI.Settings.Audio");
-UE_DEFINE_GAMEPLAY_TAG(UI_Settings_Controls, "UI.Settings.Controls");
-UE_DEFINE_GAMEPLAY_TAG(UI_Settings_System, "UI.Settings.System");
 } // namespace DemoGameplayTags

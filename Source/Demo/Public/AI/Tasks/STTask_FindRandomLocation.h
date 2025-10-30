@@ -18,16 +18,16 @@ struct FSTTask_FindRandomLocationInstanceData
     float SearchRadius{1000.f};
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Output")
-    FVector RandomLocation;
+    FVector RandomLocation{FVector::ZeroVector};
 };
 
 /**
- * 
+ *
  */
 USTRUCT(meta = (DisplayName = "Find Random Location", Category = "Demo|Common"))
 struct DEMO_API FSTTask_FindRandomLocation : public FStateTreeTaskCommonBase
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
     using FInstanceDataType = FSTTask_FindRandomLocationInstanceData;
 
@@ -35,7 +35,7 @@ struct DEMO_API FSTTask_FindRandomLocation : public FStateTreeTaskCommonBase
     {
         return FInstanceDataType::StaticStruct();
     };
-	
+
     FSTTask_FindRandomLocation();
 
     virtual EStateTreeRunStatus EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition) const override;

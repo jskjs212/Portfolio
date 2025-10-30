@@ -2,16 +2,18 @@
 
 #include "Settings/DemoUserSettings.h"
 #include "Audio/DemoSoundTags.h"
+#include "DemoTypes/DemoGameplayTags.h"
 #include "DemoTypes/LogCategories.h"
+#include "Settings/DemoProjectSettings.h"
 
 UDemoUserSettings::UDemoUserSettings(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer),
-    VolumeSettings{
+    CategoryDataArray{
         {DemoSoundTags::Master, &MasterVolume},
-        {DemoSoundTags::Music, &MusicVolume},
-        {DemoSoundTags::SFX, &SFXVolume},
-        {DemoSoundTags::UI, &UIVolume},
-        {DemoSoundTags::Voice, &VoiceVolume}
+        {DemoSoundTags::Music,  &MusicVolume},
+        {DemoSoundTags::SFX,    &SFXVolume},
+        {DemoSoundTags::UI,     &UIVolume},
+        {DemoSoundTags::Voice,  &VoiceVolume}
     }
 {
 }
@@ -21,33 +23,35 @@ void UDemoUserSettings::SetToDefaults()
     Super::SetToDefaults();
 
     /* Audio */
-    for (auto& [Category, VolumePtr] : VolumeSettings)
+    for (FAudioCategoryVolumeData& CategoryData : CategoryDataArray)
     {
-        *VolumePtr = 1.f;
+        *CategoryData.VolumePtr = 1.f;
     }
     bMuteWhenUnfocused = true;
 }
 
 float UDemoUserSettings::GetVolumeSetting(FGameplayTag InCategory) const
 {
-    for (const auto& [Category, VolumePtr] : VolumeSettings)
+    for (const FAudioCategoryVolumeData& CategoryData : CategoryDataArray)
     {
-        if (Category == InCategory)
+        if (CategoryData.Category == InCategory)
         {
-            return *VolumePtr;
+            return *CategoryData.VolumePtr;
         }
     }
     return -1.f;
 }
 
-void UDemoUserSettings::SetVolumeSetting(FGameplayTag InCategory, float InVolume)
+void UDemoUserSettings::SetVolumeSetting(const UObject* WorldContextObject, FGameplayTag InCategory, float InVolume)
 {
-    for (auto& [Category, VolumePtr] : VolumeSettings)
+    for (FAudioCategoryVolumeData& CategoryData : CategoryDataArray)
     {
-        if (Category == InCategory)
+        if (CategoryData.Category == InCategory)
         {
-            *VolumePtr = FMath::Clamp(InVolume, 0.f, 1.f);
-            OnFloatSettingChanged.Broadcast(InCategory, *VolumePtr);
+            *CategoryData.VolumePtr = FMath::Clamp(InVolume, 0.f, 1.f);
+
+            // Broadcasting (AudioCategory, NewVolume)
+            OnFloatSettingChanged.Broadcast(InCategory, *CategoryData.VolumePtr);
             return;
         }
     }
@@ -56,5 +60,5 @@ void UDemoUserSettings::SetVolumeSetting(FGameplayTag InCategory, float InVolume
 void UDemoUserSettings::SetMuteWhenUnfocused(bool bInMuteWhenUnfocused)
 {
     bMuteWhenUnfocused = bInMuteWhenUnfocused;
-    FApp::SetUnfocusedVolumeMultiplier(bMuteWhenUnfocused ? 0.f : 1.f);
+    OnBoolSettingChanged.Broadcast(DemoGameplayTags::Settings_Audio_MuteWhenUnfocused, bMuteWhenUnfocused);
 }

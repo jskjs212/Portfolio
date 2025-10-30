@@ -4,10 +4,13 @@
 #include "Audio/DemoSoundTags.h"
 #include "Audio/SoundCollection.h"
 #include "Components/AudioComponent.h"
+#include "DemoTypes/DemoGameplayTags.h"
 #include "DemoTypes/LogCategories.h"
 #include "Kismet/GameplayStatics.h"
 #include "Settings/DemoProjectSettings.h"
 #include "Settings/DemoUserSettings.h"
+#include "Sound/SoundClass.h"
+#include "Sound/SoundMix.h"
 
 UDemoAudioSubsystem::UDemoAudioSubsystem()
 {
@@ -37,6 +40,7 @@ void UDemoAudioSubsystem::Deinitialize()
     }
     if (UDemoUserSettings* UserSettings = UDemoUserSettings::GetDemoUserSettings())
     {
+        UserSettings->OnBoolSettingChanged.RemoveAll(this);
         UserSettings->OnFloatSettingChanged.RemoveAll(this);
     }
 
@@ -68,8 +72,7 @@ void UDemoAudioSubsystem::PlaySound2D(const UObject* WorldContextObject, FGamepl
     }
 
     const bool bIsUISound = Result.Category == DemoSoundTags::UI;
-    const float FinalVolume = MasterVolume * Result.CategoryVolume * VolumeMultiplier;
-    UGameplayStatics::PlaySound2D(WorldContextObject, Result.Sound, FinalVolume, PitchMultiplier, StartTime, ConcurrencySettings, OwnerActor, bIsUISound);
+    UGameplayStatics::PlaySound2D(WorldContextObject, Result.Sound, VolumeMultiplier, PitchMultiplier, StartTime, ConcurrencySettings, OwnerActor, bIsUISound);
 }
 
 void UDemoAudioSubsystem::PlaySoundAtLocation(const UObject* WorldContextObject, FGameplayTag SoundTag, FVector Location, FRotator Rotation, float VolumeMultiplier, float PitchMultiplier, float StartTime, USoundAttenuation* AttenuationSettings, USoundConcurrency* ConcurrencySettings, const AActor* OwningActor, const UInitialActiveSoundParams* InitialParams)
@@ -96,8 +99,7 @@ void UDemoAudioSubsystem::PlaySoundAtLocation(const UObject* WorldContextObject,
         return;
     }
 
-    const float FinalVolume = MasterVolume * Result.CategoryVolume * VolumeMultiplier;
-    UGameplayStatics::PlaySoundAtLocation(WorldContextObject, Result.Sound, Location, Rotation, FinalVolume, PitchMultiplier, StartTime, AttenuationSettings, ConcurrencySettings, OwningActor, InitialParams);
+    UGameplayStatics::PlaySoundAtLocation(WorldContextObject, Result.Sound, Location, Rotation, VolumeMultiplier, PitchMultiplier, StartTime, AttenuationSettings, ConcurrencySettings, OwningActor, InitialParams);
 }
 
 void UDemoAudioSubsystem::PlaySoundAttached(FGameplayTag SoundTag, USceneComponent* AttachToComponent, FName AttachPointName, FVector Location, FRotator Rotation, EAttachLocation::Type LocationType, bool bStopWhenAttachedToDestroyed, float VolumeMultiplier, float PitchMultiplier, float StartTime, USoundAttenuation* AttenuationSettings, USoundConcurrency* ConcurrencySettings, bool bAutoDestroy)
@@ -119,8 +121,7 @@ void UDemoAudioSubsystem::PlaySoundAttached(FGameplayTag SoundTag, USceneCompone
         return;
     }
 
-    const float FinalVolume = MasterVolume * Result.CategoryVolume * VolumeMultiplier;
-    UGameplayStatics::SpawnSoundAttached(Result.Sound, AttachToComponent, AttachPointName, Location, Rotation, LocationType, bStopWhenAttachedToDestroyed, FinalVolume, PitchMultiplier, StartTime, AttenuationSettings, ConcurrencySettings, bAutoDestroy);
+    UGameplayStatics::SpawnSoundAttached(Result.Sound, AttachToComponent, AttachPointName, Location, Rotation, LocationType, bStopWhenAttachedToDestroyed, VolumeMultiplier, PitchMultiplier, StartTime, AttenuationSettings, ConcurrencySettings, bAutoDestroy);
 }
 
 void UDemoAudioSubsystem::PlayMusic(const UObject* WorldContextObject, FGameplayTag MusicTag, float VolumeMultiplier, float PitchMultiplier)
@@ -170,9 +171,8 @@ void UDemoAudioSubsystem::PlayMusic(const UObject* WorldContextObject, FGameplay
     }
 
     // Play music
-    const float FinalVolume = MasterVolume * Result.CategoryVolume * VolumeMultiplier;
     MusicAudioComponent->SetSound(Result.Sound);
-    MusicAudioComponent->SetVolumeMultiplier(FinalVolume);
+    MusicAudioComponent->SetVolumeMultiplier(VolumeMultiplier);
     MusicAudioComponent->SetPitchMultiplier(PitchMultiplier);
     MusicAudioComponent->Play(0.f);
 }
@@ -183,7 +183,7 @@ void UDemoAudioSubsystem::InitAudioData()
     const UDemoProjectSettings* DemoProjectSettings = GetDefault<UDemoProjectSettings>();
     if (!DemoProjectSettings)
     {
-        DemoLOG_CF(LogDemoGame, Error, TEXT("Failed to get UDemoProjectSettings."));
+        DemoLOG_CF(LogSettings, Error, TEXT("Failed to get UDemoProjectSettings."));
         return;
     }
 
@@ -191,24 +191,49 @@ void UDemoAudioSubsystem::InitAudioData()
     const USoundCollection* LoadedSoundCollection = DemoProjectSettings->SoundCollection.LoadSynchronous();
     if (!LoadedSoundCollection)
     {
-        DemoLOG_CF(LogDemoGame, Error, TEXT("Failed to load SoundCollection from DemoProjectSettings."));
+        DemoLOG_CF(LogSettings, Error, TEXT("Failed to load SoundCollection from DemoProjectSettings."));
         return;
     }
     SoundCollection = LoadedSoundCollection;
 
     // Initialize audio data
-    MasterVolume = 1.f;
     CategoryDataArray = {
-        {DemoSoundTags::Music,  1.f, &SoundCollection->MusicMap},
-        {DemoSoundTags::SFX,    1.f, &SoundCollection->SFXMap},
-        {DemoSoundTags::UI,     1.f, &SoundCollection->UIMap},
-        {DemoSoundTags::Voice,  1.f, &SoundCollection->VoiceMap}
+        {DemoSoundTags::Master, nullptr, nullptr},
+        {DemoSoundTags::Music,  nullptr, &SoundCollection->MusicMap},
+        {DemoSoundTags::SFX,    nullptr, &SoundCollection->SFXMap},
+        {DemoSoundTags::UI,     nullptr, &SoundCollection->UIMap},
+        {DemoSoundTags::Voice,  nullptr, &SoundCollection->VoiceMap}
     };
 
-#if WITH_EDITOR
-    // Validate sound data
-    for (const FAudioCategoryData& CategoryData : CategoryDataArray)
+    // Load GlobalSoundMix
+    GlobalSoundMix = SoundCollection->GlobalSoundMix.LoadSynchronous();
+    if (!GlobalSoundMix)
     {
+        DemoLOG_CF(LogSettings, Error, TEXT("In SoundCollection, GlobalSoundMix is not set."));
+    }
+
+    // Load SoundClasses
+    for (FAudioCategorySoundData& CategoryData : CategoryDataArray)
+    {
+        const TSoftObjectPtr<USoundClass>* SoundClassPtr = SoundCollection->SoundClassMap.Find(CategoryData.Category);
+        if (SoundClassPtr)
+        {
+            CategoryData.SoundClass = SoundClassPtr->LoadSynchronous();
+        }
+        else
+        {
+            DemoLOG_CF(LogSettings, Error, TEXT("In SoundCollection, SoundClass is not set for category: %s"), *CategoryData.Category.ToString());
+        }
+    }
+
+#if WITH_EDITOR
+    // Validate sound bases
+    for (const FAudioCategorySoundData& CategoryData : CategoryDataArray)
+    {
+        if (CategoryData.Category == DemoSoundTags::Master)
+        {
+            continue;
+        }
         checkf(CategoryData.Map, TEXT("No sound map for category: %s"), *CategoryData.Category.ToString());
         for (const auto& [SoundTag, SoundPtr] : *(CategoryData.Map))
         {
@@ -225,13 +250,25 @@ void UDemoAudioSubsystem::LoadUserAudioSettings()
 {
     if (UDemoUserSettings* UserSettings = UDemoUserSettings::GetDemoUserSettings())
     {
-        // Load volumes from user settings
-        MasterVolume = UserSettings->GetVolumeSetting(DemoSoundTags::Master);
-        check(MasterVolume >= 0.f);
-        for (FAudioCategoryData& CategoryData : CategoryDataArray)
+        // Apply global SoundMix
+        if (UWorld* World = GetWorld())
         {
-            CategoryData.Volume = UserSettings->GetVolumeSetting(CategoryData.Category);
-            check(CategoryData.Volume >= 0.f);
+            // @check - Only once for now. In some edge cases, this may need to be pushed again. 
+            UGameplayStatics::PushSoundMixModifier(World, GlobalSoundMix);
+
+            // Apply volume settings
+            for (const FAudioCategorySoundData& CategoryData : CategoryDataArray)
+            {
+                if (CategoryData.SoundClass)
+                {
+                    const float CategoryVolume = UserSettings->GetVolumeSetting(CategoryData.Category);
+                    UGameplayStatics::SetSoundMixClassOverride(World, GlobalSoundMix, CategoryData.SoundClass, CategoryVolume, 1.f, 0.f);
+                }
+            }
+        }
+        else
+        {
+            DemoLOG_CF(LogAudio, Error, TEXT("Failed to get World. SoundMix and volume settings not applied."));
         }
 
         // Mute when unfocused
@@ -239,7 +276,8 @@ void UDemoAudioSubsystem::LoadUserAudioSettings()
         FApp::SetUnfocusedVolumeMultiplier(bMuteWhenUnfocused ? 0.f : 1.f);
 
         // Bind to changes
-        UserSettings->OnFloatSettingChanged.AddUObject(this, &ThisClass::HandleVolumeSettingChanged);
+        UserSettings->OnBoolSettingChanged.AddUObject(this, &ThisClass::HandleBoolUserSettingChanged);
+        UserSettings->OnFloatSettingChanged.AddUObject(this, &ThisClass::HandleFloatUserSettingChanged);
     }
 }
 
@@ -261,31 +299,27 @@ void UDemoAudioSubsystem::HandleWorldCleanup(UWorld* World, bool /*bSessionEnded
     }
 }
 
-void UDemoAudioSubsystem::HandleVolumeSettingChanged(FGameplayTag InCategory, float InVolume)
+void UDemoAudioSubsystem::HandleBoolUserSettingChanged(FGameplayTag InTag, bool NewValue)
 {
-    // Update internal volume
-    if (InCategory == DemoSoundTags::Master)
+    // Mute when unfocused
+    if (InTag == DemoGameplayTags::Settings_Audio_MuteWhenUnfocused)
     {
-        MasterVolume = InVolume;
+        FApp::SetUnfocusedVolumeMultiplier(NewValue ? 0.f : 1.f);
     }
-    else
+}
+
+void UDemoAudioSubsystem::HandleFloatUserSettingChanged(FGameplayTag InTag, float NewValue)
+{
+    // Update SoundClass volume
+    if (UWorld* World = GetWorld())
     {
-        for (FAudioCategoryData& CategoryData : CategoryDataArray)
+        for (const FAudioCategorySoundData& CategoryData : CategoryDataArray)
         {
-            if (CategoryData.Category == InCategory)
+            if (CategoryData.Category == InTag && CategoryData.SoundClass)
             {
-                CategoryData.Volume = InVolume;
-                break;
+                UGameplayStatics::SetSoundMixClassOverride(World, GlobalSoundMix, CategoryData.SoundClass, NewValue, 1.f, 0.f);
             }
         }
-    }
-
-    // Update music volume immediately
-    if ((InCategory == DemoSoundTags::Master || InCategory == DemoSoundTags::Music)
-        && MusicAudioComponent && MusicAudioComponent->IsPlaying())
-    {
-        const float FinalVolume = MasterVolume * InVolume;
-        MusicAudioComponent->SetVolumeMultiplier(FinalVolume);
     }
 }
 
@@ -298,7 +332,7 @@ FSoundQueryResult UDemoAudioSubsystem::GetSoundByTag(FGameplayTag SoundTag)
         return {};
     }
 
-    const FAudioCategoryData* CategoryData = CategoryDataArray.FindByPredicate([Category](const FAudioCategoryData& Data)
+    const FAudioCategorySoundData* CategoryData = CategoryDataArray.FindByPredicate([Category](const FAudioCategorySoundData& Data)
         {
             return Data.Category == Category;
         });
@@ -319,5 +353,5 @@ FSoundQueryResult UDemoAudioSubsystem::GetSoundByTag(FGameplayTag SoundTag)
         return {};
     }
 
-    return {Sound, Category, CategoryData->Volume};
+    return {Sound, Category};
 }

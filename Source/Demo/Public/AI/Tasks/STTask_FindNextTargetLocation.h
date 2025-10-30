@@ -26,7 +26,7 @@ struct FSTTask_FindNextTargetLocationInstanceData
     TStateTreePropertyRef<TArray<ATargetPoint*>> RefToArrayOfTargetPoints;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Output")
-    FVector TargetLocation;
+    FVector TargetLocation{FVector::ZeroVector};
 };
 
 USTRUCT(meta = (DisplayName = "Find Next Target Location", Category = "Demo|Common"))

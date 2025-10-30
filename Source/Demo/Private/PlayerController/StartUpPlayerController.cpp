@@ -26,11 +26,6 @@ void AStartUpPlayerController::BeginPlay()
     Super::BeginPlay();
 
     ShowMainMenu();
-
-    if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GetGameInstance()))
-    {
-        AudioSubsystem->PlayMusic(this, DemoSoundTags::Music_MainMenu);
-    }
 }
 
 void AStartUpPlayerController::ShowMainMenu()
@@ -63,4 +58,9 @@ void AStartUpPlayerController::InitMainMenu()
     }
 
     MainMenuWidget = CreateWidget<UMainMenuWidget>(this, MainMenuWidgetClass);
+
+    if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GetGameInstance()))
+    {
+        AudioSubsystem->PlayMusic(this, DemoSoundTags::Music_MainMenu);
+    }
 }

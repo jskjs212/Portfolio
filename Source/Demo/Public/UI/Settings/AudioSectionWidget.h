@@ -14,7 +14,9 @@ class UTextBlock;
 struct FVolumeSettingsEntry
 {
     FGameplayTag Category;
+
     TObjectPtr<UTagSlider> Slider;
+
     TObjectPtr<UTextBlock> Text;
 };
 

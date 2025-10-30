@@ -7,11 +7,19 @@
 #include "GameplayTagContainer.h"
 #include "DemoUserSettings.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnFloatSettingChanged, FGameplayTag /* InCategory */, float /* InVolume */);
+struct FAudioCategoryVolumeData
+{
+    FGameplayTag Category;
+
+    float* VolumePtr{nullptr};
+};
+
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnBoolSettingChanged, FGameplayTag /* InTag */, bool /* NewValue */);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnFloatSettingChanged, FGameplayTag /* InTag */, float /* NewValue */);
 
 /**
  * GameUserSettings subclass for Demo project.
- * If there are too many listners to delegates,
+ * If there are too many listeners to delegates, split into multiple delegates for graphics, audio, etc.
  */
 UCLASS()
 class DEMO_API UDemoUserSettings : public UGameUserSettings
@@ -31,6 +39,7 @@ public:
     //        Delegates
     ////////////////////////////////////////////////////////
 public:
+    FOnBoolSettingChanged OnBoolSettingChanged;
     FOnFloatSettingChanged OnFloatSettingChanged;
 
     ////////////////////////////////////////////////////////
@@ -50,14 +59,14 @@ public:
     float GetVolumeSetting(FGameplayTag InCategory) const;
 
     // 0.f to 1.f
-    void SetVolumeSetting(FGameplayTag InCategory, float InVolume);
+    void SetVolumeSetting(const UObject* WorldContextObject, FGameplayTag InCategory, float InVolume);
 
     bool GetMuteWhenUnfocused() const { return bMuteWhenUnfocused; }
 
     void SetMuteWhenUnfocused(bool bInMuteWhenUnfocused);
 
     ////////////////////////////////////////////////////////
-    //        Variables - Audio
+    //        Variables - Config
     ////////////////////////////////////////////////////////
 private:
     /* Volume Settings */
@@ -76,9 +85,14 @@ private:
     UPROPERTY(Config)
     float VoiceVolume;
 
-    TArray<TPair<FGameplayTag, float*>> VolumeSettings;
-
     /* Else */
     UPROPERTY(Config)
     bool bMuteWhenUnfocused;
+
+    ////////////////////////////////////////////////////////
+    //        Variables
+    ////////////////////////////////////////////////////////
+private:
+    // {Category, VolumePtr}
+    TArray<FAudioCategoryVolumeData> CategoryDataArray;
 };
