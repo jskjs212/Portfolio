@@ -8,6 +8,7 @@
 #include "Components/InventoryComponent.h"
 #include "Components/WrapBox.h"
 #include "DemoTypes/DemoGameplayTags.h"
+#include "DemoTypes/UITypes.h"
 #include "DemoTypes/ItemTypes.h"
 #include "DemoTypes/LogCategories.h"
 #include "DemoTypes/TableRowBases.h"
@@ -170,7 +171,7 @@ void UInventoryPageWidget::SetupContextMenu()
     ContextMenuWidget = CreateWidget<UContextMenuWidget>(this, ContextMenuWidgetClass);
     ContextMenuWidget->InitActions(Actions);
     ContextMenuWidget->SetVisibility(ESlateVisibility::Collapsed);
-    ContextMenuWidget->AddToViewport(3);
+    ContextMenuWidget->AddToViewport(DemoZOrder::ContextMenu);
 
     // Bind context menu buttons
     TArray<TObjectPtr<UTagButton>>& Buttons = ContextMenuWidget->GetActionButtons();

@@ -6,6 +6,7 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Character/PlayerCharacter.h"
 #include "DemoTypes/LogCategories.h"
+#include "DemoTypes/UITypes.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Input/DemoInputConfig.h"
@@ -174,7 +175,7 @@ void ADemoPlayerController::ShowBossVictoryWidget()
     {
         BossVictoryWidget = CreateWidget<UUserWidget>(this, BossVictoryWidgetClass);
     }
-    BossVictoryWidget->AddToViewport(2);
+    BossVictoryWidget->AddToViewport(DemoZOrder::Event_BossVictory);
 
     // Hide BossAIStatus
     ShowBossAIStatus(nullptr);
@@ -210,7 +211,7 @@ void ADemoPlayerController::ShowYouDiedWidgetAndAddAfterDeathInputContext()
     {
         YouDiedWidget = CreateWidget<UUserWidget>(this, YouDiedWidgetClass);
     }
-    YouDiedWidget->AddToViewport(2);
+    YouDiedWidget->AddToViewport(DemoZOrder::Event_YouDied);
 
     // Add after-death input context
     if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
@@ -274,7 +275,7 @@ void ADemoPlayerController::InitPlayerMenu()
         {
             PlayerMenuWidget->InitPlayerMenu();
             PlayerMenuWidget->SetVisibility(ESlateVisibility::Collapsed);
-            PlayerMenuWidget->AddToViewport(1);
+            PlayerMenuWidget->AddToViewport(DemoZOrder::PlayerMenu);
         }
     }
 }

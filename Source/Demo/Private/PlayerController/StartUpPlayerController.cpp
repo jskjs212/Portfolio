@@ -4,6 +4,7 @@
 #include "Audio/DemoAudioSubsystem.h"
 #include "Audio/DemoSoundTags.h"
 #include "DemoTypes/LogCategories.h"
+#include "DemoTypes/UITypes.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/MainMenuWidget.h"
 
@@ -61,7 +62,7 @@ void AStartUpPlayerController::ShowMainMenu()
     SetInputMode(InputModeData);
     SetShowMouseCursor(true);
 
-    MainMenuWidget->AddToViewport();
+    MainMenuWidget->AddToViewport(DemoZOrder::HUD_Base);
 }
 
 void AStartUpPlayerController::StartNewGame()

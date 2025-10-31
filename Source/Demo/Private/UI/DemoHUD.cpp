@@ -2,6 +2,7 @@
 
 #include "UI/DemoHUD.h"
 #include "DemoTypes/LogCategories.h"
+#include "DemoTypes/UITypes.h"
 #include "UI/DemoHUDWidget.h"
 #include "UI/PlayerMenuWidget.h"
 
@@ -31,6 +32,6 @@ void ADemoHUD::Init()
     DemoHUDWidget = CreateWidget<UDemoHUDWidget>(PlayerController, DemoHUDWidgetClass);
     if (DemoHUDWidget)
     {
-        DemoHUDWidget->AddToViewport(0);
+        DemoHUDWidget->AddToViewport(DemoZOrder::HUD_Base);
     }
 }

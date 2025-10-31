@@ -6,6 +6,7 @@
 #include "Components/EquipmentComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "DemoTypes/LogCategories.h"
+#include "DemoTypes/UITypes.h"
 #include "Items/Item.h"
 #include "PlayerController/DemoPlayerController.h"
 #include "UI/ContextMenuWidget.h"
@@ -128,7 +129,7 @@ void UEquipmentPageWidget::InitContextMenu()
     ContextMenuWidget = CreateWidget<UContextMenuWidget>(this, ContextMenuWidgetClass);
     ContextMenuWidget->InitActions(Actions);
     ContextMenuWidget->SetVisibility(ESlateVisibility::Collapsed);
-    ContextMenuWidget->AddToViewport(3);
+    ContextMenuWidget->AddToViewport(DemoZOrder::ContextMenu);
 
     // Bind context menu buttons
     TArray<TObjectPtr<UTagButton>>& Buttons = ContextMenuWidget->GetActionButtons();
