@@ -26,6 +26,7 @@ void UDemoAudioSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     LoadUserAudioSettings();
 
     FDelegateHandle Handle = FWorldDelegates::OnWorldCleanup.AddUObject(this, &ThisClass::HandleWorldCleanup);
+    FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &ThisClass::HandlePostLoadMapWithWorld);
 }
 
 void UDemoAudioSubsystem::Deinitialize()
@@ -253,7 +254,6 @@ void UDemoAudioSubsystem::LoadUserAudioSettings()
         // Apply global SoundMix
         if (UWorld* World = GetWorld())
         {
-            // @check - Only once for now. In some edge cases, this may need to be pushed again. 
             UGameplayStatics::PushSoundMixModifier(World, GlobalSoundMix);
 
             // Apply volume settings
@@ -276,8 +276,12 @@ void UDemoAudioSubsystem::LoadUserAudioSettings()
         FApp::SetUnfocusedVolumeMultiplier(bMuteWhenUnfocused ? 0.f : 1.f);
 
         // Bind to changes
-        UserSettings->OnBoolSettingChanged.AddUObject(this, &ThisClass::HandleBoolUserSettingChanged);
-        UserSettings->OnFloatSettingChanged.AddUObject(this, &ThisClass::HandleFloatUserSettingChanged);
+        if (!bHasBoundToUserSettings)
+        {
+            bHasBoundToUserSettings = true;
+            UserSettings->OnBoolSettingChanged.AddUObject(this, &ThisClass::HandleBoolUserSettingChanged);
+            UserSettings->OnFloatSettingChanged.AddUObject(this, &ThisClass::HandleFloatUserSettingChanged);
+        }
     }
 }
 
@@ -293,9 +297,23 @@ void UDemoAudioSubsystem::ClearAudioComponent()
 
 void UDemoAudioSubsystem::HandleWorldCleanup(UWorld* World, bool /*bSessionEnded*/, bool /*bCleanupResources*/)
 {
+    if (World)
+    {
+        UGameplayStatics::PopSoundMixModifier(World, GlobalSoundMix);
+    }
+
     if (MusicAudioComponent && MusicAudioComponent->GetWorld() == World)
     {
         ClearAudioComponent();
+    }
+}
+
+void UDemoAudioSubsystem::HandlePostLoadMapWithWorld(UWorld* LoadedWorld)
+{
+    if (LoadedWorld)
+    {
+        // Might not be necessary to push again, but to be safe.
+        UGameplayStatics::PushSoundMixModifier(LoadedWorld, GlobalSoundMix);
     }
 }
 

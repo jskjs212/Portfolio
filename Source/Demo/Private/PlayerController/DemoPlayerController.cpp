@@ -83,6 +83,11 @@ void ADemoPlayerController::BeginPlay()
 
     if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GetGameInstance()))
     {
+#if WITH_EDITOR
+        // Lazy load for editor
+        AudioSubsystem->LoadUserAudioSettings();
+#endif // WITH_EDITOR
+
         AudioSubsystem->PlayDefaultMusic(this);
     }
 }
@@ -182,6 +187,12 @@ void ADemoPlayerController::ShowBossVictoryWidget()
 
         World->GetTimerManager().SetTimer(BossVictoryWidgetTimerHandle, BossVictoryWidgetTimerDelegate, BossVictoryWidgetDuration, false);
     }
+
+    // Play sound
+    if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GetGameInstance()))
+    {
+        AudioSubsystem->PlaySound2D(this, DemoSoundTags::SFX_Combat_Boss_Victory);
+    }
 }
 
 void ADemoPlayerController::HideBossVictoryWidget()
@@ -208,6 +219,12 @@ void ADemoPlayerController::ShowYouDiedWidgetAndAddAfterDeathInputContext()
         {
             Subsystem->AddMappingContext(AfterDeathMappingContext, 1);
         }
+    }
+
+    // Play sound
+    if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GetGameInstance()))
+    {
+        AudioSubsystem->PlaySound2D(this, DemoSoundTags::SFX_Combat_YouDied);
     }
 }
 

@@ -59,15 +59,7 @@ private:
 
     void HideItemInfo();
 
-    ADemoPlayerController* GetDemoPlayerController();
-
-    UItemActionDispatcher* GetItemActionDispatcher();
-
-    // Only for RMB context menu = valid index.
-    FORCEINLINE void SetContextMenuData(int32 InIndex)
-    {
-        ContextMenuEquipmentType = EquipmentSlots[InIndex].EquipmentType;
-    }
+    void PlayErrorSound();
 
     ////////////////////////////////////////////////////////
     //        Handlers
@@ -82,6 +74,20 @@ private:
     void HandleItemSlotHovered(const FItemSlot& InSlot);
 
     void HandleItemSlotUnhovered();
+
+    ////////////////////////////////////////////////////////
+    //        Get & set
+    ////////////////////////////////////////////////////////
+private:
+    ADemoPlayerController* GetDemoPlayerController();
+
+    UItemActionDispatcher* GetItemActionDispatcher();
+
+    // Only for RMB context menu = valid index.
+    FORCEINLINE void SetContextMenuData(int32 InIndex)
+    {
+        ContextMenuEquipmentType = EquipmentSlots[InIndex].EquipmentType;
+    }
 
     ////////////////////////////////////////////////////////
     //        Widgets

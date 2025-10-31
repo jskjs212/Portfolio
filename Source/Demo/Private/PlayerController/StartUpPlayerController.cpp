@@ -33,6 +33,14 @@ void AStartUpPlayerController::BeginPlay()
     }
 
     ShowMainMenu();
+
+#if WITH_EDITOR
+    if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GetGameInstance()))
+    {
+        // Lazy load for editor
+        AudioSubsystem->LoadUserAudioSettings();
+    }
+#endif // WITH_EDITOR
 }
 
 void AStartUpPlayerController::ShowMainMenu()

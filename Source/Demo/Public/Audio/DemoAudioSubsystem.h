@@ -41,8 +41,8 @@ struct FSoundQueryResult
  *
  * Categories: Music, SFX, UI, Voice
  * Music: Background music
- * SFX: Sound Effects
- * UI: UI sounds, notifications
+ * SFX: Sound Effects (paused during pause)
+ * UI: UI sounds, notifications (not paused)
  * Voice: Character voices
  * @TODO - SpawnSound with AudioComponent pooling?
  *
@@ -65,7 +65,7 @@ private:
     TObjectPtr<UAudioComponent> MusicAudioComponent;
 
     ////////////////////////////////////////////////////////
-    //        Functions
+    //        Subsystem functions
     ////////////////////////////////////////////////////////
 public:
     UDemoAudioSubsystem();
@@ -74,6 +74,10 @@ public:
 
     virtual void Deinitialize() override;
 
+    ////////////////////////////////////////////////////////
+    //        Audio functions
+    ////////////////////////////////////////////////////////
+public:
     // Play a non-looping sound directly.
     void PlaySound2D(const UObject* WorldContextObject, FGameplayTag SoundTag, float VolumeMultiplier = 1.f, float PitchMultiplier = 1.f, float StartTime = 0.f, USoundConcurrency* ConcurrencySettings = nullptr, const AActor* OwningActor = nullptr);
 
@@ -106,19 +110,29 @@ public:
         PlayMusic(WorldContextObject, DefaultMusicTag, VolumeMultiplier, PitchMultiplier);
     }
 
+    void LoadUserAudioSettings();
+
 private:
     void InitAudioData();
 
-    void LoadUserAudioSettings();
-
     void ClearAudioComponent();
 
+    ////////////////////////////////////////////////////////
+    //        Handlers
+    ////////////////////////////////////////////////////////
+private:
     void HandleWorldCleanup(UWorld* World, bool bSessionEnded, bool bCleanupResources);
+
+    void HandlePostLoadMapWithWorld(UWorld* LoadedWorld);
 
     void HandleBoolUserSettingChanged(FGameplayTag InTag, bool NewValue);
 
     void HandleFloatUserSettingChanged(FGameplayTag InTag, float NewValue);
 
+    ////////////////////////////////////////////////////////
+    //        Get & set
+    ////////////////////////////////////////////////////////
+private:
     // @return Data is not valid if Sound is nullptr.
     FSoundQueryResult GetSoundByTag(FGameplayTag SoundTag);
 
@@ -126,6 +140,8 @@ private:
     //        Variables
     ////////////////////////////////////////////////////////
 private:
+    bool bHasBoundToUserSettings{false};
+
     FGameplayTag DefaultMusicTag;
 
     FDelegateHandle WorldCleanupHandle;

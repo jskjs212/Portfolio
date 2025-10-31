@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UI/InventoryPageWidget.h"
+#include "Audio/DemoAudioSubsystem.h"
+#include "Audio/DemoSoundTags.h"
 #include "Components/Border.h"
 #include "Components/Image.h"
 #include "Components/InventoryComponent.h"
@@ -190,22 +192,31 @@ void UInventoryPageWidget::BindToInventoryUpdates()
     }
 }
 
-ADemoPlayerController* UInventoryPageWidget::GetDemoPlayerController()
+void UInventoryPageWidget::ShowItemInfo(const FItemSlot& InSlot)
 {
-    if (!CachedDemoPlayerController.IsValid())
+    const FItemDataBase* ItemData = ItemInfoWidget->UpdateItemInfo(InSlot);
+    if (ItemData)
     {
-        CachedDemoPlayerController = GetOwningPlayer<ADemoPlayerController>();
+        ItemInfoWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
+        ItemPreviewBorder->SetVisibility(ESlateVisibility::HitTestInvisible);
+        ItemPreviewImage->SetBrushFromTexture(ItemData->Icon);
+        ItemPreviewImage->SetVisibility(ESlateVisibility::HitTestInvisible);
     }
-    return CachedDemoPlayerController.Get();
 }
 
-UItemActionDispatcher* UInventoryPageWidget::GetItemActionDispatcher()
+void UInventoryPageWidget::HideItemInfo()
 {
-    if (const ADemoPlayerController* DemoPlayerController = GetDemoPlayerController())
+    ItemInfoWidget->SetVisibility(ESlateVisibility::Collapsed);
+    ItemPreviewBorder->SetVisibility(ESlateVisibility::Collapsed);
+    ItemPreviewImage->SetVisibility(ESlateVisibility::Collapsed);
+}
+
+void UInventoryPageWidget::PlayErrorSound()
+{
+    if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GetGameInstance()))
     {
-        return DemoPlayerController->GetItemActionDispatcher();
+        AudioSubsystem->PlaySound2D(this, DemoSoundTags::UI_Error);
     }
-    return nullptr;
 }
 
 void UInventoryPageWidget::HandleContextMenuButtonClicked(FGameplayTag InTag)
@@ -221,13 +232,23 @@ void UInventoryPageWidget::HandleContextMenuButtonClicked(FGameplayTag InTag)
     {
         // @TODO - Get quantity from user input
         ContextMenuItemActionRequest.Quantity = 1;
-        ItemActionDispatcher->RequestUseItem(ContextMenuItemActionRequest);
+
+        const int32 Used = ItemActionDispatcher->RequestUseItem(ContextMenuItemActionRequest);
+        if (Used <= 0)
+        {
+            PlayErrorSound();
+        }
     }
     else if (InTag == DemoGameplayTags::UI_Action_Item_Drop)
     {
         // @TODO - Get quantity from user input
         ContextMenuItemActionRequest.Quantity = 1;
-        ItemActionDispatcher->RequestDropItem(ContextMenuItemActionRequest);
+
+        const int32 Dropped = ItemActionDispatcher->RequestDropItem(ContextMenuItemActionRequest);
+        if (Dropped <= 0)
+        {
+            PlayErrorSound();
+        }
     }
     else if (InTag == DemoGameplayTags::UI_Action_Item_Cancel)
     {
@@ -265,6 +286,10 @@ void UInventoryPageWidget::HandleItemSlotLeftDoubleClicked(const FItemSlot& InSl
     if (Used > 0)
     {
         HideItemInfo();
+    }
+    else
+    {
+        PlayErrorSound();
     }
 }
 
@@ -316,7 +341,11 @@ void UInventoryPageWidget::HandleItemSlotDropped(const FItemSlot& SrcSlot, const
     {
         const FGameplayTag ItemCategory = DemoItemTypes::GetItemCategory(SrcItemData->ItemType);
 
-        ItemActionDispatcher->RequestSwapItem(ItemCategory, SrcIndex, DstIndex);
+        bool bSuccess = ItemActionDispatcher->RequestSwapItem(ItemCategory, SrcIndex, DstIndex);
+        if (!bSuccess)
+        {
+            PlayErrorSound();
+        }
     }
     // Case2: Same item -> Merge
     else
@@ -335,24 +364,27 @@ void UInventoryPageWidget::HandleItemSlotDropped(const FItemSlot& SrcSlot, const
             // @misc - Potential bug if fails.
             ItemActionDispatcher->RequestRemoveItem(Request);
         }
+        else
+        {
+            PlayErrorSound();
+        }
     }
 }
 
-void UInventoryPageWidget::ShowItemInfo(const FItemSlot& InSlot)
+ADemoPlayerController* UInventoryPageWidget::GetDemoPlayerController()
 {
-    const FItemDataBase* ItemData = ItemInfoWidget->UpdateItemInfo(InSlot);
-    if (ItemData)
+    if (!CachedDemoPlayerController.IsValid())
     {
-        ItemInfoWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
-        ItemPreviewBorder->SetVisibility(ESlateVisibility::HitTestInvisible);
-        ItemPreviewImage->SetBrushFromTexture(ItemData->Icon);
-        ItemPreviewImage->SetVisibility(ESlateVisibility::HitTestInvisible);
+        CachedDemoPlayerController = GetOwningPlayer<ADemoPlayerController>();
     }
+    return CachedDemoPlayerController.Get();
 }
 
-void UInventoryPageWidget::HideItemInfo()
+UItemActionDispatcher* UInventoryPageWidget::GetItemActionDispatcher()
 {
-    ItemInfoWidget->SetVisibility(ESlateVisibility::Collapsed);
-    ItemPreviewBorder->SetVisibility(ESlateVisibility::Collapsed);
-    ItemPreviewImage->SetVisibility(ESlateVisibility::Collapsed);
+    if (const ADemoPlayerController* DemoPlayerController = GetDemoPlayerController())
+    {
+        return DemoPlayerController->GetItemActionDispatcher();
+    }
+    return nullptr;
 }

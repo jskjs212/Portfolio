@@ -349,9 +349,9 @@ bool UEquipmentComponent::AttachActor(AActor* ActorToAttach, FGameplayTag Equipm
 
 void UEquipmentComponent::EquipItem_PostProcess(const FEquipmentValidationResult& ValidationResult)
 {
+    // Add attack collision definition if it's a weapon
     if (ValidationResult.EquipmentType == DemoGameplayTags::Item_Weapon)
     {
-        // Add attack collision definition if it's a weapon
         const AItem* EquippedWeapon = *(ValidationResult.EquippedItemPtr);
         const FItemSlot& WeaponSlot = EquippedWeapon->GetItemSlot();
         const FWeaponData* WeaponData = WeaponSlot.RowHandle.GetRow<FWeaponData>(TEXT("UEquipmentComponent::EquipItem_PostProcess"));

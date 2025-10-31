@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UI/EquipmentPageWidget.h"
+#include "Audio/DemoAudioSubsystem.h"
+#include "Audio/DemoSoundTags.h"
 #include "Components/EquipmentComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "DemoTypes/LogCategories.h"
@@ -162,22 +164,12 @@ void UEquipmentPageWidget::HideItemInfo()
     ItemInfoWidget->SetVisibility(ESlateVisibility::Collapsed);
 }
 
-ADemoPlayerController* UEquipmentPageWidget::GetDemoPlayerController()
+void UEquipmentPageWidget::PlayErrorSound()
 {
-    if (!CachedDemoPlayerController.IsValid())
+    if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GetGameInstance()))
     {
-        CachedDemoPlayerController = GetOwningPlayer<ADemoPlayerController>();
+        AudioSubsystem->PlaySound2D(this, DemoSoundTags::UI_Error);
     }
-    return CachedDemoPlayerController.Get();
-}
-
-UItemActionDispatcher* UEquipmentPageWidget::GetItemActionDispatcher()
-{
-    if (const ADemoPlayerController* DemoPlayerController = GetDemoPlayerController())
-    {
-        return DemoPlayerController->GetItemActionDispatcher();
-    }
-    return nullptr;
 }
 
 void UEquipmentPageWidget::HandleContextMenuButtonClicked(FGameplayTag InTag)
@@ -191,11 +183,19 @@ void UEquipmentPageWidget::HandleContextMenuButtonClicked(FGameplayTag InTag)
     // Execute action
     if (InTag == DemoGameplayTags::UI_Action_Item_Unequip)
     {
-        ItemActionDispatcher->RequestUnequipItem(ContextMenuEquipmentType);
+        bool bSuccess = ItemActionDispatcher->RequestUnequipItem(ContextMenuEquipmentType);
+        if (!bSuccess)
+        {
+            PlayErrorSound();
+        }
     }
     else if (InTag == DemoGameplayTags::UI_Action_Item_Drop)
     {
-        ItemActionDispatcher->RequestUnequipAndDropItem(ContextMenuEquipmentType);
+        bool bSuccess = ItemActionDispatcher->RequestUnequipAndDropItem(ContextMenuEquipmentType);
+        if (!bSuccess)
+        {
+            PlayErrorSound();
+        }
     }
     else if (InTag == DemoGameplayTags::UI_Action_Item_Cancel)
     {
@@ -229,6 +229,10 @@ void UEquipmentPageWidget::HandleItemSlotLeftDoubleClicked(const FItemSlot& InSl
     {
         HideItemInfo();
     }
+    else
+    {
+        PlayErrorSound();
+    }
 }
 
 void UEquipmentPageWidget::HandleItemSlotHovered(const FItemSlot& InSlot)
@@ -252,4 +256,22 @@ void UEquipmentPageWidget::HandleItemSlotUnhovered()
     {
         DemoPlayerController->SetCursorState(ECursorState::Default);
     }
+}
+
+ADemoPlayerController* UEquipmentPageWidget::GetDemoPlayerController()
+{
+    if (!CachedDemoPlayerController.IsValid())
+    {
+        CachedDemoPlayerController = GetOwningPlayer<ADemoPlayerController>();
+    }
+    return CachedDemoPlayerController.Get();
+}
+
+UItemActionDispatcher* UEquipmentPageWidget::GetItemActionDispatcher()
+{
+    if (const ADemoPlayerController* DemoPlayerController = GetDemoPlayerController())
+    {
+        return DemoPlayerController->GetItemActionDispatcher();
+    }
+    return nullptr;
 }

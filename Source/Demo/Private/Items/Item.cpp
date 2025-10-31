@@ -80,6 +80,12 @@ int32 AItem::DropItem(UWorld* World, const FItemSlot& InSlot, const AActor* Drop
     // Throw
     DroppedItem->GetMesh()->AddImpulse(Dropper->GetActorForwardVector() * DropImpulseStrength, NAME_None, true);
 
+    // Play sound
+    if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(DroppedItem->GetGameInstance()))
+    {
+        AudioSubsystem->PlaySound2D(DroppedItem, DemoSoundTags::SFX_Item_Drop);
+    }
+
     return InSlot.Quantity;
 }
 

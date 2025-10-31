@@ -47,16 +47,11 @@ private:
 
     void BindToInventoryUpdates();
 
-    ADemoPlayerController* GetDemoPlayerController();
+    void ShowItemInfo(const FItemSlot& InSlot);
 
-    UItemActionDispatcher* GetItemActionDispatcher();
+    void HideItemInfo();
 
-    FORCEINLINE void SetContextMenuData(const FItemSlot& InSlot, int32 DesignatedIndex)
-    {
-        ContextMenuItemActionRequest.Slot = InSlot;
-        ContextMenuItemActionRequest.DesignatedIndex = DesignatedIndex;
-        ContextMenuItemActionRequest.Quantity = 0;
-    }
+    void PlayErrorSound();
 
     ////////////////////////////////////////////////////////
     //        Handlers
@@ -74,9 +69,20 @@ private:
 
     void HandleItemSlotDropped(const FItemSlot& SrcSlot, int32 SrcIndex, const FItemSlot& DstSlot, int32 DstIndex);
 
-    void ShowItemInfo(const FItemSlot& InSlot);
+    ////////////////////////////////////////////////////////
+    //        Get & set
+    ////////////////////////////////////////////////////////
+private:
+    ADemoPlayerController* GetDemoPlayerController();
 
-    void HideItemInfo();
+    UItemActionDispatcher* GetItemActionDispatcher();
+
+    FORCEINLINE void SetContextMenuData(const FItemSlot& InSlot, int32 DesignatedIndex)
+    {
+        ContextMenuItemActionRequest.Slot = InSlot;
+        ContextMenuItemActionRequest.DesignatedIndex = DesignatedIndex;
+        ContextMenuItemActionRequest.Quantity = 0;
+    }
 
     ////////////////////////////////////////////////////////
     //        Widgets
