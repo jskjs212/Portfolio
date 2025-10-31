@@ -2,6 +2,7 @@
 
 #include "UI/DemoHUDWidget.h"
 #include "DemoTypes/DemoGameplayTags.h"
+#include "DemoTypes/LogCategories.h"
 #include "Interfaces/Interactable.h"
 #include "Items/Item.h"
 #include "UI/ActionKeyWidget.h"

@@ -17,6 +17,7 @@ UE_DEFINE_GAMEPLAY_TAG(Input_Dodge, "Input.Dodge");
 UE_DEFINE_GAMEPLAY_TAG(Input_ToggleLockOn, "Input.ToggleLockOn");
 UE_DEFINE_GAMEPLAY_TAG(Input_ShowPlayerMenu, "Input.ShowPlayerMenu");
 UE_DEFINE_GAMEPLAY_TAG(Input_ToggleHelpText, "Input.ToggleHelpText");
+UE_DEFINE_GAMEPLAY_TAG(Input_GoToMainMenu, "Input.GoToMainMenu");
 UE_DEFINE_GAMEPLAY_TAG(Input_Test1, "Input.Test1");
 UE_DEFINE_GAMEPLAY_TAG(Input_Test2, "Input.Test2");
 UE_DEFINE_GAMEPLAY_TAG(Input_Escape, "Input.Escape");

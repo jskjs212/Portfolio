@@ -28,6 +28,8 @@ protected:
 public:
     void ShowMainMenu();
 
+    void StartNewGame();
+
 private:
     void InitMainMenu();
 
@@ -39,4 +41,11 @@ private:
 
     UPROPERTY()
     TObjectPtr<UMainMenuWidget> MainMenuWidget;
+
+    ////////////////////////////////////////////////////////
+    //        Variables
+    ////////////////////////////////////////////////////////
+private:
+    UPROPERTY(EditAnywhere, Category = "Initialization")
+    FName StartLevelName;
 };

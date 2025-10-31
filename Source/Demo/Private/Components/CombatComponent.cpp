@@ -27,7 +27,7 @@ float UCombatComponent::ToggleCombat()
 {
     // @TODO
 
-    return 0.0f;
+    return 0.f;
 }
 
 float UCombatComponent::Attack(FGameplayTag AttackAction)
@@ -76,7 +76,7 @@ float UCombatComponent::ContinueAttack(FGameplayTag AttackAction)
             }
         }
     }
-    return 0.0f;
+    return 0.f;
 }
 
 void UCombatComponent::ResetCombat()

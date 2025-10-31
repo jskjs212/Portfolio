@@ -3,6 +3,7 @@
 #include "Components/BossEncounterComponent.h"
 #include "Audio/DemoAudioSubsystem.h"
 #include "AI/DemoAIController.h"
+#include "Character/BaseCharacter.h"
 #include "DemoTypes/LogCategories.h"
 #include "GameFramework/Pawn.h"
 #include "PlayerController/DemoPlayerController.h"
@@ -14,12 +15,19 @@ UBossEncounterComponent::UBossEncounterComponent()
 
 void UBossEncounterComponent::SetupBossInfo(APawn* InBossPawn, FGameplayTag InBossMusicTag)
 {
+    // Unbind previous
     if (BossPawn.IsValid())
     {
-        // Unbind previous
+        if (ABaseCharacter* PreviousBossCharacter = Cast<ABaseCharacter>(BossPawn.Get()))
+        {
+            PreviousBossCharacter->OnDeath.Remove(BossDeathDelegateHandle);
+            BossDeathDelegateHandle.Reset();
+        }
         BossPawn->OnDestroyed.RemoveDynamic(this, &ThisClass::HandleBossDestroyed);
     }
 
+    // Bind new
+    // @check - Don't care if the AICharacter::IsBoss() is true or not?
     if (IsValid(InBossPawn))
     {
         BossPawn = InBossPawn;
@@ -37,6 +45,7 @@ void UBossEncounterComponent::SetupBossInfo(APawn* InBossPawn, FGameplayTag InBo
 
 void UBossEncounterComponent::StartEncounter(APawn* Instigator)
 {
+    // Validation start
     if (CurrentState != EBossEncounterState::Dormant)
     {
         return;
@@ -55,22 +64,30 @@ void UBossEncounterComponent::StartEncounter(APawn* Instigator)
         return;
     }
 
-    ADemoAIController* BossAIController = BossPawn->GetController<ADemoAIController>();
-    if (!BossAIController)
+    ADemoAIController* DemoAIController = BossPawn->GetController<ADemoAIController>();
+    if (!DemoAIController)
     {
         DemoLOG_CF(LogCombat, Warning, TEXT("BossPawn needs ADemoAIController."));
         return;
     }
+    // Validation end
 
     EncounterInstigator = Instigator;
+
     SetEncounterState(EBossEncounterState::Active);
     //OnBossEncounterStarted.Broadcast if needed
+
+    // Bind to boss death
+    if (ABaseCharacter* BossCharacter = Cast<ABaseCharacter>(BossPawn.Get()))
+    {
+        BossDeathDelegateHandle = BossCharacter->OnDeath.AddUObject(DemoPlayerController, &ADemoPlayerController::HandleBossDeath);
+    }
 
     // (UI) Show boss AI status
     DemoPlayerController->ShowBossAIStatus(BossPawn.Get());
 
     // Activate boss AI
-    BossAIController->SetTargetActor(Instigator);
+    DemoAIController->SetTargetActor(Instigator);
 
     // Start music
     if (BossMusicTag.IsValid())
@@ -106,6 +123,13 @@ void UBossEncounterComponent::EndEncounter(EBossEncounterEndReason Reason)
 
     //OnBossEncounterEnded.Broadcast if needed
 
+    // Unbind boss death
+    if (ABaseCharacter* BossCharacter = Cast<ABaseCharacter>(BossPawn.Get()))
+    {
+        BossCharacter->OnDeath.Remove(BossDeathDelegateHandle);
+        BossDeathDelegateHandle.Reset();
+    }
+
     // (UI) Hide boss AI status
     if (EncounterInstigator.IsValid())
     {
@@ -119,9 +143,9 @@ void UBossEncounterComponent::EndEncounter(EBossEncounterEndReason Reason)
     // Deactivate boss AI
     if (BossPawn.IsValid())
     {
-        if (ADemoAIController* BossAIController = BossPawn->GetController<ADemoAIController>())
+        if (ADemoAIController* DemoAIController = BossPawn->GetController<ADemoAIController>())
         {
-            BossAIController->SetTargetActor(nullptr);
+            DemoAIController->SetTargetActor(nullptr);
         }
     }
 
@@ -132,8 +156,7 @@ void UBossEncounterComponent::EndEncounter(EBossEncounterEndReason Reason)
         AudioSubsystem->PlayDefaultMusic(this);
     }
 
-    // @TODO - unlock doors, sequence, reward, etc.
-    // @WARNING - Boss defeated -> Player retreated -> Boss destroyed -> EndEncounter may miss some logics.
+    // @TODO - unlock doors, sequence, reward (in AICharacter's function?), etc.
 }
 
 void UBossEncounterComponent::SetEncounterState(EBossEncounterState NewState)

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Character/BaseCharacter.h"
+#include "Components/TimelineComponent.h"
 #include "DemoTypes/DemoTypes.h"
 #include "DemoTypes/ItemTypes.h" // @TEST
 #include "GenericTeamAgentInterface.h"
@@ -12,6 +13,7 @@
 struct FInputActionValue;
 class IInteractable;
 class UCameraComponent;
+class UCurveFloat;
 class UInputAction;
 class UInputMappingContext;
 class UInventoryComponent;
@@ -21,7 +23,7 @@ class UTargetingComponent;
 DECLARE_DELEGATE_OneParam(FOnInteractableFocused, IInteractable* /* NewFocusedInteractable */);
 
 /**
- *
+ * Player character
  */
 UCLASS()
 class DEMO_API APlayerCharacter : public ABaseCharacter, public IGenericTeamAgentInterface
@@ -59,6 +61,10 @@ public:
 protected:
     virtual void BeginPlay() override;
 
+public:
+    // PlayerCharacter ticks only after death to play timeline.
+    virtual void Tick(float DeltaTime) override;
+
     ////////////////////////////////////////////////////////
     //        Character functions
     ////////////////////////////////////////////////////////
@@ -81,6 +87,11 @@ protected:
     void HandleInteractable();
 
     void HandleTargetUpdated(AActor* NewActor);
+
+private:
+    void BindDeathCameraBoomTimeline();
+
+    void DeathCameraBoomTimelineUpdate(float Alpha);
 
     ////////////////////////////////////////////////////////
     //        Combat interface
@@ -117,6 +128,8 @@ protected:
     void StartSprinting();
     void StopSprinting();
 
+    // Select one of possible interactions in order:
+    // - Interact with focused interactable, if any.
     void Interact();
 
     /* Combat */
@@ -126,18 +139,12 @@ protected:
 
     void ToggleLockOn();
 
-    void ShowPlayerMenu();
-
-    void ToggleHelpText();
-
     // @TEST
     UFUNCTION(BlueprintNativeEvent)
     void Test1();
 
     UFUNCTION(BlueprintNativeEvent)
     void Test2();
-
-    void EscapeActionStarted();
 
     ////////////////////////////////////////////////////////
     //        Get & set
@@ -152,15 +159,13 @@ public:
     //        Input variables
     ////////////////////////////////////////////////////////
 private:
-    UPROPERTY(EditAnywhere, Category = "Input")
+    UPROPERTY(EditAnywhere, Category = "Initialization|Input")
     TObjectPtr<UInputMappingContext> DefaultMappingContext;
 
     ////////////////////////////////////////////////////////
     //        Variables
     ////////////////////////////////////////////////////////
 private:
-    FGenericTeamId TeamID{DemoTeamID::Player};
-
     /* Movement */
     // Options: true = toggle, false = hold
     bool bIsWalkInputTogglesWalk{true};
@@ -169,24 +174,43 @@ private:
     FVector2D CachedMoveInputAxis;
 
     // Sprint
-    UPROPERTY(EditDefaultsOnly, Category = "Movement")
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization|Movement")
     float SprintStaminaCostPerSecond{10.f};
-    UPROPERTY(EditDefaultsOnly, Category = "Movement")
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization|Movement")
     float SprintStaminaInterval{0.1f};
 
     FTimerHandle SprintStaminaTimerHandle;
     FTimerDelegate SprintStaminaTimerDelegate;
 
-    // Trace interactable
-    UPROPERTY(EditDefaultsOnly, Category = "Trace")
-    float TraceInterval{0.1f};
+    /* Interaction */
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization|Interaction")
+    float InteractTraceInterval{0.1f};
 
-    UPROPERTY(EditDefaultsOnly, Category = "Trace")
-    float TraceDistance{600.f};
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization|Interaction")
+    float InteractTraceDistance{600.f};
 
-    FTimerHandle TraceTimerHandle;
+    FTimerHandle InteractTraceTimerHandle;
     IInteractable* FocusedInteractable{nullptr};
 
-    UPROPERTY(EditAnywhere, Category = "TEST", meta = (AllowPrivateAccess = "true"))
+    /* Death */
+    // Used to animate camera boom length change on death.
+    // Length is set to DeathDestroyDelay in code, assume that curve length is 1 second.
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization|Death")
+    TObjectPtr<UCurveFloat> DeathCameraBoomCurve;
+
+    FTimeline DeathCameraBoomTimeline;
+    FOnTimelineFloatStatic DeathCameraBoomTimelineDelegate;
+
+    /* Else */
+    FGenericTeamId TeamID{DemoTeamID::Player};
+
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization|Camera")
+    float DefaultCameraBoomLength{300.f};
+
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization|Camera")
+    float DeathCameraBoomLength{700.f};
+
+    /* @TEST */
+    UPROPERTY(EditDefaultsOnly, Category = "TEST", meta = (AllowPrivateAccess = "true"))
     FItemSlot TestItemSlot;
 };

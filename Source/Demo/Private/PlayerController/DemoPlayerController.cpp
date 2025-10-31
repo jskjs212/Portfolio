@@ -6,6 +6,10 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Character/PlayerCharacter.h"
 #include "DemoTypes/LogCategories.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "Input/DemoInputConfig.h"
+#include "Kismet/GameplayStatics.h"
 #include "UI/CursorWidget.h"
 #include "UI/DemoHUD.h"
 #include "UI/DemoHUDWidget.h"
@@ -36,12 +40,46 @@ ADemoPlayerController::ADemoPlayerController()
         CursorWidgetClass = UCursorWidget::StaticClass();
     }
 
+    static ConstructorHelpers::FClassFinder<UUserWidget> BossVictoryWidgetBPClass(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprints/UI/Combat/WBP_BossVictory.WBP_BossVictory_C'"));
+    if (BossVictoryWidgetBPClass.Succeeded())
+    {
+        BossVictoryWidgetClass = BossVictoryWidgetBPClass.Class;
+    }
+    else
+    {
+        DemoLOG_CF(LogUI, Error, TEXT("BossVictoryWidget BP is not found."));
+        BossVictoryWidgetClass = UUserWidget::StaticClass();
+    }
+
+    static ConstructorHelpers::FClassFinder<UUserWidget> YouDiedWidgetBPClass(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Blueprints/UI/Combat/WBP_YouDied.WBP_YouDied_C'"));
+    if (YouDiedWidgetBPClass.Succeeded())
+    {
+        YouDiedWidgetClass = YouDiedWidgetBPClass.Class;
+    }
+    else
+    {
+        DemoLOG_CF(LogUI, Error, TEXT("YouDiedWidget BP is not found."));
+        YouDiedWidgetClass = UUserWidget::StaticClass();
+    }
+
     ItemActionDispatcher = CreateDefaultSubobject<UItemActionDispatcher>(TEXT("ItemActionDispatcher"));
 }
 
 void ADemoPlayerController::BeginPlay()
 {
     Super::BeginPlay();
+
+    if (MainMenuLevelName == NAME_None)
+    {
+        DemoLOG_CF(LogUI, Error, TEXT("MainMenuLevelName is not set."));
+    }
+
+    SetupPlayerInput();
+
+    if (ABaseCharacter* PlayerCharacter = Cast<ABaseCharacter>(GetPawn()))
+    {
+        PlayerCharacter->OnDeath.AddUObject(this, &ThisClass::HandleCharacterDeath);
+    }
 
     if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GetGameInstance()))
     {
@@ -53,10 +91,10 @@ void ADemoPlayerController::ShowPlayerMenu(bool bShow, FGameplayTag TabTag)
 {
     if (bShow)
     {
-        // Input mode: UI only
+        // Input mode
         FInputModeUIOnly InputModeData;
         InputModeData.SetWidgetToFocus(PlayerMenuWidget->TakeWidget());
-        InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+        InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::LockInFullscreen);
         SetInputMode(InputModeData);
 
         // Set mouse position to center
@@ -99,8 +137,6 @@ void ADemoPlayerController::ShowPlayerMenu(bool bShow, FGameplayTag TabTag)
 
         PlayerMenuWidget->SetVisibilityAndFocus(false);
 
-        // @TODO - Cancel drag
-
         if (ADemoHUD* DemoHUD = GetHUD<ADemoHUD>())
         {
             if (DemoHUD->DemoHUDWidget)
@@ -127,6 +163,54 @@ void ADemoPlayerController::ShowBossAIStatus(AActor* BossActor)
     }
 }
 
+void ADemoPlayerController::ShowBossVictoryWidget()
+{
+    if (!BossVictoryWidget)
+    {
+        BossVictoryWidget = CreateWidget<UUserWidget>(this, BossVictoryWidgetClass);
+    }
+    BossVictoryWidget->AddToViewport(2);
+
+    // Hide BossAIStatus
+    ShowBossAIStatus(nullptr);
+
+    // Prepare BossVictoryWidget remove after duration
+    if (UWorld* World = GetWorld())
+    {
+        FTimerHandle BossVictoryWidgetTimerHandle;
+        FTimerDelegate BossVictoryWidgetTimerDelegate = FTimerDelegate::CreateUObject(this, &ThisClass::HideBossVictoryWidget);
+
+        World->GetTimerManager().SetTimer(BossVictoryWidgetTimerHandle, BossVictoryWidgetTimerDelegate, BossVictoryWidgetDuration, false);
+    }
+}
+
+void ADemoPlayerController::HideBossVictoryWidget()
+{
+    if (BossVictoryWidget)
+    {
+        // @misc - Might be reused later. Does it need to be nullptr?
+        BossVictoryWidget->RemoveFromParent();
+    }
+}
+
+void ADemoPlayerController::ShowYouDiedWidgetAndAddAfterDeathInputContext()
+{
+    if (!YouDiedWidget)
+    {
+        YouDiedWidget = CreateWidget<UUserWidget>(this, YouDiedWidgetClass);
+    }
+    YouDiedWidget->AddToViewport(2);
+
+    // Add after-death input context
+    if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+    {
+        if (AfterDeathMappingContext)
+        {
+            Subsystem->AddMappingContext(AfterDeathMappingContext, 1);
+        }
+    }
+}
+
 void ADemoPlayerController::ToggleHelpText()
 {
     if (ADemoHUD* DemoHUD = GetHUD<ADemoHUD>())
@@ -138,20 +222,14 @@ void ADemoPlayerController::ToggleHelpText()
     }
 }
 
-void ADemoPlayerController::SetCursorState(ECursorState NewCursorState)
+void ADemoPlayerController::GoToMainMenu()
 {
-    if (NewCursorState != CursorState)
-    {
-        // @hardcoded - Only one exception for now.
-        if (UWidgetBlueprintLibrary::IsDragDropping() && NewCursorState != ECursorState::Dragging)
-        {
-            // Can't change to other state while dragging.
-            return;
-        }
+    FInputModeUIOnly InputModeData;
+    InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::LockInFullscreen);
+    SetInputMode(InputModeData);
+    SetShowMouseCursor(true);
 
-        CursorState = NewCursorState;
-        CursorWidget->UpdateCursorVisuals(CursorState);
-    }
+    UGameplayStatics::OpenLevel(this, MainMenuLevelName);
 }
 
 void ADemoPlayerController::InitDemoHUD()
@@ -196,6 +274,30 @@ void ADemoPlayerController::InitCursor()
     }
 }
 
+void ADemoPlayerController::HandleCharacterDeath()
+{
+    // Prepare YouDiedWidget display after delay
+    if (UWorld* World = GetWorld())
+    {
+        FTimerHandle YouDiedWidgetTimerHandle;
+        FTimerDelegate YouDiedWidgetTimerDelegate = FTimerDelegate::CreateUObject(this, &ThisClass::ShowYouDiedWidgetAndAddAfterDeathInputContext);
+
+        World->GetTimerManager().SetTimer(YouDiedWidgetTimerHandle, YouDiedWidgetTimerDelegate, YouDiedWidgetDelay, false);
+    }
+}
+
+void ADemoPlayerController::HandleBossDeath()
+{
+    // Prepare BossVictoryWidget display after delay
+    if (UWorld* World = GetWorld())
+    {
+        FTimerHandle BossVictoryWidgetTimerHandle;
+        FTimerDelegate BossVictoryWidgetTimerDelegate = FTimerDelegate::CreateUObject(this, &ThisClass::ShowBossVictoryWidget);
+
+        World->GetTimerManager().SetTimer(BossVictoryWidgetTimerHandle, BossVictoryWidgetTimerDelegate, BossVictoryWidgetDelay, false);
+    }
+}
+
 void ADemoPlayerController::HandleInteractableFocused(IInteractable* NewFocusedInteractable)
 {
     if (ADemoHUD* DemoHUD = GetHUD<ADemoHUD>())
@@ -204,5 +306,78 @@ void ADemoPlayerController::HandleInteractableFocused(IInteractable* NewFocusedI
         {
             DemoHUD->DemoHUDWidget->UpdateInteractWidgets(NewFocusedInteractable);
         }
+    }
+}
+
+void ADemoPlayerController::SetupPlayerInput()
+{
+    if (!DefaultMappingContext || !AfterDeathMappingContext || !PlayerControllerInputConfig)
+    {
+        DemoLOG_CF(LogInput, Error, TEXT("Initialization|Input variables are not set properly."));
+    }
+
+    // Add default mapping context
+    if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+    {
+        if (AfterDeathMappingContext)
+        {
+            Subsystem->AddMappingContext(DefaultMappingContext, 0);
+        }
+    }
+
+    // Bind input actions
+    if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
+    {
+        // Helper lambda
+        auto BindAction = [this, EnhancedInputComponent](FGameplayTag InputTag, ETriggerEvent TriggerEvent, void(ThisClass::* Func)())
+            {
+                if (const UInputAction* InputAction = PlayerControllerInputConfig->FindInputActionForTag(InputTag))
+                {
+                    EnhancedInputComponent->BindAction(InputAction, TriggerEvent, this, Func);
+                }
+                else
+                {
+                    DemoLOG_CF(LogDemoGame, Error, TEXT("InputAction not found for tag %s"), *InputTag.ToString());
+                }
+            };
+
+        BindAction(DemoGameplayTags::Input_GoToMainMenu, ETriggerEvent::Started, &ThisClass::GoToMainMenu);
+        BindAction(DemoGameplayTags::Input_ShowPlayerMenu, ETriggerEvent::Started, &ThisClass::ShowPlayerMenuActionStarted);
+        BindAction(DemoGameplayTags::Input_ToggleHelpText, ETriggerEvent::Started, &ThisClass::ToggleHelpText);
+        BindAction(DemoGameplayTags::Input_Escape, ETriggerEvent::Started, &ThisClass::EscapeActionStarted);
+    }
+}
+
+void ADemoPlayerController::ShowPlayerMenuActionStarted()
+{
+    ABaseCharacter* BaseCharacter = GetPawn<ABaseCharacter>();
+    if (BaseCharacter && !BaseCharacter->IsDead())
+    {
+        ShowPlayerMenu(true);
+    }
+}
+
+void ADemoPlayerController::EscapeActionStarted()
+{
+    ABaseCharacter* BaseCharacter = GetPawn<ABaseCharacter>();
+    if (BaseCharacter && !BaseCharacter->IsDead())
+    {
+        ShowPlayerMenu(true, DemoGameplayTags::UI_PlayerMenu_SystemMenu);
+    }
+}
+
+void ADemoPlayerController::SetCursorState(ECursorState NewCursorState)
+{
+    if (NewCursorState != CursorState)
+    {
+        // @hardcoded - Only one exception for now.
+        if (UWidgetBlueprintLibrary::IsDragDropping() && NewCursorState != ECursorState::Dragging)
+        {
+            // Can't change to other state while dragging.
+            return;
+        }
+
+        CursorState = NewCursorState;
+        CursorWidget->UpdateCursorVisuals(CursorState);
     }
 }

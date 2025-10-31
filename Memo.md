@@ -81,3 +81,4 @@ Global - Esc: Close\
 PlayerMenu - Tab: Close\
 PlayerMenu - Q, E: Switch tabs\
 Inventory - 1~3: ItemTabs
+YouDied - E: MainMenu

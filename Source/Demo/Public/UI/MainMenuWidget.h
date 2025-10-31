@@ -84,7 +84,4 @@ private:
     TSubclassOf<USettingsPageWidget> SettingsPageWidgetClass;
 
     TObjectPtr<USettingsPageWidget> SettingsPageWidget;
-
-    UPROPERTY(EditAnywhere, Category = "Initialization")
-    FName StartLevelName;
 };

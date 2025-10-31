@@ -4,6 +4,7 @@
 #include "Audio/DemoAudioSubsystem.h"
 #include "Audio/DemoSoundTags.h"
 #include "DemoTypes/LogCategories.h"
+#include "Kismet/GameplayStatics.h"
 #include "UI/MainMenuWidget.h"
 
 AStartUpPlayerController::AStartUpPlayerController()
@@ -25,6 +26,12 @@ void AStartUpPlayerController::BeginPlay()
 {
     Super::BeginPlay();
 
+    if (StartLevelName == NAME_None)
+    {
+        // @hardcoded
+        StartLevelName = TEXT("Test");
+    }
+
     ShowMainMenu();
 }
 
@@ -42,11 +49,20 @@ void AStartUpPlayerController::ShowMainMenu()
 
     FInputModeUIOnly InputModeData;
     InputModeData.SetWidgetToFocus(MainMenuWidget->TakeWidget());
-    InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+    InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::LockInFullscreen);
     SetInputMode(InputModeData);
     SetShowMouseCursor(true);
 
     MainMenuWidget->AddToViewport();
+}
+
+void AStartUpPlayerController::StartNewGame()
+{
+    FInputModeGameOnly InputModeData;
+    SetInputMode(InputModeData);
+    SetShowMouseCursor(false);
+
+    UGameplayStatics::OpenLevel(this, StartLevelName);
 }
 
 void AStartUpPlayerController::InitMainMenu()

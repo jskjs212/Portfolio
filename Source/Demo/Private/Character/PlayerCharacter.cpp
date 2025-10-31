@@ -23,11 +23,13 @@
 #include "Interfaces/Interactable.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "PlayerController/DemoPlayerController.h"
-#include "Settings/DemoUserSettings.h" // @TEST
 
 APlayerCharacter::APlayerCharacter() :
     SprintStaminaTimerDelegate{FTimerDelegate::CreateUObject(this, &ThisClass::ConsumeSprintStamina)}
 {
+    PrimaryActorTick.bCanEverTick = true;
+    PrimaryActorTick.bStartWithTickEnabled = false;
+
     // Disable character rotation by controller
     bUseControllerRotationPitch = false;
     bUseControllerRotationRoll = false;
@@ -49,7 +51,7 @@ APlayerCharacter::APlayerCharacter() :
 
     CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
     CameraBoom->SetupAttachment(GetMesh());
-    CameraBoom->TargetArmLength = 300.0f;
+    CameraBoom->TargetArmLength = DefaultCameraBoomLength;
     CameraBoom->bUsePawnControlRotation = true;
 
     // Camera position
@@ -82,9 +84,21 @@ void APlayerCharacter::BeginPlay()
     if (UWorld* World = GetWorld())
     {
         FTimerManager& TimerManager = World->GetTimerManager();
-        TimerManager.SetTimer(TraceTimerHandle, this, &ThisClass::HandleInteractable, TraceInterval, true);
+        TimerManager.SetTimer(InteractTraceTimerHandle, this, &ThisClass::HandleInteractable, InteractTraceInterval, true);
         TimerManager.SetTimer(SprintStaminaTimerHandle, SprintStaminaTimerDelegate, SprintStaminaInterval, true);
         TimerManager.PauseTimer(SprintStaminaTimerHandle);
+    }
+
+    BindDeathCameraBoomTimeline();
+}
+
+void APlayerCharacter::Tick(float DeltaTime)
+{
+    Super::Tick(DeltaTime);
+
+    if (IsDead())
+    {
+        DeathCameraBoomTimeline.TickTimeline(DeltaTime);
     }
 }
 
@@ -97,6 +111,12 @@ void APlayerCharacter::HandleDeath()
     {
         DemoPlayerController->ShowPlayerMenu(false);
     }
+
+    // Play death camera boom timeline
+    CameraBoom->SocketOffset = FVector::ZeroVector;
+    DeathCameraBoomTimeline.SetPlayRate(1.f / DeathDestroyDelay);
+    DeathCameraBoomTimeline.PlayFromStart();
+    SetActorTickEnabled(true);
 }
 
 void APlayerCharacter::HandleWeaponChanged(const FWeaponData* WeaponData)
@@ -158,7 +178,7 @@ IInteractable* APlayerCharacter::TraceForInteractables()
     }
 
     const FVector& Start = FollowCamera->GetComponentLocation();
-    const FVector&& End = Start + (FollowCamera->GetForwardVector() * TraceDistance);
+    const FVector&& End = Start + (FollowCamera->GetForwardVector() * InteractTraceDistance);
     FHitResult HitResult;
 
     const bool bHit = World->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility);
@@ -201,6 +221,24 @@ void APlayerCharacter::HandleTargetUpdated(AActor* NewActor)
     }
 }
 
+void APlayerCharacter::BindDeathCameraBoomTimeline()
+{
+    if (!DeathCameraBoomCurve)
+    {
+        DemoLOG_CF(LogCharacter, Warning, TEXT("DeathCameraBoomCurve is not set"));
+        return;
+    }
+
+    DeathCameraBoomTimelineDelegate.BindUObject(this, &ThisClass::DeathCameraBoomTimelineUpdate);
+    DeathCameraBoomTimeline.AddInterpFloat(DeathCameraBoomCurve, DeathCameraBoomTimelineDelegate);
+}
+
+void APlayerCharacter::DeathCameraBoomTimelineUpdate(float Alpha)
+{
+    const float NewCameraBoomLength = FMath::Lerp(DefaultCameraBoomLength, DeathCameraBoomLength, Alpha);
+    CameraBoom->TargetArmLength = NewCameraBoomLength;
+}
+
 bool APlayerCharacter::CanReceiveDamageFrom(const AActor* Attacker) const
 {
     if (!Super::CanReceiveDamageFrom(Attacker))
@@ -239,15 +277,27 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-    // Add input mapping context
+    if (!PawnData || !PawnData->InputConfig)
+    {
+        DemoLOG_CF(LogCharacter, Error, TEXT("PlayerCharacter has no PawnData or InputConfig"));
+        return;
+    }
+
+    // Add default mapping context
     if (const APlayerController* PlayerController = GetController<APlayerController>())
     {
         if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
         {
-            Subsystem->AddMappingContext(DefaultMappingContext, 0);
+            if (DefaultMappingContext)
+            {
+                Subsystem->AddMappingContext(DefaultMappingContext, 0);
+            }
+            else
+            {
+                DemoLOG_CF(LogDemoGame, Error, TEXT("DefaultMappingContext is not set."));
+            }
         }
     }
-
 
     // Bind input actions
     if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
@@ -264,12 +314,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
                     DemoLOG_CF(LogDemoGame, Error, TEXT("InputAction not found for tag %s"), *InputTag.ToString());
                 }
             };
-
-        if (!PawnData || !PawnData->InputConfig)
-        {
-            DemoLOG_CF(LogCharacter, Error, TEXT("PlayerCharacter has no PawnData or InputConfig"));
-            return;
-        }
 
         const UInputAction* LookAction = PawnData->InputConfig->FindInputActionForTag(DemoGameplayTags::Input_Look);
         const UInputAction* MoveAction = PawnData->InputConfig->FindInputActionForTag(DemoGameplayTags::Input_Move);
@@ -289,11 +333,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
         BindAction(DemoGameplayTags::Input_Block, ETriggerEvent::Completed, &ThisClass::StopBlocking);
         BindAction(DemoGameplayTags::Input_Dodge, ETriggerEvent::Started, &ThisClass::Dodge);
         BindAction(DemoGameplayTags::Input_ToggleLockOn, ETriggerEvent::Started, &ThisClass::ToggleLockOn);
-        BindAction(DemoGameplayTags::Input_ShowPlayerMenu, ETriggerEvent::Started, &ThisClass::ShowPlayerMenu);
-        BindAction(DemoGameplayTags::Input_ToggleHelpText, ETriggerEvent::Started, &ThisClass::ToggleHelpText);
         BindAction(DemoGameplayTags::Input_Test1, ETriggerEvent::Started, &ThisClass::Test1);
         BindAction(DemoGameplayTags::Input_Test2, ETriggerEvent::Started, &ThisClass::Test2);
-        BindAction(DemoGameplayTags::Input_Escape, ETriggerEvent::Started, &ThisClass::EscapeActionStarted);
     }
 }
 
@@ -430,13 +471,15 @@ void APlayerCharacter::StopSprinting()
 
 void APlayerCharacter::Interact()
 {
+    // Interact with focused interactable, if any.
     if (IInteractable* Interactable = FocusedInteractable)
     {
         Interactable->Interact(this);
 
-        // Prevent multiple interactions for TraceInterval.
+        // Prevent multiple interactions for InteractTraceInterval.
         FocusedInteractable = nullptr;
         OnInteractableFocused.ExecuteIfBound(nullptr);
+        return;
     }
 }
 
@@ -453,33 +496,6 @@ void APlayerCharacter::Dodge()
 void APlayerCharacter::ToggleLockOn()
 {
     TargetingComponent->ToggleTargetLock();
-}
-
-void APlayerCharacter::ShowPlayerMenu()
-{
-    if (!bIsDead)
-    {
-        if (ADemoPlayerController* DemoPlayerController = GetController<ADemoPlayerController>())
-        {
-            DemoPlayerController->ShowPlayerMenu(true);
-        }
-    }
-}
-
-void APlayerCharacter::ToggleHelpText()
-{
-    if (ADemoPlayerController* DemoPlayerController = GetController<ADemoPlayerController>())
-    {
-        DemoPlayerController->ToggleHelpText();
-    }
-}
-
-void APlayerCharacter::EscapeActionStarted()
-{
-    if (ADemoPlayerController* DemoPlayerController = GetController<ADemoPlayerController>())
-    {
-        DemoPlayerController->ShowPlayerMenu(true, DemoGameplayTags::UI_PlayerMenu_SystemMenu);
-    }
 }
 
 void APlayerCharacter::SetMovementSpeedMode(FGameplayTag NewSpeedMode)
@@ -509,20 +525,12 @@ void APlayerCharacter::Test1_Implementation()
 {
     DemoLOG_CF(LogCharacter, Warning, TEXT("called!"));
 
-    if (UGameUserSettings* UserSettings = GEngine->GetGameUserSettings())
-    {
-        UserSettings->SetFullscreenMode(EWindowMode::WindowedFullscreen);
-        UserSettings->ApplySettings(false);
-    }
+    StatsComponent->Heal(50.f);
 }
 
 void APlayerCharacter::Test2_Implementation()
 {
     DemoLOG_CF(LogCharacter, Warning, TEXT("called!"));
 
-    if (UGameUserSettings* UserSettings = GEngine->GetGameUserSettings())
-    {
-        UserSettings->SetFullscreenMode(EWindowMode::Windowed);
-        UserSettings->ApplySettings(false);
-    }
+    StatsComponent->TakeDamage(50.f);
 }

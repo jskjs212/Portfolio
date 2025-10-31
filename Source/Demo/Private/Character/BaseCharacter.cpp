@@ -321,6 +321,7 @@ void ABaseCharacter::HandleDeath()
     DemoLOG_F(LogCharacter, Display, TEXT("%s has died."), *GetName());
 
     bIsDead = true;
+    OnDeath.Broadcast();
 
     // Stop animations to prevent notifies
     UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -334,7 +335,6 @@ void ABaseCharacter::HandleDeath()
     if (GetCharacterMovement())
     {
         GetCharacterMovement()->DisableMovement();
-        //MovementComponent->StopMovementImmediately();
     }
 
     // Disable collisions

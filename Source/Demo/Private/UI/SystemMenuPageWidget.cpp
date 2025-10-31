@@ -32,8 +32,10 @@ void USystemMenuPageWidget::HandleContinueButtonClicked()
 
 void USystemMenuPageWidget::HandleExitToMainMenuButtonClicked()
 {
-    const FName MainMenuLevelName = TEXT("StartUp"); // @hardcoded
-    UGameplayStatics::OpenLevel(this, MainMenuLevelName);
+    if (ADemoPlayerController* DemoPlayerController = GetOwningPlayer<ADemoPlayerController>())
+    {
+        DemoPlayerController->GoToMainMenu();
+    }
 }
 
 void USystemMenuPageWidget::HandleExitToDesktopButtonClicked()

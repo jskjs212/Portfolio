@@ -5,7 +5,6 @@
 #include "Components/Button.h"
 #include "Components/VerticalBox.h"
 #include "DemoTypes/LogCategories.h"
-#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "PlayerController/StartUpPlayerController.h"
 #include "UI/SettingsPageWidget.h"
@@ -35,12 +34,6 @@ void UMainMenuWidget::NativeOnInitialized()
     checkf(MainMenuVerticalBox && NewGameButton && LoadButton && SettingsButton && QuitButton
         && SettingsPageBorder && SettingsPageVerticalBox && SettingsPageCloseButton,
         TEXT("Failed to bind widgets."));
-
-    if (StartLevelName == NAME_None)
-    {
-        DemoLOG_CF(LogUI, Error, TEXT("StartLevelName is not set."));
-        StartLevelName = TEXT("Test");
-    }
 
     LoadButton->SetIsEnabled(false);
     SettingsPageBorder->SetVisibility(ESlateVisibility::Collapsed);
@@ -115,18 +108,14 @@ void UMainMenuWidget::ShowSettingsPage(bool bShow)
 
 void UMainMenuWidget::HandleNewGameButtonClicked()
 {
-    if (APlayerController* PlayerController = GetOwningPlayer())
+    if (AStartUpPlayerController* StartUpPlayerController = GetOwningPlayer<AStartUpPlayerController>())
     {
-        FInputModeGameOnly InputModeData;
-        PlayerController->SetInputMode(InputModeData);
-        PlayerController->SetShowMouseCursor(false);
+        StartUpPlayerController->StartNewGame();
     }
     else
     {
-        DemoLOG_CF(LogUI, Error, TEXT("PlayerController is not valid."));
+        DemoLOG_CF(LogUI, Error, TEXT("OwningPlayer is not AStartUpPlayerController."));
     }
-
-    UGameplayStatics::OpenLevel(this, StartLevelName);
 }
 
 void UMainMenuWidget::HandleQuitButtonClicked()

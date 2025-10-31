@@ -55,6 +55,9 @@ protected:
     //        Delegates
     ////////////////////////////////////////////////////////
 public:
+    // Dead state -> HandleDeath -> Broadcast
+    FSimpleMulticastDelegate OnDeath;
+
     FOnBlockingStateChanged OnBlockingStateChanged;
 
     ////////////////////////////////////////////////////////
@@ -106,6 +109,10 @@ protected:
 
     void EnableRagdoll();
 
+    ////////////////////////////////////////////////////////
+    //        Handlers
+    ////////////////////////////////////////////////////////
+protected:
     virtual void HandleDeath();
 
     /* Event handlers */
