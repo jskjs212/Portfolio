@@ -7,6 +7,15 @@
 #include "GenericTeamAgentInterface.h"
 #include "DemoTypes.generated.h"
 
+// Priority levels for InputMappingContext
+// Better option? DataAsset that contains both context and priority
+namespace IMCPriority
+{
+constexpr int32 PlayerCharacter{100};
+constexpr int32 PlayerController{200};
+constexpr int32 PlayerController_Event{201}; // e.g. AfterDeath
+} // namespace IMCPriority
+
 namespace DemoTeamID
 {
 const FGenericTeamId Player{1};

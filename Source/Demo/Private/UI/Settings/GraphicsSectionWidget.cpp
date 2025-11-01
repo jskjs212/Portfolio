@@ -23,6 +23,12 @@ const TArray<FString> UGraphicsSectionWidget::QualityOptions{
     TEXT("Cinematic")
 };
 
+UGraphicsSectionWidget::UGraphicsSectionWidget(const FObjectInitializer& ObjectInitializer)
+    : Super(ObjectInitializer),
+    OnWindowActionDelegate{FOnWindowAction::CreateUObject(this, &ThisClass::HandleWindowAction)}
+{
+}
+
 void UGraphicsSectionWidget::NativeOnInitialized()
 {
     Super::NativeOnInitialized();
@@ -66,6 +72,8 @@ void UGraphicsSectionWidget::NativeOnInitialized()
         ShadowQualityComboBox->AddOption(QualityOption);
     }
 
+    SyncUIWithUserSettings();
+
     DisplayModeComboBox->OnSelectionChanged.AddDynamic(this, &ThisClass::HandleDisplayModeChanged);
     ResolutionComboBox->OnSelectionChanged.AddDynamic(this, &ThisClass::HandleResolutionChanged);
     FPSLimitComboBox->OnSelectionChanged.AddDynamic(this, &ThisClass::HandleFPSLimitChanged);
@@ -73,7 +81,6 @@ void UGraphicsSectionWidget::NativeOnInitialized()
     ShadowQualityComboBox->OnSelectionChanged.AddDynamic(this, &ThisClass::HandleShadowQualityChanged);
 
     // Bind to external window action
-    OnWindowActionDelegate.BindUObject(this, &ThisClass::HandleWindowAction);
     OnWindowActionDelegateHandle = FSlateApplication::Get().RegisterOnWindowActionNotification(OnWindowActionDelegate);
 }
 

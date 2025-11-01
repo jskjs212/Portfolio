@@ -29,7 +29,7 @@ void UAudioSectionWidget::NativeOnInitialized()
         {DemoSoundTags::Voice,  VoiceVolumeSlider,  VoiceVolumeText}
     };
 
-    // Configure widgets and bind events
+    // Configure widgets
     for (FVolumeSettingsEntry& Entry : VolumeSettingsEntries)
     {
         Entry.Slider->MouseUsesStep = true;
@@ -37,11 +37,19 @@ void UAudioSectionWidget::NativeOnInitialized()
         Entry.Slider->SetMaxValue(VolumeMaxValue);
         Entry.Slider->SetStepSize(VolumeStepSize);
         Entry.Slider->SetTypeTag(Entry.Category);
-        Entry.Slider->OnTagSliderMouseCaptureEnd.BindUObject(this, &ThisClass::HandleTagSliderMouseCaptureEnd);
-        Entry.Slider->OnTagSliderValueChanged.BindUObject(this, &ThisClass::HandleTagSliderValueChanged);
         Entry.Text->SetVisibility(ESlateVisibility::HitTestInvisible);
     }
+
+    SyncUIWithUserSettings();
+
+    // Bind events
     MuteWhenUnfocusedCheckBox->OnCheckStateChanged.AddDynamic(this, &ThisClass::HandleCheckBoxStateChanged);
+
+    for (FVolumeSettingsEntry& Entry : VolumeSettingsEntries)
+    {
+        Entry.Slider->OnTagSliderMouseCaptureEnd.BindUObject(this, &ThisClass::HandleTagSliderMouseCaptureEnd);
+        Entry.Slider->OnTagSliderValueChanged.BindUObject(this, &ThisClass::HandleTagSliderValueChanged);
+    }
 }
 
 void UAudioSectionWidget::SyncUIWithUserSettings()
@@ -94,7 +102,7 @@ void UAudioSectionWidget::HandleTagSliderValueChanged(FGameplayTag InTag, float 
                 // Update volume setting and text immediately.
                 // Not applying settings until mouse capture ends.
                 const float NewVolume = Entry.Slider->GetValue() / VolumeMaxValue;
-                UserSettings->SetVolumeSetting(this, InTag, NewVolume);
+                UserSettings->SetVolumeSetting(InTag, NewVolume);
                 Entry.Text->SetText(FText::AsNumber(FMath::RoundToInt(InValue)));
                 break;
             }

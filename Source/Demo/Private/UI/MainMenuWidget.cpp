@@ -85,7 +85,7 @@ void UMainMenuWidget::InitSettingsPage()
 
     SettingsPageWidget = CreateWidget<USettingsPageWidget>(GetOwningPlayer(), SettingsPageWidgetClass);
     SettingsPageWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-    SettingsPageWidget->SyncUIWithUserSettings();
+    //SettingsPageWidget->SyncUIWithUserSettings();
     SettingsPageVerticalBox->AddChild(SettingsPageWidget);
 }
 

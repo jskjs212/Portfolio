@@ -22,6 +22,9 @@ class DEMO_API UGraphicsSectionWidget : public USettingsSectionWidget
     ////////////////////////////////////////////////////////
     //        UI functions
     ////////////////////////////////////////////////////////
+public:
+    UGraphicsSectionWidget(const FObjectInitializer& ObjectInitializer);
+
 protected:
     virtual void NativeOnInitialized() override;
 

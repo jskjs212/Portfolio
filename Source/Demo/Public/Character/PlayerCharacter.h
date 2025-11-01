@@ -11,6 +11,8 @@
 #include "PlayerCharacter.generated.h"
 
 struct FInputActionValue;
+struct FInputChord;
+struct FWeaponData;
 class IInteractable;
 class UCameraComponent;
 class UCurveFloat;
@@ -78,6 +80,9 @@ protected:
     //        PlayerCharacter functions
     ////////////////////////////////////////////////////////
 protected:
+    // Load user settings and bind to changes.
+    void LoadUserSettings();
+
     void ConsumeSprintStamina();
 
     // Trace first visible interactable from camera.
@@ -91,7 +96,15 @@ protected:
 private:
     void BindDeathCameraBoomTimeline();
 
-    void DeathCameraBoomTimelineUpdate(float Alpha);
+    ////////////////////////////////////////////////////////
+    //        Handlers
+    ////////////////////////////////////////////////////////
+private:
+    void HandleDeathCameraBoomTimelineUpdate(float Alpha);
+
+    void HandleControlsBoolUserSettingChanged(FGameplayTag InTag, bool bNewValue);
+
+    void HandleInputKeySettingChanged(FGameplayTag InTag, const FInputChord& NewChord);
 
     ////////////////////////////////////////////////////////
     //        Combat interface
@@ -112,6 +125,11 @@ public:
     ////////////////////////////////////////////////////////
 public:
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+    // @param bReapplyMappings If false, only update runtime mapping context (For LoadUserSettings())
+    void RebindInputKey(FGameplayTag InInputTag, const FInputChord& NewChord, bool bReapplyMappings);
+
+    bool IsInputKeyBound(const FInputChord& InChord) const;
 
 protected:
     void Look(const FInputActionValue& Value);
@@ -160,16 +178,20 @@ public:
     ////////////////////////////////////////////////////////
 private:
     UPROPERTY(EditAnywhere, Category = "Initialization|Input")
-    TObjectPtr<UInputMappingContext> DefaultMappingContext;
+    TObjectPtr<const UInputMappingContext> DefaultMappingContext;
+
+    UPROPERTY(VisibleAnywhere, Category = "Input")
+    TObjectPtr<UInputMappingContext> RuntimeDefaultMappingContext;
 
     ////////////////////////////////////////////////////////
     //        Variables
     ////////////////////////////////////////////////////////
 private:
     /* Movement */
-    // Options: true = toggle, false = hold
-    bool bIsWalkInputTogglesWalk{true};
-    bool bIsSprintInputTogglesSprint{false};
+    // true = toggle, false = hold (user settings)
+    bool bWalkInputToggle{true};
+    // true = toggle, false = hold (user settings)
+    bool bSprintInputToggle{false};
 
     FVector2D CachedMoveInputAxis;
 

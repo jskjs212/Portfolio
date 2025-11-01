@@ -51,7 +51,7 @@ void UInventoryPageWidget::NativeOnInitialized()
     BindToInventoryUpdates();
 }
 
-FReply UInventoryPageWidget::NativeOnPreviewKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
+FReply UInventoryPageWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
     static const TMap<FKey, int32> KeyToIndexMap{
         {EKeys::One, 0},
@@ -76,7 +76,7 @@ FReply UInventoryPageWidget::NativeOnPreviewKeyDown(const FGeometry& InGeometry,
         }
     }
 
-    return Super::NativeOnPreviewKeyDown(InGeometry, InKeyEvent);
+    return Super::NativeOnKeyDown(InGeometry, InKeyEvent);
 }
 
 void UInventoryPageWidget::UpdateInventorySlotsUI()

@@ -31,7 +31,7 @@ class DEMO_API UInventoryPageWidget : public UTabMenuWidget
 protected:
     virtual void NativeOnInitialized() override;
 
-    virtual FReply NativeOnPreviewKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
+    virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
 
     ////////////////////////////////////////////////////////
     //        UI functions

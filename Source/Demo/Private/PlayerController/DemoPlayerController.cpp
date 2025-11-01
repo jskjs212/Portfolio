@@ -5,6 +5,7 @@
 #include "Audio/DemoSoundTags.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Character/PlayerCharacter.h"
+#include "DemoTypes/DemoTypes.h"
 #include "DemoTypes/LogCategories.h"
 #include "DemoTypes/UITypes.h"
 #include "EnhancedInputComponent.h"
@@ -214,11 +215,11 @@ void ADemoPlayerController::ShowYouDiedWidgetAndAddAfterDeathInputContext()
     YouDiedWidget->AddToViewport(DemoZOrder::Event_YouDied);
 
     // Add after-death input context
-    if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+    if (UEnhancedInputLocalPlayerSubsystem* EILPSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
     {
         if (AfterDeathMappingContext)
         {
-            Subsystem->AddMappingContext(AfterDeathMappingContext, 1);
+            EILPSubsystem->AddMappingContext(AfterDeathMappingContext, IMCPriority::PlayerController_Event);
         }
     }
 
@@ -335,11 +336,11 @@ void ADemoPlayerController::SetupPlayerInput()
     }
 
     // Add default mapping context
-    if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+    if (UEnhancedInputLocalPlayerSubsystem* EILPSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
     {
         if (AfterDeathMappingContext)
         {
-            Subsystem->AddMappingContext(DefaultMappingContext, 0);
+            EILPSubsystem->AddMappingContext(DefaultMappingContext, IMCPriority::PlayerController);
         }
     }
 

@@ -29,8 +29,8 @@ class DEMO_API USettingsPageWidget : public UTabMenuWidget
 protected:
     virtual void NativeOnInitialized() override;
 
-public:
-    void SyncUIWithUserSettings();
+//public:
+//    void SyncUIWithUserSettings();
 
     ////////////////////////////////////////////////////////
     //        Widgets
@@ -41,12 +41,19 @@ private:
     TObjectPtr<UTagButton> GraphicsTabButton;
 
     UPROPERTY(meta = (BindWidget))
-    TObjectPtr<USettingsSectionWidget> GraphicsPageWidget;
+    TObjectPtr<USettingsSectionWidget> GraphicsSectionWidget;
 
     /* Audio */
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UTagButton> AudioTabButton;
 
     UPROPERTY(meta = (BindWidget))
-    TObjectPtr<USettingsSectionWidget> AudioPageWidget;
+    TObjectPtr<USettingsSectionWidget> AudioSectionWidget;
+
+    /* Controls */
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UTagButton> ControlsTabButton;
+
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<USettingsSectionWidget> ControlsSectionWidget;
 };

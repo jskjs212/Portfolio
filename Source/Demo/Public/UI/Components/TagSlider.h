@@ -32,16 +32,17 @@ public:
     ////////////////////////////////////////////////////////
     //        UI functions
     ////////////////////////////////////////////////////////
-public:
-    virtual void SynchronizeProperties() override
+protected:
+    virtual void OnWidgetRebuilt() override
     {
-        Super::SynchronizeProperties();
-
+        Super::OnWidgetRebuilt();
+        DemoLOG_CF(LogTEST, Display, TEXT("Name: %s"), *GetName());
         OnMouseCaptureEnd.AddDynamic(this, &ThisClass::HandleTagSliderMouseCaptureEnd);
         OnControllerCaptureEnd.AddDynamic(this, &ThisClass::HandleTagSliderControllerCaptureEnd);
         OnValueChanged.AddDynamic(this, &ThisClass::HandleTagSliderValueChanged);
     }
 
+public:
     FORCEINLINE FGameplayTag GetTypeTag() const { return TypeTag; }
 
     FORCEINLINE void SetTypeTag(FGameplayTag InTag) { TypeTag = InTag; }

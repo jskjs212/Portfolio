@@ -15,7 +15,8 @@
 				"CoreUObject",
 				"DeveloperSettings",
 				"StateTreeModule",
-				"GameplayStateTreeModule"
+				"GameplayStateTreeModule",
+				"EnhancedInput"
 			]
 		}
 	],
