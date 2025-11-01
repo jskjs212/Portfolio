@@ -9,8 +9,6 @@
 
 UStateManagerComponent::UStateManagerComponent()
 {
-    PrimaryComponentTick.bCanEverTick = false;
-
     SetupAllowedTransitionsOnlyOnce();
 }
 

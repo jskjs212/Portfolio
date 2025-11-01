@@ -15,9 +15,6 @@ class DEMO_API UCombatComponent : public UActorComponent
     ////////////////////////////////////////////////////////
     //        Fundamentals
     ////////////////////////////////////////////////////////
-public:
-    UCombatComponent();
-
 protected:
     virtual void BeginPlay() override;
 

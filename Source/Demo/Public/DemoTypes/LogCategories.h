@@ -24,6 +24,9 @@ DECLARE_LOG_CATEGORY_EXTERN(LogUI, Log, All);
 // Add [ClassName::FuncName] prefix to log messages.
 #define DemoLOG_CF(CategoryName, Verbosity, Format, ...) UE_LOG(CategoryName, Verbosity, TEXT("[%hs] ") Format, __FUNCTION__, ##__VA_ARGS__);
 
+// Add [FileName:LineNumber] prefix to log messages.
+#define DemoLOG_FL(CategoryName, Verbosity, Format, ...) UE_LOG(CategoryName, Verbosity, TEXT("[%hs:%d] ") Format, __FILE__, __LINE__, ##__VA_ARGS__);
+
 // __FUNCTION__: Class::Func
 // __func__: Func
 // __LINE__: Line number

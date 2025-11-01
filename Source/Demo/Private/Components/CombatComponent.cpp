@@ -5,11 +5,6 @@
 #include "DemoTypes/DemoGameplayTags.h"
 #include "Interfaces/CombatInterface.h"
 
-UCombatComponent::UCombatComponent()
-{
-    PrimaryComponentTick.bCanEverTick = false;
-}
-
 void UCombatComponent::BeginPlay()
 {
     Super::BeginPlay();

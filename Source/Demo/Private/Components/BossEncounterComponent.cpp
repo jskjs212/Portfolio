@@ -4,14 +4,10 @@
 #include "Audio/DemoAudioSubsystem.h"
 #include "AI/DemoAIController.h"
 #include "Character/BaseCharacter.h"
+#include "Components/StatsComponent.h"
 #include "DemoTypes/LogCategories.h"
 #include "GameFramework/Pawn.h"
 #include "PlayerController/DemoPlayerController.h"
-
-UBossEncounterComponent::UBossEncounterComponent()
-{
-    PrimaryComponentTick.bCanEverTick = false;
-}
 
 void UBossEncounterComponent::SetupBossInfo(APawn* InBossPawn, FGameplayTag InBossMusicTag)
 {
@@ -72,10 +68,15 @@ void UBossEncounterComponent::StartEncounter(APawn* Instigator)
     }
     // Validation end
 
+    // Set state
+    SetEncounterState(EBossEncounterState::Active);
+
+    // Member variables
     EncounterInstigator = Instigator;
 
-    SetEncounterState(EBossEncounterState::Active);
-    //OnBossEncounterStarted.Broadcast if needed
+    // Broadcast
+    // e.g. Lock doors, start cutscene, etc.
+    OnEncounterStarted.Broadcast(Instigator);
 
     // Bind to boss death
     if (ABaseCharacter* BossCharacter = Cast<ABaseCharacter>(BossPawn.Get()))
@@ -98,10 +99,6 @@ void UBossEncounterComponent::StartEncounter(APawn* Instigator)
             AudioSubsystem->PlayMusic(this, BossMusicTag);
         }
     }
-
-    // @TODO - Lock doors
-
-    // @TODO - Start sequence
 }
 
 void UBossEncounterComponent::EndEncounter(EBossEncounterEndReason Reason)
@@ -111,17 +108,28 @@ void UBossEncounterComponent::EndEncounter(EBossEncounterEndReason Reason)
         return;
     }
 
+    // Set state
     if (Reason == EBossEncounterEndReason::BossDefeated)
     {
-        // @misc - If boss is still alive (!BaseCharacter->IsDead()), what to do? Disable further interactions?
+        // @misc - If the boss is still alive (!BaseCharacter->IsDead()), what to do? Disable further interactions?
         SetEncounterState(EBossEncounterState::Completed);
     }
     else
     {
         SetEncounterState(EBossEncounterState::Dormant);
+
+        // Regen health immediately (until player hits again)
+        if (BossPawn.IsValid())
+        {
+            if (UStatsComponent* StatsComponent = BossPawn->FindComponentByClass<UStatsComponent>())
+            {
+                StatsComponent->StartRegenChecked(DemoGameplayTags::Stat_Resource_Health, true);
+            }
+        }
     }
 
-    //OnBossEncounterEnded.Broadcast if needed
+    // Broadcast
+    OnEncounterEnded.Broadcast(Reason);
 
     // Unbind boss death
     if (ABaseCharacter* BossCharacter = Cast<ABaseCharacter>(BossPawn.Get()))
@@ -130,7 +138,7 @@ void UBossEncounterComponent::EndEncounter(EBossEncounterEndReason Reason)
         BossDeathDelegateHandle.Reset();
     }
 
-    // (UI) Hide boss AI status
+    // (UI) Hide boss AI status and clear instigator
     if (EncounterInstigator.IsValid())
     {
         if (ADemoPlayerController* DemoPlayerController = EncounterInstigator->GetController<ADemoPlayerController>())
@@ -155,8 +163,6 @@ void UBossEncounterComponent::EndEncounter(EBossEncounterEndReason Reason)
     {
         AudioSubsystem->PlayDefaultMusic(this);
     }
-
-    // @TODO - unlock doors, sequence, reward (in AICharacter's function?), etc.
 }
 
 void UBossEncounterComponent::SetEncounterState(EBossEncounterState NewState)

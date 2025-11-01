@@ -2,14 +2,26 @@
 
 #include "Volumes/BossTriggerBox.h"
 #include "Character/PlayerCharacter.h"
+#include "Components/BillboardComponent.h"
 #include "Components/BossEncounterComponent.h"
+#include "Components/ShapeComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "DemoTypes/LogCategories.h"
 
 ABossTriggerBox::ABossTriggerBox()
 {
-    PrimaryActorTick.bCanEverTick = false;
+    // ATriggerBox
+    SetHidden(false);
+    GetCollisionComponent()->SetHiddenInGame(true);
+#if WITH_EDITORONLY_DATA
+    GetSpriteComponent()->SetHiddenInGame(true);
+#endif // WITH_EDITORONLY_DATA
 
     BossEncounterComponent = CreateDefaultSubobject<UBossEncounterComponent>(TEXT("BossEncounterComponent"));
+
+    EntranceBlockerComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("EntranceBlockerComponent"));
+    EntranceBlockerComponent->SetupAttachment(GetRootComponent());
+    SetEntranceBlocked(false);
 }
 
 void ABossTriggerBox::BeginPlay()
@@ -26,11 +38,24 @@ void ABossTriggerBox::BeginPlay()
         DemoLOG_CF(LogDemoGame, Warning, TEXT("No BossMusicTag assigned for %s."), *GetName());
         // Continue
     }
-
-    BossEncounterComponent->SetupBossInfo(BossPawn.Get(), BossMusicTag);
+    if (InstigatorTeleportLocation.IsZero())
+    {
+        DemoLOG_CF(LogDemoGame, Warning, TEXT("No InstigatorTeleportLocation assigned for %s."), *GetName());
+        // Continue
+    }
 
     OnActorBeginOverlap.AddDynamic(this, &ThisClass::HandleBeginOverlap);
     OnActorEndOverlap.AddDynamic(this, &ThisClass::HandleEndOverlap);
+
+    BossEncounterComponent->SetupBossInfo(BossPawn.Get(), BossMusicTag);
+    BossEncounterComponent->OnEncounterStarted.AddUObject(this, &ThisClass::HandleEncounterStarted);
+    BossEncounterComponent->OnEncounterEnded.AddUObject(this, &ThisClass::HandleEncounterEnded);
+}
+
+void ABossTriggerBox::SetEntranceBlocked(bool bBlocked)
+{
+    EntranceBlockerComponent->SetCollisionEnabled(bBlocked ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
+    EntranceBlockerComponent->SetHiddenInGame(!bBlocked);
 }
 
 void ABossTriggerBox::HandleBeginOverlap(AActor* /*OverlappedActor*/, AActor* OtherActor)
@@ -48,4 +73,25 @@ void ABossTriggerBox::HandleEndOverlap(AActor* /*OverlappedActor*/, AActor* Othe
     {
         BossEncounterComponent->EndEncounter(EBossEncounterEndReason::PlayerRetreated);
     }
+}
+
+void ABossTriggerBox::HandleEncounterStarted(APawn* InInstigator)
+{
+    // Teleport the instigator to the specified location.
+    if (!InstigatorTeleportLocation.IsZero())
+    {
+        FVector Destination = GetTransform().TransformPosition(InstigatorTeleportLocation);
+        const bool bTeleported = InInstigator->TeleportTo(Destination, InInstigator->GetActorRotation());
+        if (!bTeleported)
+        {
+            DemoLOG_CF(LogDemoGame, Warning, TEXT("Failed to teleport instigator %s."), *InInstigator->GetName());
+        }
+    }
+
+    SetEntranceBlocked(true);
+}
+
+void ABossTriggerBox::HandleEncounterEnded(EBossEncounterEndReason Reason)
+{
+    SetEntranceBlocked(false);
 }

@@ -6,11 +6,6 @@
 #include "DemoTypes/LogCategories.h"
 #include "DemoTypes/TableRowBases.h"
 
-UStatsComponent::UStatsComponent()
-{
-    PrimaryComponentTick.bCanEverTick = false;
-}
-
 void UStatsComponent::InitStatsComponent()
 {
     static const FGameplayTagContainer MustHaveStatType = FGameplayTagContainer::CreateFromArray(TArray<FGameplayTag>{
@@ -293,7 +288,7 @@ void UStatsComponent::RecalculateDerivedStat(FGameplayTag InPrimaryStatTag)
     }
 }
 
-void UStatsComponent::StartRegenChecked(const FGameplayTag StatTag)
+void UStatsComponent::StartRegenChecked(const FGameplayTag StatTag, bool bNoDelay)
 {
     UWorld* World = GetWorld();
     if (!World)
@@ -304,14 +299,14 @@ void UStatsComponent::StartRegenChecked(const FGameplayTag StatTag)
 
     FResourceStat& ResourceStat = GetResourceStatChecked(StatTag);
 
-    if (ResourceStat.bCanRegen && ResourceStat.RegenInterval > 0.f && ResourceStat.RegenDelay > 0.f)
+    if (ResourceStat.bCanRegen && ResourceStat.RegenInterval > 0.f && ResourceStat.RegenDelay >= 0.f)
     {
         GetWorld()->GetTimerManager().SetTimer(
             ResourceStat.TimerHandle,
             ResourceStat.TimerDelegate,
             ResourceStat.RegenInterval,
             true,
-            ResourceStat.RegenDelay);
+            bNoDelay ? 0.f : ResourceStat.RegenDelay);
     }
 }
 

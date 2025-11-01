@@ -6,6 +6,10 @@
 #include "GameplayTagContainer.h"
 #include "StatsTypes.generated.h"
 
+/**
+ * @TODO - Create a common parent for all stats that holds StatModifiers.
+ */
+
 UENUM()
 enum class EStatModOp : uint8
 {
@@ -83,16 +87,16 @@ struct DEMO_API FResourceStat
     UPROPERTY(EditAnywhere, Category = "Stats")
     bool bCanRegen{false};
 
-    // Per second!!!
-    UPROPERTY(EditAnywhere, Category = "Stats")
+    // [units per second]
+    UPROPERTY(EditAnywhere, Category = "Stats", meta = (EditCondition = "bCanRegen", ClampMin = "0.0"))
     float RegenRate{5.f};
 
-    // Seconds
-    UPROPERTY(EditAnywhere, Category = "Stats")
+    // If 0, never regen. [seconds]
+    UPROPERTY(EditAnywhere, Category = "Stats", meta = (EditCondition = "bCanRegen", ClampMin = "0.0", Units = "s"))
     float RegenInterval{0.1f};
 
-    // Seconds
-    UPROPERTY(EditAnywhere, Category = "Stats")
+    // [seconds]
+    UPROPERTY(EditAnywhere, Category = "Stats", meta = (EditCondition = "bCanRegen", ClampMin = "0.0", Units = "s"))
     float RegenDelay{1.f};
 
     FTimerHandle TimerHandle;

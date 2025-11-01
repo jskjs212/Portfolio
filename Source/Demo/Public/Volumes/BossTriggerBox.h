@@ -7,10 +7,14 @@
 #include "GameplayTagContainer.h"
 #include "BossTriggerBox.generated.h"
 
+enum class EBossEncounterEndReason : uint8;
 class UBossEncounterComponent;
+class UBoxComponent;
+class UStaticMeshComponent;
 
 /**
- *
+ * Trigger box that starts a boss encounter when the player enters.
+ * Blocks entrance during the encounter.
  */
 UCLASS()
 class DEMO_API ABossTriggerBox : public ATriggerBox
@@ -24,14 +28,20 @@ private:
     UPROPERTY(VisibleAnywhere)
     TObjectPtr<UBossEncounterComponent> BossEncounterComponent;
 
+    UPROPERTY(VisibleAnywhere)
+    TObjectPtr<UStaticMeshComponent> EntranceBlockerComponent;
+
     ////////////////////////////////////////////////////////
-    //        Fundamentals
+    //        Functions
     ////////////////////////////////////////////////////////
 public:
     ABossTriggerBox();
 
 protected:
     virtual void BeginPlay() override;
+
+private:
+    void SetEntranceBlocked(bool bBlocked);
 
     ////////////////////////////////////////////////////////
     //        Handlers
@@ -43,6 +53,10 @@ private:
     UFUNCTION()
     void HandleEndOverlap(class AActor* OverlappedActor, class AActor* OtherActor);
 
+    void HandleEncounterStarted(APawn* InInstigator);
+
+    void HandleEncounterEnded(EBossEncounterEndReason Reason);
+
     ////////////////////////////////////////////////////////
     //        Variables
     ////////////////////////////////////////////////////////
@@ -52,4 +66,8 @@ private:
 
     UPROPERTY(EditAnywhere, Category = "Initialization", meta = (Categories = "Sound.Music"))
     FGameplayTag BossMusicTag;
+
+    // Relative location
+    UPROPERTY(EditAnywhere, Category = "Initialization", meta = (MakeEditWidget = "true"))
+    FVector InstigatorTeleportLocation;
 };

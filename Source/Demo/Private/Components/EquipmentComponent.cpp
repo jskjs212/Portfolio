@@ -14,11 +14,6 @@
 #include "PlayerController/DemoPlayerController.h"
 #include "UI/ItemActionDispatcher.h"
 
-UEquipmentComponent::UEquipmentComponent()
-{
-    PrimaryComponentTick.bCanEverTick = false;
-}
-
 void UEquipmentComponent::BeginPlay()
 {
     Super::BeginPlay();

@@ -91,8 +91,6 @@ int32 AItem::DropItem(UWorld* World, const FItemSlot& InSlot, const AActor* Drop
 
 AItem::AItem()
 {
-    PrimaryActorTick.bCanEverTick = false;
-
     StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
     SetRootComponent(StaticMesh);
     StaticMesh->SetVisibility(false);

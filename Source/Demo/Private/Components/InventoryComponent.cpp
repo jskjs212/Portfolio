@@ -12,11 +12,6 @@
 #include "PlayerController/DemoPlayerController.h"
 #include "UI/ItemActionDispatcher.h"
 
-UInventoryComponent::UInventoryComponent()
-{
-    PrimaryComponentTick.bCanEverTick = false;
-}
-
 void UInventoryComponent::BeginPlay()
 {
     Super::BeginPlay();

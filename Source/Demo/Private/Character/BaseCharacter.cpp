@@ -26,7 +26,6 @@
 
 ABaseCharacter::ABaseCharacter()
 {
-    PrimaryActorTick.bCanEverTick = false;
     HitSoundTag = DemoSoundTags::SFX_Combat_Hit_Default;
     MovementSpeedMode = DemoGameplayTags::Movement_SpeedMode_Jog;
 

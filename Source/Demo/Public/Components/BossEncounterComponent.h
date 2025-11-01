@@ -22,14 +22,17 @@ enum class EBossEncounterEndReason : uint8
     PlayerRetreated UMETA(DisplayName = "PlayerRetreated")
 };
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnEncounterStarted, APawn* /* Instigator */);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnEncounterEnded, EBossEncounterEndReason /* Reason */);
+
 /**
- * Handles boss encounter state and logic.
- * This component can be added to an actor that manages boss encounters.
+ * Handles common logics for boss encounters; state management, activate AI, show UI, play music, etc.
+ * This component can be added to an actor that triggers boss encounters.
  * e.g. BossTriggerBox, BossTriggerSwitch, Door, etc.
  *
  * @TODO - Boss defeated -> Player retreated -> Boss destroyed -> EndEncounter may miss some logics.
  * @TODO - Apply DOT effects to boss -> Player retreated -> Boss defeated -> EndEncounter may miss some logics.
- * @WARNING - Player should not be allowed to kill boss outside of encounter.
+ * @WARNING - Boss kill outside of this encounter causes undefined behavior.
  */
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class DEMO_API UBossEncounterComponent : public UActorComponent
@@ -37,11 +40,19 @@ class DEMO_API UBossEncounterComponent : public UActorComponent
     GENERATED_BODY()
 
     ////////////////////////////////////////////////////////
+    //        Delegates
+    ////////////////////////////////////////////////////////
+public:
+    FOnEncounterStarted OnEncounterStarted;
+    FOnEncounterEnded OnEncounterEnded;
+
+    ////////////////////////////////////////////////////////
     //        Functions
     ////////////////////////////////////////////////////////
 public:
-    UBossEncounterComponent();
-
+    // Sets up the boss pawn and music tag for the encounter.
+    // @param InBossMusicTag Don't play music if invalid.
+    // Music is for all bosses regardless of the owner of this component, so it is set here.
     void SetupBossInfo(APawn* InBossPawn, FGameplayTag InBossMusicTag);
 
     void StartEncounter(APawn* Instigator);
@@ -58,7 +69,6 @@ private:
     //        Variables
     ////////////////////////////////////////////////////////
 private:
-    UPROPERTY(VisibleAnywhere, Category = "Boss Encounter")
     EBossEncounterState CurrentState{EBossEncounterState::Dormant};
 
     FGameplayTag BossMusicTag;

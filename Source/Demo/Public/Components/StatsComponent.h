@@ -34,12 +34,6 @@ public:
     FOnStatChanged OnDerivedStatChanged;
 
     ////////////////////////////////////////////////////////
-    //        Fundamentals
-    ////////////////////////////////////////////////////////
-public:
-    UStatsComponent();
-
-    ////////////////////////////////////////////////////////
     //        Stats
     ////////////////////////////////////////////////////////
 public:
@@ -69,7 +63,8 @@ public:
     // Should be called after modifying primary stats!
     void RecalculateDerivedStat(FGameplayTag InPrimaryStatTag);
 
-    void StartRegenChecked(FGameplayTag StatTag);
+    // @param bNoDelay If true, regen starts immediately.
+    void StartRegenChecked(FGameplayTag StatTag, bool bNoDelay = false);
 
     void RegenChecked(FGameplayTag StatTag);
 
