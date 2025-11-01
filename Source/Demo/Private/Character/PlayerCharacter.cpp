@@ -12,20 +12,25 @@
 #include "Components/StatsComponent.h"
 #include "Components/TargetingComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
+#include "DemoTypes/DemoTypes.h"
 #include "DemoTypes/LogCategories.h"
 #include "DemoTypes/TableRowBases.h"
+#include "EnhancedActionKeyMapping.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Input/DemoInputConfig.h"
 #include "InputActionValue.h"
+#include "InputMappingContext.h"
 #include "Interfaces/Interactable.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "PlayerController/DemoPlayerController.h"
+#include "Settings/DemoUserSettings.h"
 
 APlayerCharacter::APlayerCharacter() :
-    SprintStaminaTimerDelegate{FTimerDelegate::CreateUObject(this, &ThisClass::ConsumeSprintStamina)}
+    SprintStaminaTimerDelegate{FTimerDelegate::CreateUObject(this, &ThisClass::ConsumeSprintStamina)},
+    DeathCameraBoomTimelineDelegate{FOnTimelineFloatStatic::CreateUObject(this, &ThisClass::HandleDeathCameraBoomTimelineUpdate)}
 {
     PrimaryActorTick.bCanEverTick = true;
     PrimaryActorTick.bStartWithTickEnabled = false;
@@ -89,6 +94,7 @@ void APlayerCharacter::BeginPlay()
         TimerManager.PauseTimer(SprintStaminaTimerHandle);
     }
 
+    LoadUserSettings();
     BindDeathCameraBoomTimeline();
 }
 
@@ -130,6 +136,37 @@ void APlayerCharacter::HandleWeaponChanged(const FWeaponData* WeaponData)
     else if (TargetingComponent->IsTargetLocked()) // Equipped and target locked
     {
         SetOrientRotationToMovement(false);
+    }
+}
+
+void APlayerCharacter::LoadUserSettings()
+{
+    if (UDemoUserSettings* UserSettings = UDemoUserSettings::GetDemoUserSettings())
+    {
+        bWalkInputToggle = UserSettings->GetWalkInputToggle();
+        bSprintInputToggle = UserSettings->GetSprintInputToggle();
+
+        // Key bindings
+        if (RuntimeDefaultMappingContext)
+        {
+            const auto& InputKeyMappings = UserSettings->GetInputKeyMap();
+            for (const auto& [InputTag, InputChord] : InputKeyMappings)
+            {
+                RebindInputKey(InputTag, InputChord, false);
+            }
+            // Re-apply
+            if (const APlayerController* PlayerController = GetController<APlayerController>())
+            {
+                if (UEnhancedInputLocalPlayerSubsystem* EILPSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+                {
+                    EILPSubsystem->RemoveMappingContext(RuntimeDefaultMappingContext);
+                    EILPSubsystem->AddMappingContext(RuntimeDefaultMappingContext, IMCPriority::PlayerCharacter);
+                }
+            }
+        }
+
+        UserSettings->OnControlsBoolSettingChanged.AddUObject(this, &ThisClass::HandleControlsBoolUserSettingChanged);
+        UserSettings->OnInputKeySettingChanged.AddUObject(this, &ThisClass::HandleInputKeySettingChanged);
     }
 }
 
@@ -229,14 +266,30 @@ void APlayerCharacter::BindDeathCameraBoomTimeline()
         return;
     }
 
-    DeathCameraBoomTimelineDelegate.BindUObject(this, &ThisClass::DeathCameraBoomTimelineUpdate);
     DeathCameraBoomTimeline.AddInterpFloat(DeathCameraBoomCurve, DeathCameraBoomTimelineDelegate);
 }
 
-void APlayerCharacter::DeathCameraBoomTimelineUpdate(float Alpha)
+void APlayerCharacter::HandleDeathCameraBoomTimelineUpdate(float Alpha)
 {
     const float NewCameraBoomLength = FMath::Lerp(DefaultCameraBoomLength, DeathCameraBoomLength, Alpha);
     CameraBoom->TargetArmLength = NewCameraBoomLength;
+}
+
+void APlayerCharacter::HandleControlsBoolUserSettingChanged(FGameplayTag InTag, bool bNewValue)
+{
+    if (InTag == DemoGameplayTags::Setting_Controls_WalkInputToggle)
+    {
+        bWalkInputToggle = bNewValue;
+    }
+    else if (InTag == DemoGameplayTags::Setting_Controls_SprintInputToggle)
+    {
+        bSprintInputToggle = bNewValue;
+    }
+}
+
+void APlayerCharacter::HandleInputKeySettingChanged(FGameplayTag InTag, const FInputChord& NewChord)
+{
+    RebindInputKey(InTag, NewChord, true);
 }
 
 bool APlayerCharacter::CanReceiveDamageFrom(const AActor* Attacker) const
@@ -286,11 +339,12 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
     // Add default mapping context
     if (const APlayerController* PlayerController = GetController<APlayerController>())
     {
-        if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+        if (UEnhancedInputLocalPlayerSubsystem* EILPSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
         {
             if (DefaultMappingContext)
             {
-                Subsystem->AddMappingContext(DefaultMappingContext, 0);
+                RuntimeDefaultMappingContext = DuplicateObject<UInputMappingContext>(DefaultMappingContext, this);
+                EILPSubsystem->AddMappingContext(RuntimeDefaultMappingContext, IMCPriority::PlayerCharacter);
             }
             else
             {
@@ -336,6 +390,67 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
         BindAction(DemoGameplayTags::Input_Test1, ETriggerEvent::Started, &ThisClass::Test1);
         BindAction(DemoGameplayTags::Input_Test2, ETriggerEvent::Started, &ThisClass::Test2);
     }
+}
+
+void APlayerCharacter::RebindInputKey(FGameplayTag InInputTag, const FInputChord& NewChord, bool bReapplyMappings)
+{
+    if (!PawnData || !PawnData->InputConfig || !RuntimeDefaultMappingContext)
+    {
+        DemoLOG_CF(LogCharacter, Error, TEXT("Invalid state."));
+        return;
+    }
+
+    if (!NewChord.Key.IsValid())
+    {
+        DemoLOG_CF(LogCharacter, Error, TEXT("Invalid key for tag %s"), *InInputTag.ToString());
+        return;
+    }
+
+    // Find the input action for the given tag
+    const UInputAction* InputAction = PawnData->InputConfig->FindInputActionForTag(InInputTag);
+    if (!InputAction)
+    {
+        DemoLOG_CF(LogCharacter, Error, TEXT("InputAction not found for tag %s"), *InInputTag.ToString());
+        return;
+    }
+
+    // @WARNING @check - There might be multiple mappings for the same action, and might want to unmap only one of them. Not for now.
+    RuntimeDefaultMappingContext->UnmapAllKeysFromAction(InputAction);
+
+    FEnhancedActionKeyMapping& NewMapping = RuntimeDefaultMappingContext->MapKey(InputAction, NewChord.Key);
+
+    // @TODO - Set modifier keys in NewMapping based on NewChord @TEST
+
+    // Apply changes to subsystem
+    if (bReapplyMappings)
+    {
+        if (const APlayerController* PlayerController = GetController<APlayerController>())
+        {
+            if (UEnhancedInputLocalPlayerSubsystem* EILPSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+            {
+                EILPSubsystem->RemoveMappingContext(RuntimeDefaultMappingContext);
+                EILPSubsystem->AddMappingContext(RuntimeDefaultMappingContext, IMCPriority::PlayerCharacter);
+            }
+        }
+    }
+}
+
+bool APlayerCharacter::IsInputKeyBound(const FInputChord& InChord) const
+{
+    if (!RuntimeDefaultMappingContext)
+    {
+        return false;
+    }
+
+    for (const FEnhancedActionKeyMapping& Mapping : RuntimeDefaultMappingContext->GetMappings())
+    {
+        if (Mapping.Key == InChord.Key)
+        {
+            // @TODO - Check modifier keys @TEST
+            return true;
+        }
+    }
+    return false;
 }
 
 void APlayerCharacter::Look(const FInputActionValue& Value)
@@ -403,7 +518,7 @@ void APlayerCharacter::Landed(const FHitResult& Hit)
 
 void APlayerCharacter::StartWalking()
 {
-    if (bIsWalkInputTogglesWalk)
+    if (bWalkInputToggle)
     {
         if (MovementSpeedMode == DemoGameplayTags::Movement_SpeedMode_Walk)
         {
@@ -422,7 +537,7 @@ void APlayerCharacter::StartWalking()
 
 void APlayerCharacter::StopWalking()
 {
-    if (bIsWalkInputTogglesWalk)
+    if (bWalkInputToggle)
     {
         // Do nothing
     }
@@ -437,7 +552,7 @@ void APlayerCharacter::StopWalking()
 
 void APlayerCharacter::StartSprinting()
 {
-    if (bIsSprintInputTogglesSprint)
+    if (bSprintInputToggle)
     {
         if (MovementSpeedMode == DemoGameplayTags::Movement_SpeedMode_Sprint)
         {
@@ -456,7 +571,7 @@ void APlayerCharacter::StartSprinting()
 
 void APlayerCharacter::StopSprinting()
 {
-    if (bIsSprintInputTogglesSprint)
+    if (bSprintInputToggle)
     {
         // Do nothing
     }

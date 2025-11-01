@@ -37,7 +37,11 @@ PlayerController (플레이어 UI)
 - PlayerMenu: 직접 보관
 
 ### Flow
-PlayerCharacter -> Broadcast -> PlayerController -> HUDWidget-Update() -> SubWidget-Update()
+Change setting:
+- SettingsSectionWidget (Graphics, ...) -> Modify -> DemoUserSettings::Set(Property)Value() (and call ApplySettings() after that or all changes) -> Modify DemoUserSettings's property -> On(Section)(Type)SettingChanged.Broadcast -> Listeners (AudioSubsystem, PlayerCharacter) modify their in-game properties.
+
+UI Update:
+- PlayerCharacter -> Broadcast -> PlayerController -> HUDWidget-Update() -> SubWidget-Update()
 
 ### 클래스 구조
 Term:
@@ -65,20 +69,27 @@ DemoHUDWidget: Resource, Crosshair, Interact, QuickSlot, Minimap, etc.
 Color: #F5F5E7
 
 ## Key bindings
-### Basic
-Mouse: Look\
-WASD: Move\
-Shift: Sprint\
-Ctrl: Walk\
-F: Jump\
-Space: Dodge\
-Tab: PlayerMenu\
-E: Interact\
-Q: Toggle Lock-On
+### PlayerCharacter
+- Mouse: Look
+- WASD: Move
+- Shift: Sprint
+- Ctrl: Walk
+- F: Jump
+- Space: Dodge
+- RMB: Block
+- E: Interact
+- Q: Toggle Lock-On
+- 1: Test1
+- 2: Test2
+
+### PlayerController
+- Tab: PlayerMenu
+- Esc: PlayerMenu::SystemMenu
+- F1: Toggle help text
+- E: Go to MainMenu from YouDied screen
 
 ### UI
-Global - Esc: Close\
-PlayerMenu - Tab: Close\
-PlayerMenu - Q, E: Switch tabs\
-Inventory - 1~3: ItemTabs
-YouDied - E: MainMenu
+- Global - Esc: Close top UI
+- PlayerMenu - Tab: Close
+- PlayerMenu - Q, E: Switch tabs
+- Inventory - 1~3: ItemTabs

@@ -48,6 +48,18 @@ FReply UPlayerMenuWidget::NativeOnPreviewKeyDown(const FGeometry& InGeometry, co
         return FReply::Handled();
     }
 
+    return Super::NativeOnPreviewKeyDown(InGeometry, InKeyEvent);
+}
+
+FReply UPlayerMenuWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
+{
+    // Key(Escape) -> close
+    if (InKeyEvent.GetKey() == EKeys::Escape)
+    {
+        HideMenu();
+        return FReply::Handled();
+    }
+
     // Key(Q) -> left tab
     if (InKeyEvent.GetKey() == EKeys::Q)
     {
@@ -63,18 +75,6 @@ FReply UPlayerMenuWidget::NativeOnPreviewKeyDown(const FGeometry& InGeometry, co
         const int32 CurrentIndex = PageSwitcher->GetActiveWidgetIndex();
         const int32 NewIndex = CurrentIndex == TabEntries.Num() - 1 ? 0 : CurrentIndex + 1;
         SelectTab(NewIndex);
-        return FReply::Handled();
-    }
-
-    return Super::NativeOnPreviewKeyDown(InGeometry, InKeyEvent);
-}
-
-FReply UPlayerMenuWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
-{
-    // Key(Escape) -> close
-    if (InKeyEvent.GetKey() == EKeys::Escape)
-    {
-        HideMenu();
         return FReply::Handled();
     }
 
@@ -124,7 +124,7 @@ bool UPlayerMenuWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDro
 void UPlayerMenuWidget::InitPlayerMenu()
 {
     StatsPageWidget->UpdateAllStats();
-    SettingsPageWidget->SyncUIWithUserSettings();
+    //SettingsPageWidget->SyncUIWithUserSettings();
 }
 
 void UPlayerMenuWidget::HideMenu()

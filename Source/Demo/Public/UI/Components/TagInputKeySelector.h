@@ -3,19 +3,19 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/Button.h"
+#include "Components/InputKeySelector.h"
 #include "DemoTypes/LogCategories.h"
 #include "GameplayTagContainer.h"
-#include "TagButton.generated.h"
+#include "TagInputKeySelector.generated.h"
 
-DECLARE_DELEGATE_OneParam(FOnTagButtonEvent, FGameplayTag /* InTag */);
+DECLARE_DELEGATE_TwoParams(FOnTagInputKeySelectorKeySelected, FGameplayTag /* InTag */, FInputChord /* InSelectedKey */);
+DECLARE_DELEGATE_OneParam(FOnTagInputKeySelectorIsSelectingKeyChanged, FGameplayTag /* InTag */);
 
 /**
- * Button that has a tag.
- * When button events are triggered, the owner of this button can handle them with the tag in a generic way.
+ * Input key selector that has a tag.
  */
 UCLASS()
-class DEMO_API UTagButton : public UButton
+class DEMO_API UTagInputKeySelector : public UInputKeySelector
 {
     GENERATED_BODY()
 
@@ -23,9 +23,8 @@ class DEMO_API UTagButton : public UButton
     //        Delegates
     ////////////////////////////////////////////////////////
 public:
-    FOnTagButtonEvent OnTagButtonClicked;
-    FOnTagButtonEvent OnTagButtonHovered;
-    FOnTagButtonEvent OnTagButtonUnhovered;
+    FOnTagInputKeySelectorKeySelected OnTagInputKeySelectorKeySelected;
+    FOnTagInputKeySelectorIsSelectingKeyChanged OnTagInputKeySelectorIsSelectingKeyChanged;
 
     ////////////////////////////////////////////////////////
     //        UI functions
@@ -35,9 +34,8 @@ protected:
     {
         Super::OnWidgetRebuilt();
         DemoLOG_CF(LogTEST, Display, TEXT("Name: %s"), *GetName());
-        OnClicked.AddDynamic(this, &ThisClass::HandleOnClicked);
-        OnHovered.AddDynamic(this, &ThisClass::HandleOnHovered);
-        OnUnhovered.AddDynamic(this, &ThisClass::HandleOnUnhovered);
+        OnKeySelected.AddDynamic(this, &ThisClass::HandleTagInputKeySelectorKeySelected);
+        OnIsSelectingKeyChanged.AddDynamic(this, &ThisClass::HandleTagInputKeySelectorIsSelectingKeyChanged);
     }
 
 public:
@@ -47,13 +45,16 @@ public:
 
 private:
     UFUNCTION()
-    void HandleOnClicked() { OnTagButtonClicked.ExecuteIfBound(TypeTag); }
+    void HandleTagInputKeySelectorKeySelected(FInputChord InSelectedKey)
+    {
+        OnTagInputKeySelectorKeySelected.ExecuteIfBound(TypeTag, InSelectedKey);
+    }
 
     UFUNCTION()
-    void HandleOnHovered() { OnTagButtonHovered.ExecuteIfBound(TypeTag); }
-
-    UFUNCTION()
-    void HandleOnUnhovered() { OnTagButtonUnhovered.ExecuteIfBound(TypeTag); }
+    void HandleTagInputKeySelectorIsSelectingKeyChanged()
+    {
+        OnTagInputKeySelectorIsSelectingKeyChanged.ExecuteIfBound(TypeTag);
+    }
 
     ////////////////////////////////////////////////////////
     //        Variables

@@ -41,12 +41,14 @@ UE_DEFINE_GAMEPLAY_TAG(Movement_SpeedMode_Walk, "Movement.SpeedMode.Walk");
 UE_DEFINE_GAMEPLAY_TAG(Movement_SpeedMode_Jog, "Movement.SpeedMode.Jog");
 UE_DEFINE_GAMEPLAY_TAG(Movement_SpeedMode_Sprint, "Movement.SpeedMode.Sprint");
 
-// Settings.*
-UE_DEFINE_GAMEPLAY_TAG(Settings_Graphics, "Settings.Graphics");
-UE_DEFINE_GAMEPLAY_TAG(Settings_Audio, "Settings.Audio");
-UE_DEFINE_GAMEPLAY_TAG(Settings_Audio_MuteWhenUnfocused, "Settings.Audio.MuteWhenUnfocused");
-UE_DEFINE_GAMEPLAY_TAG(Settings_Controls, "Settings.Controls");
-UE_DEFINE_GAMEPLAY_TAG(Settings_System, "Settings.System");
+// Setting.*
+UE_DEFINE_GAMEPLAY_TAG(Setting_Graphics, "Setting.Graphics");
+UE_DEFINE_GAMEPLAY_TAG(Setting_Audio, "Setting.Audio");
+UE_DEFINE_GAMEPLAY_TAG(Setting_Audio_MuteWhenUnfocused, "Setting.Audio.MuteWhenUnfocused");
+UE_DEFINE_GAMEPLAY_TAG(Setting_Controls, "Setting.Controls");
+UE_DEFINE_GAMEPLAY_TAG(Setting_Controls_WalkInputToggle, "Setting.Controls.WalkInputToggle");
+UE_DEFINE_GAMEPLAY_TAG(Setting_Controls_SprintInputToggle, "Setting.Controls.SprintInputToggle");
+UE_DEFINE_GAMEPLAY_TAG(Setting_System, "Setting.System");
 
 // Stat.*
 UE_DEFINE_GAMEPLAY_TAG(Stat_Resource_Health, "Stat.Resource.Health");

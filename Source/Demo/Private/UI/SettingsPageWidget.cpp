@@ -2,33 +2,33 @@
 
 #include "UI/SettingsPageWidget.h"
 #include "DemoTypes/DemoGameplayTags.h"
-#include "DemoTypes/LogCategories.h"
-#include "Settings/DemoUserSettings.h"
 #include "UI/Settings/SettingsSectionWidget.h"
 
 void USettingsPageWidget::NativeOnInitialized()
 {
     Super::NativeOnInitialized();
 
-    checkf(GraphicsTabButton && GraphicsPageWidget
-        && AudioTabButton && AudioPageWidget,
+    checkf(GraphicsTabButton && GraphicsSectionWidget
+        && AudioTabButton && AudioSectionWidget
+        && ControlsTabButton && ControlsSectionWidget,
         TEXT("Failed to bind widgets."));
 
     bUseTabButtonImages = false;
 
     // Setup tab entries
-    TabEntries.Emplace(DemoGameplayTags::Settings_Graphics, GraphicsTabButton, nullptr, GraphicsPageWidget);
-    TabEntries.Emplace(DemoGameplayTags::Settings_Audio, AudioTabButton, nullptr, AudioPageWidget);
+    TabEntries.Emplace(DemoGameplayTags::Setting_Graphics, GraphicsTabButton, nullptr, GraphicsSectionWidget);
+    TabEntries.Emplace(DemoGameplayTags::Setting_Audio, AudioTabButton, nullptr, AudioSectionWidget);
+    TabEntries.Emplace(DemoGameplayTags::Setting_Controls, ControlsTabButton, nullptr, ControlsSectionWidget);
     InitTabMenu();
 }
 
-void USettingsPageWidget::SyncUIWithUserSettings()
-{
-    for (FTabEntry& TabEntry : TabEntries)
-    {
-        if (USettingsSectionWidget* SettingsSectionWidget = Cast<USettingsSectionWidget>(TabEntry.Widget))
-        {
-            SettingsSectionWidget->SyncUIWithUserSettings();
-        }
-    }
-}
+//void USettingsPageWidget::SyncUIWithUserSettings()
+//{
+//    for (FTabEntry& TabEntry : TabEntries)
+//    {
+//        if (USettingsPageWidget* SettingsSectionWidget = Cast<USettingsPageWidget>(TabEntry.Widget))
+//        {
+//            SettingsSectionWidget->SyncUIWithUserSettings();
+//        }
+//    }
+//}

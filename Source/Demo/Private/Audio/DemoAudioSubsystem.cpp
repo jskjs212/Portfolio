@@ -41,8 +41,8 @@ void UDemoAudioSubsystem::Deinitialize()
     }
     if (UDemoUserSettings* UserSettings = UDemoUserSettings::GetDemoUserSettings())
     {
-        UserSettings->OnBoolSettingChanged.RemoveAll(this);
-        UserSettings->OnFloatSettingChanged.RemoveAll(this);
+        UserSettings->OnAudioBoolSettingChanged.RemoveAll(this);
+        UserSettings->OnAudioFloatSettingChanged.RemoveAll(this);
     }
 
     ClearAudioComponent();
@@ -261,8 +261,10 @@ void UDemoAudioSubsystem::LoadUserAudioSettings()
             {
                 if (CategoryData.SoundClass)
                 {
-                    const float CategoryVolume = UserSettings->GetVolumeSetting(CategoryData.Category);
-                    UGameplayStatics::SetSoundMixClassOverride(World, GlobalSoundMix, CategoryData.SoundClass, CategoryVolume, 1.f, 0.f);
+                    const float* CategoryVolume = UserSettings->GetVolumeSetting(CategoryData.Category);
+                    check(CategoryVolume);
+
+                    UGameplayStatics::SetSoundMixClassOverride(World, GlobalSoundMix, CategoryData.SoundClass, *CategoryVolume, 1.f, 0.f);
                 }
             }
         }
@@ -279,8 +281,8 @@ void UDemoAudioSubsystem::LoadUserAudioSettings()
         if (!bHasBoundToUserSettings)
         {
             bHasBoundToUserSettings = true;
-            UserSettings->OnBoolSettingChanged.AddUObject(this, &ThisClass::HandleBoolUserSettingChanged);
-            UserSettings->OnFloatSettingChanged.AddUObject(this, &ThisClass::HandleFloatUserSettingChanged);
+            UserSettings->OnAudioBoolSettingChanged.AddUObject(this, &ThisClass::HandleAudioBoolUserSettingChanged);
+            UserSettings->OnAudioFloatSettingChanged.AddUObject(this, &ThisClass::HandleAudioFloatUserSettingChanged);
         }
     }
 }
@@ -317,16 +319,16 @@ void UDemoAudioSubsystem::HandlePostLoadMapWithWorld(UWorld* LoadedWorld)
     }
 }
 
-void UDemoAudioSubsystem::HandleBoolUserSettingChanged(FGameplayTag InTag, bool NewValue)
+void UDemoAudioSubsystem::HandleAudioBoolUserSettingChanged(FGameplayTag InTag, bool bNewValue)
 {
     // Mute when unfocused
-    if (InTag == DemoGameplayTags::Settings_Audio_MuteWhenUnfocused)
+    if (InTag == DemoGameplayTags::Setting_Audio_MuteWhenUnfocused)
     {
-        FApp::SetUnfocusedVolumeMultiplier(NewValue ? 0.f : 1.f);
+        FApp::SetUnfocusedVolumeMultiplier(bNewValue ? 0.f : 1.f);
     }
 }
 
-void UDemoAudioSubsystem::HandleFloatUserSettingChanged(FGameplayTag InTag, float NewValue)
+void UDemoAudioSubsystem::HandleAudioFloatUserSettingChanged(FGameplayTag InTag, float NewValue)
 {
     // Update SoundClass volume
     if (UWorld* World = GetWorld())

@@ -14,7 +14,10 @@ ABossTriggerBox::ABossTriggerBox()
     SetHidden(false);
     GetCollisionComponent()->SetHiddenInGame(true);
 #if WITH_EDITORONLY_DATA
-    GetSpriteComponent()->SetHiddenInGame(true);
+    if (GetSpriteComponent())
+    {
+        GetSpriteComponent()->SetHiddenInGame(true);
+    }
 #endif // WITH_EDITORONLY_DATA
 
     BossEncounterComponent = CreateDefaultSubobject<UBossEncounterComponent>(TEXT("BossEncounterComponent"));

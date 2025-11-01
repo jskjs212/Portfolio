@@ -110,6 +110,7 @@ public:
         PlayMusic(WorldContextObject, DefaultMusicTag, VolumeMultiplier, PitchMultiplier);
     }
 
+    // Load user settings and bind to changes.
     void LoadUserAudioSettings();
 
 private:
@@ -125,9 +126,9 @@ private:
 
     void HandlePostLoadMapWithWorld(UWorld* LoadedWorld);
 
-    void HandleBoolUserSettingChanged(FGameplayTag InTag, bool NewValue);
+    void HandleAudioBoolUserSettingChanged(FGameplayTag InTag, bool bNewValue);
 
-    void HandleFloatUserSettingChanged(FGameplayTag InTag, float NewValue);
+    void HandleAudioFloatUserSettingChanged(FGameplayTag InTag, float NewValue);
 
     ////////////////////////////////////////////////////////
     //        Get & set
