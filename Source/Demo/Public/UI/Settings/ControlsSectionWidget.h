@@ -5,19 +5,17 @@
 #include "CoreMinimal.h"
 #include "UI/Settings/SettingsSectionWidget.h"
 #include "Framework/Commands/InputChord.h"
-#include "GameplayTagContainer.h"
 #include "ControlsSectionWidget.generated.h"
 
 class UCheckBox;
-class UTagInputKeySelector;
+class UEnhancedInputUserSettings;
+class UDemoInputKeySelector;
 
 struct FInputKeySelectorData
 {
-    FGameplayTag InputTag;
-
     FInputChord CurrentChord;
 
-    TObjectPtr<UTagInputKeySelector> Selector;
+    TObjectPtr<UDemoInputKeySelector> Selector;
 };
 
 /**
@@ -37,14 +35,22 @@ protected:
     // Sync UI elements with UserSettings values
     virtual void SyncUIWithUserSettings() override;
 
+    void SyncUIWithEnhancedInputUserSettings();
+
 private:
+    // Register all IMCs from project settings with EIUserSettings to enable key binding configuration. (Don't activate)
+    void RegisterAllInputMappingContexts();
+
     UFUNCTION()
     void HandleWalkInputToggleCheckStateChanged(bool bIsChecked);
 
     UFUNCTION()
     void HandleSprintInputToggleCheckStateChanged(bool bIsChecked);
 
-    void HandleTagInputKeySelectorKeySelected(FGameplayTag InTag, FInputChord InSelectedKey);
+    // If there is no conflict, bind the new key to the InputAction using EIUserSettings::MapPlayerKey.
+    // @TODO - modifiers
+    // @TODO - Handle with the keys that are used for multiple actions. Once changed, can't use the same key anymore.
+    void HandleDemoInputKeySelectorKeySelected(FInputChord InSelectedKey, FName InMappingName);
 
     ////////////////////////////////////////////////////////
     //        Widgets
@@ -61,10 +67,16 @@ private:
      * Key bindings
      */
     UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTagInputKeySelector> JumpKeySelector;
+    TObjectPtr<UDemoInputKeySelector> WalkKeySelector;
 
     UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTagInputKeySelector> DodgeKeySelector;
+    TObjectPtr<UDemoInputKeySelector> SprintKeySelector;
+
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UDemoInputKeySelector> JumpKeySelector;
+
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UDemoInputKeySelector> DodgeKeySelector;
 
     ////////////////////////////////////////////////////////
     //        Variables
@@ -74,5 +86,6 @@ private:
 
     static const TArray<FKey> InputSelectorEscapeKeys;
 
-    TArray<FInputKeySelectorData> InputKeySelectors;
+    // {MappingName, {CurrentChord, Selector}}
+    TMap<FName, FInputKeySelectorData> InputKeySelectorMap;
 };

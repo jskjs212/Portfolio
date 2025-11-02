@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Components/Button.h"
-#include "DemoTypes/LogCategories.h"
 #include "GameplayTagContainer.h"
 #include "TagButton.generated.h"
 
@@ -34,7 +33,7 @@ protected:
     virtual void OnWidgetRebuilt() override
     {
         Super::OnWidgetRebuilt();
-        DemoLOG_CF(LogTEST, Display, TEXT("Name: %s"), *GetName());
+
         OnClicked.AddDynamic(this, &ThisClass::HandleOnClicked);
         OnHovered.AddDynamic(this, &ThisClass::HandleOnHovered);
         OnUnhovered.AddDynamic(this, &ThisClass::HandleOnUnhovered);

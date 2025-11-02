@@ -4,13 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameUserSettings.h"
-#include "Framework/Commands/InputChord.h"
 #include "GameplayTagContainer.h"
 #include "DemoUserSettings.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnBoolSettingChanged, FGameplayTag /* InTag */, bool /* bNewValue */);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnFloatSettingChanged, FGameplayTag /* InTag */, float /* NewValue */);
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnInputKeySettingChanged, FGameplayTag /* InTag */, const FInputChord& /* NewChord */);
 
 /**
  * GameUserSettings subclass for Demo project.
@@ -39,7 +37,6 @@ public:
     FOnBoolSettingChanged OnAudioBoolSettingChanged;
     FOnFloatSettingChanged OnAudioFloatSettingChanged;
     FOnBoolSettingChanged OnControlsBoolSettingChanged;
-    FOnInputKeySettingChanged OnInputKeySettingChanged;
 
     ////////////////////////////////////////////////////////
     //        Functions
@@ -74,13 +71,6 @@ public:
 
     void SetSprintInputToggle(bool bInSprintInputToggle);
 
-    const TMap<FGameplayTag, FInputChord>& GetInputKeyMap() const { return InputKeySettings; }
-
-    // @return nullptr if not found
-    const FInputChord* GetInputKey(FGameplayTag InTag) const { return InputKeySettings.Find(InTag); }
-
-    void SetInputKey(FGameplayTag InTag, const FInputChord& InChord);
-
     ////////////////////////////////////////////////////////
     //        Variables - Audio
     ////////////////////////////////////////////////////////
@@ -106,9 +96,4 @@ private:
     // true = toggle, false = hold
     UPROPERTY(Config)
     bool bSprintInputToggle;
-
-    /* Key bindings */
-    // {InputTag, InputChord}
-    UPROPERTY(Config)
-    TMap<FGameplayTag, FInputChord> InputKeySettings;
 };

@@ -11,7 +11,7 @@
  * e.g. Graphics, Audio, etc.
  *
  * Apply settings when UI elements change for now.
- * @TODO - ApplySettings(), ResetToDefaults(), CancelChanges(), MarkDirty(), etc.
+ * @TODO - ApplySettings(), ResetToDefaults(), CancelChanges(), NotifySettingChanged(), etc.
  */
 UCLASS()
 class DEMO_API USettingsSectionWidget : public UUserWidget

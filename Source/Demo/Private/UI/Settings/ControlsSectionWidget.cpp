@@ -1,15 +1,20 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UI/Settings/ControlsSectionWidget.h"
-#include "Character/PlayerCharacter.h"
 #include "Components/CheckBox.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "DemoTypes/LogCategories.h"
+#include "GameplayTagContainer.h"
+#include "Input/DemoInputMappingCollection.h"
+#include "Input/DemoInputUserSettings.h"
+#include "InputMappingContext.h"
+#include "Settings/DemoProjectSettings.h"
 #include "Settings/DemoUserSettings.h"
-#include "UI/Components/TagInputKeySelector.h"
+#include "UI/Components/DemoInputKeySelector.h"
+#include "UserSettings/EnhancedInputUserSettings.h"
 
 // Static variable initialization - @hardcoded
-const FText UControlsSectionWidget::NoKeySpecifiedText{FText::FromString(TEXT("-"))};
+const FText UControlsSectionWidget::NoKeySpecifiedText{FText::FromString(TEXT("None"))};
 const TArray<FKey> UControlsSectionWidget::InputSelectorEscapeKeys{
     EKeys::Gamepad_Special_Right,
     EKeys::Escape,
@@ -21,33 +26,36 @@ void UControlsSectionWidget::NativeOnInitialized()
     Super::NativeOnInitialized();
 
     checkf(WalkInputToggleCheckBox && SprintInputToggleCheckBox
-        && JumpKeySelector && DodgeKeySelector,
+        && WalkKeySelector && SprintKeySelector && JumpKeySelector && DodgeKeySelector,
         TEXT("Failed to bind widgets."));
 
     // Initialize entries
-    InputKeySelectors = {
-        {DemoGameplayTags::Input_Jump, FInputChord{}, JumpKeySelector},
-        {DemoGameplayTags::Input_Dodge, FInputChord{}, DodgeKeySelector}
+    InputKeySelectorMap = {
+        {DemoGameplayTags::Input_Walk.GetTag().GetTagName(),   {FInputChord{}, WalkKeySelector}},
+        {DemoGameplayTags::Input_Sprint.GetTag().GetTagName(), {FInputChord{}, SprintKeySelector}},
+        {DemoGameplayTags::Input_Jump.GetTag().GetTagName(),   {FInputChord{}, JumpKeySelector}},
+        {DemoGameplayTags::Input_Dodge.GetTag().GetTagName(),  {FInputChord{}, DodgeKeySelector}}
     };
 
-    // Configure widgets
-    for (FInputKeySelectorData& Data : InputKeySelectors)
+    // Configure widgets and set MappingNames
+    for (auto& [MappingName, Data] : InputKeySelectorMap)
     {
         Data.Selector->SetEscapeKeys(InputSelectorEscapeKeys);
         Data.Selector->SetNoKeySpecifiedText(NoKeySpecifiedText);
-        Data.Selector->SetAllowModifierKeys(false); // @TODO @TEST - temporary
-        Data.Selector->SetTypeTag(Data.InputTag);
+        Data.Selector->SetAllowModifierKeys(false); // @TODO - modifiers
     }
 
     SyncUIWithUserSettings();
+    RegisterAllInputMappingContexts();
+    SyncUIWithEnhancedInputUserSettings();
 
     // Bind events
     WalkInputToggleCheckBox->OnCheckStateChanged.AddDynamic(this, &ThisClass::HandleWalkInputToggleCheckStateChanged);
     SprintInputToggleCheckBox->OnCheckStateChanged.AddDynamic(this, &ThisClass::HandleSprintInputToggleCheckStateChanged);
 
-    for (FInputKeySelectorData& Data : InputKeySelectors)
+    for (auto& [MappingName, Data] : InputKeySelectorMap)
     {
-        Data.Selector->OnTagInputKeySelectorKeySelected.BindUObject(this, &ThisClass::HandleTagInputKeySelectorKeySelected);
+        Data.Selector->OnDemoKeySelected.BindUObject(this, &ThisClass::HandleDemoInputKeySelectorKeySelected, MappingName);
     }
 }
 
@@ -58,24 +66,61 @@ void UControlsSectionWidget::SyncUIWithUserSettings()
         // Basics
         WalkInputToggleCheckBox->SetIsChecked(UserSettings->GetWalkInputToggle());
         SprintInputToggleCheckBox->SetIsChecked(UserSettings->GetSprintInputToggle());
+    }
+}
 
-        // Key bindings
-        if (APlayerController* PlayerController = GetOwningPlayer())
+void UControlsSectionWidget::SyncUIWithEnhancedInputUserSettings()
+{
+    const UEnhancedInputUserSettings* EIUserSettings = UDemoInputUserSettings::GetUserSettingsForLocalPlayer(GetOwningLocalPlayer());
+    if (!EIUserSettings)
+    {
+        return;
+    }
+
+    // Assume only the first slot was used for MapPlayerKey().
+    constexpr EPlayerMappableKeySlot FirstSlot = EPlayerMappableKeySlot::First;
+    for (auto& [MappingName, Data] : InputKeySelectorMap)
+    {
+        // Find the current mapping from active profile
+        const FPlayerKeyMapping* PlayerKeyMapping = EIUserSettings->FindCurrentMappingForSlot(MappingName, FirstSlot);
+        if (PlayerKeyMapping)
         {
-            APlayerCharacter* PlayerCharacter = PlayerController->GetPawn<APlayerCharacter>();
-            for (FInputKeySelectorData& Data : InputKeySelectors)
-            {
-                const FInputChord* SelectedKey = UserSettings->GetInputKey(Data.InputTag);
-                if (SelectedKey)
-                {
-                    Data.Selector->SetSelectedKey(*SelectedKey);
-                }
-                // @TODO @TEST - MainMenu
-                if (!PlayerCharacter)
-                {
-                    Data.Selector->SetIsEnabled(false);
-                }
-            }
+            // Update UI
+            // @TODO - Modifiers
+            Data.CurrentChord.Key = PlayerKeyMapping->GetCurrentKey();
+            Data.Selector->SetSelectedKey(Data.CurrentChord);
+        }
+    }
+}
+
+void UControlsSectionWidget::RegisterAllInputMappingContexts()
+{
+    UEnhancedInputUserSettings* EIUserSettings = UDemoInputUserSettings::GetUserSettingsForLocalPlayer(GetOwningLocalPlayer());
+    if (!EIUserSettings)
+    {
+        return;
+    }
+
+    const UDemoInputMappingCollection* InputMappingCollection = GetDefault<UDemoProjectSettings>()->InputMappingCollection.LoadSynchronous();
+    if (!InputMappingCollection)
+    {
+        DemoLOG_CF(LogInput, Error, TEXT("InputMappingCollection is not set in DemoProjectSettings."));
+        return;
+    }
+
+    // Register all IMCs in the collection with the EIUserSettings
+    for (const auto& [ContextTag, InputMappingData] : InputMappingCollection->InputMappingDataMap)
+    {
+        // Skip if not required
+        if (!InputMappingData.bRegisterWithSettings)
+        {
+            continue;
+        }
+
+        const UInputMappingContext* InputMappingContext = InputMappingData.InputMappingContext.LoadSynchronous();
+        if (InputMappingContext)
+        {
+            EIUserSettings->RegisterInputMappingContext(InputMappingContext);
         }
     }
 }
@@ -98,53 +143,77 @@ void UControlsSectionWidget::HandleSprintInputToggleCheckStateChanged(bool bIsCh
     }
 }
 
-void UControlsSectionWidget::HandleTagInputKeySelectorKeySelected(FGameplayTag InTag, FInputChord InSelectedKey)
+void UControlsSectionWidget::HandleDemoInputKeySelectorKeySelected(FInputChord InSelectedKey, FName InMappingName)
 {
-    UDemoUserSettings* UserSettings = UDemoUserSettings::GetDemoUserSettings();
-    if (!UserSettings)
+    FInputKeySelectorData& SelectorData = InputKeySelectorMap[InMappingName];
+    if (InSelectedKey == SelectorData.CurrentChord)
+    {
+        // No change
+        return;
+    }
+
+    UEnhancedInputUserSettings* EIUserSettings = UDemoInputUserSettings::GetUserSettingsForLocalPlayer(GetOwningLocalPlayer());
+    if (!EIUserSettings)
     {
         return;
     }
 
-
-    APlayerController* PlayerController = GetOwningPlayer();
-    if (!PlayerController)
+    UEnhancedPlayerMappableKeyProfile* ActiveKeyProfile = EIUserSettings->GetActiveKeyProfile();
+    if (!ActiveKeyProfile)
     {
         return;
     }
 
-    // @TODO @TEST - In main menu, there's no PlayerCharacter.
-    // -> Need to figure out a better way to check key conflicts.
+    // Check for conflicts
+    TArray<FName> ConflictingMappings;
+    ActiveKeyProfile->GetMappingNamesForKey(InSelectedKey.Key, ConflictingMappings);
 
-    // @TODO - To check if the key is already bound, directly accessing to the PlayerCharacter. How can I decouple this?
-    // DemoUserSettings::SetKey -> delegate -> PlayerCharacter::rebind can't echo the key conflict to the Settings UI.
-    APlayerCharacter* PlayerCharacter = PlayerController->GetPawn<APlayerCharacter>();
-    if (!PlayerCharacter)
+    // No conflicts, or None (unbound)
+    if (ConflictingMappings.IsEmpty() || InSelectedKey.Key == EKeys::Invalid)
     {
-        return;
-    }
+        FMapPlayerKeyArgs Args;
+        Args.MappingName = InMappingName;
+        Args.NewKey = InSelectedKey.Key;
+        Args.Slot = EPlayerMappableKeySlot::First; // Only one slot for now
 
-    // @TODO @TEST
-    bool bIsAlreadyBound = PlayerCharacter->IsInputKeyBound(InSelectedKey);
-    if (bIsAlreadyBound)
-    {
-        // Revert the selection to previous key
-        const FInputChord* PreviousKey = UserSettings->GetInputKey(InTag);
-        if (PreviousKey)
+        FGameplayTagContainer FailureReason;
+        EIUserSettings->MapPlayerKey(Args, FailureReason);
+
+        if (FailureReason.IsEmpty())
         {
-            for (FInputKeySelectorData& Data : InputKeySelectors)
-            {
-                if (Data.InputTag == InTag)
-                {
-                    Data.Selector->SetSelectedKey(*PreviousKey);
-                    break;
-                }
-            }
+            // Successfully bound -> return
+            DemoLOG_CF(LogInput, Verbose, TEXT("Successfully bound. Key: %s, Action: %s"),
+                *InSelectedKey.Key.ToString(),
+                *InMappingName.ToString()
+            );
+            SelectorData.CurrentChord = InSelectedKey;
+            EIUserSettings->AsyncSaveSettings();
+            return;
+        }
+        else
+        {
+            // Failed to bind -> revert
+            DemoLOG_CF(LogInput, Warning, TEXT("Failed to bind key: %s, Action: %s, Reason: %s"),
+                *InSelectedKey.Key.ToString(),
+                *InMappingName.ToString(),
+                *FailureReason.ToStringSimple()
+            );
         }
     }
-    else // Not bound
+    else
     {
-        UserSettings->SetInputKey(InTag, InSelectedKey);
-        UserSettings->ApplySettings(false);
+        // Already bound -> revert
+        for (const FName& MappingName : ConflictingMappings)
+        {
+            // @TODO - Show warning message with conflicting action names.
+            DemoLOG_CF(LogInput, Error, TEXT("Already bound. Key: %s. Bound action: %s"),
+                *InSelectedKey.Key.ToString(),
+                *MappingName.ToString()
+            );
+        }
     }
+
+    // Failed to bind. Revert the selection to previous key.
+    // @WARNING - This fires the OnKeySelected again, unless you create a custom selector widget.
+    SelectorData.Selector->SetSelectedKey(SelectorData.CurrentChord);
 }

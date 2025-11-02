@@ -118,10 +118,10 @@ public:
     ////////////////////////////////////////////////////////
 private:
     UPROPERTY(EditAnywhere, Category = "Initialization|Input")
-    TObjectPtr<UInputMappingContext> DefaultMappingContext;
+    FGameplayTag DefaultInputMappingContextTag;
 
     UPROPERTY(EditAnywhere, Category = "Initialization|Input")
-    TObjectPtr<UInputMappingContext> AfterDeathMappingContext;
+    FGameplayTag AfterDeathInputMappingContextTag;
 
     UPROPERTY(EditAnywhere, Category = "Initialization|Input")
     TObjectPtr<UDemoInputConfig> PlayerControllerInputConfig;

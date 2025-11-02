@@ -14,6 +14,8 @@ class USoundMix;
 /**
  * Sound with the category itself as the key will be played as the sample sound at the settings.
  * e.g. {Sound.SFX, SFXSample} (not for Music)
+ * 
+ * @TODO - Configure each map in a new DataAsset class for convenience? or Plugin that helps editing maps?
  */
 UCLASS()
 class DEMO_API USoundCollection : public UDataAsset

@@ -9,7 +9,6 @@
 void UStatsComponent::InitStatsComponent()
 {
     static const FGameplayTagContainer MustHaveStatType = FGameplayTagContainer::CreateFromArray(TArray<FGameplayTag>{
-        //STRTag, DEXTag, INTTag, AttackTag, DefenseTag
         DemoGameplayTags::Stat_Primary_STR,
             DemoGameplayTags::Stat_Primary_DEX,
             DemoGameplayTags::Stat_Primary_INT,

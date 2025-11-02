@@ -8,7 +8,9 @@
 #include "DemoTypes/StatsTypes.h"
 #include "Engine/DataTable.h"
 #include "GameplayTagContainer.h"
+#if WITH_EDITOR
 #include "Misc/DataValidation.h"
+#endif // WITH_EDITOR
 #include "TableRowBases.generated.h"
 
 class USkeletalMesh;

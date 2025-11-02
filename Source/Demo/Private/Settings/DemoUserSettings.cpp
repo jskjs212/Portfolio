@@ -4,7 +4,6 @@
 #include "Audio/DemoSoundTags.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "DemoTypes/LogCategories.h"
-#include "Settings/DemoProjectSettings.h"
 
 void UDemoUserSettings::SetToDefaults()
 {
@@ -23,10 +22,6 @@ void UDemoUserSettings::SetToDefaults()
     /* Controls */
     bWalkInputToggle = true;
     bSprintInputToggle = false;
-    InputKeySettings = {
-        {DemoGameplayTags::Input_Jump,  FInputChord{EKeys::F}},
-        {DemoGameplayTags::Input_Dodge, FInputChord{EKeys::SpaceBar}}
-    };
 }
 
 void UDemoUserSettings::SetVolumeSetting(FGameplayTag InCategory, float InVolume)
@@ -67,22 +62,5 @@ void UDemoUserSettings::SetSprintInputToggle(bool bInSprintInputToggle)
     {
         bSprintInputToggle = bInSprintInputToggle;
         OnControlsBoolSettingChanged.Broadcast(DemoGameplayTags::Setting_Controls_SprintInputToggle, bSprintInputToggle);
-    }
-}
-
-void UDemoUserSettings::SetInputKey(FGameplayTag InTag, const FInputChord& InChord)
-{
-    if (FInputChord* ExistingChord = InputKeySettings.Find(InTag))
-    {
-        if (*ExistingChord != InChord)
-        {
-            *ExistingChord = InChord;
-            OnInputKeySettingChanged.Broadcast(InTag, InChord);
-        }
-    }
-    else // New element
-    {
-        InputKeySettings.Emplace(InTag, InChord);
-        OnInputKeySettingChanged.Broadcast(InTag, InChord);
     }
 }

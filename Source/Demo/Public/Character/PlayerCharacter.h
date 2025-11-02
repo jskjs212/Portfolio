@@ -11,8 +11,6 @@
 #include "PlayerCharacter.generated.h"
 
 struct FInputActionValue;
-struct FInputChord;
-struct FWeaponData;
 class IInteractable;
 class UCameraComponent;
 class UCurveFloat;
@@ -104,8 +102,6 @@ private:
 
     void HandleControlsBoolUserSettingChanged(FGameplayTag InTag, bool bNewValue);
 
-    void HandleInputKeySettingChanged(FGameplayTag InTag, const FInputChord& NewChord);
-
     ////////////////////////////////////////////////////////
     //        Combat interface
     ////////////////////////////////////////////////////////
@@ -125,11 +121,6 @@ public:
     ////////////////////////////////////////////////////////
 public:
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-    // @param bReapplyMappings If false, only update runtime mapping context (For LoadUserSettings())
-    void RebindInputKey(FGameplayTag InInputTag, const FInputChord& NewChord, bool bReapplyMappings);
-
-    bool IsInputKeyBound(const FInputChord& InChord) const;
 
 protected:
     void Look(const FInputActionValue& Value);
@@ -177,11 +168,9 @@ public:
     //        Input variables
     ////////////////////////////////////////////////////////
 private:
+    // Tag to find default IMC from project settings.
     UPROPERTY(EditAnywhere, Category = "Initialization|Input")
-    TObjectPtr<const UInputMappingContext> DefaultMappingContext;
-
-    UPROPERTY(VisibleAnywhere, Category = "Input")
-    TObjectPtr<UInputMappingContext> RuntimeDefaultMappingContext;
+    FGameplayTag DefaultInputMappingContextTag;
 
     ////////////////////////////////////////////////////////
     //        Variables

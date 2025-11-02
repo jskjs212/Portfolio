@@ -12,17 +12,16 @@
 #include "Components/StatsComponent.h"
 #include "Components/TargetingComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
-#include "DemoTypes/DemoTypes.h"
 #include "DemoTypes/LogCategories.h"
 #include "DemoTypes/TableRowBases.h"
-#include "EnhancedActionKeyMapping.h"
+#include "Engine/LocalPlayer.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Input/DemoInputConfig.h"
+#include "Input/DemoInputHelper.h"
 #include "InputActionValue.h"
-#include "InputMappingContext.h"
 #include "Interfaces/Interactable.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "PlayerController/DemoPlayerController.h"
@@ -75,6 +74,11 @@ APlayerCharacter::APlayerCharacter() :
 void APlayerCharacter::BeginPlay()
 {
     Super::BeginPlay();
+
+    if (!DefaultInputMappingContextTag.IsValid())
+    {
+        DemoLOG_CF(LogCharacter, Error, TEXT("DefaultInputMappingContextTag is not valid."));
+    }
 
     TargetingComponent->OnTargetUpdated.AddUObject(this, &ThisClass::HandleTargetUpdated);
 
@@ -146,27 +150,7 @@ void APlayerCharacter::LoadUserSettings()
         bWalkInputToggle = UserSettings->GetWalkInputToggle();
         bSprintInputToggle = UserSettings->GetSprintInputToggle();
 
-        // Key bindings
-        if (RuntimeDefaultMappingContext)
-        {
-            const auto& InputKeyMappings = UserSettings->GetInputKeyMap();
-            for (const auto& [InputTag, InputChord] : InputKeyMappings)
-            {
-                RebindInputKey(InputTag, InputChord, false);
-            }
-            // Re-apply
-            if (const APlayerController* PlayerController = GetController<APlayerController>())
-            {
-                if (UEnhancedInputLocalPlayerSubsystem* EILPSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-                {
-                    EILPSubsystem->RemoveMappingContext(RuntimeDefaultMappingContext);
-                    EILPSubsystem->AddMappingContext(RuntimeDefaultMappingContext, IMCPriority::PlayerCharacter);
-                }
-            }
-        }
-
         UserSettings->OnControlsBoolSettingChanged.AddUObject(this, &ThisClass::HandleControlsBoolUserSettingChanged);
-        UserSettings->OnInputKeySettingChanged.AddUObject(this, &ThisClass::HandleInputKeySettingChanged);
     }
 }
 
@@ -287,11 +271,6 @@ void APlayerCharacter::HandleControlsBoolUserSettingChanged(FGameplayTag InTag, 
     }
 }
 
-void APlayerCharacter::HandleInputKeySettingChanged(FGameplayTag InTag, const FInputChord& NewChord)
-{
-    RebindInputKey(InTag, NewChord, true);
-}
-
 bool APlayerCharacter::CanReceiveDamageFrom(const AActor* Attacker) const
 {
     if (!Super::CanReceiveDamageFrom(Attacker))
@@ -336,19 +315,19 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
         return;
     }
 
-    // Add default mapping context
+    // Add default IMC to subsystem
     if (const APlayerController* PlayerController = GetController<APlayerController>())
     {
-        if (UEnhancedInputLocalPlayerSubsystem* EILPSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+        if (UEnhancedInputLocalPlayerSubsystem* EISubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
         {
+            const auto [DefaultMappingContext, Priority] = DemoInputHelper::FindInputMappingContext(DefaultInputMappingContextTag);
             if (DefaultMappingContext)
             {
-                RuntimeDefaultMappingContext = DuplicateObject<UInputMappingContext>(DefaultMappingContext, this);
-                EILPSubsystem->AddMappingContext(RuntimeDefaultMappingContext, IMCPriority::PlayerCharacter);
+                EISubsystem->AddMappingContext(DefaultMappingContext, Priority);
             }
             else
             {
-                DemoLOG_CF(LogDemoGame, Error, TEXT("DefaultMappingContext is not set."));
+                DemoLOG_CF(LogInput, Error, TEXT("Failed to add DefaultMappingContext."));
             }
         }
     }
@@ -365,7 +344,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
                 }
                 else
                 {
-                    DemoLOG_CF(LogDemoGame, Error, TEXT("InputAction not found for tag %s"), *InputTag.ToString());
+                    DemoLOG_CF(LogCharacter, Error, TEXT("InputAction not found for tag %s"), *InputTag.ToString());
                 }
             };
 
@@ -390,67 +369,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
         BindAction(DemoGameplayTags::Input_Test1, ETriggerEvent::Started, &ThisClass::Test1);
         BindAction(DemoGameplayTags::Input_Test2, ETriggerEvent::Started, &ThisClass::Test2);
     }
-}
-
-void APlayerCharacter::RebindInputKey(FGameplayTag InInputTag, const FInputChord& NewChord, bool bReapplyMappings)
-{
-    if (!PawnData || !PawnData->InputConfig || !RuntimeDefaultMappingContext)
-    {
-        DemoLOG_CF(LogCharacter, Error, TEXT("Invalid state."));
-        return;
-    }
-
-    if (!NewChord.Key.IsValid())
-    {
-        DemoLOG_CF(LogCharacter, Error, TEXT("Invalid key for tag %s"), *InInputTag.ToString());
-        return;
-    }
-
-    // Find the input action for the given tag
-    const UInputAction* InputAction = PawnData->InputConfig->FindInputActionForTag(InInputTag);
-    if (!InputAction)
-    {
-        DemoLOG_CF(LogCharacter, Error, TEXT("InputAction not found for tag %s"), *InInputTag.ToString());
-        return;
-    }
-
-    // @WARNING @check - There might be multiple mappings for the same action, and might want to unmap only one of them. Not for now.
-    RuntimeDefaultMappingContext->UnmapAllKeysFromAction(InputAction);
-
-    FEnhancedActionKeyMapping& NewMapping = RuntimeDefaultMappingContext->MapKey(InputAction, NewChord.Key);
-
-    // @TODO - Set modifier keys in NewMapping based on NewChord @TEST
-
-    // Apply changes to subsystem
-    if (bReapplyMappings)
-    {
-        if (const APlayerController* PlayerController = GetController<APlayerController>())
-        {
-            if (UEnhancedInputLocalPlayerSubsystem* EILPSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-            {
-                EILPSubsystem->RemoveMappingContext(RuntimeDefaultMappingContext);
-                EILPSubsystem->AddMappingContext(RuntimeDefaultMappingContext, IMCPriority::PlayerCharacter);
-            }
-        }
-    }
-}
-
-bool APlayerCharacter::IsInputKeyBound(const FInputChord& InChord) const
-{
-    if (!RuntimeDefaultMappingContext)
-    {
-        return false;
-    }
-
-    for (const FEnhancedActionKeyMapping& Mapping : RuntimeDefaultMappingContext->GetMappings())
-    {
-        if (Mapping.Key == InChord.Key)
-        {
-            // @TODO - Check modifier keys @TEST
-            return true;
-        }
-    }
-    return false;
 }
 
 void APlayerCharacter::Look(const FInputActionValue& Value)

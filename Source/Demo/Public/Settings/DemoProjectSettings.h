@@ -8,6 +8,7 @@
 #include "DemoProjectSettings.generated.h"
 
 class UActionInfoEntryConfig;
+class UDemoInputMappingCollection;
 class UItemAnimLayerConfig;
 class USoundCollection;
 
@@ -40,4 +41,7 @@ public:
 
     UPROPERTY(Config, EditDefaultsOnly, Category = "Audio")
     TSoftObjectPtr<USoundCollection> SoundCollection;
+
+    UPROPERTY(Config, EditDefaultsOnly, Category = "Input")
+    TSoftObjectPtr<UDemoInputMappingCollection> InputMappingCollection;
 };

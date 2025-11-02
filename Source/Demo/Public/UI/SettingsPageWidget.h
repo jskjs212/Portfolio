@@ -29,9 +29,6 @@ class DEMO_API USettingsPageWidget : public UTabMenuWidget
 protected:
     virtual void NativeOnInitialized() override;
 
-//public:
-//    void SyncUIWithUserSettings();
-
     ////////////////////////////////////////////////////////
     //        Widgets
     ////////////////////////////////////////////////////////

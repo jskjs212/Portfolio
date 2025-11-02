@@ -8,9 +8,11 @@
 #include "DemoTypes/DemoTypes.h"
 #include "DemoTypes/LogCategories.h"
 #include "DemoTypes/UITypes.h"
+#include "Engine/LocalPlayer.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Input/DemoInputConfig.h"
+#include "Input/DemoInputHelper.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/CursorWidget.h"
 #include "UI/DemoHUD.h"
@@ -70,6 +72,8 @@ ADemoPlayerController::ADemoPlayerController()
 void ADemoPlayerController::BeginPlay()
 {
     Super::BeginPlay();
+
+    DemoLOG_CF(LogTEST, Warning, TEXT("BeginPlay!")); // @debug
 
     if (MainMenuLevelName == NAME_None)
     {
@@ -214,12 +218,17 @@ void ADemoPlayerController::ShowYouDiedWidgetAndAddAfterDeathInputContext()
     }
     YouDiedWidget->AddToViewport(DemoZOrder::Event_YouDied);
 
-    // Add after-death input context
-    if (UEnhancedInputLocalPlayerSubsystem* EILPSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+    // Add after-death IMC to subsystem
+    if (UEnhancedInputLocalPlayerSubsystem* EISubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
     {
+        const auto [AfterDeathMappingContext, Priority] = DemoInputHelper::FindInputMappingContext(AfterDeathInputMappingContextTag);
         if (AfterDeathMappingContext)
         {
-            EILPSubsystem->AddMappingContext(AfterDeathMappingContext, IMCPriority::PlayerController_Event);
+            EISubsystem->AddMappingContext(AfterDeathMappingContext, Priority);
+        }
+        else
+        {
+            DemoLOG_CF(LogInput, Error, TEXT("Failed to add AfterDeathMappingContext."));
         }
     }
 
@@ -330,17 +339,22 @@ void ADemoPlayerController::HandleInteractableFocused(IInteractable* NewFocusedI
 
 void ADemoPlayerController::SetupPlayerInput()
 {
-    if (!DefaultMappingContext || !AfterDeathMappingContext || !PlayerControllerInputConfig)
+    if (!DefaultInputMappingContextTag.IsValid() || !AfterDeathInputMappingContextTag.IsValid() || !PlayerControllerInputConfig)
     {
         DemoLOG_CF(LogInput, Error, TEXT("Initialization|Input variables are not set properly."));
     }
 
-    // Add default mapping context
-    if (UEnhancedInputLocalPlayerSubsystem* EILPSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+    // Add default IMC to subsystem
+    if (UEnhancedInputLocalPlayerSubsystem* EISubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
     {
-        if (AfterDeathMappingContext)
+        const auto [DefaultMappingContext, Priority] = DemoInputHelper::FindInputMappingContext(DefaultInputMappingContextTag);
+        if (DefaultMappingContext)
         {
-            EILPSubsystem->AddMappingContext(DefaultMappingContext, IMCPriority::PlayerController);
+            EISubsystem->AddMappingContext(DefaultMappingContext, Priority);
+        }
+        else
+        {
+            DemoLOG_CF(LogInput, Error, TEXT("Failed to add DefaultMappingContext."));
         }
     }
 

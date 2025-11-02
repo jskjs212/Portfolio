@@ -11,16 +11,9 @@ void UAnimationDataSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
     Super::Initialize(Collection);
 
-    // Get DemoProjectSettings
-    const UDemoProjectSettings* DemoProjectSettings = GetDefault<UDemoProjectSettings>();
-    if (!DemoProjectSettings)
-    {
-        DemoLOG_CF(LogDemoGame, Error, TEXT("Failed to get UDemoProjectSettings."));
-        return;
-    }
-
     // Load ActionInfoEntryConfig
-    const UActionInfoEntryConfig* ActionInfoEntryConfig = DemoProjectSettings->ActionInfoEntryConfig.LoadSynchronous();
+    const UDemoProjectSettings* Settings = GetDefault<UDemoProjectSettings>();
+    const UActionInfoEntryConfig* ActionInfoEntryConfig = Settings->ActionInfoEntryConfig.LoadSynchronous();
     if (!ActionInfoEntryConfig)
     {
         DemoLOG_CF(LogDemoGame, Error, TEXT("Failed to load ActionInfoEntryConfig from DemoProjectSettings."));
@@ -28,7 +21,7 @@ void UAnimationDataSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     }
 
     // Load ItemAnimLayerConfig
-    const UItemAnimLayerConfig* ItemAnimLayerConfig = DemoProjectSettings->ItemAnimLayerConfig.LoadSynchronous();
+    const UItemAnimLayerConfig* ItemAnimLayerConfig = Settings->ItemAnimLayerConfig.LoadSynchronous();
     if (!ItemAnimLayerConfig)
     {
         DemoLOG_CF(LogDemoGame, Error, TEXT("Failed to load ItemAnimLayerConfig from DemoProjectSettings."));

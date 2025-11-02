@@ -9,6 +9,11 @@
  */
 namespace DemoGameplayTags
 {
+// IMC.*
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(IMC_PlayerCharacter_Default);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(IMC_PlayerController_Default);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(IMC_PlayerController_AfterDeath);
+
 // Input.*
 DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input_Look);
 DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input_Move);

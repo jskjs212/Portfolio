@@ -20,14 +20,14 @@ void UDemoGameInstance::BeginLoadingScreen(const FString& InMapName)
     {
         FLoadingScreenAttributes LoadingScreen;
 
-        const UDemoProjectSettings* Settings = GetDefault<UDemoProjectSettings>();
-        if (Settings && !Settings->MoviePath.IsEmpty())
+        const FString& MoviePath = GetDefault<UDemoProjectSettings>()->MoviePath;
+        if (!MoviePath.IsEmpty())
         {
-            LoadingScreen.MoviePaths.Add(Settings->MoviePath);
+            LoadingScreen.MoviePaths.Add(MoviePath);
             LoadingScreen.bAllowInEarlyStartup = true;
             LoadingScreen.PlaybackType = EMoviePlaybackType::MT_LoadingLoop;
         }
-        else
+        else // No movie, use images
         {
             LoadingScreen.WidgetLoadingScreen = SNew(SBackgroundWidget);
         }

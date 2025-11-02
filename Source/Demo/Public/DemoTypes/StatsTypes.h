@@ -19,7 +19,7 @@ enum class EStatModOp : uint8
 
 /**
  * Modifier format for buffs, debuffs, equipment, etc.
- * @TODO Duration, Handle(GUID)
+ * Consider adding: Duration, Handle(GUID)
  */
 USTRUCT()
 struct FStatModifier

@@ -20,7 +20,6 @@
 #include "DemoTypes/TableRowBases.h"
 #include "Engine/DamageEvents.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GenericTeamAgentInterface.h"
 #include "Items/Item.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -464,8 +463,6 @@ float ABaseCharacter::CalculateDamage(EAttackCollisionType InType) const
             Damage *= (*ActionInfosPtr)[Index].DamageMultiplier;
         }
     }
-
-    // @TODO - Damage multiplier from stats, buffs, etc.
 
     return Damage;
 }

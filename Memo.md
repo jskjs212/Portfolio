@@ -69,6 +69,9 @@ DemoHUDWidget: Resource, Crosshair, Interact, QuickSlot, Minimap, etc.
 Color: #F5F5E7
 
 ## Key bindings
+### Warning
+You must assign PlayerMappableKeySettings to all InputActions to prevent binding key to already bound keys. Otherwise, duplicate key may invoke multiple actions at once.
+
 ### PlayerCharacter
 - Mouse: Look
 - WASD: Move

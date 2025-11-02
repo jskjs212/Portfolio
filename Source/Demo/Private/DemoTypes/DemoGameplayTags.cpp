@@ -4,6 +4,11 @@
 
 namespace DemoGameplayTags
 {
+// IMC.*
+UE_DEFINE_GAMEPLAY_TAG(IMC_PlayerCharacter_Default, "IMC.PlayerCharacter.Default");
+UE_DEFINE_GAMEPLAY_TAG(IMC_PlayerController_Default, "IMC.PlayerController.Default");
+UE_DEFINE_GAMEPLAY_TAG(IMC_PlayerController_AfterDeath, "IMC.PlayerController.AfterDeath");
+
 // Input.*
 UE_DEFINE_GAMEPLAY_TAG(Input_Look, "Input.Look");
 UE_DEFINE_GAMEPLAY_TAG(Input_Move, "Input.Move");

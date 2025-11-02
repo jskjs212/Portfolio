@@ -11,7 +11,7 @@
 void SBackgroundWidget::Construct(const FArguments& InArgs)
 {
     const UDemoProjectSettings* Settings = GetDefault<UDemoProjectSettings>();
-    if (!Settings || Settings->LoadingScreenImages.Num() == 0)
+    if (Settings->LoadingScreenImages.IsEmpty())
     {
         DemoLOG_CF(LogUI, Warning, TEXT("No settings or no images found."));
         return;

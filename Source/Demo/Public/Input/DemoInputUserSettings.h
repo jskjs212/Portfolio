@@ -6,12 +6,17 @@
 #include "UserSettings/EnhancedInputUserSettings.h"
 #include "DemoInputUserSettings.generated.h"
 
+class ULocalPlayer;
+
 /**
- * 
+ *
  */
 UCLASS()
 class DEMO_API UDemoInputUserSettings : public UEnhancedInputUserSettings
 {
-	GENERATED_BODY()
-	
+    GENERATED_BODY()
+
+public:
+    // Get the EnhancedInputUserSettings for the given local player.
+    static UEnhancedInputUserSettings* GetUserSettingsForLocalPlayer(const ULocalPlayer* LocalPlayer);
 };

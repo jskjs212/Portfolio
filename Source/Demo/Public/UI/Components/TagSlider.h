@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Components/Slider.h"
-#include "DemoTypes/LogCategories.h"
 #include "GameplayTagContainer.h"
 #include "TagSlider.generated.h"
 
@@ -36,7 +35,7 @@ protected:
     virtual void OnWidgetRebuilt() override
     {
         Super::OnWidgetRebuilt();
-        DemoLOG_CF(LogTEST, Display, TEXT("Name: %s"), *GetName());
+
         OnMouseCaptureEnd.AddDynamic(this, &ThisClass::HandleTagSliderMouseCaptureEnd);
         OnControllerCaptureEnd.AddDynamic(this, &ThisClass::HandleTagSliderControllerCaptureEnd);
         OnValueChanged.AddDynamic(this, &ThisClass::HandleTagSliderValueChanged);

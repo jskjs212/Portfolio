@@ -21,14 +21,3 @@ void USettingsPageWidget::NativeOnInitialized()
     TabEntries.Emplace(DemoGameplayTags::Setting_Controls, ControlsTabButton, nullptr, ControlsSectionWidget);
     InitTabMenu();
 }
-
-//void USettingsPageWidget::SyncUIWithUserSettings()
-//{
-//    for (FTabEntry& TabEntry : TabEntries)
-//    {
-//        if (USettingsPageWidget* SettingsSectionWidget = Cast<USettingsPageWidget>(TabEntry.Widget))
-//        {
-//            SettingsSectionWidget->SyncUIWithUserSettings();
-//        }
-//    }
-//}

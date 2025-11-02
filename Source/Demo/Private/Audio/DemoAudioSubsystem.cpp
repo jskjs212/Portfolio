@@ -180,16 +180,8 @@ void UDemoAudioSubsystem::PlayMusic(const UObject* WorldContextObject, FGameplay
 
 void UDemoAudioSubsystem::InitAudioData()
 {
-    // Get DemoProjectSettings
-    const UDemoProjectSettings* DemoProjectSettings = GetDefault<UDemoProjectSettings>();
-    if (!DemoProjectSettings)
-    {
-        DemoLOG_CF(LogSettings, Error, TEXT("Failed to get UDemoProjectSettings."));
-        return;
-    }
-
     // Load SoundCollection
-    const USoundCollection* LoadedSoundCollection = DemoProjectSettings->SoundCollection.LoadSynchronous();
+    const USoundCollection* LoadedSoundCollection = GetDefault<UDemoProjectSettings>()->SoundCollection.LoadSynchronous();
     if (!LoadedSoundCollection)
     {
         DemoLOG_CF(LogSettings, Error, TEXT("Failed to load SoundCollection from DemoProjectSettings."));
@@ -345,20 +337,18 @@ void UDemoAudioSubsystem::HandleAudioFloatUserSettingChanged(FGameplayTag InTag,
 
 FSoundQueryResult UDemoAudioSubsystem::GetSoundByTag(FGameplayTag SoundTag)
 {
-    const FGameplayTag Category = DemoSoundTags::GetCategory(SoundTag);
-    if (!Category.IsValid())
+    const FAudioCategorySoundData* CategoryData = CategoryDataArray.FindByPredicate([SoundTag](const FAudioCategorySoundData& Data)
+        {
+            return SoundTag.MatchesTag(Data.Category);
+        });
+    if (!CategoryData)
     {
-        DemoLOG_CF(LogAudio, Error, TEXT("Invalid category for sound tag: %s"), *SoundTag.ToString());
+        DemoLOG_CF(LogAudio, Warning, TEXT("AudioSubsystem not initialized."));
         return {};
     }
 
-    const FAudioCategorySoundData* CategoryData = CategoryDataArray.FindByPredicate([Category](const FAudioCategorySoundData& Data)
-        {
-            return Data.Category == Category;
-        });
-    checkf(CategoryData, TEXT("No map for category: %s"), *Category.ToString());
+    checkf(CategoryData->Map, TEXT("SoundCollection is not set in project settings, or garbage collected."));
 
-    // Access to the map pointer is safe unless the SoundCollection is unloaded.
     const TSoftObjectPtr<USoundBase>* SoundPtr = CategoryData->Map->Find(SoundTag);
     if (!SoundPtr)
     {
@@ -373,5 +363,5 @@ FSoundQueryResult UDemoAudioSubsystem::GetSoundByTag(FGameplayTag SoundTag)
         return {};
     }
 
-    return {Sound, Category};
+    return {Sound, CategoryData->Category};
 }
