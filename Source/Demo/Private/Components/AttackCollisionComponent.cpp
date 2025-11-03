@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Components/AttackCollisionComponent.h"
+#include "Character/BaseCharacter.h"
+#include "Character/DemoPawnData.h"
 #include "Components/EquipmentComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "DemoTypes/LogCategories.h"
@@ -40,9 +42,13 @@ void UAttackCollisionComponent::BeginPlay()
         }
     }
 
-    for (const FAttackCollisionDefinition& Definition : AttackCollisionDefinitions)
+    // Get definitions from PawnData
+    if (ABaseCharacter* OwnerCharacter = GetOwner<ABaseCharacter>())
     {
-        // @TODO - Validate CollisionDefinitions: Valid sockets, types, etc.
+        if (const UDemoPawnData* PawnData = OwnerCharacter->GetPawnData())
+        {
+            AttackCollisionDefinitions = PawnData->AttackCollisionDefinitions;
+        }
     }
 }
 

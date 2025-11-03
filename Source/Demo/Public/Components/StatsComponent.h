@@ -85,7 +85,8 @@ public:
     FORCEINLINE float GetMaxHealth() const { return GetMaxResourceStatChecked(DemoGameplayTags::Stat_Resource_Health); }
 
     // Health tag needed.
-    FORCEINLINE float Heal(float HealAmount) { return ModifyCurrentResourceStatChecked(DemoGameplayTags::Stat_Resource_Health, HealAmount, false); }
+    // Can't resurrect with this.
+    float Heal(float HealAmount);
 
     // Health tag needed.
     // @return The actual amount by which the damage was taken.

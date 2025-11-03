@@ -45,16 +45,6 @@ void UStatsComponent::ResetAllResourceStats()
 
 void UStatsComponent::AddResourceStat(const FGameplayTag StatTag, const FResourceStat& ResourceStat)
 {
-    //static const FGameplayTagContainer AllowedResouceStatTags = FGameplayTagContainer::CreateFromArray(TArray<FGameplayTag>{
-    //    HealthTag, StaminaTag
-    //});
-
-    //if (!StatTag.MatchesAnyExact(AllowedResouceStatTags))
-    //{
-    //    DemoLOG_F(LogAttributes, Error, TEXT("Stat %s is not allowed."), *StatTag.GetTagName().ToString());
-    //    return;
-    //}
-
     if (ResourceStats.Contains(StatTag))
     {
         DemoLOG_F(LogAttributes, Warning, TEXT("Stat %s already exists."), *StatTag.GetTagName().ToString());
@@ -246,10 +236,8 @@ void UStatsComponent::RecalculateDerivedStat(FGameplayTag InPrimaryStatTag)
     // Defense = STR * 0.1 + DEX * 0.3 + INT * 0.1
     // {DerivedStat, Array{PrimaryStat, Weight}}
     static const TMap<FGameplayTag, TArray<TPair<FGameplayTag, float>>> DerivedStatDependencies = {
-        //{AttackTag, {{STRTag, 0.5f}, {DEXTag, 0.1f}}},
-        //{DefenseTag, {{STRTag, 0.1f}, {DEXTag, 0.3f}, {INTTag, 0.1f}}}
         {DemoGameplayTags::Stat_Derived_Attack, {{DemoGameplayTags::Stat_Primary_STR, 0.5f}, {DemoGameplayTags::Stat_Primary_DEX, 0.1f}}},
-                {DemoGameplayTags::Stat_Derived_Defense, {{DemoGameplayTags::Stat_Primary_STR, 0.1f}, {DemoGameplayTags::Stat_Primary_DEX, 0.3f}, {DemoGameplayTags::Stat_Primary_INT, 0.1f}}}
+        {DemoGameplayTags::Stat_Derived_Defense, {{DemoGameplayTags::Stat_Primary_STR, 0.1f}, {DemoGameplayTags::Stat_Primary_DEX, 0.3f}, {DemoGameplayTags::Stat_Primary_INT, 0.1f}}}
     };
 
     // For each derived stat
@@ -368,11 +356,19 @@ void UStatsComponent::HandleItemUnequipped(FGameplayTag EquipmentType, const FIt
     }
 }
 
+float UStatsComponent::Heal(float HealAmount)
+{
+    if (GetCurrentHealth() > 0.f)
+    {
+        return ModifyCurrentResourceStatChecked(DemoGameplayTags::Stat_Resource_Health, HealAmount, false);
+    }
+    return 0.f;
+}
+
 float UStatsComponent::TakeDamage(const float InDamage)
 {
     // Damage calculation
     float Damage = InDamage;
-    // Damage = Damage * (Damage / (Damage + Armor))
 
     constexpr float MinDamage = 0.f;
     constexpr float MaxDamage = 1e10f; // @misc - Set max damage

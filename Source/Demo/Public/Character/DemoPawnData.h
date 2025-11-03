@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
+#include "DemoTypes/AttackTypes.h"
 #include "DemoTypes/StatsTypes.h"
 #include "GameplayTagContainer.h"
 #include "DemoPawnData.generated.h"
@@ -43,6 +44,11 @@ public:
     // Default Attack, Defense, etc.
     UPROPERTY(EditDefaultsOnly, Category = "Stats", meta = (Categories = "Stat.Derived"))
     TMap<FGameplayTag, FDerivedStat> DefaultDerivedStats;
+
+    // Definitions for attack collision shapes without weapons (e.g. fists, claws, etc.).
+    // Activated by AnimNotifies during attack animations.
+    UPROPERTY(EditDefaultsOnly, Category = "Combat")
+    TArray<FAttackCollisionDefinition> AttackCollisionDefinitions;
 
     // Input configuration for PlayerCharacter.
     UPROPERTY(EditDefaultsOnly, Category = "Input")

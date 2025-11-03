@@ -9,7 +9,10 @@
 #include "GameFramework/Pawn.h"
 #include "Items/Item.h"
 #include "Items/ItemRowBases.h"
+#include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystem.h"
 #include "PlayerController/DemoPlayerController.h"
+#include "Sound/SoundBase.h"
 #include "UI/ItemActionDispatcher.h"
 
 void UInventoryComponent::BeginPlay()
@@ -568,7 +571,25 @@ int32 UInventoryComponent::ConsumeFood(const FConsumableData* ConsumableData, co
     const float MaxHealth = StatsComponent->GetMaxHealth();
     const int32 ToUse = FMath::Min(Quantity, FMath::CeilToInt32((MaxHealth - CurrentHealth) / ConsumableData->HealAmount));
 
-    StatsComponent->Heal(ConsumableData->HealAmount * ToUse);
+    if (ToUse > 0)
+    {
+        // Heal
+        StatsComponent->Heal(ConsumableData->HealAmount * ToUse);
+
+        // VFX & SFX
+        if (AActor* OwnerActor = GetOwner())
+        {
+            FVector Location = OwnerActor->GetActorLocation();
+            if (UParticleSystem* Effect = ConsumableData->Effect.LoadSynchronous())
+            {
+                UGameplayStatics::SpawnEmitterAttached(Effect, OwnerActor->GetRootComponent());
+            }
+            if (USoundBase* Sound = ConsumableData->Sound.LoadSynchronous())
+            {
+                UGameplayStatics::PlaySoundAtLocation(this, Sound, Location);
+            }
+        }
+    }
     return ToUse;
 }
 

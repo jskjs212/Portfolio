@@ -10,9 +10,8 @@ void UStatsPageWidget::NativeOnInitialized()
 {
     Super::NativeOnInitialized();
 
-    checkf(CurrentHealthText && CurrentStaminaText
-        && STRText && DEXText && INTText
-        && AttackText && DefenseText,
+    checkf(CurrentHealthText && MaxHealthText && CurrentStaminaText && MaxStaminaText
+        && STRText && DEXText && INTText && AttackText && DefenseText,
         TEXT("Failed to bind widgets."));
 
     // @hardcoded - DataTable or UMyTagText that contains tag.
@@ -40,6 +39,11 @@ void UStatsPageWidget::UpdateAllStats()
                 const auto [bFound, StatValue] = StatsComponent->GetStatFinalValue(StatTag);
                 StatText->SetText(FText::AsNumber(FMath::RoundToInt32(bFound ? StatValue : 0.f)));
             }
+
+            const float MaxHealth = StatsComponent->GetMaxHealth();
+            const float MaxStamina = StatsComponent->GetMaxResourceStatChecked(DemoGameplayTags::Stat_Resource_Stamina);
+            MaxHealthText->SetText(FText::AsNumber(FMath::RoundToInt32(MaxHealth)));
+            MaxStaminaText->SetText(FText::AsNumber(FMath::RoundToInt32(MaxStamina)));
         }
     }
 }

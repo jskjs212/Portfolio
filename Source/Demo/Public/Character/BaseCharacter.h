@@ -163,6 +163,8 @@ public:
 
     FORCEINLINE FText GetCharacterDisplayName() const { return CharacterDisplayName; }
 
+    FORCEINLINE const UDemoPawnData* GetPawnData() const { return PawnData; }
+
     UFUNCTION(BlueprintCallable, Category = "Movement", meta = (Categories = "Movement.SpeedMode"))
     virtual void SetMovementSpeedMode(FGameplayTag NewSpeedMode);
 

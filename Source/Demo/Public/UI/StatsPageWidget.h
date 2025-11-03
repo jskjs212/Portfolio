@@ -42,7 +42,13 @@ private:
     TObjectPtr<UTextBlock> CurrentHealthText;
 
     UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UTextBlock> MaxHealthText;
+
+    UPROPERTY(meta = (BindWidget))
     TObjectPtr<UTextBlock> CurrentStaminaText;
+
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UTextBlock> MaxStaminaText;
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UTextBlock> STRText;

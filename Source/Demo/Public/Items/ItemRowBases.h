@@ -15,7 +15,9 @@
 
 #include "ItemRowBases.generated.h"
 
+class UParticleSystem;
 class USkeletalMesh;
+class USoundBase;
 class UStaticMesh;
 class UTexture2D;
 
@@ -193,8 +195,14 @@ struct FConsumableData : public FItemDataBase
 {
     GENERATED_BODY()
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditDefaultsOnly)
     float HealAmount{10.f};
+
+    UPROPERTY(EditDefaultsOnly)
+    TSoftObjectPtr<UParticleSystem> Effect;
+
+    UPROPERTY(EditDefaultsOnly)
+    TSoftObjectPtr<USoundBase> Sound;
 
 #if WITH_EDITOR
     virtual EDataValidationResult IsDataValid(FDataValidationContext& Context) const override

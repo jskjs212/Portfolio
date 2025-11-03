@@ -18,7 +18,9 @@ class UTagButton;
 class UWrapBox;
 
 /**
- *
+ * Inventory page widget in the player menu.
+ * ItemSlotWidgets from inventory are stored in WrapBoxes categorized by each ItemType.
+ * Their indexes are matched with indexes in InventoryComponent's Inventory array.
  */
 UCLASS()
 class DEMO_API UInventoryPageWidget : public UTabMenuWidget
@@ -118,7 +120,7 @@ private:
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UWrapBox> ConsumableWrapBox;
 
-    /* Else */
+    /* ItemInfo */
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UItemInfoWidget> ItemInfoWidget;
 
@@ -128,14 +130,16 @@ private:
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UImage> ItemPreviewImage;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Initialization")
-    TSubclassOf<UItemSlotWidget> ItemSlotWidgetClass;
-
+    /* ContextMenu */
     UPROPERTY(EditDefaultsOnly, Category = "Initialization")
     TSubclassOf<UContextMenuWidget> ContextMenuWidgetClass;
 
     UPROPERTY()
     TObjectPtr<UContextMenuWidget> ContextMenuWidget;
+
+    /* Else */
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization")
+    TSubclassOf<UItemSlotWidget> ItemSlotWidgetClass;
 
     ////////////////////////////////////////////////////////
     //        Variables

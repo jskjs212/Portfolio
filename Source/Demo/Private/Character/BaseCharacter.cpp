@@ -375,7 +375,7 @@ void ABaseCharacter::HandleDeath()
         GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     }
 
-    // Animation of ragdoll
+    // Animation or ragdoll
     if (AnimInstance && DeathMontage)
     {
         AnimInstance->Montage_Play(DeathMontage);

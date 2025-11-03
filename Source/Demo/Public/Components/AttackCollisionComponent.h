@@ -15,6 +15,7 @@ class UEquipmentComponent;
 struct FActiveAttackCollisionDefinition
 {
     const FAttackCollisionDefinition* Definition{nullptr};
+
     int32 HitGroup{-1};
 
     bool operator==(const FActiveAttackCollisionDefinition& Other) const
@@ -94,10 +95,7 @@ private:
     // Current active attack collision definitions.
     TArray<FActiveAttackCollisionDefinition> ActiveDefinitions;
 
-    /* Attack collision */
-    // All collision definitions.
-    // @TODO - DataAsset?
-    UPROPERTY(EditAnywhere, Category = "Initialization|Collision")
+    // All available attack collision definitions.
     TArray<FAttackCollisionDefinition> AttackCollisionDefinitions;
 
     ////////////////////////////////////////////////////////
