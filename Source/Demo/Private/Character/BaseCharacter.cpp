@@ -23,6 +23,10 @@
 #include "Items/ItemRowBases.h"
 #include "Kismet/GameplayStatics.h"
 
+#if WITH_EDITOR
+#include "Misc/DataValidation.h"
+#endif // WITH_EDITOR
+
 ABaseCharacter::ABaseCharacter()
 {
     HitSoundTag = DemoSoundTags::SFX_Combat_Hit_Default;
@@ -52,9 +56,9 @@ void ABaseCharacter::BeginPlay()
     Super::BeginPlay();
 
     // Validate
-    if (!HitReactFrontMontage || !HitReactBackMontage || !HitParticle)
+    if (!HitParticle)
     {
-        DemoLOG_CF(LogCharacter, Warning, TEXT("HitReact assets are not set for %s."), *GetName());
+        DemoLOG_CF(LogCharacter, Warning, TEXT("HitParticle is not set for %s."), *GetName());
     }
 
     InitCharacter();
@@ -86,14 +90,20 @@ float ABaseCharacter::InternalTakePointDamage(float Damage, FPointDamageEvent co
     return Damage;
 }
 
-void ABaseCharacter::InitCharacter()
+#if WITH_EDITOR
+EDataValidationResult ABaseCharacter::IsDataValid(FDataValidationContext& Context) const
 {
     if (!PawnData)
     {
-        DemoLOG_CF(LogCharacter, Error, TEXT("PawnData is not set for %s."), *GetName());
-        return;
+        Context.AddError(FText::FromString(TEXT("PawnData is not set.")));
+        return EDataValidationResult::Invalid;
     }
+    return Super::IsDataValid(Context);
+}
+#endif // WITH_EDITOR
 
+void ABaseCharacter::InitCharacter()
+{
     // Init character identity
     CharacterTag = PawnData->CharacterTag;
     if (!CharacterTag.IsValid())
@@ -254,11 +264,14 @@ void ABaseCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8
 
     // Set Jump state when falling.
     // If already performing another action, then carry on.
-    if (GetCharacterMovement()->IsFalling())
+    if (HasActorBegunPlay())
     {
-        if (StateManager->CanPerformAction(DemoGameplayTags::State_Jump))
+        if (GetCharacterMovement()->IsFalling())
         {
-            StateManager->SetAction(DemoGameplayTags::State_Jump);
+            if (StateManager->CanPerformAction(DemoGameplayTags::State_Jump))
+            {
+                StateManager->SetAction(DemoGameplayTags::State_Jump);
+            }
         }
     }
 }
@@ -294,24 +307,27 @@ void ABaseCharacter::PlayPointHitEffects(const FPointDamageEvent& PointDamageEve
     {
         if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
         {
-            UAnimMontage* HitReactMontage = FrontDot >= 0.f ? HitReactFrontMontage : HitReactBackMontage;
+            FGameplayTag HitstunTag = DemoGameplayTags::State_Disabled_HitstunFront;
+            if (FrontDot < 0.f && bHasHitstunBackAnim) // Back
+            {
+                HitstunTag = DemoGameplayTags::State_Disabled_HitstunBack;
+            }
             if (FMath::Abs(FrontDot) < Cos45) // Side
             {
                 if (RightDot >= 0.f)
                 {
-                    HitReactMontage = HitReactRightMontage ? HitReactRightMontage.Get() : HitReactMontage;
+                    HitstunTag = bHasHitstunRightAnim ? DemoGameplayTags::State_Disabled_HitstunRight : HitstunTag;
                 }
                 else
                 {
-                    HitReactMontage = HitReactLeftMontage ? HitReactLeftMontage.Get() : HitReactMontage;
+                    HitstunTag = bHasHitstunLeftAnim ? DemoGameplayTags::State_Disabled_HitstunLeft : HitstunTag;
                 }
             }
 
-            const float Duration = AnimInstance->Montage_Play(HitReactMontage);
-            if (Duration > 0.f)
+            const float Duration = PerformAction(HitstunTag, true, 0, true);
+            if (Duration < 0.f)
             {
-                // Cancel current action, but allow performing another action.
-                StateManager->SetAction(DemoGameplayTags::State_General);
+                DemoLOG_CF(LogCharacter, Warning, TEXT("Failed to play hitstun animation for %s."), *GetName());
             }
         }
     }
@@ -410,6 +426,12 @@ void ABaseCharacter::HandleStateBegan(FGameplayTag NewState)
     if (NewState == DemoGameplayTags::State_Dead)
     {
         HandleDeath();
+        return;
+    }
+    if (IsBlocking() && NewState != DemoGameplayTags::State_Block)
+    {
+        // Interrupted while blocking
+        StopBlocking();
     }
 }
 
@@ -435,6 +457,13 @@ void ABaseCharacter::UpdateAnimationData(FGameplayTag WeaponTag)
         DemoLOG_CF(LogCharacter, Error, TEXT("Invalid ActionInfo for (%s, %s)."), *CharacterTag.ToString(), *WeaponTag.ToString());
     }
 
+    // Check hitstun montages
+    bHasHitstunFrontAnim = CurrentActionInfo->GetActionInfoArray(DemoGameplayTags::State_Disabled_HitstunFront) != nullptr;
+    bHasHitstunBackAnim = CurrentActionInfo->GetActionInfoArray(DemoGameplayTags::State_Disabled_HitstunBack) != nullptr;
+    bHasHitstunLeftAnim = CurrentActionInfo->GetActionInfoArray(DemoGameplayTags::State_Disabled_HitstunLeft) != nullptr;
+    bHasHitstunRightAnim = CurrentActionInfo->GetActionInfoArray(DemoGameplayTags::State_Disabled_HitstunRight) != nullptr;
+
+    // Update anim layers
     if (GetMesh())
     {
         if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
@@ -562,7 +591,7 @@ const FActionInfo* ABaseCharacter::PerformAction_Validate(FGameplayTag InAction,
     const TArray<FActionInfo>* ActionInfoArray = CurrentActionInfo->GetActionInfoArray(InAction);
     if (!ActionInfoArray)
     {
-        DemoLOG_CF(LogCharacter, Error, TEXT("Invalid ActionInfo for action %s."), *InAction.ToString());
+        DemoLOG_CF(LogCharacter, Error, TEXT("No ActionInfo for action %s."), *InAction.ToString());
         return nullptr;
     }
 
@@ -588,7 +617,7 @@ const FActionInfo* ABaseCharacter::PerformAction_Validate(FGameplayTag InAction,
     // Check montage
     if (!ActionInfo.AnimMontage)
     {
-        DemoLOG_CF(LogCharacter, Error, TEXT("Invalid AnimMontage for action %s."), *InAction.ToString());
+        DemoLOG_CF(LogCharacter, Error, TEXT("Failed to load AnimMontage for action %s."), *InAction.ToString());
         return nullptr;
     }
 

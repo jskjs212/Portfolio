@@ -80,13 +80,13 @@ void APlayerCharacter::BeginPlay()
         DemoLOG_CF(LogCharacter, Error, TEXT("DefaultInputMappingContextTag is not valid."));
     }
 
-    TargetingComponent->OnTargetUpdated.AddUObject(this, &ThisClass::HandleTargetUpdated);
-
     // Init UI
     if (ADemoPlayerController* DemoPlayerController = GetController<ADemoPlayerController>())
     {
         DemoPlayerController->InitUI();
     }
+
+    TargetingComponent->OnTargetUpdated.AddUObject(this, &ThisClass::HandleTargetUpdated);
 
     // Set timers for interactable tracing and sprint stamina consumption.
     // Trace for interactables at intervals rather than every tick.
@@ -309,9 +309,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-    if (!PawnData || !PawnData->InputConfig)
+    if (!PawnData->InputConfig)
     {
-        DemoLOG_CF(LogCharacter, Error, TEXT("PlayerCharacter has no PawnData or InputConfig"));
+        DemoLOG_CF(LogCharacter, Error, TEXT("No InputConfig set in PawnData."));
         return;
     }
 

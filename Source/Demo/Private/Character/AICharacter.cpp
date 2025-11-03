@@ -38,11 +38,6 @@ void AAICharacter::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (!PawnData)
-    {
-        return;
-    }
-
     bIsBoss = PawnData->bIsBoss;
     if (ADemoAIController* DemoAIController = GetController<ADemoAIController>())
     {

@@ -52,7 +52,7 @@ void UAnimationDataSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     // Validate all ActionInfoConfigs
     for (const auto& [ActionInfoKey, ActionInfoConfig] : ActionInfoMap)
     {
-        if (!ActionInfoKey.CharacterTag.IsValid() || !ActionInfoKey.WeaponTag.IsValid() || !ActionInfoConfig->IsValid())
+        if (!ActionInfoKey.CharacterTag.IsValid() || !ActionInfoKey.WeaponTag.IsValid() || !ActionInfoConfig)
         {
             DemoLOG_CF(LogDemoGame, Error, TEXT("Invalid ActionInfoConfig (%s, %s)."), *ActionInfoKey.CharacterTag.ToString(), *ActionInfoKey.WeaponTag.ToString());
         }

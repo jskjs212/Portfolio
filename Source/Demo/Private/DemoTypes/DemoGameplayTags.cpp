@@ -79,6 +79,10 @@ UE_DEFINE_GAMEPLAY_TAG(State_Dodge, "State.Dodge");
 UE_DEFINE_GAMEPLAY_TAG(State_Block, "State.Block");
 
 // Character actions: State.[state].[action]
+UE_DEFINE_GAMEPLAY_TAG(State_Disabled_HitstunFront, "State.Disabled.HitstunFront");
+UE_DEFINE_GAMEPLAY_TAG(State_Disabled_HitstunBack, "State.Disabled.HitstunBack");
+UE_DEFINE_GAMEPLAY_TAG(State_Disabled_HitstunLeft, "State.Disabled.HitstunLeft");
+UE_DEFINE_GAMEPLAY_TAG(State_Disabled_HitstunRight, "State.Disabled.HitstunRight");
 UE_DEFINE_GAMEPLAY_TAG(State_ToggleCombat_Enter, "State.ToggleCombat.Enter");
 UE_DEFINE_GAMEPLAY_TAG(State_ToggleCombat_Exit, "State.ToggleCombat.Exit");
 UE_DEFINE_GAMEPLAY_TAG(State_Attack_Light, "State.Attack.Light");

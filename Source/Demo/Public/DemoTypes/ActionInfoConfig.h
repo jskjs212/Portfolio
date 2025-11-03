@@ -6,6 +6,11 @@
 #include "Engine/DataAsset.h"
 #include "DemoTypes/DemoTypes.h"
 #include "GameplayTagContainer.h"
+
+#if WITH_EDITOR
+#include "Misc/DataValidation.h"
+#endif // WITH_EDITOR
+
 #include "ActionInfoConfig.generated.h"
 
 class UAnimMontage;
@@ -57,27 +62,36 @@ class DEMO_API UActionInfoConfig : public UDataAsset
 {
     GENERATED_BODY()
 
-public:
-    bool IsValid() const
+protected:
+#if WITH_EDITOR
+    virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override
     {
         for (const auto& [ActionTag, ActionInfos] : ActionInfoMap)
         {
-            if (!ActionTag.IsValid() || ActionInfos.Array.Num() == 0)
+            if (!ActionTag.IsValid())
             {
-                return false;
+                Context.AddError(FText::FromString(TEXT("ActionTag is not valid.")));
+                return EDataValidationResult::Invalid;
             }
-
+            if (ActionInfos.Array.IsEmpty())
+            {
+                Context.AddError(FText::FromString(FString::Printf(TEXT("ActionInfos array is empty. ActionTag: %s."), *ActionTag.ToString())));
+                return EDataValidationResult::Invalid;
+            }
             for (const FActionInfo& ActionInfo : ActionInfos.Array)
             {
                 if (!ActionInfo.IsValid())
                 {
-                    return false;
+                    Context.AddError(FText::FromString(FString::Printf(TEXT("ActionInfo is not valid. ActionTag: %s."), *ActionTag.ToString())));
+                    return EDataValidationResult::Invalid;
                 }
             }
         }
-        return true;
+        return Super::IsDataValid(Context);
     }
+#endif // WITH_EDITOR
 
+public:
     const TArray<FActionInfo>* GetActionInfoArray(FGameplayTag InAction) const
     {
         if (const FActionInfos* ActionInfos = ActionInfoMap.Find(InAction))

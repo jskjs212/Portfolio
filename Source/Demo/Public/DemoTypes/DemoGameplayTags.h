@@ -87,6 +87,10 @@ DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Block);
 
 // Character actions: State.[state].[action]
 // *.[subaction] is not allowed for now.
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Disabled_HitstunFront);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Disabled_HitstunBack);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Disabled_HitstunLeft);
+DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Disabled_HitstunRight);
 DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_ToggleCombat_Enter);
 DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_ToggleCombat_Exit);
 DEMO_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Attack_Light);

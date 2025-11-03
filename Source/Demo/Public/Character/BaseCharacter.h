@@ -71,6 +71,10 @@ protected:
 
     virtual float InternalTakePointDamage(float Damage, struct FPointDamageEvent const& PointDamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
+#if WITH_EDITOR
+    virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif // WITH_EDITOR
+
     ////////////////////////////////////////////////////////
     //        Character functions
     ////////////////////////////////////////////////////////
@@ -184,17 +188,12 @@ protected:
     //        Variables - Hit
     ////////////////////////////////////////////////////////
 protected:
-    UPROPERTY(EditAnywhere, Category = "Initialization|Hit")
-    TObjectPtr<UAnimMontage> HitReactFrontMontage;
-
-    UPROPERTY(EditAnywhere, Category = "Initialization|Hit")
-    TObjectPtr<UAnimMontage> HitReactBackMontage;
-
-    UPROPERTY(EditAnywhere, Category = "Initialization|Hit")
-    TObjectPtr<UAnimMontage> HitReactLeftMontage;
-
-    UPROPERTY(EditAnywhere, Category = "Initialization|Hit")
-    TObjectPtr<UAnimMontage> HitReactRightMontage;
+    // There are set when CurrentActionInfo is updated.
+    // Must have Front.
+    bool bHasHitstunFrontAnim{false};
+    bool bHasHitstunBackAnim{false};
+    bool bHasHitstunLeftAnim{false};
+    bool bHasHitstunRightAnim{false};
 
     UPROPERTY(EditAnywhere, Category = "Initialization|Death")
     float DeathDestroyDelay{5.f};

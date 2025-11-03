@@ -34,7 +34,7 @@ void UStateManagerComponent::SetAction(const FGameplayTag NewAction)
     }
 
     // @debug
-    DemoLOG_F(LogStateManager, Verbose, TEXT("to %s"), *NewAction.ToString());
+    DemoLOG_F(LogStateManager, Verbose, TEXT("Owner: %s, Action: %s"), *GetNameSafe(GetOwner()), *NewAction.ToString());
 
     // Set state and action
     SetState(NewState);
@@ -150,27 +150,28 @@ bool UStateManagerComponent::CanChangeEquipment() const
 bool UStateManagerComponent::CanPerformAction(const FGameplayTag NewAction) const
 {
     const FGameplayTagContainer* const ToStates = AllowedTransitions.Find(CurrentState);
-
-    return ToStates ? GetStateFromAction(NewAction).MatchesAnyExact(*ToStates) : false;
+    checkf(ToStates, TEXT("Not even initialized. Owner: %s"), *GetNameSafe(GetOwner()));
+    return GetStateFromAction(NewAction).MatchesAnyExact(*ToStates);
 }
 
 FGameplayTag UStateManagerComponent::GetStateFromAction(const FGameplayTag InAction) const
 {
-    FGameplayTag DerivedState = InAction;                                   // 'State.[state]'  or 'State.[state].[action]'
+    //                                                  If InAction is one of: 'State.[state]'  or 'State.[state].[action]'
     const FGameplayTag ParentTag = InAction.RequestDirectParent();          // 'State'          or 'State.[state]'
     const FGameplayTag GrandParentTag = ParentTag.RequestDirectParent();    // EmptyTag         or 'State'
 
     // Check if GrandParentTag is 'State'
     if (GrandParentTag.MatchesTagExact(DemoGameplayTags::State))
     {
-        DerivedState = ParentTag; // 'State.[state]'
+        return ParentTag; // 'State.[state]'
     }
+
     // ParentTag is not 'State' or 'State.[state]' == invalid action input
-    else if (!ParentTag.MatchesTagExact(DemoGameplayTags::State))
+    if (!ParentTag.MatchesTagExact(DemoGameplayTags::State))
     {
         DemoLOG_CF(LogStateManager, Error, TEXT("Invalid action tag %s"), *InAction.ToString());
         return FGameplayTag::EmptyTag;
     }
 
-    return DerivedState;
+    return InAction;
 }
