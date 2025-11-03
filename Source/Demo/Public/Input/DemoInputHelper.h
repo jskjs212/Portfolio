@@ -8,9 +8,10 @@
 
 class UInputMappingContext;
 
-namespace DemoInputHelper
+// Helper functions for Demo input system.
+namespace Demo::Input
 {
 // Find and load an IMC from the DemoInputMappingCollection in the project settings.
 // @return {IMC, Priority} if found, nullptr otherwise.
 TPair<const UInputMappingContext*, int32> FindInputMappingContext(FGameplayTag ContextTag);
-} // namespace DemoInputHelper
+} // namespace Demo::Input

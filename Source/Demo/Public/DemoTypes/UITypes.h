@@ -7,7 +7,7 @@
 /**
  * Centralized ZOrder definitions for Demo UI widgets.
  */
-namespace DemoZOrder
+namespace Demo::ZOrder
 {
 /* Core HUD */
 // Used: DemoHUDWidget, MainMenuWidget (Outside of game session)
@@ -41,4 +41,4 @@ constexpr int32 System{8000};
 
 /* Debug */
 constexpr int32 Debug{9000};
-} // namespace DemoZOrder
+} // namespace Demo::ZOrder

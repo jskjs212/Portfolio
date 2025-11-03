@@ -171,7 +171,7 @@ void UInventoryPageWidget::SetupContextMenu()
     ContextMenuWidget = CreateWidget<UContextMenuWidget>(this, ContextMenuWidgetClass);
     ContextMenuWidget->InitActions(Actions);
     ContextMenuWidget->SetVisibility(ESlateVisibility::Collapsed);
-    ContextMenuWidget->AddToViewport(DemoZOrder::ContextMenu);
+    ContextMenuWidget->AddToViewport(Demo::ZOrder::ContextMenu);
 
     // Bind context menu buttons
     TArray<TObjectPtr<UTagButton>>& Buttons = ContextMenuWidget->GetActionButtons();
@@ -340,7 +340,7 @@ void UInventoryPageWidget::HandleItemSlotDropped(const FItemSlot& SrcSlot, const
     // Case1: Empty or different item -> Swap
     if (!DstSlot.IsValid() || SrcSlot.RowHandle != DstSlot.RowHandle)
     {
-        const FGameplayTag ItemCategory = DemoItemTypes::GetItemCategory(SrcItemData->ItemType);
+        const FGameplayTag ItemCategory = Demo::Item::GetItemCategory(SrcItemData->ItemType);
 
         bool bSuccess = ItemActionDispatcher->RequestSwapItem(ItemCategory, SrcIndex, DstIndex);
         if (!bSuccess)

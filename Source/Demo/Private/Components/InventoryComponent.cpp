@@ -188,14 +188,14 @@ bool UInventoryComponent::AddMaxSlotSize(FGameplayTag ItemCategory, const int32 
 void UInventoryComponent::InitInventoryComponent()
 {
     // Inventory setup for fixed item categories.
-    for (const FGameplayTag& ItemCategory : DemoItemTypes::GetItemCategories())
+    for (const FGameplayTag& ItemCategory : Demo::Item::GetItemCategories())
     {
         OwnedItems.Add(ItemCategory, FItemArray{});
         MaxSlotSizes.Add(ItemCategory, 0);
     }
 
-    checkf(OwnedItems.Num() == DemoItemTypes::GetItemCategories().Num(), TEXT("OwnedItems should have all ItemCategories."));
-    checkf(MaxSlotSizes.Num() == DemoItemTypes::GetItemCategories().Num(), TEXT("MaxSlotSizes should have all ItemCategories."));
+    checkf(OwnedItems.Num() == Demo::Item::GetItemCategories().Num(), TEXT("OwnedItems should have all ItemCategories."));
+    checkf(MaxSlotSizes.Num() == Demo::Item::GetItemCategories().Num(), TEXT("MaxSlotSizes should have all ItemCategories."));
 }
 
 void UInventoryComponent::InitMaxSlots()
@@ -263,7 +263,7 @@ FInventoryValidationResult UInventoryComponent::AddItem_Validate(const FItemSlot
 
     // Find ItemType & ItemArray
     // ex) Item.Weapon tag from Item.Weapon.Melee.OneHanded tag
-    FGameplayTag ItemCategory = DemoItemTypes::GetItemCategory(ItemData->ItemType);
+    FGameplayTag ItemCategory = Demo::Item::GetItemCategory(ItemData->ItemType);
     TArray<FItemSlot>* ItemArray = nullptr;
     if (ItemCategory.IsValid())
     {
@@ -447,7 +447,7 @@ FInventoryValidationResult UInventoryComponent::ValidateActionRequest(const FIte
         return {}; // Log in GetRow()
     }
 
-    FGameplayTag ItemCategory = DemoItemTypes::GetItemCategory(ItemData->ItemType);
+    FGameplayTag ItemCategory = Demo::Item::GetItemCategory(ItemData->ItemType);
 
     // Category is validated in data table.
     TArray<FItemSlot>& ItemArray = OwnedItems[ItemCategory].ItemArray;
@@ -504,7 +504,7 @@ int32 UInventoryComponent::RemoveItem_Internal(FInventoryValidationResult& InOut
 int32 UInventoryComponent::UseItem_Internal(const FItemSlot& InSlot, const FGameplayTag ItemType, const int32 Quantity)
 {
     // Equipment types
-    FGameplayTag EquipmentType = DemoItemTypes::GetEquipmentType(ItemType);
+    FGameplayTag EquipmentType = Demo::Item::GetEquipmentType(ItemType);
     if (EquipmentType.IsValid())
     {
         return UseItem_Equip(InSlot) ? 1 : -1;

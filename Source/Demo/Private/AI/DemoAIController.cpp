@@ -17,7 +17,7 @@
 
 ADemoAIController::ADemoAIController()
 {
-    SetGenericTeamId(DemoTeamID::Enemy); // @TODO - Enemy and Neutral
+    SetGenericTeamId(Demo::TeamID::Enemy); // @TODO - Enemy and Neutral
 
     DemoStateTreeAIComponent = CreateDefaultSubobject<UDemoStateTreeAIComponent>(TEXT("DemoStateTreeAIComponent"));
     DemoStateTreeAIComponent->SetStartLogicAutomatically(false);

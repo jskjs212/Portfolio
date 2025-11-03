@@ -7,12 +7,12 @@
 #include "GenericTeamAgentInterface.h"
 #include "DemoTypes.generated.h"
 
-namespace DemoTeamID
+namespace Demo::TeamID
 {
 const FGenericTeamId Player{1};
 const FGenericTeamId Enemy{2};
 const FGenericTeamId Neutral{3};
-} // namespace DemoTeamID
+} // namespace Demo::TeamID
 
 // Consider adding: Droppable, Blocked, Using, Disabled, etc.
 UENUM()

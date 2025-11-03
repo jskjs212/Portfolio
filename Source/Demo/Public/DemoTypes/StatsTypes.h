@@ -43,7 +43,8 @@ struct FStatModifier
     }
 };
 
-namespace StatModOpHelper
+// Helper function for Demo stats system.
+namespace Demo::Stats
 {
 inline float Aggregate(float BaseLikeValue, const TArray<FStatModifier>& Modifiers)
 {
@@ -67,7 +68,7 @@ inline float Aggregate(float BaseLikeValue, const TArray<FStatModifier>& Modifie
 
     return (BaseLikeValue + ToAdd) * ToMultiply;
 }
-} // namespace StatModOpHelper
+} // namespace Demo::Stats
 
 /**
  * Stat format for Health, Mana, Stamina, etc.
@@ -141,7 +142,7 @@ struct DEMO_API FPrimaryStat
     float GetFinalValue() const
     {
         const float BaseLike = BaseValue + AssignedValue;
-        return StatModOpHelper::Aggregate(BaseLike, Modifiers);
+        return Demo::Stats::Aggregate(BaseLike, Modifiers);
     }
 };
 
@@ -178,6 +179,6 @@ struct DEMO_API FDerivedStat
 
     float GetFinalValue() const
     {
-        return StatModOpHelper::Aggregate(BaseValue, Modifiers);
+        return Demo::Stats::Aggregate(BaseValue, Modifiers);
     }
 };

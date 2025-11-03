@@ -6,7 +6,9 @@
 #include "InputMappingContext.h"
 #include "Settings/DemoProjectSettings.h"
 
-TPair<const UInputMappingContext*, int32> DemoInputHelper::FindInputMappingContext(FGameplayTag ContextTag)
+namespace Demo::Input
+{
+TPair<const UInputMappingContext*, int32> FindInputMappingContext(FGameplayTag ContextTag)
 {
     const UDemoInputMappingCollection* InputMappingCollection = GetDefault<UDemoProjectSettings>()->InputMappingCollection.LoadSynchronous();
     if (!InputMappingCollection)
@@ -31,3 +33,4 @@ TPair<const UInputMappingContext*, int32> DemoInputHelper::FindInputMappingConte
 
     return {InputMappingContext, InputMappingContextData->Priority};
 }
+} // namespace Demo::Input

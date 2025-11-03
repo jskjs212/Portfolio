@@ -144,16 +144,17 @@ protected:
     /* Combat */
     void LightAttack();
 
+    void HeavyAttack();
+
     void Dodge();
 
     void ToggleLockOn();
 
-    // @TEST
-    UFUNCTION(BlueprintNativeEvent)
+#if WITH_EDITOR
     void Test1();
 
-    UFUNCTION(BlueprintNativeEvent)
     void Test2();
+#endif // WITH_EDITOR
 
     ////////////////////////////////////////////////////////
     //        Get & set
@@ -213,7 +214,7 @@ private:
     FOnTimelineFloatStatic DeathCameraBoomTimelineDelegate;
 
     /* Else */
-    FGenericTeamId TeamID{DemoTeamID::Player};
+    FGenericTeamId TeamID{Demo::TeamID::Player};
 
     UPROPERTY(EditDefaultsOnly, Category = "Initialization|Camera")
     float DefaultCameraBoomLength{300.f};

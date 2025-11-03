@@ -11,7 +11,7 @@
 UItemInfoWidget::UItemInfoWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
     // GameplayTags are initialized(?) before subsystem's init.
-    for (const FGameplayTag& ItemCategory : DemoItemTypes::GetItemCategories())
+    for (const FGameplayTag& ItemCategory : Demo::Item::GetItemCategories())
     {
         CategoryImages.Add(ItemCategory, nullptr);
     }
@@ -26,7 +26,7 @@ void UItemInfoWidget::NativeOnInitialized()
     checkf(StatModifierEntryBox->GetEntryWidgetClass()->IsChildOf(UStatModifierWidget::StaticClass()),
         TEXT("Invalid EntryWidgetClass for StatModifierEntryBox."));
 
-    if (CategoryImages.Num() != DemoItemTypes::GetItemCategories().Num())
+    if (CategoryImages.Num() != Demo::Item::GetItemCategories().Num())
     {
         DemoLOG_CF(LogUI, Error, TEXT("CategoryImages should have all ItemCategories."));
     }
@@ -56,14 +56,14 @@ const FItemDataBase* UItemInfoWidget::UpdateItemInfo(const FItemSlot& InSlot)
     CachedItemRowHandle = InSlot.RowHandle;
 
     // Update
-    FGameplayTag ItemCategory = DemoItemTypes::GetItemCategory(ItemData->ItemType);
+    FGameplayTag ItemCategory = Demo::Item::GetItemCategory(ItemData->ItemType);
     CategoryImage->SetBrushFromTexture(CategoryImages[ItemCategory]);
     StatModifierEntryBox->Reset();
     NameText->SetText(FText::FromName(ItemData->Name));
     DescriptionText->SetText(ItemData->Description);
 
     // Stat modifier entries
-    bool bIsEquipment = DemoItemTypes::GetEquipmentType(ItemData->ItemType).IsValid();
+    bool bIsEquipment = Demo::Item::GetEquipmentType(ItemData->ItemType).IsValid();
     if (bIsEquipment)
     {
         if (const FEquipmentData* EquipmentData = InSlot.RowHandle.GetRow<FEquipmentData>(TEXT("UItemInfoWidget::UpdateItemInfo()")))

@@ -32,6 +32,6 @@ void ADemoHUD::Init()
     DemoHUDWidget = CreateWidget<UDemoHUDWidget>(PlayerController, DemoHUDWidgetClass);
     if (DemoHUDWidget)
     {
-        DemoHUDWidget->AddToViewport(DemoZOrder::HUD_Base);
+        DemoHUDWidget->AddToViewport(Demo::ZOrder::HUD_Base);
     }
 }

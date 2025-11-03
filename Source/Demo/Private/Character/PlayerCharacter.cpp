@@ -320,7 +320,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
     {
         if (UEnhancedInputLocalPlayerSubsystem* EISubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
         {
-            const auto [DefaultMappingContext, Priority] = DemoInputHelper::FindInputMappingContext(DefaultInputMappingContextTag);
+            const auto [DefaultMappingContext, Priority] = Demo::Input::FindInputMappingContext(DefaultInputMappingContextTag);
             if (DefaultMappingContext)
             {
                 EISubsystem->AddMappingContext(DefaultMappingContext, Priority);
@@ -362,12 +362,15 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
         BindAction(DemoGameplayTags::Input_Sprint, ETriggerEvent::Completed, &ThisClass::StopSprinting);
         BindAction(DemoGameplayTags::Input_Interact, ETriggerEvent::Started, &ThisClass::Interact);
         BindAction(DemoGameplayTags::Input_LightAttack, ETriggerEvent::Started, &ThisClass::LightAttack);
+        BindAction(DemoGameplayTags::Input_HeavyAttack, ETriggerEvent::Started, &ThisClass::HeavyAttack);
         BindAction(DemoGameplayTags::Input_Block, ETriggerEvent::Started, &ThisClass::StartBlocking);
         BindAction(DemoGameplayTags::Input_Block, ETriggerEvent::Completed, &ThisClass::StopBlocking);
         BindAction(DemoGameplayTags::Input_Dodge, ETriggerEvent::Started, &ThisClass::Dodge);
         BindAction(DemoGameplayTags::Input_ToggleLockOn, ETriggerEvent::Started, &ThisClass::ToggleLockOn);
+#if WITH_EDITOR
         BindAction(DemoGameplayTags::Input_Test1, ETriggerEvent::Started, &ThisClass::Test1);
         BindAction(DemoGameplayTags::Input_Test2, ETriggerEvent::Started, &ThisClass::Test2);
+#endif // WITH_EDITOR
     }
 }
 
@@ -521,6 +524,11 @@ void APlayerCharacter::LightAttack()
     CombatComponent->Attack(DemoGameplayTags::State_Attack_Light);
 }
 
+void APlayerCharacter::HeavyAttack()
+{
+    CombatComponent->Attack(DemoGameplayTags::State_Attack_Heavy);
+}
+
 void APlayerCharacter::Dodge()
 {
     PerformAction(DemoGameplayTags::State_Dodge, false, 0);
@@ -554,16 +562,18 @@ void APlayerCharacter::SetMovementSpeedMode(FGameplayTag NewSpeedMode)
     }
 }
 
-void APlayerCharacter::Test1_Implementation()
+#if WITH_EDITOR
+void APlayerCharacter::Test1()
 {
     DemoLOG_CF(LogCharacter, Warning, TEXT("called!"));
 
     StatsComponent->Heal(50.f);
 }
 
-void APlayerCharacter::Test2_Implementation()
+void APlayerCharacter::Test2()
 {
     DemoLOG_CF(LogCharacter, Warning, TEXT("called!"));
 
     StatsComponent->TakeDamage(50.f);
 }
+#endif // WITH_EDITOR

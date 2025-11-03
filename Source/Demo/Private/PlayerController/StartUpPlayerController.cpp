@@ -62,7 +62,7 @@ void AStartUpPlayerController::ShowMainMenu()
     SetInputMode(InputModeData);
     SetShowMouseCursor(true);
 
-    MainMenuWidget->AddToViewport(DemoZOrder::HUD_Base);
+    MainMenuWidget->AddToViewport(Demo::ZOrder::HUD_Base);
 }
 
 void AStartUpPlayerController::StartNewGame()

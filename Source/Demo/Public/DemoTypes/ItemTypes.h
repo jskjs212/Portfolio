@@ -13,7 +13,7 @@
 // ItemType: Item.Weapon.Melee.OneHanded, Item.Consumable.Food, etc.
 // EquipmentType: Item.Armor.Shield, etc.
 // @check - Refactor from TArray to FGameplayTagContainer if needed.
-namespace DemoItemTypes
+namespace Demo::Item
 {
 // Inventory TMap's keys.
 // MUST sync with InventoryPageWidget's tab entries.
@@ -70,7 +70,7 @@ FORCEINLINE FGameplayTag GetEquipmentType(const FGameplayTag ItemType)
     }
     return FGameplayTag::EmptyTag;
 }
-} // namespace DemoItemTypes
+} // namespace Demo::Item
 
 /**
  * Item slot for inventory & UI.

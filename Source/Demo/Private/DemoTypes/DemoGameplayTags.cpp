@@ -17,6 +17,7 @@ UE_DEFINE_GAMEPLAY_TAG(Input_Walk, "Input.Walk");
 UE_DEFINE_GAMEPLAY_TAG(Input_Sprint, "Input.Sprint");
 UE_DEFINE_GAMEPLAY_TAG(Input_Interact, "Input.Interact");
 UE_DEFINE_GAMEPLAY_TAG(Input_LightAttack, "Input.LightAttack");
+UE_DEFINE_GAMEPLAY_TAG(Input_HeavyAttack, "Input.HeavyAttack");
 UE_DEFINE_GAMEPLAY_TAG(Input_Block, "Input.Block");
 UE_DEFINE_GAMEPLAY_TAG(Input_Dodge, "Input.Dodge");
 UE_DEFINE_GAMEPLAY_TAG(Input_ToggleLockOn, "Input.ToggleLockOn");

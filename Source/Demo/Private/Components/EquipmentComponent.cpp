@@ -154,12 +154,12 @@ void UEquipmentComponent::DestroyAllEquippedItems()
 
 void UEquipmentComponent::InitEquipmentComponent()
 {
-    for (const FGameplayTag& EquipmentType : DemoItemTypes::GetEquipmentTypes())
+    for (const FGameplayTag& EquipmentType : Demo::Item::GetEquipmentTypes())
     {
         EquippedItems.Add(EquipmentType, nullptr);
     }
 
-    checkf(EquippedItems.Num() == DemoItemTypes::GetEquipmentTypes().Num(), TEXT("EquippedItems should have all EquipmentTypes."));
+    checkf(EquippedItems.Num() == Demo::Item::GetEquipmentTypes().Num(), TEXT("EquippedItems should have all EquipmentTypes."));
 
     // @TODO - Config file or data table?
     EquipDefaultSocketNames.Add(DemoGameplayTags::Item_Weapon, TEXT("MeleeHandSocket"));
@@ -213,7 +213,7 @@ FEquipmentValidationResult UEquipmentComponent::EquipItem_Validate(const FItemSl
     }
 
     FGameplayTag ItemType = ItemData->ItemType;
-    FGameplayTag EquipmentType = DemoItemTypes::GetEquipmentType(ItemData->ItemType);
+    FGameplayTag EquipmentType = Demo::Item::GetEquipmentType(ItemData->ItemType);
     if (!EquipmentType.IsValid())
     {
         DemoLOG_F(LogEquipment, Error, TEXT("Item is not equippable."));

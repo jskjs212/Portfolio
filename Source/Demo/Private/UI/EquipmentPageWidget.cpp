@@ -129,7 +129,7 @@ void UEquipmentPageWidget::InitContextMenu()
     ContextMenuWidget = CreateWidget<UContextMenuWidget>(this, ContextMenuWidgetClass);
     ContextMenuWidget->InitActions(Actions);
     ContextMenuWidget->SetVisibility(ESlateVisibility::Collapsed);
-    ContextMenuWidget->AddToViewport(DemoZOrder::ContextMenu);
+    ContextMenuWidget->AddToViewport(Demo::ZOrder::ContextMenu);
 
     // Bind context menu buttons
     TArray<TObjectPtr<UTagButton>>& Buttons = ContextMenuWidget->GetActionButtons();

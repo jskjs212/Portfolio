@@ -180,7 +180,7 @@ void ADemoPlayerController::ShowBossVictoryWidget()
     {
         BossVictoryWidget = CreateWidget<UUserWidget>(this, BossVictoryWidgetClass);
     }
-    BossVictoryWidget->AddToViewport(DemoZOrder::Event_BossVictory);
+    BossVictoryWidget->AddToViewport(Demo::ZOrder::Event_BossVictory);
 
     // Hide BossAIStatus
     ShowBossAIStatus(nullptr);
@@ -216,12 +216,12 @@ void ADemoPlayerController::ShowYouDiedWidgetAndAddAfterDeathInputContext()
     {
         YouDiedWidget = CreateWidget<UUserWidget>(this, YouDiedWidgetClass);
     }
-    YouDiedWidget->AddToViewport(DemoZOrder::Event_YouDied);
+    YouDiedWidget->AddToViewport(Demo::ZOrder::Event_YouDied);
 
     // Add after-death IMC to subsystem
     if (UEnhancedInputLocalPlayerSubsystem* EISubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
     {
-        const auto [AfterDeathMappingContext, Priority] = DemoInputHelper::FindInputMappingContext(AfterDeathInputMappingContextTag);
+        const auto [AfterDeathMappingContext, Priority] = Demo::Input::FindInputMappingContext(AfterDeathInputMappingContextTag);
         if (AfterDeathMappingContext)
         {
             EISubsystem->AddMappingContext(AfterDeathMappingContext, Priority);
@@ -285,7 +285,7 @@ void ADemoPlayerController::InitPlayerMenu()
         {
             PlayerMenuWidget->InitPlayerMenu();
             PlayerMenuWidget->SetVisibility(ESlateVisibility::Collapsed);
-            PlayerMenuWidget->AddToViewport(DemoZOrder::PlayerMenu);
+            PlayerMenuWidget->AddToViewport(Demo::ZOrder::PlayerMenu);
         }
     }
 }
@@ -347,7 +347,7 @@ void ADemoPlayerController::SetupPlayerInput()
     // Add default IMC to subsystem
     if (UEnhancedInputLocalPlayerSubsystem* EISubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
     {
-        const auto [DefaultMappingContext, Priority] = DemoInputHelper::FindInputMappingContext(DefaultInputMappingContextTag);
+        const auto [DefaultMappingContext, Priority] = Demo::Input::FindInputMappingContext(DefaultInputMappingContextTag);
         if (DefaultMappingContext)
         {
             EISubsystem->AddMappingContext(DefaultMappingContext, Priority);

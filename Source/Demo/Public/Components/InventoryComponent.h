@@ -31,7 +31,7 @@ struct FInventoryValidationResult
 /**
  * Inventory
  * Map of { ItemCategory, Array<ItemSlot> }
- * Fixed ItemCategories from DemoItemTypes::ItemCategories.
+ * Fixed ItemCategories from Demo::Item::ItemCategories.
  * ItemSlot.Quantity == 0 means empty slot, although ItemSlot.RowHandle may be valid (not cleared when emptied).
  * For/while loops are used in AddItem. Sizes should not be absurd (Size << 1000).
  *
