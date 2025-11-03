@@ -5,8 +5,8 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "DemoTypes/ItemTypes.h"
-#include "DemoTypes/TableRowBases.h"
 #include "GameplayTagContainer.h"
+#include "Items/ItemRowBases.h"
 #include "InventoryComponent.generated.h"
 
 class UEquipmentComponent;

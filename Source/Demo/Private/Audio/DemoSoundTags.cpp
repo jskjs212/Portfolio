@@ -19,6 +19,8 @@ UE_DEFINE_GAMEPLAY_TAG(SFX_Combat_Boss_Intro, "Sound.SFX.Combat.Boss.Intro");
 UE_DEFINE_GAMEPLAY_TAG(SFX_Combat_Boss_Victory, "Sound.SFX.Combat.Boss.Victory");
 UE_DEFINE_GAMEPLAY_TAG(SFX_Combat_Hit_Default, "Sound.SFX.Combat.Hit.Default");
 UE_DEFINE_GAMEPLAY_TAG(SFX_Combat_Hit_Metal, "Sound.SFX.Combat.Hit.Metal");
+UE_DEFINE_GAMEPLAY_TAG(SFX_Combat_Hit_Block, "Sound.SFX.Combat.Hit.Block");
+UE_DEFINE_GAMEPLAY_TAG(SFX_Combat_LockOn, "Sound.SFX.Combat.LockOn");
 UE_DEFINE_GAMEPLAY_TAG(SFX_Combat_YouDied, "Sound.SFX.Combat.YouDied");
 UE_DEFINE_GAMEPLAY_TAG(SFX_Item_PickUp, "Sound.SFX.Item.PickUp");
 UE_DEFINE_GAMEPLAY_TAG(SFX_Item_Drop, "Sound.SFX.Item.Drop");

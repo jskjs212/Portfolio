@@ -17,10 +17,10 @@
 #include "DemoTypes/ActionInfoConfig.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "DemoTypes/LogCategories.h"
-#include "DemoTypes/TableRowBases.h"
 #include "Engine/DamageEvents.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Items/Item.h"
+#include "Items/ItemRowBases.h"
 #include "Kismet/GameplayStatics.h"
 
 ABaseCharacter::ABaseCharacter()
@@ -72,22 +72,9 @@ float ABaseCharacter::InternalTakePointDamage(float Damage, FPointDamageEvent co
     // Deal with damage types
 
     // Block
-    // @TODO - Wrap into a function?
-    constexpr float BlockDamageMultiplier = 0.3f;
-    constexpr float AllowBlockDegree = 45.f;
-    if (bIsBlocking)
+    if (ExecuteBlock(PointDamageEvent, EventInstigator))
     {
-        if (AActor* OtherActor = EventInstigator ? EventInstigator->GetPawn() : nullptr)
-        {
-            const FVector ToOther = (OtherActor->GetActorLocation() - GetActorLocation()).GetSafeNormal();
-            const float FrontDot = FVector::DotProduct(GetActorForwardVector(), ToOther);
-
-            if (FrontDot >= FMath::Cos(FMath::DegreesToRadians(AllowBlockDegree)))
-            {
-                // Successful block
-                Damage *= BlockDamageMultiplier;
-            }
-        }
+        Damage *= BlockReducedDamageFactor;
     }
 
     // Apply damage
@@ -228,6 +215,37 @@ void ABaseCharacter::StopBlocking()
     {
         StateManager->SetAction(DemoGameplayTags::State_General);
     }
+}
+
+bool ABaseCharacter::ExecuteBlock(const FPointDamageEvent& PointDamageEvent, const AController* EventInstigator)
+{
+    if (bIsBlocking)
+    {
+        if (AActor* OtherActor = EventInstigator ? EventInstigator->GetPawn() : nullptr)
+        {
+            const FVector ToOther = (OtherActor->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+            const float FrontDot = FVector::DotProduct(GetActorForwardVector(), ToOther);
+
+            // Successful block
+            if (FrontDot >= FMath::Cos(FMath::DegreesToRadians(BlockAngleThreshold)))
+            {
+                // Play sound
+                if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GetGameInstance()))
+                {
+                    AudioSubsystem->PlaySoundAtLocation(this, DemoSoundTags::SFX_Combat_Hit_Block, GetActorLocation());
+                }
+
+                // Spawn particle
+                FTransform ParticleTransform;
+                ParticleTransform.AddToTranslation(BlockParticleTransform.GetTranslation() + PointDamageEvent.HitInfo.ImpactPoint);
+                ParticleTransform.SetRotation(PointDamageEvent.HitInfo.ImpactNormal.ToOrientationQuat() * BlockParticleTransform.GetRotation());
+                UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BlockParticle, ParticleTransform);
+
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 void ABaseCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode)

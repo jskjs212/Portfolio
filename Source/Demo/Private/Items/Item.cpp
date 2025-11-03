@@ -9,7 +9,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "DemoTypes/LogCategories.h"
-#include "DemoTypes/TableRowBases.h"
+#include "Items/ItemRowBases.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 

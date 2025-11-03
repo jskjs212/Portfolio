@@ -33,8 +33,8 @@ ADemoAIController::ADemoAIController()
     SenseSightConfig->DetectionByAffiliation.bDetectFriendlies = false;
     SenseSightConfig->SightRadius = 1000.f;
     SenseSightConfig->LoseSightRadius = 1500.f;
-    SenseSightConfig->PeripheralVisionAngleDegrees = 45.f;
-    SenseSightConfig->AutoSuccessRangeFromLastSeenLocation = 300.f;
+    SenseSightConfig->PeripheralVisionAngleDegrees = 60.f;
+    SenseSightConfig->AutoSuccessRangeFromLastSeenLocation = 500.f;
 
     DemoPerceptionComponent->ConfigureSense(*SenseDamageConfig);
     DemoPerceptionComponent->ConfigureSense(*SenseSightConfig);

@@ -8,9 +8,9 @@
 #include "DemoTypes/DemoGameplayTags.h"
 #include "DemoTypes/ItemTypes.h"
 #include "DemoTypes/LogCategories.h"
-#include "DemoTypes/TableRowBases.h"
 #include "GameFramework/Character.h"
 #include "Items/Item.h"
+#include "Items/ItemRowBases.h"
 #include "PlayerController/DemoPlayerController.h"
 #include "UI/ItemActionDispatcher.h"
 

@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Components/TargetingComponent.h"
+#include "Audio/DemoAudioSubsystem.h"
+#include "Audio/DemoSoundTags.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/Pawn.h"
 #include "Interfaces/TargetInterface.h"
@@ -35,6 +37,15 @@ void UTargetingComponent::LockTarget()
         {
             FindResult.TargetInterface->OnTargeted(true);
             SetTargetStatus(true, FindResult.Target);
+
+            // Play sound
+            if (AActor* OwnerActor = GetOwner())
+            {
+                if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(OwnerActor->GetGameInstance()))
+                {
+                    AudioSubsystem->PlaySound2D(this, DemoSoundTags::SFX_Combat_LockOn);
+                }
+            }
 
 #if WITH_EDITORONLY_DATA
             if (bDrawDebugInfo)

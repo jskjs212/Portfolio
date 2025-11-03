@@ -11,7 +11,7 @@
 #include "DemoTypes/DemoTypes.h"
 #include "DemoTypes/ItemTypes.h"
 #include "DemoTypes/LogCategories.h"
-#include "DemoTypes/TableRowBases.h"
+#include "Items/ItemRowBases.h"
 #include "PlayerController/DemoPlayerController.h"
 #include "Styling/SlateBrush.h"
 #include "UI/DraggedItemSlotWidget.h"

@@ -8,13 +8,16 @@
 #include "BossTriggerBox.generated.h"
 
 enum class EBossEncounterEndReason : uint8;
+class APlayerCharacter;
 class UBossEncounterComponent;
 class UBoxComponent;
+class ULevelSequence;
 class UStaticMeshComponent;
 
 /**
  * Trigger box that starts a boss encounter when the player enters.
- * Blocks entrance during the encounter.
+ * Blocks entrance during the encounter. Plays level sequence on start.
+ * @TODO - DataTable
  */
 UCLASS()
 class DEMO_API ABossTriggerBox : public ATriggerBox
@@ -41,6 +44,10 @@ protected:
     virtual void BeginPlay() override;
 
 private:
+    void StopPlayerMovement(bool bStop);
+
+    void SetBossAIPauseState(bool bPause);
+
     void SetEntranceBlocked(bool bBlocked);
 
     ////////////////////////////////////////////////////////
@@ -57,6 +64,9 @@ private:
 
     void HandleEncounterEnded(EBossEncounterEndReason Reason);
 
+    UFUNCTION()
+    void HandleBossIntroLevelSequenceStop();
+
     ////////////////////////////////////////////////////////
     //        Variables
     ////////////////////////////////////////////////////////
@@ -67,7 +77,14 @@ private:
     UPROPERTY(EditAnywhere, Category = "Initialization", meta = (Categories = "Sound.Music"))
     FGameplayTag BossMusicTag;
 
+    UPROPERTY(EditAnywhere, Category = "Initialization")
+    TObjectPtr<ULevelSequence> BossIntroLevelSequence;
+
     // Relative location
     UPROPERTY(EditAnywhere, Category = "Initialization", meta = (MakeEditWidget = "true"))
     FVector InstigatorTeleportLocation;
+
+    bool bIsPausedForSequence{false};
+
+    TWeakObjectPtr<APlayerCharacter> CachedPlayerCharacter;
 };

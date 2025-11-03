@@ -26,7 +26,7 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnEncounterStarted, APawn* /* Instigator */
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnEncounterEnded, EBossEncounterEndReason /* Reason */);
 
 /**
- * Handles common logics for boss encounters; state management, activate AI, show UI, play music, etc.
+ * Handles common logics for boss encounters; state management, activate AI, show UI, play music.
  * This component can be added to an actor that triggers boss encounters.
  * e.g. BossTriggerBox, BossTriggerSwitch, Door, etc.
  *

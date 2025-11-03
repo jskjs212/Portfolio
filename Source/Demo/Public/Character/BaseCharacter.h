@@ -92,6 +92,8 @@ protected:
     void SetBlockingState(bool bNewBlocking);
     void StartBlocking();
     void StopBlocking();
+    // @return true if blocked successfully.
+    bool ExecuteBlock(const FPointDamageEvent& PointDamageEvent, const AController* EventInstigator);
 
     // CharacterMovementComponent's movement mode
     virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode = 0) override;
@@ -212,6 +214,12 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Initialization|Hit")
     FTransform HitParticleTransform;
 
+    UPROPERTY(EditAnywhere, Category = "Initialization|Hit")
+    TObjectPtr<UParticleSystem> BlockParticle;
+
+    UPROPERTY(EditAnywhere, Category = "Initialization|Hit")
+    FTransform BlockParticleTransform;
+
     ////////////////////////////////////////////////////////
     //        Variables
     ////////////////////////////////////////////////////////
@@ -239,6 +247,14 @@ protected:
 
     // Blocking with a shield.
     bool bIsBlocking{false};
+
+    // [Degree]
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization|Combat", meta = (ClampMin = "0.0", UIMax = "120.0"))
+    float BlockAngleThreshold{45.f};
+
+    // Damage *= Factor
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization|Combat", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+    float BlockReducedDamageFactor{0.3f};
 
     // Invincible
     bool bIFrameEnabled{false};

@@ -5,6 +5,7 @@
 namespace DemoGameplayTags
 {
 // IMC.*
+UE_DEFINE_GAMEPLAY_TAG(IMC_Modifier, "IMC.Modifier");
 UE_DEFINE_GAMEPLAY_TAG(IMC_PlayerCharacter_Default, "IMC.PlayerCharacter.Default");
 UE_DEFINE_GAMEPLAY_TAG(IMC_PlayerController_Default, "IMC.PlayerController.Default");
 UE_DEFINE_GAMEPLAY_TAG(IMC_PlayerController_AfterDeath, "IMC.PlayerController.AfterDeath");

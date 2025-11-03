@@ -5,7 +5,7 @@
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "DemoTypes/LogCategories.h"
-#include "DemoTypes/TableRowBases.h"
+#include "Items/ItemRowBases.h"
 #include "UI/StatModifierWidget.h"
 
 UItemInfoWidget::UItemInfoWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)

@@ -84,6 +84,8 @@ You must assign PlayerMappableKeySettings to all InputActions to prevent binding
 - Q: Toggle Lock-On
 - 1: Test1
 - 2: Test2
+- LMB: Light attack
+- Alt + LMB: Heavy attack
 
 ### PlayerController
 - Tab: PlayerMenu

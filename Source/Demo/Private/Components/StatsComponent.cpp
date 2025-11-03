@@ -4,7 +4,7 @@
 #include "Components/EquipmentComponent.h"
 #include "DemoTypes/ItemTypes.h"
 #include "DemoTypes/LogCategories.h"
-#include "DemoTypes/TableRowBases.h"
+#include "Items/ItemRowBases.h"
 
 void UStatsComponent::InitStatsComponent()
 {
