@@ -37,7 +37,7 @@ protected:
     TObjectPtr<APawn> Pawn;
 
     UPROPERTY(VisibleAnywhere, Category = "Context")
-    TObjectPtr<AAIController> AIController;
+    TWeakObjectPtr<AAIController> AIController;
 
     UPROPERTY(EditAnywhere, Category = "Parameter")
     TObjectPtr<AActor> TargetActor;

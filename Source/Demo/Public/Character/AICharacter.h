@@ -51,6 +51,7 @@ protected:
     //        Combat interface
     ////////////////////////////////////////////////////////
 public:
+    // Stop current AI movement if the new state doesn't allow.
     virtual float PerformAction(FGameplayTag InAction, bool bIgnoreCurrentState, int32 MontageIndex, bool bUseRandomIndex = false) override;
 
     virtual bool CanReceiveDamageFrom(const AActor* Attacker) const override;
@@ -68,7 +69,9 @@ public:
 
     virtual FVector GetTargetPointLocation() const override;
 
-    FORCEINLINE const FStateTreeReference& GetStateTreeRefOverride() const { return StateTreeRefOverride; }
+    FORCEINLINE const FStateTreeReference& GetStateTreeRefOverride_Peaceful() const { return StateTreeRefOverride_Peaceful; }
+
+    FORCEINLINE const FStateTreeReference& GetStateTreeRefOverride_Aggressive() const { return StateTreeRefOverride_Aggressive; }
 
     ////////////////////////////////////////////////////////
     //        Variables
@@ -79,6 +82,10 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Initialization|AI")
     FName LockOnSocketName{TEXT("Head")};
 
-    UPROPERTY(EditAnywhere, Category = "Initialization|AI|StateTreeOverride")
-    FStateTreeReference StateTreeRefOverride;
+    // Can be set in AIController's StateTreeAIComponent, but here we can manage per-character overrides.
+    UPROPERTY(EditAnywhere, Category = "Initialization|AI|StateTreeOverride|Peaceful")
+    FStateTreeReference StateTreeRefOverride_Peaceful;
+
+    UPROPERTY(EditAnywhere, Category = "Initialization|AI|StateTreeOverride|Aggressive")
+    FStateTreeReference StateTreeRefOverride_Aggressive;
 };

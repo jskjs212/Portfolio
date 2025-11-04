@@ -15,7 +15,7 @@ USTTask_PerformAction::USTTask_PerformAction(const FObjectInitializer& ObjectIni
 
 EStateTreeRunStatus USTTask_PerformAction::EnterState(FStateTreeExecutionContext& Context, const FStateTreeTransitionResult& Transition)
 {
-    if (Super::EnterState(Context, Transition) == EStateTreeRunStatus::Failed)
+    if (Super::EnterState(Context, Transition) == EStateTreeRunStatus::Failed || !Pawn.IsValid())
     {
         return EStateTreeRunStatus::Failed;
     }
@@ -51,24 +51,29 @@ void USTTask_PerformAction::ExitState(FStateTreeExecutionContext& Context, const
 {
     Super::ExitState(Context, Transition);
 
-    if (UStateManagerComponent* StateManager = Pawn->FindComponentByClass<UStateManagerComponent>())
+    if (Pawn.IsValid())
     {
-        if (StateManager->OnStateEnded.Remove(StateEndedHandle))
+        if (UStateManagerComponent* StateManager = Pawn->FindComponentByClass<UStateManagerComponent>())
         {
-            StateEndedHandle.Reset();
+            if (StateManager->OnStateEnded.Remove(StateEndedHandle))
+            {
+                StateEndedHandle.Reset();
+            }
         }
     }
 }
 
 void USTTask_PerformAction::HandleStateEnded(FGameplayTag InState)
 {
-    if (UStateManagerComponent* StateManager = Pawn->FindComponentByClass<UStateManagerComponent>())
+    if (Pawn.IsValid())
     {
-        if (StateManager->OnStateEnded.Remove(StateEndedHandle))
+        if (UStateManagerComponent* StateManager = Pawn->FindComponentByClass<UStateManagerComponent>())
         {
-            StateEndedHandle.Reset();
+            if (StateManager->OnStateEnded.Remove(StateEndedHandle))
+            {
+                StateEndedHandle.Reset();
+            }
         }
     }
-
     FinishTask(true);
 }

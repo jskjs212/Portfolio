@@ -11,6 +11,7 @@ enum class ERotateType : uint8
 {
     Control UMETA(DisplayName = "Control (camera)"),
     Input UMETA(DisplayName = "Input (character)"),
+    Count UMETA(Hidden)
 };
 
 /**

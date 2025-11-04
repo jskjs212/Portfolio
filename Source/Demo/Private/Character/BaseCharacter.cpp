@@ -4,6 +4,8 @@
 #include "Animation/AnimationDataSubsystem.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimLayerInterface.h"
+#include "Animation/AnimMontage.h"
+#include "Animation/AnimNotifies/AnimNotify_ResetState.h"
 #include "Audio/DemoAudioSubsystem.h"
 #include "Audio/DemoSoundTags.h"
 #include "Character/DemoPawnData.h"
@@ -548,8 +550,9 @@ float ABaseCharacter::PerformAction(FGameplayTag InAction, bool bIgnoreCurrentSt
     }
 
     // Play montage
+    UAnimMontage* AnimMontage = ActionInfo->AnimMontage;
     UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-    float Duration = AnimInstance->Montage_Play(ActionInfo->AnimMontage, ActionInfo->PlayRate, EMontagePlayReturnType::Duration);
+    float Duration = AnimInstance->Montage_Play(AnimMontage, ActionInfo->PlayRate, EMontagePlayReturnType::Duration);
     if (Duration == 0.f)
     {
         DemoLOG_CF(LogCharacter, Error, TEXT("Failed to play montage for %s."), *InAction.ToString());
@@ -559,11 +562,30 @@ float ABaseCharacter::PerformAction(FGameplayTag InAction, bool bIgnoreCurrentSt
     // Jump to section
     if (ActionInfo->StartSection != NAME_None)
     {
-        AnimInstance->Montage_JumpToSection(ActionInfo->StartSection, ActionInfo->AnimMontage);
+        AnimInstance->Montage_JumpToSection(ActionInfo->StartSection, AnimMontage);
     }
 
     StateManager->SetAction(InAction);
     StatsComponent->ConsumeStamina(ActionInfo->StaminaCost);
+
+#if WITH_EDITOR
+    // Warn if the montage doesn't have a UAnimNotify_ResetState notify.
+    // ResetState is at the end in most cases.
+    bool bFound = false;
+    for (auto Itr = AnimMontage->Notifies.rbegin(); Itr != AnimMontage->Notifies.rend(); ++Itr)
+    {
+        if ((*Itr).Notify && (*Itr).Notify->IsA<UAnimNotify_ResetState>())
+        {
+            bFound = true;
+            break;
+        }
+    }
+    if (!bFound)
+    {
+        DemoLOG_CF(LogAnimation, Warning, TEXT("AnimMontage has no UAnimNotify_ResetState notify. This may cause the character to be stuck in this state. Montage: %s, Action: %s."),
+            *AnimMontage->GetName(), *InAction.ToString());
+    }
+#endif // WITH_EDITOR
 
     return Duration;
 }

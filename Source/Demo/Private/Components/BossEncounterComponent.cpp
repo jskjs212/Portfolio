@@ -88,7 +88,7 @@ void UBossEncounterComponent::StartEncounter(APawn* Instigator)
     DemoPlayerController->ShowBossAIStatus(BossPawn.Get());
 
     // Activate boss AI
-    DemoAIController->SetTargetActor(Instigator);
+    DemoAIController->SetTargetActorManually(Instigator);
 
     // Start music
     if (BossMusicTag.IsValid())
@@ -153,7 +153,7 @@ void UBossEncounterComponent::EndEncounter(EBossEncounterEndReason Reason)
     {
         if (ADemoAIController* DemoAIController = BossPawn->GetController<ADemoAIController>())
         {
-            DemoAIController->SetTargetActor(nullptr);
+            DemoAIController->SetTargetActorManually(nullptr);
         }
     }
 

@@ -35,6 +35,7 @@ struct FActionInfo
     UPROPERTY(EditAnywhere)
     TObjectPtr<UAnimMontage> AnimMontage;
 
+#if WITH_EDITOR
     bool IsValid() const
     {
         if (DamageMultiplier < 0.f || StaminaCost < 0.f || PlayRate <= 0.f || !AnimMontage)
@@ -43,6 +44,7 @@ struct FActionInfo
         }
         return true;
     }
+#endif // WITH_EDITOR
 };
 
 USTRUCT()

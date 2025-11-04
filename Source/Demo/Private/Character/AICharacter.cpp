@@ -9,7 +9,6 @@
 #include "Components/StateManagerComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "DemoTypes/LogCategories.h"
-
 #include "Engine/DamageEvents.h"
 #include "GenericTeamAgentInterface.h"
 #include "Perception/AISense_Damage.h"
@@ -75,13 +74,15 @@ float AAICharacter::InternalTakePointDamage(float Damage, FPointDamageEvent cons
     // Notify AI
     FVector HitLocation = PointDamageEvent.HitInfo.ImpactPoint;
     FVector EventLocation = DamageCauser ? DamageCauser->GetActorLocation() : HitLocation;
+    AActor* InstigatorActor = EventInstigator ? EventInstigator->GetPawn() : nullptr;
     UAISense_Damage::ReportDamageEvent(
         this, /* WorldContextObject */
         this, /* DamagedActor */
-        EventInstigator,
+        InstigatorActor,
         Damage,
         EventLocation,
-        HitLocation
+        HitLocation,
+        TEXT("AICharacter::InternalTakePointDamage")
     );
 
     return Damage;
@@ -101,6 +102,7 @@ float AAICharacter::PerformAction(FGameplayTag InAction, bool bIgnoreCurrentStat
 {
     const float Duration = Super::PerformAction(InAction, bIgnoreCurrentState, MontageIndex, bUseRandomIndex);
 
+    // Stop current AI movement if the new state doesn't allow.
     if (!StateManager->CanMoveInCurrentState())
     {
         if (ADemoAIController* DemoAIController = GetController<ADemoAIController>())

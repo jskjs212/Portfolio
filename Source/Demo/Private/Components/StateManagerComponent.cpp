@@ -5,6 +5,7 @@
 #include "DemoTypes/LogCategories.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
+// std library
 #include <mutex>
 
 UStateManagerComponent::UStateManagerComponent()
@@ -128,17 +129,26 @@ void UStateManagerComponent::SetupAllowedTransitionsOnlyOnce()
 
 bool UStateManagerComponent::CanMoveInCurrentState() const
 {
+    // @hardcoded
     static const FGameplayTagContainer MovementBlockingStates = FGameplayTagContainer::CreateFromArray(TArray<FGameplayTag>{
         DemoGameplayTags::State_Dead,
             DemoGameplayTags::State_Disabled,
             DemoGameplayTags::State_Attack,
             DemoGameplayTags::State_Dodge
     });
-    return !CurrentState.MatchesAnyExact(MovementBlockingStates);
+    // Blocked states, but allow specific actions.
+    static const FGameplayTagContainer MovementAllowingActions = FGameplayTagContainer::CreateFromArray(TArray<FGameplayTag>{
+        //DemoGameplayTags::State_Disabled_HitstunFront,
+        //    DemoGameplayTags::State_Disabled_HitstunBack,
+        //    DemoGameplayTags::State_Disabled_HitstunLeft,
+        //    DemoGameplayTags::State_Disabled_HitstunRight
+    });
+    return !CurrentState.MatchesAnyExact(MovementBlockingStates) || CurrentAction.MatchesAnyExact(MovementAllowingActions);
 }
 
 bool UStateManagerComponent::CanChangeEquipment() const
 {
+    // @hardcoded
     static const FGameplayTagContainer ChangeEquipmentBlockingStates = FGameplayTagContainer::CreateFromArray(TArray<FGameplayTag>{
         DemoGameplayTags::State_Dead,
             DemoGameplayTags::State_Disabled,

@@ -91,9 +91,14 @@ UE_DEFINE_GAMEPLAY_TAG(State_Attack_Charged, "State.Attack.Charged");
 
 // StateTree.*
 UE_DEFINE_GAMEPLAY_TAG(StateTree_Tree_Main, "StateTree.Tree.Main");
+UE_DEFINE_GAMEPLAY_TAG(StateTree_Tree_Peaceful, "StateTree.Tree.Peaceful");
+UE_DEFINE_GAMEPLAY_TAG(StateTree_Tree_Aggressive, "StateTree.Tree.Aggressive");
+UE_DEFINE_GAMEPLAY_TAG(StateTree_Event_Alert, "StateTree.Event.Alert");
 UE_DEFINE_GAMEPLAY_TAG(StateTree_Event_TargetLost, "StateTree.Event.TargetLost");
 UE_DEFINE_GAMEPLAY_TAG(StateTree_Event_TargetSensed, "StateTree.Event.TargetSensed");
 UE_DEFINE_GAMEPLAY_TAG(StateTree_Event_Death, "StateTree.Event.Death");
+UE_DEFINE_GAMEPLAY_TAG(StateTree_Event_Respawn, "StateTree.Event.Respawn");
+UE_DEFINE_GAMEPLAY_TAG(StateTree_Event_Ressurect, "StateTree.Event.Resurrect");
 
 // UI.Action.Item.*
 UE_DEFINE_GAMEPLAY_TAG(UI_Action_Item_Use, "UI.Action.Item.Use");

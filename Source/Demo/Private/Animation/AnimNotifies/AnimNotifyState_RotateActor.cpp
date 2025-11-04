@@ -6,6 +6,8 @@
 
 void UAnimNotifyState_RotateActor::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float FrameDeltaTime, const FAnimNotifyEventReference& EventReference)
 {
+    static_assert(static_cast<uint8>(ERotateType::Count) == 2, "You added a new ERotateType value, but didn't update the switch statements.");
+
     Super::NotifyTick(MeshComp, Animation, FrameDeltaTime, EventReference);
 
     if (AActor* OwnerActor = MeshComp->GetOwner())
@@ -20,10 +22,13 @@ void UAnimNotifyState_RotateActor::NotifyTick(USkeletalMeshComponent* MeshComp, 
             case ERotateType::Control:
                 Target = CombatInterface->GetDesiredControlRotation();
                 break;
+
             case ERotateType::Input:
                 Target = CombatInterface->GetDesiredInputRotation();
                 break;
-            default:
+
+            default: _UNLIKELY
+                checkNoEntry();
                 break;
             }
 

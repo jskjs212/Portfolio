@@ -51,7 +51,7 @@ void ABossTriggerBox::BeginPlay()
     }
     if (!BossIntroLevelSequence)
     {
-        DemoLOG_CF(LogDemoGame, Warning, TEXT("No BossIntroLevelSequence assigned for %s."), *GetName());
+        DemoLOG_CF(LogDemoGame, Display, TEXT("No BossIntroLevelSequence assigned for %s."), *GetName());
         // Continue
     }
     if (InstigatorTeleportLocation.IsZero())

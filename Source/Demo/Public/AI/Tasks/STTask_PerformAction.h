@@ -29,7 +29,7 @@ private:
 
 protected:
     UPROPERTY(VisibleAnywhere, Category = "Context")
-    TObjectPtr<APawn> Pawn;
+    TWeakObjectPtr<APawn> Pawn;
 
     UPROPERTY(EditAnywhere, Category = "Parameter", meta = (Categories = "State"))
     FGameplayTag ActionTag;

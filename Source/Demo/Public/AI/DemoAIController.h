@@ -10,8 +10,6 @@
 struct FActorPerceptionUpdateInfo;
 struct FStateTreeReference;
 class UAIPerceptionComponent;
-class UAISenseConfig_Damage;
-class UAISenseConfig_Sight;
 class UDemoStateTreeAIComponent;
 
 /**
@@ -26,21 +24,16 @@ class DEMO_API ADemoAIController : public AAIController
     //        Subobjects
     ////////////////////////////////////////////////////////
 protected:
-    // Default StateTree is an empty tree with only one state that can be overridden with the same StateTreeTag.
+    // Default StateTree is an empty tree with two linked assets (Peaceful and Aggressive) that can be overridden.
     // If the possessed pawn is an AICharacter and has a valid StateTreeRefOverride, it will be used instead and execute StartLogic().
     // StateTreeAIComponent->SetStateTree() has problem transferring the parameters.
     // StateTreeAIComponent->SetStateTreeReference() shows error message from FRuntimeValidationInstanceData::SetContext.
     UPROPERTY(VisibleAnywhere)
     TObjectPtr<UDemoStateTreeAIComponent> DemoStateTreeAIComponent;
 
+    // Sense: Sight, damage
     UPROPERTY(VisibleAnywhere)
     TObjectPtr<UAIPerceptionComponent> DemoPerceptionComponent;
-
-    UPROPERTY(VisibleAnywhere)
-    TObjectPtr<UAISenseConfig_Damage> SenseDamageConfig;
-
-    UPROPERTY(VisibleAnywhere)
-    TObjectPtr<UAISenseConfig_Sight> SenseSightConfig;
 
     ////////////////////////////////////////////////////////
     //        AIController functions
@@ -52,17 +45,18 @@ protected:
     virtual void OnPossess(APawn* InPawn) override;
 
 public:
+    // If the current state disallows movement, deny the request for AAIController::MoveTo.
     virtual FPathFollowingRequestResult MoveTo(const FAIMoveRequest& MoveRequest, FNavPathSharedPtr* OutPath = nullptr) override;
 
     void SendStateTreeEvent(FGameplayTag InTag, FName InOrigin);
 
 protected:
-    void OverrideStateTree(FStateTreeReference InStateTreeRef);
+    void OverrideStateTree(FStateTreeReference InStateTreeRef, FGameplayTag InStateTreeTag);
 
     void OverrideStateTree(const APawn* InPawn);
 
     UFUNCTION()
-    void HandleTargetPerceptionInfoUpdated(const FActorPerceptionUpdateInfo& UpdateInfo);
+    void HandleTargetPerceptionUpdated(AActor* InActor, FAIStimulus Stimulus);
 
     ////////////////////////////////////////////////////////
     //        Get & set
@@ -73,7 +67,7 @@ public:
     void SetIsBoss(bool bInIsBoss) { bIsBoss = bInIsBoss; }
 
     // Ignores perception system, directly sets the target actor.
-    void SetTargetActor(AActor* InTargetActor);
+    void SetTargetActorManually(AActor* InTargetActor);
 
     void SetControlRotationToTarget();
 
@@ -91,5 +85,8 @@ protected:
     bool bIsBoss{false};
 
     UPROPERTY(EditAnywhere, Category = "Initialization|AI|StateTree")
-    FGameplayTag StateTreeTag;
+    FGameplayTag PeacefulStateTreeTag;
+
+    UPROPERTY(EditAnywhere, Category = "Initialization|AI|StateTree")
+    FGameplayTag AggressiveStateTreeTag;
 };

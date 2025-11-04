@@ -14,7 +14,8 @@ UENUM()
 enum class EStatModOp : uint8
 {
     Add UMETA(DisplayName = "Additive"),
-    Multiply UMETA(DisplayName = "Multiplicative")
+    Multiply UMETA(DisplayName = "Multiplicative"),
+    Count UMETA(Hidden)
 };
 
 /**
@@ -48,6 +49,8 @@ namespace Demo::Stats
 {
 inline float Aggregate(float BaseLikeValue, const TArray<FStatModifier>& Modifiers)
 {
+    static_assert(static_cast<uint8>(EStatModOp::Count) == 2, "You added a new EStatModOp value, but didn't update the switch statements.");
+
     float ToAdd = 0.f;
     float ToMultiply = 1.f;
 
@@ -58,10 +61,13 @@ inline float Aggregate(float BaseLikeValue, const TArray<FStatModifier>& Modifie
         case EStatModOp::Add:
             ToAdd += Modifier.Magnitude;
             break;
+
         case EStatModOp::Multiply:
             ToMultiply += Modifier.Magnitude;
             break;
-        default:
+
+        default: _UNLIKELY
+            checkNoEntry();
             break;
         }
     }
