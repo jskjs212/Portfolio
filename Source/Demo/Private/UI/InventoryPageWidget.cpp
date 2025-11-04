@@ -110,9 +110,9 @@ void UInventoryPageWidget::UpdateInventorySlotsUI()
 
         checkf(WrapBox, TEXT("Invalid inventory."));
 
+        // @check - Show text? Set color?
         // No items (empty wrapbox)
         // ItemArray.Num() == 0 means bFixSlotSizeAndExposeEmptySlots == false.
-        // @TODO - Show text? Set color?
 
         const int32 ItemNum = ItemArray.Num();
         const int32 ExistingNum = WrapBox->GetAllChildren().Num();
@@ -231,7 +231,6 @@ void UInventoryPageWidget::HandleContextMenuButtonClicked(FGameplayTag InTag)
     // Execute action
     if (InTag == DemoGameplayTags::UI_Action_Item_Use)
     {
-        // @TODO - Get quantity from user input
         ContextMenuItemActionRequest.Quantity = 1;
 
         const int32 Used = ItemActionDispatcher->RequestUseItem(ContextMenuItemActionRequest);
@@ -242,7 +241,6 @@ void UInventoryPageWidget::HandleContextMenuButtonClicked(FGameplayTag InTag)
     }
     else if (InTag == DemoGameplayTags::UI_Action_Item_Drop)
     {
-        // @TODO - Get quantity from user input
         ContextMenuItemActionRequest.Quantity = 1;
 
         const int32 Dropped = ItemActionDispatcher->RequestDropItem(ContextMenuItemActionRequest);

@@ -38,13 +38,15 @@ struct FSoundQueryResult
 
 /**
  * Demo audio subsystem that plays sounds based on GameplayTags.
+ * This allows centralized management of SoundBases via SoundCollection DataAsset.
+ * Character, UI, component, and other classes would need to directly reference SoundBases without this subsystem.
  *
  * Categories: Music, SFX, UI, Voice
  * Music: Background music
  * SFX: Sound Effects (paused during pause)
  * UI: UI sounds, notifications (not paused)
  * Voice: Character voices
- * @TODO - SpawnSound with AudioComponent pooling?
+ * @TODO - SpawnSound series with AudioComponent pooling
  *
  * Consider adding:
  * - Parameters: StartTime, FadeIn, FadeOut, Concurrency, Attenuation, etc.

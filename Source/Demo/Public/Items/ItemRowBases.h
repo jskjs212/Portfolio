@@ -22,6 +22,7 @@ class UStaticMesh;
 class UTexture2D;
 
 // Consider adding:
+// Tag to Attribute mapping
 // Price (Buy/Sell), Weight, Rarity, MaxDurability, bCanDrop
 // bIsQuestItem, ItemSubType, Sound, Particle, Animation
 // Requirements
@@ -30,28 +31,31 @@ struct FItemDataBase : public FTableRowBase
 {
     GENERATED_BODY()
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditDefaultsOnly)
     FName Name;
 
-    UPROPERTY(EditAnywhere, meta = (Categories = "Item"))
+    UPROPERTY(EditDefaultsOnly, meta = (Categories = "Item"))
     FGameplayTag ItemType;
 
-    UPROPERTY(EditAnywhere, meta = (MultiLine = "true"))
+    UPROPERTY(EditDefaultsOnly, meta = (MultiLine = "true"))
     FText Description;
 
-    UPROPERTY(EditAnywhere, meta = (ClampMin = "1"))
+    UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "1"))
     int32 MaxStackSize{1};
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditDefaultsOnly)
     TObjectPtr<UTexture2D> Icon;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditDefaultsOnly)
     TObjectPtr<UStaticMesh> StaticMesh;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditDefaultsOnly)
     TObjectPtr<USkeletalMesh> SkeletalMesh;
 
-    //UPROPERTY(EditAnywhere)
+    UPROPERTY(EditDefaultsOnly)
+    FVector MeshRelativeScale3D{FVector::OneVector};
+
+    //UPROPERTY(EditDefaultsOnly)
     //TMap<FGameplayTag, float> Attributes;
     //
     //// @return { bFound, Value }
@@ -94,7 +98,7 @@ struct FEquipmentData : public FItemDataBase
 
     // {StatTag, StatModifier}
     // Recommended StatModifier::SourceTag = EquipmentTypes like Item.Armor.Shield.
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditDefaultsOnly)
     TMap<FGameplayTag, FStatModifier> StatModifiers;
 };
 
@@ -105,7 +109,7 @@ struct FWeaponData : public FEquipmentData
 {
     GENERATED_BODY()
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditDefaultsOnly)
     FAttackCollisionDefinition AttackCollisionDefinition{.CollisionType = EAttackCollisionType::MainWeapon};
 
     FWeaponData()

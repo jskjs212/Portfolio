@@ -6,7 +6,6 @@
 #include "Character/BaseCharacter.h"
 #include "Components/TimelineComponent.h"
 #include "DemoTypes/DemoTypes.h"
-#include "DemoTypes/ItemTypes.h" // @TEST
 #include "GenericTeamAgentInterface.h"
 #include "PlayerCharacter.generated.h"
 
@@ -221,8 +220,4 @@ private:
 
     UPROPERTY(EditDefaultsOnly, Category = "Initialization|Camera")
     float DeathCameraBoomLength{700.f};
-
-    /* @TEST */
-    UPROPERTY(EditDefaultsOnly, Category = "TEST", meta = (AllowPrivateAccess = "true"))
-    FItemSlot TestItemSlot;
 };

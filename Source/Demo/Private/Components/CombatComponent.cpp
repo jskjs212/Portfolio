@@ -20,7 +20,7 @@ void UCombatComponent::BeginPlay()
 
 float UCombatComponent::ToggleCombat()
 {
-    // @TODO
+    // @TODO - Draw, sheathe
 
     return 0.f;
 }

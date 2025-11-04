@@ -139,17 +139,18 @@ void ADemoAIController::OverrideStateTree(const APawn* InPawn)
 void ADemoAIController::HandleTargetPerceptionUpdated(AActor* InActor, FAIStimulus Stimulus)
 {
 #if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
-    //    DemoLOG_F(LogAI, Display, TEXT("Pawn: %s, Sensed: %s, Stimulus: %s"),
-    //        *GetNameSafe(GetPawn()),
-    //        Stimulus.WasSuccessfullySensed() ? TEXT("true") : TEXT("false"),
-    //        *Stimulus.GetDebugDescription()
-    //    ); // @debug if needed
+    // @debug - Uncomment if needed.
+    //DemoLOG_F(LogAI, Display, TEXT("Pawn: %s, Sensed: %s, Stimulus: %s"),
+    //    *GetNameSafe(GetPawn()),
+    //    Stimulus.WasSuccessfullySensed() ? TEXT("true") : TEXT("false"),
+    //    *Stimulus.GetDebugDescription()
+    //);
 #endif // !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
 
     if (bIsBoss)
     {
         // Boss AI ignores perception updates.
-        // @TODO - Make BossAIController, override StateTree, or use different perception settings.
+        // @TODO - Implement BossAIController
         return;
     }
 

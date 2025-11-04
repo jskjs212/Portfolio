@@ -11,7 +11,6 @@
 #include "DemoTypes/LogCategories.h"
 #include "Items/ItemRowBases.h"
 #include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetSystemLibrary.h"
 
 AItem* AItem::SpawnItem(
     UWorld* World,
@@ -65,14 +64,14 @@ int32 AItem::DropItem(UWorld* World, const FItemSlot& InSlot, const AActor* Drop
     AItem* DroppedItem = AItem::SpawnItem(World, InSlot, SpawnTransform);
     if (!IsValid(DroppedItem))
     {
-        DemoLOG_CF(LogTemp, Error, TEXT("Failed to spawn item."));
+        DemoLOG_CF(LogDemoGame, Error, TEXT("Failed to spawn item."));
         return -1;
     }
 
     // Check mesh to drop
     if (!DroppedItem->IsMeshAssetValid())
     {
-        DemoLOG_CF(LogTemp, Error, TEXT("Item has no mesh."));
+        DemoLOG_CF(LogDemoGame, Error, TEXT("Item has no mesh."));
         DroppedItem->Destroy();
         return -1;
     }
@@ -118,7 +117,7 @@ void AItem::BeginPlay()
     }
     else
     {
-        DemoLOG_CF(LogTemp, Error, TEXT("ItemSlot is not set properly from %s."), *GetName());
+        DemoLOG_CF(LogDemoGame, Error, TEXT("ItemSlot is not set properly from %s."), *GetName());
     }
 }
 
@@ -174,7 +173,7 @@ void AItem::SetupMesh()
 {
     check(StaticMesh && SkeletalMesh && InteractCollision);
 
-    const FItemDataBase* ItemData = ItemSlot.RowHandle.GetRow<FItemDataBase>(TEXT("AItem::AItem()"));
+    const FItemDataBase* ItemData = ItemSlot.RowHandle.GetRow<FItemDataBase>(TEXT("AItem::SetupMesh()"));
     if (!ItemData)
     {
         return;
@@ -223,7 +222,8 @@ void AItem::SetupMesh()
         {
             MeshType = EItemMeshType::StaticMesh;
 
-            const FTransform& CurrentTransform = GetActorTransform();
+            FTransform CurrentTransform = GetActorTransform();
+            CurrentTransform.SetScale3D(ItemData->MeshRelativeScale3D);
 
             StaticMesh->DetachFromComponent(DetachRules);
             InteractCollision->DetachFromComponent(DetachRules);
@@ -249,15 +249,26 @@ void AItem::SetupMesh()
         CurrentMesh = StaticMesh;
     }
 
+    // Set the interact collision's location and box size according to the new mesh.
     if (CurrentMesh)
     {
-        float Radius;
-        FVector Origin;
-        FVector BoxExtent;
-        UKismetSystemLibrary::GetComponentBounds(CurrentMesh, Origin, BoxExtent, Radius);
-        InteractCollision->SetBoxExtent(BoxExtent);
-        // @TEST
-        //DemoLOG_CF(LogTemp, Display, TEXT("BoxExtent: %s, Origin: %s."), *BoxExtent.ToString(), *Origin.ToString());
+        // Adjust the separation of two centers of mesh; root and origin.
+        // Root: Mesh component's location, Origin: Protruding mesh's center location.
+        FVector NewOrigin = CurrentMesh->Bounds.Origin;
+
+        // Rotated and scaled bounds are not correct, so temporarily set transform to identity.
+        const FTransform SavedTransform = CurrentMesh->GetComponentTransform();
+        CurrentMesh->SetWorldTransform(FTransform::Identity); // Temporary
+
+        // Box boundary size.
+        FVector NewBoxExtent = CurrentMesh->Bounds.BoxExtent;
+        CurrentMesh->SetWorldTransform(SavedTransform); // Restore
+
+        InteractCollision->SetWorldLocation(NewOrigin);
+        InteractCollision->SetBoxExtent(NewBoxExtent);
+
+        // Set relative scale after getting bounds.
+        CurrentMesh->SetRelativeScale3D(ItemData->MeshRelativeScale3D);
     }
 }
 

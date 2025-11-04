@@ -37,6 +37,8 @@ protected:
     TObjectPtr<USkeletalMeshComponent> SkeletalMesh;
 
     // Collision for item pickup.
+    // Adjust the box size to fit the mesh's bounds.
+    // Not visible, but blocks visibility to be detected by line traces.
     UPROPERTY(VisibleAnywhere, Category = "Item")
     TObjectPtr<UBoxComponent> InteractCollision;
 
@@ -119,13 +121,13 @@ public:
     //        Variables
     ////////////////////////////////////////////////////////
 protected:
-    EItemMeshType MeshType{EItemMeshType::None};
-
-    UPROPERTY(EditAnywhere, Category = "Item")
+    UPROPERTY(EditAnywhere, Category = "Initialization")
     FItemSlot ItemSlot;
 
+    EItemMeshType MeshType{EItemMeshType::None};
+
 private:
-    static constexpr float DropDistance{50.f};
-    static constexpr float DropHeight{50.f};
-    static constexpr float DropImpulseStrength{250.f};
+    static constexpr inline float DropDistance{50.f};
+    static constexpr inline float DropHeight{50.f};
+    static constexpr inline float DropImpulseStrength{250.f};
 };

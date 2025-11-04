@@ -120,7 +120,6 @@ void UStateManagerComponent::SetupAllowedTransitionsOnlyOnce()
             AllowedTransitions.Add(DemoGameplayTags::State_Dodge, BasicStates);
             AllowedTransitions.Add(DemoGameplayTags::State_Block, BasicStates);
 
-            // @TODO - Allow toggling combat when jumping?
             // @check - Allow canceling attacks by toggling combat or dodging?
             // @check - Allow canceling ToggleCombat_Exit by attacking or dodging?
             //          -> Currently it's meaningless to ToggleCombat_Exit, because there's no advantage to do so.

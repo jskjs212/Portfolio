@@ -73,7 +73,7 @@ void ADemoPlayerController::BeginPlay()
 {
     Super::BeginPlay();
 
-    DemoLOG_CF(LogTEST, Warning, TEXT("BeginPlay!")); // @debug
+    DemoLOG_CF(LogTEST, Warning, TEXT("BeginPlay!")); // @debug - To distinguish every session start.
 
     if (MainMenuLevelName == NAME_None)
     {

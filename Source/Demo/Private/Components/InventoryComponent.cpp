@@ -203,7 +203,7 @@ void UInventoryComponent::InitInventoryComponent()
 
 void UInventoryComponent::InitMaxSlots()
 {
-    // @TODO - Config file or data table? Determined by character class or something?
+    // @TODO - DataTable. Maybe after implementing character combat class.
     // Initial max slot sizes.
     constexpr int32 WeaponMaxSlots = 10;
     constexpr int32 ArmorMaxSlots = 10;
@@ -233,10 +233,7 @@ void UInventoryComponent::BindToItemActionDispatcher()
         {
             if (UItemActionDispatcher* ItemActionDispatcher = DemoPlayerController->GetItemActionDispatcher())
             {
-                ItemActionDispatcher->OnAddItemRequested.BindUObject(this, &ThisClass::AddItem);
-                ItemActionDispatcher->OnRemoveItemRequested.BindUObject(this, &ThisClass::RemoveItem);
-                ItemActionDispatcher->OnUseItemRequested.BindUObject(this, &ThisClass::UseItem);
-                ItemActionDispatcher->OnDropItemRequested.BindUObject(this, &ThisClass::DropItem);
+                ItemActionDispatcher->OnItemActionRequested.BindUObject(this, &ThisClass::HandleItemActionRequested);
                 ItemActionDispatcher->OnSwapItemRequested.BindUObject(this, &ThisClass::SwapItem);
             }
         }
@@ -591,6 +588,31 @@ int32 UInventoryComponent::ConsumeFood(const FConsumableData* ConsumableData, co
         }
     }
     return ToUse;
+}
+
+int32 UInventoryComponent::HandleItemActionRequested(FGameplayTag InActionTag, const FItemActionRequest& Request)
+{
+    if (InActionTag == DemoGameplayTags::UI_Action_Item_Add)
+    {
+        return AddItem(Request);
+    }
+    else if (InActionTag == DemoGameplayTags::UI_Action_Item_Remove)
+    {
+        return RemoveItem(Request);
+    }
+    else if (InActionTag == DemoGameplayTags::UI_Action_Item_Use)
+    {
+        return UseItem(Request);
+    }
+    else if (InActionTag == DemoGameplayTags::UI_Action_Item_Drop)
+    {
+        return DropItem(Request);
+    }
+    else
+    {
+        checkNoEntry();
+        return -1;
+    }
 }
 
 UEquipmentComponent* UInventoryComponent::GetEquipmentComponent()

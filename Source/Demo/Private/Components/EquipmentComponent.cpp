@@ -161,7 +161,7 @@ void UEquipmentComponent::InitEquipmentComponent()
 
     checkf(EquippedItems.Num() == Demo::Item::GetEquipmentTypes().Num(), TEXT("EquippedItems should have all EquipmentTypes."));
 
-    // @TODO - Config file or data table?
+    // @TODO - FEquipmentData (DataTable)
     EquipDefaultSocketNames.Add(DemoGameplayTags::Item_Weapon, TEXT("MeleeHandSocket"));
     EquipDefaultSocketNames.Add(DemoGameplayTags::Item_Armor_Shield, TEXT("ShieldHandSocket"));
 
@@ -183,8 +183,7 @@ void UEquipmentComponent::BindToItemActionDispatcher()
         {
             if (UItemActionDispatcher* ItemActionDispatcher = DemoPlayerController->GetItemActionDispatcher())
             {
-                ItemActionDispatcher->OnUnequipItemRequested.BindUObject(this, &ThisClass::UnequipItem);
-                ItemActionDispatcher->OnUnequipAndDropItemRequested.BindUObject(this, &ThisClass::UnequipAndDropItem);
+                ItemActionDispatcher->OnUnequipItemActionRequested.BindUObject(this, &ThisClass::HandleUnequipItemActionRequested);
             }
         }
     }
@@ -314,7 +313,7 @@ bool UEquipmentComponent::AttachActor(AActor* ActorToAttach, FGameplayTag Equipm
         return false;
     }
 
-    // @TODO - Move socketName to FItemData?
+    // @TODO - Move socketName to FEquipmentData
     // Socket name
     const FName* SocketNamePtr = EquipDefaultSocketNames.Find(EquipmentType);
     if (!SocketNamePtr)
@@ -409,6 +408,23 @@ void UEquipmentComponent::UnequipItem_PostProcess(FGameplayTag EquipmentType, co
     }
 
     // Unregister active skills
+}
+
+bool UEquipmentComponent::HandleUnequipItemActionRequested(FGameplayTag InActionTag, FGameplayTag EquipmentType)
+{
+    if (InActionTag == DemoGameplayTags::UI_Action_Item_Unequip)
+    {
+        return UnequipItem(EquipmentType);
+    }
+    else if (InActionTag == DemoGameplayTags::UI_Action_Item_UnequipAndDrop)
+    {
+        return UnequipAndDropItem(EquipmentType);
+    }
+    else
+    {
+        checkNoEntry();
+        return false;
+    }
 }
 
 AItem* UEquipmentComponent::GetEquippedItem(FGameplayTag EquipmentType) const

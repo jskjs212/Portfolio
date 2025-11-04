@@ -78,7 +78,7 @@ inline float Aggregate(float BaseLikeValue, const TArray<FStatModifier>& Modifie
 
 /**
  * Stat format for Health, Mana, Stamina, etc.
- * @TODO - Add StatModifiers -> Add parent struct for all stats.
+ * @TODO - Add max stat modifiers to EquipmentData after implementing the parent struct.
  */
 USTRUCT()
 struct DEMO_API FResourceStat

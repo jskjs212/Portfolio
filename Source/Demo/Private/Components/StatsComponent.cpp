@@ -230,8 +230,7 @@ bool UStatsComponent::RemoveModifierFromDerivedStat(FGameplayTag StatTag, const 
 
 void UStatsComponent::RecalculateDerivedStat(FGameplayTag InPrimaryStatTag)
 {
-    // @hardcoded - Formula is hardcoded for now.
-    // @TODO - DataTable
+    // @hardcoded @TODO - Formula is hardcoded for now. Move to DataTable.
     // Attack = STR * 0.5 + DEX * 0.1
     // Defense = STR * 0.1 + DEX * 0.3 + INT * 0.1
     // {DerivedStat, Array{PrimaryStat, Weight}}

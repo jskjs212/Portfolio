@@ -101,9 +101,13 @@ UE_DEFINE_GAMEPLAY_TAG(StateTree_Event_Respawn, "StateTree.Event.Respawn");
 UE_DEFINE_GAMEPLAY_TAG(StateTree_Event_Ressurect, "StateTree.Event.Resurrect");
 
 // UI.Action.Item.*
-UE_DEFINE_GAMEPLAY_TAG(UI_Action_Item_Use, "UI.Action.Item.Use");
+UE_DEFINE_GAMEPLAY_TAG(UI_Action_Item_Add, "UI.Action.Item.Add");
+UE_DEFINE_GAMEPLAY_TAG(UI_Action_Item_Remove, "UI.Action.Item.Remove");
+UE_DEFINE_GAMEPLAY_TAG_COMMENT(UI_Action_Item_Use, "UI.Action.Item.Use", "Equip, consume, etc.")
 UE_DEFINE_GAMEPLAY_TAG(UI_Action_Item_Drop, "UI.Action.Item.Drop");
+UE_DEFINE_GAMEPLAY_TAG(UI_Action_Item_Swap, "UI.Action.Item.Swap");
 UE_DEFINE_GAMEPLAY_TAG(UI_Action_Item_Unequip, "UI.Action.Item.Unequip");
+UE_DEFINE_GAMEPLAY_TAG(UI_Action_Item_UnequipAndDrop, "UI.Action.Item.UnequipAndDrop");
 UE_DEFINE_GAMEPLAY_TAG(UI_Action_Item_Cancel, "UI.Action.Item.Cancel");
 
 // UI.PlayerMenu.*
