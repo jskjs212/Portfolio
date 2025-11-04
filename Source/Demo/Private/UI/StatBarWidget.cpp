@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UI/StatBarWidget.h"
-//#include "Blueprint/WidgetTree.h"
 #include "Components/ProgressBar.h"
 #include "Components/StatsComponent.h"
 #include "DemoTypes/LogCategories.h"
@@ -12,6 +11,8 @@ void UStatBarWidget::NativeOnInitialized()
     Super::NativeOnInitialized();
 
     checkf(StatBar, TEXT("Failed to bind widgets."));
+
+    StatBar->SetVisibility(ESlateVisibility::HitTestInvisible);
 }
 
 void UStatBarWidget::NativePreConstruct()
@@ -62,17 +63,15 @@ void UStatBarWidget::BindToStatsComponent(AActor* InActor, FGameplayTag InStatTa
 
     if (CachedStatsComponent.IsValid())
     {
+        // Already bound
         if (CachedStatsComponent.Get() == StatsComponent && StatTag == InStatTag)
         {
-            // Already bound
             return;
         }
 
-        // Unbind previous
+        // Unbind from previous
         CachedStatsComponent->OnCurrentResourceStatChanged.Remove(StatChangedDelegateHandle);
-
         StatChangedDelegateHandle.Reset();
-        CachedStatsComponent = nullptr;
     }
 
     StatTag = InStatTag;
@@ -82,6 +81,16 @@ void UStatBarWidget::BindToStatsComponent(AActor* InActor, FGameplayTag InStatTa
     StatChangedDelegateHandle = StatsComponent->OnCurrentResourceStatChanged.AddUObject(this, &ThisClass::HandleCurrentStatChanged);
 
     UpdateStatBar();
+}
+
+void UStatBarWidget::UnbindFromStatsComponent()
+{
+    if (CachedStatsComponent.IsValid())
+    {
+        CachedStatsComponent->OnCurrentResourceStatChanged.Remove(StatChangedDelegateHandle);
+        CachedStatsComponent = nullptr;
+        StatChangedDelegateHandle.Reset();
+    }
 }
 
 void UStatBarWidget::UpdateStatBar()

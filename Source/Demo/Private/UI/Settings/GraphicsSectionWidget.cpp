@@ -86,11 +86,11 @@ void UGraphicsSectionWidget::NativeOnInitialized()
 
 void UGraphicsSectionWidget::NativeDestruct()
 {
-    Super::NativeDestruct();
-
     // Unbind from external window action
     FSlateApplication::Get().UnregisterOnWindowActionNotification(OnWindowActionDelegateHandle);
     OnWindowActionDelegateHandle.Reset();
+
+    Super::NativeDestruct();
 }
 
 void UGraphicsSectionWidget::SyncUIWithUserSettings()

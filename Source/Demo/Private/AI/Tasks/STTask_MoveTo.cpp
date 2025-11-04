@@ -63,7 +63,7 @@ EStateTreeRunStatus USTTask_MoveTo::EnterState(FStateTreeExecutionContext& Conte
             {
                 if (StateManager->CanMoveInCurrentState())
                 {
-                    DemoLOG_CF(LogAI, Error, TEXT("Can move in current state. But MoveTo was denied for %s."), *Pawn->GetName());
+                    DemoLOG_CF(LogAI, Warning, TEXT("Can move in current state. But MoveTo was denied for %s."), *Pawn->GetName());
                 }
             }
         }

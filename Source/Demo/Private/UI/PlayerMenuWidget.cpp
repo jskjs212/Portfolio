@@ -105,11 +105,11 @@ bool UPlayerMenuWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDro
     {
         if (DragDropOp->GetSourceTag() == DemoGameplayTags::UI_PlayerMenu_Inventory)
         {
-            return DropInventoryItem(DragDropOp);
+            return DragDropInventoryItem(DragDropOp);
         }
         else if (DragDropOp->GetSourceTag() == DemoGameplayTags::UI_PlayerMenu_Equipment)
         {
-            return DropEquipmentItem(DragDropOp);
+            return DragDropEquipmentItem(DragDropOp);
         }
         else
         {
@@ -136,7 +136,7 @@ void UPlayerMenuWidget::HideMenu()
     }
 }
 
-bool UPlayerMenuWidget::DropInventoryItem(const UItemSlotDragDropOp* InDragDropOp)
+bool UPlayerMenuWidget::DragDropInventoryItem(const UItemSlotDragDropOp* InDragDropOp)
 {
     if (ADemoPlayerController* DemoPlayerController = GetDemoPlayerController())
     {
@@ -153,7 +153,7 @@ bool UPlayerMenuWidget::DropInventoryItem(const UItemSlotDragDropOp* InDragDropO
     return false;
 }
 
-bool UPlayerMenuWidget::DropEquipmentItem(const UItemSlotDragDropOp* InDragDropOp)
+bool UPlayerMenuWidget::DragDropEquipmentItem(const UItemSlotDragDropOp* InDragDropOp)
 {
     if (ADemoPlayerController* DemoPlayerController = GetDemoPlayerController())
     {
@@ -161,7 +161,18 @@ bool UPlayerMenuWidget::DropEquipmentItem(const UItemSlotDragDropOp* InDragDropO
         {
             FGameplayTag EquipmentType = EquipmentPageWidget->GetEquipmentTypeAtIndex(InDragDropOp->GetIndex());
 
-            return ItemActionDispatcher->RequestUnequipAndDropItem(EquipmentType);
+            switch (EquippedItemDragDropAction)
+            {
+            case EEquippedItemDragDropAction::Unequip:
+                return ItemActionDispatcher->RequestUnequipItem(EquipmentType);
+
+            case EEquippedItemDragDropAction::Drop:
+                return ItemActionDispatcher->RequestUnequipAndDropItem(EquipmentType);
+
+            default: _UNLIKELY
+                checkNoEntry();
+                break;
+            }
         }
     }
     return false;

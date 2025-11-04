@@ -246,6 +246,9 @@ protected:
     /* Combat */
     bool bIsDead{false};
 
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization|Combat")
+    float DamageRandomFactor{0.05f};
+
     // Blocking with a shield.
     bool bIsBlocking{false};
 

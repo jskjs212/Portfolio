@@ -83,6 +83,9 @@ float ABaseCharacter::InternalTakePointDamage(float Damage, FPointDamageEvent co
         Damage *= BlockReducedDamageFactor;
     }
 
+    // Random variance
+    Damage = FMath::Max(0.f, Damage * FMath::FRandRange(1.f - DamageRandomFactor, 1.f + DamageRandomFactor));
+
     // Apply damage
     Damage = StatsComponent->TakeDamage(Damage);
 

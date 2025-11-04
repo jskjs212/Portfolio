@@ -32,6 +32,8 @@ public:
     // Unbind from previous StatsComponent if already bound.
     void BindToStatsComponent(AActor* InActor, FGameplayTag InStatTag);
 
+    void UnbindFromStatsComponent();
+
     void UpdateStatBar();
 
 private:
@@ -55,8 +57,6 @@ public:
     //        Variables
     ////////////////////////////////////////////////////////
 private:
-    FGameplayTag StatTag;
-
     UPROPERTY(EditAnywhere, Category = "Initialization")
     FLinearColor StatBarFillColor{FLinearColor::White};
 
@@ -66,7 +66,9 @@ private:
     UPROPERTY(EditAnywhere, Category = "Initialization")
     TObjectPtr<UTexture2D> StatBarBackgroundImage;
 
-    // References
+    FGameplayTag StatTag;
+
     FDelegateHandle StatChangedDelegateHandle;
+
     TWeakObjectPtr<UStatsComponent> CachedStatsComponent;
 };

@@ -16,6 +16,13 @@ class USystemMenuPageWidget;
 class UTagButton;
 class UTextBlock;
 
+UENUM()
+enum class EEquippedItemDragDropAction : uint8
+{
+    Drop UMETA(DisplayName = "Drop"),
+    Unequip UMETA(DisplayName = "Unequip")
+};
+
 /**
  * Call InitPlayerMenu() after creating this widget.
  */
@@ -50,9 +57,9 @@ public:
     void HideMenu();
 
 private:
-    bool DropInventoryItem(const UItemSlotDragDropOp* InDragDropOp);
+    bool DragDropInventoryItem(const UItemSlotDragDropOp* InDragDropOp);
 
-    bool DropEquipmentItem(const UItemSlotDragDropOp* InDragDropOp);
+    bool DragDropEquipmentItem(const UItemSlotDragDropOp* InDragDropOp);
 
     virtual void SetFocusToWidget(UWidget* InWidget) override;
 
@@ -98,4 +105,12 @@ private:
     /* Else */
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UButton> CloseButton;
+
+    ////////////////////////////////////////////////////////
+    //        Variables
+    ////////////////////////////////////////////////////////
+private:
+    // @TODO - Make this configurable in DemoUserSettings and Gameplay settings UI.
+    UPROPERTY(EditDefaultsOnly, Category = "Initialization")
+    EEquippedItemDragDropAction EquippedItemDragDropAction{EEquippedItemDragDropAction::Unequip};
 };

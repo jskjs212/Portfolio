@@ -37,6 +37,7 @@ protected:
     ////////////////////////////////////////////////////////
 public:
     void UpdateEquippedItemSlotUI(FGameplayTag EquipmentType, const FItemSlot& EquippedSlot);
+
     void UpdateUnequippedItemSlotUI(FGameplayTag EquipmentType, const FItemSlot& /* UnequippedSlot */);
 
     void UpdateAllEquipmentSlotsUI();

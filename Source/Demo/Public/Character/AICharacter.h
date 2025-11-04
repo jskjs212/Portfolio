@@ -39,6 +39,10 @@ public:
 protected:
     virtual void BeginPlay() override;
 
+    // Show AIStatus for a while.
+    virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
+    // Report damage event to AI perception system.
     virtual float InternalTakePointDamage(float Damage, struct FPointDamageEvent const& PointDamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
     ////////////////////////////////////////////////////////
@@ -46,6 +50,8 @@ protected:
     ////////////////////////////////////////////////////////
 protected:
     virtual void HandleDeath() override;
+
+    void HideAIStatusWidget();
 
     ////////////////////////////////////////////////////////
     //        Combat interface
@@ -63,7 +69,7 @@ public:
     //        Target interface
     ////////////////////////////////////////////////////////
 public:
-    virtual void OnTargeted(bool bIsTargeted) override;
+    virtual void OnTargeted(bool bNewIsTargeted) override;
 
     virtual bool CanBeTargeted() const override;
 
@@ -79,13 +85,22 @@ public:
 protected:
     bool bIsBoss{false};
 
-    UPROPERTY(EditAnywhere, Category = "Initialization|AI")
-    FName LockOnSocketName{TEXT("Head")};
+    bool bIsTargeted{false};
 
+    FTimerHandle HideAIStatusTimerHandle;
+    FTimerDelegate HideAIStatusTimerDelegate;
+
+    UPROPERTY(EditAnywhere, Category = "Initialization|AI")
+    float GetHitAIStatusDuration{5.f};
+
+    /* StateTree */
     // Can be set in AIController's StateTreeAIComponent, but here we can manage per-character overrides.
     UPROPERTY(EditAnywhere, Category = "Initialization|AI|StateTreeOverride|Peaceful")
     FStateTreeReference StateTreeRefOverride_Peaceful;
 
     UPROPERTY(EditAnywhere, Category = "Initialization|AI|StateTreeOverride|Aggressive")
     FStateTreeReference StateTreeRefOverride_Aggressive;
+
+    UPROPERTY(EditAnywhere, Category = "Initialization|AI")
+    FName LockOnSocketName{TEXT("Head")};
 };

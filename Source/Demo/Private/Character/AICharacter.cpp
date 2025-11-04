@@ -15,6 +15,7 @@
 #include "UI/AIStatusWidget.h"
 
 AAICharacter::AAICharacter()
+    : HideAIStatusTimerDelegate{FTimerDelegate::CreateUObject(this, &ThisClass::HideAIStatusWidget)}
 {
     GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
     GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
@@ -67,6 +68,22 @@ void AAICharacter::BeginPlay()
     }
 }
 
+float AAICharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+    DamageAmount = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+    if (!bIsBoss && !bIsTargeted)
+    {
+        AIStatusWidgetComponent->SetVisibility(true);
+
+        if (UWorld* World = GetWorld())
+        {
+            World->GetTimerManager().SetTimer(HideAIStatusTimerHandle, HideAIStatusTimerDelegate, GetHitAIStatusDuration, false);
+        }
+    }
+    return DamageAmount;
+}
+
 float AAICharacter::InternalTakePointDamage(float Damage, FPointDamageEvent const& PointDamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
     Damage = Super::InternalTakePointDamage(Damage, PointDamageEvent, EventInstigator, DamageCauser);
@@ -92,9 +109,30 @@ void AAICharacter::HandleDeath()
 {
     Super::HandleDeath();
 
+    // Unbind in OnNativeDestruct will cause issues when WidgetComponent is not visible. So unbind here.
+    if (UAIStatusWidget* AIStatusWidget = Cast<UAIStatusWidget>(AIStatusWidgetComponent->GetWidget()))
+    {
+        AIStatusWidget->SetVisibility(ESlateVisibility::Collapsed);
+        AIStatusWidget->UnbindFromActor();
+    }
+    AIStatusWidgetComponent->SetVisibility(false);
+
+    if (UWorld* World = GetWorld())
+    {
+        World->GetTimerManager().ClearTimer(HideAIStatusTimerHandle);
+    }
+
     if (ADemoAIController* DemoAIController = GetController<ADemoAIController>())
     {
         DemoAIController->SendStateTreeEvent(DemoGameplayTags::StateTree_Event_Death, TEXT("AAICharacter::HandleDeath"));
+    }
+}
+
+void AAICharacter::HideAIStatusWidget()
+{
+    if (!bIsBoss && !bIsTargeted)
+    {
+        AIStatusWidgetComponent->SetVisibility(false);
     }
 }
 
@@ -137,13 +175,14 @@ FRotator AAICharacter::GetDesiredControlRotation() const
     return Super::GetDesiredControlRotation();
 }
 
-void AAICharacter::OnTargeted(bool bIsTargeted)
+void AAICharacter::OnTargeted(bool bNewIsTargeted)
 {
+    bIsTargeted = bNewIsTargeted;
     if (!bIsBoss)
     {
-        AIStatusWidgetComponent->SetVisibility(bIsTargeted);
+        AIStatusWidgetComponent->SetVisibility(bNewIsTargeted);
     }
-    LockOnMarkerWidgetComponent->SetVisibility(bIsTargeted);
+    LockOnMarkerWidgetComponent->SetVisibility(bNewIsTargeted);
 }
 
 bool AAICharacter::CanBeTargeted() const
