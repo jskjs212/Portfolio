@@ -8,7 +8,7 @@
 #include "DemoTypes/LogCategories.h"
 #include "DemoTypes/UITypes.h"
 #include "Items/Item.h"
-#include "PlayerController/DemoPlayerController.h"
+#include "Player/DemoPlayerController.h"
 #include "UI/ContextMenuWidget.h"
 #include "UI/ItemActionDispatcher.h"
 #include "UI/ItemInfoWidget.h"

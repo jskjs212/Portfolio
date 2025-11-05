@@ -6,12 +6,15 @@
 #include "Components/InventoryComponent.h"
 #include "Components/StateManagerComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
-#include "DemoTypes/ItemTypes.h"
+#include "Items/ItemTypes.h"
 #include "DemoTypes/LogCategories.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/Controller.h"
+#include "GameFramework/Pawn.h"
 #include "Items/Item.h"
 #include "Items/ItemRowBases.h"
-#include "PlayerController/DemoPlayerController.h"
+#include "Player/DemoPlayerController.h"
+#include "Settings/DemoSaveGame.h"
 #include "UI/ItemActionDispatcher.h"
 
 void UEquipmentComponent::BeginPlay()
@@ -141,13 +144,37 @@ bool UEquipmentComponent::UnequipAndDropItem(const FGameplayTag EquipmentType)
 
 void UEquipmentComponent::DestroyAllEquippedItems()
 {
-    for (TPair<FGameplayTag, TObjectPtr<AItem>>& Pair : EquippedItems)
+    for (auto& [EquipmentType, EquippedItem] : EquippedItems)
     {
-        TObjectPtr<AItem>& EquippedItem = Pair.Value;
-        if (IsValid(EquippedItem))
+        if (EquippedItem)
         {
             EquippedItem->Destroy();
             EquippedItem = nullptr;
+        }
+    }
+}
+
+void UEquipmentComponent::PopulateSaveData(FEquipmentSaveData& OutData) const
+{
+    OutData.EquippedItemSlots.Empty();
+    for (const auto& [EquipmentType, EquippedItem] : EquippedItems)
+    {
+        // Save empty slot if unequipped
+        FItemSlot ItemSlot = IsValid(EquippedItem) ? EquippedItem->GetItemSlot() : FItemSlot{};
+        OutData.EquippedItemSlots.Emplace(EquipmentType, ItemSlot);
+    }
+}
+
+void UEquipmentComponent::LoadFromSaveData(const FEquipmentSaveData& InData)
+{
+    DestroyAllEquippedItems();
+
+    // Load and equip items
+    for (const auto& [EquipmentType, ItemSlot] : InData.EquippedItemSlots)
+    {
+        if (ItemSlot.IsValid())
+        {
+            EquipItem(ItemSlot);
         }
     }
 }
@@ -440,9 +467,12 @@ UInventoryComponent* UEquipmentComponent::GetInventoryComponent()
 {
     if (!CachedInventoryComponent.IsValid())
     {
-        if (AActor* OwnerActor = GetOwner())
+        if (APawn* OwnerPawn = GetOwner<APawn>())
         {
-            CachedInventoryComponent = OwnerActor->FindComponentByClass<UInventoryComponent>();
+            if (AController* Controller = OwnerPawn->GetController())
+            {
+                CachedInventoryComponent = Controller->FindComponentByClass<UInventoryComponent>();
+            }
         }
     }
     return CachedInventoryComponent.Get();

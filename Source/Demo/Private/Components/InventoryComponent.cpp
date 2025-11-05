@@ -4,14 +4,15 @@
 #include "Components/EquipmentComponent.h"
 #include "Components/StatsComponent.h"
 #include "DemoTypes/DemoGameplayTags.h"
-#include "DemoTypes/ItemTypes.h"
+#include "Items/ItemTypes.h"
 #include "DemoTypes/LogCategories.h"
 #include "GameFramework/Pawn.h"
 #include "Items/Item.h"
 #include "Items/ItemRowBases.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
-#include "PlayerController/DemoPlayerController.h"
+#include "Player/DemoPlayerController.h"
+#include "Settings/DemoSaveGame.h"
 #include "Sound/SoundBase.h"
 #include "UI/ItemActionDispatcher.h"
 
@@ -74,7 +75,7 @@ int32 UInventoryComponent::RemoveItem(const FItemActionRequest& Request)
 
     int32 Removed = RemoveItem_Internal(ValidationResult, Request.DesignatedIndex, Request.Quantity);
 
-    UE_LOG(LogInventory, VeryVerbose, TEXT("Remove item - %s, %d"), *ValidationResult.ItemData->Name.ToString(), Removed);
+    UE_LOG(LogInventory, Verbose, TEXT("Remove item - %s, %d"), *ValidationResult.ItemData->Name.ToString(), Removed);
     return Removed;
 }
 
@@ -112,7 +113,9 @@ int32 UInventoryComponent::DropItem(const FItemActionRequest& Request)
 
     const int32 ToDrop = FMath::Min(Request.Quantity, ValidationResult.ItemSlot->Quantity);
     const FItemSlot DropSlot = FItemSlot{ValidationResult.ItemSlot->RowHandle, ToDrop, false};
-    int32 Dropped = AItem::DropItem(GetWorld(), DropSlot, GetOwner());
+    AActor* Dropper = GetActorForWorldActions();
+
+    int32 Dropped = AItem::DropItem(Dropper, DropSlot);
     if (Dropped < 0)
     {
         return -1; // Log in AItem::DropItem()
@@ -188,6 +191,36 @@ bool UInventoryComponent::AddMaxSlotSize(FGameplayTag ItemCategory, const int32 
     return true;
 }
 
+void UInventoryComponent::PopulateSaveData(FInventorySaveData& OutData) const
+{
+    OutData.OwnedItems.Empty();
+
+    // For each item category
+    for (const auto& [ItemCategory, ItemArray] : OwnedItems)
+    {
+        FItemArray& OutItemArray = OutData.OwnedItems.Emplace(ItemCategory);
+
+        // Copy every slots
+        for (const FItemSlot& Slot : ItemArray.ItemArray)
+        {
+            OutItemArray.ItemArray.Add(Slot);
+        }
+    }
+}
+
+void UInventoryComponent::LoadFromSaveData(const FInventorySaveData& InData)
+{
+    // Clear current inventory
+    OwnedItems.Empty();
+
+    // Restore inventory
+    for (const auto& [ItemCategory, ItemArray] : InData.OwnedItems)
+    {
+        OwnedItems.Emplace(ItemCategory, ItemArray);
+    }
+    OnInventoryUpdated.Broadcast();
+}
+
 void UInventoryComponent::InitInventoryComponent()
 {
     // Inventory setup for fixed item categories.
@@ -227,15 +260,12 @@ void UInventoryComponent::InitMaxSlots()
 
 void UInventoryComponent::BindToItemActionDispatcher()
 {
-    if (APawn* Pawn = Cast<APawn>(GetOwner()))
+    if (ADemoPlayerController* DemoPlayerController = GetOwner<ADemoPlayerController>())
     {
-        if (ADemoPlayerController* DemoPlayerController = Pawn->GetController<ADemoPlayerController>())
+        if (UItemActionDispatcher* ItemActionDispatcher = DemoPlayerController->GetItemActionDispatcher())
         {
-            if (UItemActionDispatcher* ItemActionDispatcher = DemoPlayerController->GetItemActionDispatcher())
-            {
-                ItemActionDispatcher->OnItemActionRequested.BindUObject(this, &ThisClass::HandleItemActionRequested);
-                ItemActionDispatcher->OnSwapItemRequested.BindUObject(this, &ThisClass::SwapItem);
-            }
+            ItemActionDispatcher->OnItemActionRequested.BindUObject(this, &ThisClass::HandleItemActionRequested);
+            ItemActionDispatcher->OnSwapItemRequested.BindUObject(this, &ThisClass::SwapItem);
         }
     }
 }
@@ -574,16 +604,15 @@ int32 UInventoryComponent::ConsumeFood(const FConsumableData* ConsumableData, co
         StatsComponent->Heal(ConsumableData->HealAmount * ToUse);
 
         // VFX & SFX
-        if (AActor* OwnerActor = GetOwner())
+        if (AActor* Actor = GetActorForWorldActions())
         {
-            FVector Location = OwnerActor->GetActorLocation();
             if (UParticleSystem* Effect = ConsumableData->Effect.LoadSynchronous())
             {
-                UGameplayStatics::SpawnEmitterAttached(Effect, OwnerActor->GetRootComponent());
+                UGameplayStatics::SpawnEmitterAttached(Effect, Actor->GetRootComponent());
             }
             if (USoundBase* Sound = ConsumableData->Sound.LoadSynchronous())
             {
-                UGameplayStatics::PlaySoundAtLocation(this, Sound, Location);
+                UGameplayStatics::PlaySoundAtLocation(this, Sound, Actor->GetActorLocation());
             }
         }
     }
@@ -615,13 +644,29 @@ int32 UInventoryComponent::HandleItemActionRequested(FGameplayTag InActionTag, c
     }
 }
 
+AActor* UInventoryComponent::GetActorForWorldActions() const
+{
+    AActor* Actor = GetOwner();
+    if (AController* OwnerController = Cast<AController>(Actor))
+    {
+        if (APawn* Pawn = OwnerController->GetPawn())
+        {
+            Actor = Pawn; // In case the owner controller owns a pawn.
+        }
+    }
+    return Actor;
+}
+
 UEquipmentComponent* UInventoryComponent::GetEquipmentComponent()
 {
     if (!CachedEquipmentComponent.IsValid())
     {
-        if (AActor* OwnerActor = GetOwner())
+        if (AController* OwnerController = GetOwner<AController>())
         {
-            CachedEquipmentComponent = OwnerActor->FindComponentByClass<UEquipmentComponent>();
+            if (APawn* Pawn = OwnerController->GetPawn())
+            {
+                CachedEquipmentComponent = Pawn->FindComponentByClass<UEquipmentComponent>();
+            }
         }
     }
     return CachedEquipmentComponent.Get();
@@ -631,9 +676,12 @@ UStatsComponent* UInventoryComponent::GetStatsComponent()
 {
     if (!CachedStatsComponent.IsValid())
     {
-        if (AActor* OwnerActor = GetOwner())
+        if (AController* OwnerController = GetOwner<AController>())
         {
-            CachedStatsComponent = OwnerActor->FindComponentByClass<UStatsComponent>();
+            if (APawn* Pawn = OwnerController->GetPawn())
+            {
+                CachedStatsComponent = Pawn->FindComponentByClass<UStatsComponent>();
+            }
         }
     }
     return CachedStatsComponent.Get();

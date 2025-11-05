@@ -9,6 +9,8 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "DemoTypes/LogCategories.h"
+#include "GameFramework/Controller.h"
+#include "GameFramework/Pawn.h"
 #include "Items/ItemRowBases.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -48,9 +50,15 @@ AItem* AItem::SpawnItem(
     return SpawnedItem;
 }
 
-int32 AItem::DropItem(UWorld* World, const FItemSlot& InSlot, const AActor* Dropper)
+int32 AItem::DropItem(const AActor* Dropper, const FItemSlot& InSlot)
 {
-    if (!World || !Dropper)
+    if (!Dropper)
+    {
+        return -1;
+    }
+
+    UWorld* World = Dropper->GetWorld();
+    if (!World)
     {
         return -1;
     }
@@ -287,27 +295,30 @@ void AItem::Interact(APawn* InstigatorPawn)
 {
     if (InstigatorPawn)
     {
-        if (UInventoryComponent* InventoryComp = InstigatorPawn->FindComponentByClass<UInventoryComponent>())
+        if (AController* InstigatorController = InstigatorPawn->GetController())
         {
-            // Index = -1
-            FItemActionRequest Request;
-            Request.Slot = ItemSlot;
-            Request.Quantity = ItemSlot.Quantity;
-
-            const int32 Added = InventoryComp->AddItem(Request);
-            ItemSlot.Quantity -= Added;
-
-            if (Added > 0)
+            if (UInventoryComponent* InventoryComp = InstigatorController->FindComponentByClass<UInventoryComponent>())
             {
-                if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GetGameInstance()))
+                // Index = -1
+                FItemActionRequest Request;
+                Request.Slot = ItemSlot;
+                Request.Quantity = ItemSlot.Quantity;
+
+                const int32 Added = InventoryComp->AddItem(Request);
+                ItemSlot.Quantity -= Added;
+
+                if (Added > 0)
                 {
-                    AudioSubsystem->PlaySound2D(this, DemoSoundTags::SFX_Item_PickUp);
+                    if (UDemoAudioSubsystem* AudioSubsystem = UGameInstance::GetSubsystem<UDemoAudioSubsystem>(GetGameInstance()))
+                    {
+                        AudioSubsystem->PlaySound2D(this, DemoSoundTags::SFX_Item_PickUp);
+                    }
                 }
-            }
 
-            if (ItemSlot.Quantity <= 0)
-            {
-                Destroy();
+                if (ItemSlot.Quantity <= 0)
+                {
+                    Destroy();
+                }
             }
         }
     }

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "PlayerController/StartUpPlayerController.h"
+#include "Player/StartUpPlayerController.h"
 #include "StartUpGameMode.generated.h"
 
 UCLASS()

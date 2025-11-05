@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Kismet/GameplayStatics.h"
 #include "SystemMenuPageWidget.generated.h"
 
 class UButton;
@@ -19,8 +20,13 @@ class DEMO_API USystemMenuPageWidget : public UUserWidget
     ////////////////////////////////////////////////////////
     //        UUserWidget functions
     ////////////////////////////////////////////////////////
+public:
+    USystemMenuPageWidget(const FObjectInitializer& ObjectInitializer);
+
 protected:
     virtual void NativeOnInitialized() override;
+
+    virtual void NativeDestruct() override;
 
     ////////////////////////////////////////////////////////
     //        UI functions
@@ -28,6 +34,16 @@ protected:
 private:
     UFUNCTION()
     void HandleContinueButtonClicked();
+
+    UFUNCTION()
+    void HandleSaveButtonClicked();
+
+    void HandleAsyncSaveCompleted(const FString& SlotName, const int32 UserIndex, bool bSuccess);
+
+    UFUNCTION()
+    void HandleLoadButtonClicked();
+
+    void HandleLoadedSaveGameDiscarded();
 
     UFUNCTION()
     void HandleExitToMainMenuButtonClicked();
@@ -53,4 +69,10 @@ protected:
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UButton> ExitToDesktopButton;
+
+    ////////////////////////////////////////////////////////
+    //        Variables
+    ////////////////////////////////////////////////////////
+private:
+    FAsyncSaveGameToSlotDelegate AsyncSavedDelegate;
 };

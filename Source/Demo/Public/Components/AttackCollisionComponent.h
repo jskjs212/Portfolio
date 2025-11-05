@@ -104,10 +104,10 @@ private:
 private:
     static const TArray<TEnumAsByte<EObjectTypeQuery>> TraceObjectTypes;
 
-    UPROPERTY(EditAnywhere, Category = "Initialization|Collision")
+    UPROPERTY(EditAnywhere, Category = "Initialization|AttackCollision")
     float DrawDebugDuration{3.f};
 
-    UPROPERTY(EditAnywhere, Category = "Initialization|Collision")
+    UPROPERTY(EditAnywhere, Category = "Initialization|AttackCollision")
     TEnumAsByte<EDrawDebugTrace::Type> DrawDebugType;
 
     TArray<AActor*> ActorsToIgnore;

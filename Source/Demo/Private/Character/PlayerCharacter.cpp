@@ -6,7 +6,6 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/CombatComponent.h"
 #include "Components/EquipmentComponent.h"
-#include "Components/InventoryComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StateManagerComponent.h"
 #include "Components/StatsComponent.h"
@@ -24,8 +23,10 @@
 #include "Interfaces/Interactable.h"
 #include "Items/ItemRowBases.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "PlayerController/DemoPlayerController.h"
+#include "Player/DemoPlayerController.h"
+#include "Settings/DemoSaveGame.h"
 #include "Settings/DemoUserSettings.h"
+#include "System/DemoGameInstance.h"
 
 APlayerCharacter::APlayerCharacter() :
     SprintStaminaTimerDelegate{FTimerDelegate::CreateUObject(this, &ThisClass::ConsumeSprintStamina)},
@@ -66,8 +67,6 @@ APlayerCharacter::APlayerCharacter() :
     FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
     FollowCamera->bUsePawnControlRotation = false;
 
-    InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
-
     TargetingComponent = CreateDefaultSubobject<UTargetingComponent>(TEXT("TargetingComponent"));
 }
 
@@ -100,6 +99,12 @@ void APlayerCharacter::BeginPlay()
 
     LoadUserSettings();
     BindDeathCameraBoomTimeline();
+
+    // Apply loaded save game if required
+    if (UDemoGameInstance* DemoGameInstance = GetGameInstance<UDemoGameInstance>())
+    {
+        DemoGameInstance->ApplyLoadedSaveGame();
+    }
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -141,6 +146,16 @@ void APlayerCharacter::HandleWeaponChanged(const FWeaponData* WeaponData)
     {
         SetOrientRotationToMovement(false);
     }
+}
+
+void APlayerCharacter::PopulateSaveData(FPlayerCharacterSaveData& OutData) const
+{
+    OutData.Transform = GetActorTransform();
+}
+
+void APlayerCharacter::LoadFromSaveData(const FPlayerCharacterSaveData& InData)
+{
+    SetActorTransform(InData.Transform);
 }
 
 void APlayerCharacter::LoadUserSettings()

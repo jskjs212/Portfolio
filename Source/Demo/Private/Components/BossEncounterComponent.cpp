@@ -7,7 +7,7 @@
 #include "Components/StatsComponent.h"
 #include "DemoTypes/LogCategories.h"
 #include "GameFramework/Pawn.h"
-#include "PlayerController/DemoPlayerController.h"
+#include "Player/DemoPlayerController.h"
 
 void UBossEncounterComponent::SetupBossInfo(APawn* InBossPawn, FGameplayTag InBossMusicTag)
 {

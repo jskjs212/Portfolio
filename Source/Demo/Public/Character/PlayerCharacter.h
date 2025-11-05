@@ -10,12 +10,12 @@
 #include "PlayerCharacter.generated.h"
 
 struct FInputActionValue;
+struct FPlayerCharacterSaveData;
 class IInteractable;
 class UCameraComponent;
 class UCurveFloat;
 class UInputAction;
 class UInputMappingContext;
-class UInventoryComponent;
 class USpringArmComponent;
 class UTargetingComponent;
 
@@ -38,9 +38,6 @@ private:
 
     UPROPERTY(VisibleAnywhere)
     TObjectPtr<UCameraComponent> FollowCamera;
-
-    UPROPERTY(VisibleAnywhere)
-    TObjectPtr<UInventoryComponent> InventoryComponent;
 
     UPROPERTY(VisibleAnywhere)
     TObjectPtr<UTargetingComponent> TargetingComponent;
@@ -76,6 +73,11 @@ protected:
     ////////////////////////////////////////////////////////
     //        PlayerCharacter functions
     ////////////////////////////////////////////////////////
+public:
+    void PopulateSaveData(FPlayerCharacterSaveData& OutData) const;
+
+    void LoadFromSaveData(const FPlayerCharacterSaveData& InData);
+
 protected:
     // Load user settings and bind to changes.
     void LoadUserSettings();

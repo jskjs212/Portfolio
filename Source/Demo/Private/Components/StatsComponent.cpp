@@ -2,7 +2,7 @@
 
 #include "Components/StatsComponent.h"
 #include "Components/EquipmentComponent.h"
-#include "DemoTypes/ItemTypes.h"
+#include "Items/ItemTypes.h"
 #include "DemoTypes/LogCategories.h"
 #include "Items/ItemRowBases.h"
 

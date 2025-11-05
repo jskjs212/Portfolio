@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "DemoTypes/DemoTypes.h"
-#include "DemoTypes/ItemTypes.h"
+#include "Items/ItemTypes.h"
 #include "GameplayTagContainer.h"
 #include "UI/ItemActionDispatcher.h"
 #include "DemoPlayerController.generated.h"
@@ -15,6 +15,7 @@ class UContextMenuWidget;
 class UCursorWidget;
 class UDemoInputConfig;
 class UInputMappingContext;
+class UInventoryComponent;
 class UPlayerMenuWidget;
 class UYouDiedWidget;
 
@@ -30,6 +31,9 @@ class DEMO_API ADemoPlayerController : public APlayerController
     //        Subobjects
     ////////////////////////////////////////////////////////
 private:
+    UPROPERTY(VisibleAnywhere)
+    TObjectPtr<UInventoryComponent> InventoryComponent;
+
     UPROPERTY()
     TObjectPtr<UItemActionDispatcher> ItemActionDispatcher;
 

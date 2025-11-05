@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "DemoTypes/DemoGameplayTags.h"
-#include "DemoTypes/ItemTypes.h"
+#include "Items/ItemTypes.h"
 #include "ItemActionDispatcher.generated.h"
 
 DECLARE_DELEGATE_RetVal_TwoParams(int32, FOnItemActionRequested, FGameplayTag /* InActionTag */, const FItemActionRequest& /* Request */);

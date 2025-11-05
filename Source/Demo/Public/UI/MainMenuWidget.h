@@ -40,8 +40,15 @@ private:
 
     void ShowSettingsPage(bool bShow);
 
+    void TryStartNewGame();
+
     UFUNCTION()
     void HandleNewGameButtonClicked();
+
+    UFUNCTION()
+    void HandleLoadGameButtonClicked();
+
+    void HandleLoadedSaveGameDiscarded();
 
     UFUNCTION()
     void HandleSettingsButtonClicked() { ShowSettingsPage(true); }
@@ -63,7 +70,7 @@ private:
     TObjectPtr<UButton> NewGameButton;
 
     UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UButton> LoadButton;
+    TObjectPtr<UButton> LoadGameButton;
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UButton> SettingsButton;

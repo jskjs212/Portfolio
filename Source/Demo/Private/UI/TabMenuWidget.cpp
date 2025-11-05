@@ -7,7 +7,7 @@
 #include "Components/Image.h"
 #include "Components/WidgetSwitcher.h"
 #include "DemoTypes/LogCategories.h"
-#include "PlayerController/DemoPlayerController.h"
+#include "Player/DemoPlayerController.h"
 #include "UI/Components/TagButton.h"
 
 void UTabMenuWidget::NativeOnInitialized()

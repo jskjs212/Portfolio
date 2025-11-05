@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "DemoTypes/ItemTypes.h"
+#include "Items/ItemTypes.h"
 #include "GameplayTagContainer.h"
 #include "Interfaces/CombatInterface.h"
 #include "BaseCharacter.generated.h"

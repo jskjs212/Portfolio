@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "DemoTypes/ItemTypes.h"
+#include "Items/ItemTypes.h"
 #include "GameplayTagContainer.h"
 #include "EquipmentComponent.generated.h"
 
+struct FEquipmentSaveData;
 struct FWeaponData;
 class AItem;
 class UDemoAudioSubsystem;
@@ -32,7 +33,7 @@ DECLARE_MULTICAST_DELEGATE_TwoParams(FOnEquipmentChanged, FGameplayTag /* Equipm
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnWeaponChanged, const FWeaponData* /* WeaponData */);
 
 /**
- * Equipment
+ * Equipment component attached to ACharacter.
  * Fixed EquipmentTypes and SocketNames:
  *   Item.Weapon = MeleeHandSocket
  *   Item.Armor.Shield = ShieldHandSocket
@@ -84,6 +85,10 @@ public:
 
     void DestroyAllEquippedItems();
 
+    void PopulateSaveData(FEquipmentSaveData& OutData) const;
+
+    void LoadFromSaveData(const FEquipmentSaveData& InData);
+
 private:
     void InitEquipmentComponent();
 
@@ -124,7 +129,9 @@ public:
     const TMap<FGameplayTag, TObjectPtr<AItem>>& GetAllEquippedItems() const { return EquippedItems; }
 
 private:
+    // Get InventoryComponent from the owner's controller
     UInventoryComponent* GetInventoryComponent();
+
     const UStateManagerComponent* GetStateManager();
 
     ////////////////////////////////////////////////////////

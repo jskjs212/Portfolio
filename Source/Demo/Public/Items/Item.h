@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "DemoTypes/ItemTypes.h"
+#include "Items/ItemTypes.h"
 #include "Interfaces/Interactable.h"
 #include "Item.generated.h"
 
@@ -56,8 +56,9 @@ public:
         ESpawnActorCollisionHandlingMethod CollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::AlwaysSpawn
     );
 
+    // @param Dropper Actor who drops the item in the world.
     // @return Actually dropped quantity, -1 if failed.
-    static int32 DropItem(UWorld* World, const FItemSlot& InSlot, const AActor* Dropper);
+    static int32 DropItem(const AActor* Dropper, const FItemSlot& InSlot);
 
     ////////////////////////////////////////////////////////
     //        Fundamentals

@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "PlayerController/StartUpPlayerController.h"
+#include "Player/StartUpPlayerController.h"
 #include "Audio/DemoAudioSubsystem.h"
 #include "Audio/DemoSoundTags.h"
 #include "DemoTypes/LogCategories.h"

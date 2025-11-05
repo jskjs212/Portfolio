@@ -4,11 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "DemoTypes/ItemTypes.h"
+#include "Items/ItemTypes.h"
 #include "GameplayTagContainer.h"
 #include "Items/ItemRowBases.h"
 #include "InventoryComponent.generated.h"
 
+struct FInventorySaveData;
 class UEquipmentComponent;
 class UStatsComponent;
 
@@ -29,7 +30,10 @@ struct FInventoryValidationResult
 };
 
 /**
- * Inventory
+ * Inventory component
+ * Can be attached to any Actor (e.g. Controller, Character, Chest, etc.)
+ * But the owner must be AController for UseItem() to work properly.
+ *
  * Map of { ItemCategory, Array<ItemSlot> }
  * Fixed ItemCategories from Demo::Item::ItemCategories.
  * ItemSlot.Quantity == 0 means empty slot, although ItemSlot.RowHandle may be valid (not cleared when emptied).
@@ -92,6 +96,10 @@ public:
     // @return true if succeeded.
     bool AddMaxSlotSize(FGameplayTag ItemCategory, int32 ToAdd);
 
+    void PopulateSaveData(FInventorySaveData& OutData) const;
+
+    void LoadFromSaveData(const FInventorySaveData& InData);
+
     ////////////////////////////////////////////////////////
     //        Inventory helper functions
     ////////////////////////////////////////////////////////
@@ -101,7 +109,7 @@ private:
     // Set initial max slot sizes, and fill with empty slots if bFixSlotSizeAndExposeEmptySlots == true.
     void InitMaxSlots();
 
-    // Bind inventory functions to UI's item action dispatcher.
+    // Bind inventory functions to UI's item action dispatcher only if the owner is DemoPlayerController.
     void BindToItemActionDispatcher();
 
     // @return true if the slot is empty in inventory's perspective.
@@ -180,7 +188,14 @@ public:
     const TMap<FGameplayTag, FItemArray>& GetOwnedItems() const { return OwnedItems; }
 
 private:
+    // Return actor representing the world location for dropping items, spawning VFX, etc.
+    // If the owner is a controller, return its pawn. Otherwise, return the owner itself.
+    AActor* GetActorForWorldActions() const;
+
+    // Get EquipmentComponent if the owner is AController.
     UEquipmentComponent* GetEquipmentComponent();
+
+    // Get StatsComponent if the owner is AController.
     UStatsComponent* GetStatsComponent();
 
     ////////////////////////////////////////////////////////

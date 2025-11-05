@@ -1,10 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "PlayerController/DemoPlayerController.h"
+#include "Player/DemoPlayerController.h"
 #include "Audio/DemoAudioSubsystem.h"
 #include "Audio/DemoSoundTags.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Character/PlayerCharacter.h"
+#include "Components/InventoryComponent.h"
 #include "DemoTypes/DemoTypes.h"
 #include "DemoTypes/LogCategories.h"
 #include "DemoTypes/UITypes.h"
@@ -66,14 +67,14 @@ ADemoPlayerController::ADemoPlayerController()
         YouDiedWidgetClass = UUserWidget::StaticClass();
     }
 
+    InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+
     ItemActionDispatcher = CreateDefaultSubobject<UItemActionDispatcher>(TEXT("ItemActionDispatcher"));
 }
 
 void ADemoPlayerController::BeginPlay()
 {
     Super::BeginPlay();
-
-    DemoLOG_CF(LogTEST, Warning, TEXT("BeginPlay!")); // @debug - To distinguish every session start.
 
     if (MainMenuLevelName == NAME_None)
     {

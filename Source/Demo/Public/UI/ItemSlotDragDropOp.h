@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/DragDropOperation.h"
-#include "DemoTypes/ItemTypes.h"
+#include "Items/ItemTypes.h"
 #include "GameplayTagContainer.h"
 #include "ItemSlotDragDropOp.generated.h"
 

@@ -5,7 +5,7 @@
 #include "Components/Button.h"
 #include "Components/WidgetSwitcher.h"
 #include "DemoTypes/DemoGameplayTags.h"
-#include "PlayerController/DemoPlayerController.h"
+#include "Player/DemoPlayerController.h"
 #include "UI/EquipmentPageWidget.h"
 #include "UI/InventoryPageWidget.h"
 #include "UI/ItemActionDispatcher.h"

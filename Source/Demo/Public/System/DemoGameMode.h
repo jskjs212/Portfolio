@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "UI/DemoHUD.h"
 #include "DemoGameMode.generated.h"
 
 /**
@@ -14,4 +15,9 @@ class DEMO_API ADemoGameMode : public AGameModeBase
 {
     GENERATED_BODY()
 
+public:
+    ADemoGameMode()
+    {
+        HUDClass = ADemoHUD::StaticClass();
+    }
 };

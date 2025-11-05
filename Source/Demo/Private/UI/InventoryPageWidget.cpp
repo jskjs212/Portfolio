@@ -9,12 +9,12 @@
 #include "Components/WrapBox.h"
 #include "DemoTypes/DemoGameplayTags.h"
 #include "DemoTypes/UITypes.h"
-#include "DemoTypes/ItemTypes.h"
+#include "Items/ItemTypes.h"
 #include "DemoTypes/LogCategories.h"
-#include "GameFramework/Pawn.h"
+#include "GameFramework/PlayerController.h"
 #include "GameplayTagContainer.h"
 #include "Items/ItemRowBases.h"
-#include "PlayerController/DemoPlayerController.h"
+#include "Player/DemoPlayerController.h"
 #include "UI/ContextMenuWidget.h"
 #include "UI/ItemActionDispatcher.h"
 #include "UI/ItemInfoWidget.h"
@@ -88,13 +88,13 @@ void UInventoryPageWidget::UpdateInventorySlotsUI()
     }
     bPendingUpdateSlotsUI = false;
 
-    const APawn* OwningPawn = GetOwningPlayerPawn();
-    if (!OwningPawn)
+    const APlayerController* PlayerController = GetOwningPlayer();
+    if (!PlayerController)
     {
         return;
     }
 
-    const UInventoryComponent* InventoryComponent = OwningPawn->FindComponentByClass<UInventoryComponent>();
+    const UInventoryComponent* InventoryComponent = PlayerController->FindComponentByClass<UInventoryComponent>();
     if (!InventoryComponent)
     {
         return;
@@ -183,9 +183,9 @@ void UInventoryPageWidget::SetupContextMenu()
 
 void UInventoryPageWidget::BindToInventoryUpdates()
 {
-    if (APawn* OwningPawn = GetOwningPlayerPawn())
+    if (APlayerController* PlayerController = GetOwningPlayer())
     {
-        if (UInventoryComponent* InventoryComponent = OwningPawn->FindComponentByClass<UInventoryComponent>())
+        if (UInventoryComponent* InventoryComponent = PlayerController->FindComponentByClass<UInventoryComponent>())
         {
             InventoryComponent->OnInventoryUpdated.AddUObject(this, &ThisClass::UpdateInventorySlotsUI);
             UpdateInventorySlotsUI();
